@@ -1,4 +1,4 @@
-// components/Divider.jsx
+
 export default function Divider({ text = "or" }) {
   return (
     <div className="relative my-6">
