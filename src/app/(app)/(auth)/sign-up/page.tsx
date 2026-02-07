@@ -194,9 +194,9 @@ export default function Signup() {
               <span className="text-primary font-medium">Outlook</span>
             </Button>
           </div>
-          <div className="text-primary-600 font-medium text-center">
+          <div className="text-primary-600 text-center">
             Already have an account?{" "}
-            <Link className="text-primary hover:underline" href={"/sign-in"}>
+            <Link className="text-primary font-medium hover:underline" href={"/sign-in"}>
               Login
             </Link>
           </div>

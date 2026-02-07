@@ -8,7 +8,7 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen grid md:grid-cols-2 bg-bgPrimary">
       {/* Form  */}
-      <div className="flex flex-col items-center justify-start px-6 pt-16 pb-4">
+      <div className="flex flex-col items-center justify-center">
         {children}
       </div>
       {/* Sliders */}
