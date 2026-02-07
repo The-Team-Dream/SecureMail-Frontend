@@ -98,7 +98,7 @@ export default function Signin() {
             <Button
               size={"lg"}
               variant={"outline"}
-              className="w-[45%] bg-transparent border border-borderSecondary rounded-xl"
+              className="w-[45%] bg-transparent border border-borderSecondary rounded-2xl"
             >
               <Image
                 src={"/icons/google.svg"}
