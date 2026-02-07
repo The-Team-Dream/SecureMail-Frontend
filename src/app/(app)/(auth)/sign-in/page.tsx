@@ -2,19 +2,17 @@
 import Cookies from "js-cookie";
 import { useSignin } from "@/APIs/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, LockIcon, Mail } from "lucide-react";
+import { LockIcon, Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Input } from "@/_components/Input";
 
 export default function Signin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-
   const router = useRouter();
   const signinMutation = useSignin({
     onSuccess: (res) => {
@@ -29,10 +27,6 @@ export default function Signin() {
       toast.error(err?.response?.data?.message || "login failed");
     },
   });
-  const isDisabled =
-    signinMutation.isPending ||
-    email.trim().length < 3 ||
-    password.trim().length < 3;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,7 +34,7 @@ export default function Signin() {
   };
 
   return (
-    <div className="bg-bgPrimary">
+    <div className="max-w-sm lg:max-w-lg w-full mx-auto">
       {/* Form Container */}
       <div className="flex flex-col text-center lg:text-left gap-6">
         <Image
@@ -50,69 +44,51 @@ export default function Signin() {
           height={200}
           className="cursor-pointer mx-auto lg:mx-0"
         />
-        <div className="space-y-3">
-          <h3 className="text-3xl text-primary font-normal">
-            Hello, Welcome back
-          </h3>
-          <p className="text-textSecondary text-base font-normal">
+        <div className="space-y-2">
+          <h3 className="text-3xl text-primary">Hello, Welcome back</h3>
+          <p className="text-sm xl:text-base text-textSecondary">
             Enter your email address and password to log in.
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           {" "}
-          <div className="flex items-center gap-0.5 px-4 h-12 py-4 border border-border rounded-lg">
-            <Mail className="text-textMuted" />
-            <Input
-              type="email"
-              className="h-full w-full border-none text-primary"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex items-center gap-0.5 px-4 h-12 py-4 border border-border rounded-lg">
-            <LockIcon className="text-textMuted" />
-            <Input
-              type={showPassword ? "text" : "password"}
-              className="flex-1 h-full border-none"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            {showPassword ? (
-              <EyeOff
-                className="text-textMuted w-5 h-5 cursor-pointer"
-                onClick={() => setShowPassword(false)}
-              />
-            ) : (
-              <Eye
-                className="text-textMuted w-5 h-5 cursor-pointer"
-                onClick={() => setShowPassword(true)}
-              />
-            )}
-          </div>
+          <Input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="Email Address"
+            leftIcon={<Mail />}
+          />
+          <Input
+            type="password"
+            isPassword
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            leftIcon={<LockIcon />}
+          />
           <Link
             href={"/forgot-password"}
-            className="flex justify-end font-medium text-primary hover:underline float-right w-max"
+            className="font-medium text-primary hover:underline float-right"
           >
             Forgot Password?
           </Link>
           {signinMutation.isError && (
-            <p className="text-destructive">
+            <p className="text-error">
               {signinMutation.error?.response?.data?.message ||
                 "An error occurred"}
             </p>
           )}
           <Button
             type="submit"
-            disabled={isDisabled}
+            disabled={signinMutation.isPending}
             size={"lg"}
-            className={`w-full rounded-lg hover:bg-primaryHover transition-colors duration-300 ${isDisabled ? "bg-primary/50" : "bg-primary"}`}
+            className={`w-full rounded-lg hover:bg-primaryHover transition-colors duration-300 ${signinMutation.isPending ? "bg-primary/60" : "bg-primary"}`}
           >
             {signinMutation.isPending ? "LOGGING IN..." : "LOGIN"}
           </Button>
+        </form>
+        <div className="space-y-4">
           <div className="flex items-center gap-2">
             <div className="flex-1 h-px bg-borderSecondary" />
             <span className="text-center text-borderSecondary">Or</span>
@@ -121,6 +97,7 @@ export default function Signin() {
           <div className="flex items-center justify-between">
             <Button
               size={"lg"}
+              variant={"outline"}
               className="w-[45%] bg-transparent border border-borderSecondary rounded-xl"
             >
               <Image
@@ -129,10 +106,11 @@ export default function Signin() {
                 height={30}
                 alt="google"
               />
-              <span className="text-primary font-medium">Google</span>
+              <span className="text-primary">Google</span>
             </Button>
             <Button
               size={"lg"}
+              variant={"outline"}
               className="w-[45%] bg-transparent border border-borderSecondary rounded-xl"
             >
               <Image
@@ -141,16 +119,16 @@ export default function Signin() {
                 height={30}
                 alt="Outlook Icon"
               />
-              <span className="text-primary font-medium">Outlook</span>
+              <span className="text-primary">Outlook</span>
             </Button>
           </div>
-          <div className="text-primary font-medium text-center">
-            Don&apos;t have an account?{" "}
+          <div className="text-primary-600 text-center">
+            Already have an account?{" "}
             <Link className="text-primary hover:underline" href={"/sign-up"}>
               Register
             </Link>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

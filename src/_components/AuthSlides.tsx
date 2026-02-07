@@ -26,7 +26,7 @@ export const AuthSlides = () => {
 
   return (
     <div
-      className="relative w-full bg-cover bg-center"
+      className="relative w-full h-full bg-cover bg-center"
       style={{
         backgroundImage: `
           linear-gradient(
@@ -53,7 +53,7 @@ export const AuthSlides = () => {
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
-            <div className="flex h-full w-full flex-col justify-end pb-24 text-center text-white space-y-4">
+            <div className="flex min-h-full w-full flex-col justify-end pb-24 text-center text-white space-y-4">
               <h3 className="text-3xl font-semibold">{slide.title}</h3>
               <p className="mt-2 text-xl text-white/80 max-w-sm mx-auto">
                 {slide.desc}
@@ -68,7 +68,7 @@ export const AuthSlides = () => {
               key={index}
               onClick={() => swiperRef.current?.swiper?.slideToLoop(index)}
               className={`h-1 transition-all duration-300 ${
-                active === index ? "w-24 bg-secondary" : "w-10 bg-bgSecondary"
+                active === index ? "w-24 bg-secondary" : "w-10 bg-bgGrey"
               }`}
             />
           ))}

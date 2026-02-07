@@ -6,13 +6,13 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex">
+    <div className="min-h-screen grid md:grid-cols-2 bg-bgPrimary">
       {/* Form  */}
-      <div className="w-full lg:w-1/2 m-auto max-w-md lg:max-w-lg">
+      <div className="flex flex-col items-center justify-start px-6 pt-16 pb-4">
         {children}
       </div>
       {/* Sliders */}
-      <div className="hidden lg:flex lg:w-1/2 min-h-screen">
+      <div className="hidden md:flex overflow-hidden">
         <AuthSlides />
       </div>
     </div>
