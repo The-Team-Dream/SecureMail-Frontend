@@ -10,6 +10,13 @@ export interface signinPayload {
   email: string;
   password: string;
 }
+export interface verifyOtpPayload {
+  email: string;
+  otp: string;
+}
+export interface resendOtpPayload {
+  email: string;
+}
 
 export interface SignupResponse {
   data: {
@@ -52,8 +59,18 @@ export const signup = async (
 };
 
 export const signin = async (
-  formData: signinPayload,
+  payload: signinPayload,
 ): Promise<SigninResponse> => {
-  const res = await axiosInstance.post<SigninResponse>("/signin", formData);
+  const res = await axiosInstance.post<SigninResponse>("/signin", payload);
+  return res.data;
+};
+
+export const verifyOtp = async (payload: verifyOtpPayload) => {
+  const res = await axiosInstance.post("/verifyOtp", payload);
+  return res.data;
+};
+
+export const resendOtp = async (payload: resendOtpPayload) => {
+  const res = await axiosInstance.post("/resendOtp", payload);
   return res.data;
 };

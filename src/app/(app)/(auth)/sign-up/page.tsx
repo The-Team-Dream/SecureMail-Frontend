@@ -48,7 +48,7 @@ export default function Signup() {
       if (token) Cookies.set("token", token);
 
       toast.success("Signed up successfully");
-      router.push("/");
+      router.push("/verify-otp");
     },
     // onError: (err) => {
     //   const errors = err?.response?.data?.errors;
@@ -69,13 +69,14 @@ export default function Signup() {
   const onSubmit: SubmitHandler<ISignUp> = ({ fullName, email, password }) => {
     const form = { fullName, email, password };
     signupMutation.mutate(form);
+    router.push("/verify-otp");
     reset();
   };
 
   return (
     <div className="max-w-sm lg:max-w-lg w-full mx-auto">
       {/* Form Container */}
-      <div className="flex flex-col text-center lg:text-left gap-6">
+      <div className="flex flex-col text-center lg:text-left gap-6 2xl:gap-12">
         <Image
           src={"/icons/logo_Dark.png"}
           alt="Logo"
@@ -196,7 +197,10 @@ export default function Signup() {
           </div>
           <div className="text-primary-600 text-center">
             Already have an account?{" "}
-            <Link className="text-primary font-medium hover:underline" href={"/sign-in"}>
+            <Link
+              className="text-primary font-medium hover:underline"
+              href={"/sign-in"}
+            >
               Login
             </Link>
           </div>

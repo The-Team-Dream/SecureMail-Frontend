@@ -1,12 +1,16 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import {
   AuthError,
+  otpResponse,
+  resendOtpPayload,
   signin,
   signinPayload,
   SigninResponse,
   signup,
   signupPayload,
   SignupResponse,
+  verifyOtp,
+  verifyOtpPayload,
 } from "../features/auth";
 
 export const useSignup = (options?: {
@@ -24,6 +28,22 @@ export const useSignin = (
 ) => {
   return useMutation<SigninResponse, AuthError, signinPayload>({
     mutationFn: (data: signinPayload) => signin(data),
+    ...options,
+  });
+};
+export const useVerifyOtp = (
+  options?: UseMutationOptions<any, any, verifyOtpPayload>,
+) => {
+  return useMutation<any, any, verifyOtpPayload>({
+    mutationFn: (data: verifyOtpPayload) => verifyOtp(data),
+    ...options,
+  });
+};
+export const resendOtp = (
+  options?: UseMutationOptions<any, any, resendOtpPayload>,
+) => {
+  return useMutation<any, any, verifyOtpPayload>({
+    mutationFn: (data: verifyOtpPayload) => verifyOtp(data),
     ...options,
   });
 };
