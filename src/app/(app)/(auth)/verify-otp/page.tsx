@@ -53,7 +53,7 @@ export default function VerifyOtp() {
           <h3 className="text-2xl font-semibold text-primary">
             Verification code
           </h3>
-          <p className="text-textSecondary">
+          <p className="text-textSecondary"> 
             Enter OTP sent to mobile number{" "}
             <span className="font-medium">05xxx12345</span> and email address{" "}
             <span className="font-medium">email@email.com</span> to login the
