@@ -48,7 +48,7 @@ export default function Signup() {
       if (token) Cookies.set("token", token);
 
       toast.success("Signed up successfully");
-      router.push("/");
+      router.push("/verify-otp");
     },
     // onError: (err) => {
     //   const errors = err?.response?.data?.errors;
@@ -69,6 +69,7 @@ export default function Signup() {
   const onSubmit: SubmitHandler<ISignUp> = ({ fullName, email, password }) => {
     const form = { fullName, email, password };
     signupMutation.mutate(form);
+    router.push("/verify-otp");
     reset();
   };
 
@@ -122,7 +123,7 @@ export default function Signup() {
             error={errors.confirmPassword?.message}
           />
           <div className="relative">
-            <div className="flex items-center gap-4 ">
+            <div className="flex items-center gap-4">
               <input
                 type="checkbox"
                 id="terms"
@@ -196,7 +197,10 @@ export default function Signup() {
           </div>
           <div className="text-primary-600 text-center">
             Already have an account?{" "}
-            <Link className="text-primary font-medium hover:underline" href={"/sign-in"}>
+            <Link
+              className="text-primary font-medium hover:underline"
+              href={"/sign-in"}
+            >
               Login
             </Link>
           </div>

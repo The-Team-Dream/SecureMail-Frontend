@@ -124,7 +124,10 @@ export default function Signin() {
           </div>
           <div className="text-primary-600 text-center">
             Already have an account?{" "}
-            <Link className="text-primary font-medium hover:underline" href={"/sign-up"}>
+            <Link
+              className="text-primary font-medium hover:underline"
+              href={"/sign-up"}
+            >
               Register
             </Link>
           </div>
