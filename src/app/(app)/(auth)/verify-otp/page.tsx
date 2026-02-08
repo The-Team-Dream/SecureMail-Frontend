@@ -47,13 +47,13 @@ export default function VerifyOtp() {
           alt="Logo"
           width={200}
           height={200}
-          className="cursor-pointer mx-auto"
+          className="cursor-pointer mb-2"
         />
         <div className="space-y-8">
           <h3 className="text-2xl font-semibold text-primary">
             Verification code
           </h3>
-          <p className="text-textSecondary"> 
+          <p className="text-textSecondary text-sm">
             Enter OTP sent to mobile number{" "}
             <span className="font-medium">05xxx12345</span> and email address{" "}
             <span className="font-medium">email@email.com</span> to login the
@@ -64,7 +64,7 @@ export default function VerifyOtp() {
         {/* OTP Input */}
         <div>
           <InputOTP maxLength={6} onChange={handleOtpChange} value={otp}>
-            <InputOTPGroup className="flex items-center justify-between max-w-87.5 mx-auto w-full">
+            <InputOTPGroup className="flex items-center justify-between max-w-[380px] mx-auto w-full">
               {[0, 1, 2, 3, 4, 5].map((index) => (
                 <InputOTPSlot
                   key={index}
