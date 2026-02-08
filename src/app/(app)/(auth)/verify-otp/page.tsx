@@ -8,6 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
+import Link from "next/link";
 
 export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
@@ -40,7 +41,7 @@ export default function VerifyOtp() {
   return (
     <div className="max-w-sm lg:max-w-lg w-full mx-auto">
       {/* Container */}
-      <div className="flex flex-col text-center gap-6 2xl:gap-12">
+      <div className="flex flex-col text-center gap-8">
         <Image
           src={"/icons/logo_Dark.png"}
           alt="Logo"
@@ -69,7 +70,7 @@ export default function VerifyOtp() {
                   key={index}
                   index={index}
                   data-testid="otp-slot"
-                  className={`h-14 w-12 rounded-md text-3xl font-medium border transition-colors ${
+                  className={`h-14 w-12 rounded-md text-3xl text-[#333] font-medium border transition-colors ${
                     otp[index] ? "border-inputFocus" : "border-borderPrimary"
                   }`}
                 />

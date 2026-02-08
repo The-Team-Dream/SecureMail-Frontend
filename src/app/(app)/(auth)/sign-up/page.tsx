@@ -76,7 +76,7 @@ export default function Signup() {
   return (
     <div className="max-w-sm lg:max-w-lg w-full mx-auto">
       {/* Form Container */}
-      <div className="flex flex-col text-center lg:text-left gap-6 2xl:gap-12">
+      <div className="flex flex-col text-center lg:text-left gap-6">
         <Image
           src={"/icons/logo_Dark.png"}
           alt="Logo"
@@ -123,7 +123,7 @@ export default function Signup() {
             error={errors.confirmPassword?.message}
           />
           <div className="relative">
-            <div className="flex items-center gap-4 ">
+            <div className="flex items-center gap-4">
               <input
                 type="checkbox"
                 id="terms"

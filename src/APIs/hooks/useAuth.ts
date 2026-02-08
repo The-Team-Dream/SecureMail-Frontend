@@ -39,7 +39,7 @@ export const useVerifyOtp = (
     ...options,
   });
 };
-export const resendOtp = (
+export const useResendOtp = (
   options?: UseMutationOptions<any, any, resendOtpPayload>,
 ) => {
   return useMutation<any, any, verifyOtpPayload>({
