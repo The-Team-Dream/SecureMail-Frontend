@@ -9,17 +9,47 @@ import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
 import useCountDown from "@/hooks/useCountDown";
 import Logo from "@/_components/Logo";
+import { useResendOtp, useVerifyOtp } from "@/APIs/hooks/useAuth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
   const { timeLeft, resend, resetTimer, formattedTime } = useCountDown(30);
+  const router = useRouter();
+  const { mutate, isPending } = useVerifyOtp({
+    onSuccess: () => {
+      router.push("/");
+      toast.success("Your email has been verified");
+    },
+    onError: () => {
+      toast.error("Invalid Otp");
+    },
+  });
 
+  const { mutate: resendOtp, isPending: resendPending } = useResendOtp({
+    onSuccess: () => {
+      toast.success("Otp sent successfully");
+    },
+    onError: () => {
+      toast.error("Failed to send otp");
+    },
+  });
   const handleOtpChange = (value: string) => {
     setOtp(value);
   };
 
+  const handleVerify = () => {
+    if (otp.length === 6) {
+      // mutate({ email, otp });
+    } else {
+      alert("Otp must be 6 digits");
+    }
+  };
+
   const handleResend = () => {
     if (resend) {
+      // resendOtp({ email });
       setOtp("");
       resetTimer();
     }
@@ -67,7 +97,7 @@ export default function VerifyOtp() {
           <p className="text-[15px] text-primary">
             <button
               onClick={handleResend}
-              disabled={!resend}
+              disabled={!resend || resendPending}
               className={`${
                 !resend
                   ? "opacity-50 cursor-not-allowed"
@@ -78,9 +108,17 @@ export default function VerifyOtp() {
             </button>
           </p>
 
-          <Button className="group flex items-center gap-2" size={"lg"}>
-            <span>Continue</span>
-            <MoveRight className="w-4 h-4 text-white group-hover:translate-x-2 transition duration-300" />
+          <Button
+            onClick={handleVerify}
+            disabled={isPending}
+            className="group flex items-center gap-2"
+            size={"lg"}
+          >
+            <span>{isPending ? "Sending..." : "Continue"}</span>
+
+            {!isPending && (
+              <MoveRight className="w-4 h-4 text-white group-hover:translate-x-2 transition duration-300" />
+            )}
           </Button>
         </div>
       </div>
