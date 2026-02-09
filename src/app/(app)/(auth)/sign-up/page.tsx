@@ -12,9 +12,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
 import { Input } from "@/_components/Input";
 import Logo from "@/_components/Logo";
-import Head from "next/head";
-import { useEffect } from "react";
-
+import DOMPurify from "dompurify";
 const signupSchema = z
   .object({
     fullName: z.string().min(1, { message: "Full name is required" }),
@@ -32,6 +30,7 @@ const signupSchema = z
     message: "Password does not match",
   });
 
+type ISignUp = z.infer<typeof signupSchema>;
 export default function Signup() {
   const {
     handleSubmit,
@@ -44,8 +43,6 @@ export default function Signup() {
     resolver: zodResolver(signupSchema),
   });
   const router = useRouter();
-
-  type ISignUp = z.infer<typeof signupSchema>;
 
   const signupMutation = useSignup({
     onSuccess: (res) => {
@@ -71,21 +68,25 @@ export default function Signup() {
     // },
   });
 
-  const onSubmit: SubmitHandler<ISignUp> = ({ fullName, email, password }) => {
-    const form = { fullName, email, password };
+  const onSubmit: SubmitHandler<ISignUp> = (data) => {
+    const { fullName, email, password } = data;
+    const form = {
+      fullName: DOMPurify.sanitize(fullName),
+      email: DOMPurify.sanitize(email),
+      password: DOMPurify.sanitize(password),
+    };
     signupMutation.mutate(form);
     router.push("/verify-otp");
     reset();
   };
-  useEffect(() => {
-    document.title = "Sign Up";
-  }, []);
 
   return (
     <div className="max-w-sm lg:max-w-lg w-full mx-auto">
       {/* Form Container */}
       <div className="flex flex-col text-center lg:text-left gap-6">
-        <Logo />
+        <div className="flex justify-center lg:justify-start">
+          <Logo />
+        </div>
         <div className="space-y-2">
           <h3 className="text-3xl text-primary">Hello, Welcome back</h3>
           <p className="text-textSecondary text-sm xl:text-base">

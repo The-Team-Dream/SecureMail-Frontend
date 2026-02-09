@@ -51,7 +51,7 @@ export const AuthSlides = () => {
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
-            <div className="flex min-h-full w-full flex-col justify-end pb-24 text-center text-white space-y-4">
+            <div className="flex flex-col h-full justify-end pb-24 text-center text-white space-y-4">
               <h3 className="text-3xl font-semibold">{slide.title}</h3>
               <p className="mt-2 text-xl text-white/80 max-w-sm mx-auto">
                 {slide.desc}
