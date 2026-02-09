@@ -9,11 +9,44 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Input } from "@/_components/Input";
+import Logo from "@/_components/Logo";
+import DOMPurify from "dompurify";
+interface FormData {
+  email: string;
+  password: string;
+}
 
+interface FormDataErrors {
+  email?: string;
+  password?: string;
+}
 export default function Signin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, name } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+  const [errors, setErrors] = useState<FormDataErrors>({});
   const router = useRouter();
+  // Form Validation
+  const validateForm = () => {
+    const newErrors: FormDataErrors = {};
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid Email";
+    }
+    if (!formData.password.trim()) {
+      newErrors.password = "Password is required";
+    }
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
   const signinMutation = useSignin({
     onSuccess: (res) => {
       const token = res?.data?.token;
@@ -30,42 +63,49 @@ export default function Signin() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    signinMutation.mutate({ email, password });
+    if (!validateForm()) return;
+    const sanitizedForm = {
+      email: DOMPurify.sanitize(formData.email),
+      password: DOMPurify.sanitize(formData.password),
+    };
+    console.log(sanitizedForm);
+    signinMutation.mutate(sanitizedForm);
   };
 
   return (
     <div className="max-w-sm lg:max-w-lg w-full mx-auto">
       {/* Form Container */}
       <div className="flex flex-col text-center lg:text-left gap-6">
-        <Image
-          src={"/icons/logo_Dark.png"}
-          alt="Logo"
-          width={200}
-          height={200}
-          className="cursor-pointer mx-auto lg:mx-0"
-        />
+        <div className="flex justify-center lg:justify-start">
+          <Logo />
+        </div>
         <div className="space-y-2">
           <h3 className="text-3xl text-primary">Hello, Welcome back</h3>
           <p className="text-sm xl:text-base text-textSecondary">
             Enter your email address and password to log in.
           </p>
         </div>
+        {/* Form Input Fields */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {" "}
           <Input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             type="email"
             placeholder="Email Address"
             leftIcon={<Mail />}
+            error={errors.email}
           />
           <Input
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
             type="password"
-            isPassword
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            isPassword
             leftIcon={<LockIcon />}
+            error={errors.password}
           />
           <Link
             href={"/forgot-password"}
@@ -88,17 +128,18 @@ export default function Signin() {
             {signinMutation.isPending ? "LOGGING IN..." : "LOGIN"}
           </Button>
         </form>
+        {/* OAuth Buttons */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <div className="flex-1 h-px bg-borderSecondary" />
             <span className="text-center text-borderSecondary">Or</span>
             <div className="flex-1 h-px bg-borderSecondary" />
           </div>
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-2 gap-6 md:gap-12">
             <Button
               size={"lg"}
               variant={"outline"}
-              className="w-[45%] bg-transparent border border-borderSecondary rounded-xl"
+              className=" bg-transparent border border-borderSecondary rounded-xl"
             >
               <Image
                 src={"/icons/google.svg"}
@@ -111,7 +152,7 @@ export default function Signin() {
             <Button
               size={"lg"}
               variant={"outline"}
-              className="w-[45%] bg-transparent border border-borderSecondary rounded-xl"
+              className="bg-transparent border border-borderSecondary rounded-xl"
             >
               <Image
                 src={"/icons/outlook.svg"}
