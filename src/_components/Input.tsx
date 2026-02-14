@@ -3,14 +3,18 @@
 import { cn } from "@/lib/utils";
 import { CircleAlert } from "lucide-react";
 import { useState } from "react";
-
+import { AnimatePresence, motion } from "framer-motion";
 interface Input extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   leftIcon?: React.ReactNode;
   isPassword?: boolean;
   error?: string | undefined;
 }
-
+export const errorVariants = {
+  initial: { x: -10, opacity: 0 },
+  animate: { x: 0, opacity: 1 },
+  exit: { x: -10, opacity: 0 },
+};
 export const Input: React.FC<Input> = ({
   label,
   leftIcon,
@@ -96,12 +100,21 @@ export const Input: React.FC<Input> = ({
           </button>
         )}
       </div>
-      {error && (
-        <div className="flex items-center gap-2 text-error mt-1">
-          <CircleAlert className="w-4 h-4" />
-          <span className="text-sm font-medium">{error}</span>
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            variants={errorVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ ease: "easeInOut", duration: 0.2, stiffness: 120 }}
+            className="flex items-center gap-2 text-error mt-1"
+          >
+            <CircleAlert className="w-4 h-4" />
+            <span className="text-sm font-medium">{error}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

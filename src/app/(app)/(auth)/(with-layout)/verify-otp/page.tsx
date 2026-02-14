@@ -60,8 +60,8 @@ export default function VerifyOtp() {
       <div className="absolute top-12 left-1/2 -translate-x-1/2">
         <Logo />
       </div>
-      <div className="max-w-sm lg:max-w-lg w-full mx-auto flex items-center justify-center min-h-screen">
-        {/* Container */}
+      {/* Container */}
+      <div className="max-w-sm lg:max-w-lg w-full mx-auto flex items-center justify-center min-h-screen -my-4!">
         <div className="flex flex-col text-center gap-8">
           <div className="space-y-8">
             <h3 className="text-2xl font-semibold text-primary">

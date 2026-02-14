@@ -2,17 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
-  const otp = req.cookies.get("otp")?.value;
   const { pathname } = req.nextUrl;
-  if (!token && pathname === "/") {
-    return NextResponse.redirect(new URL("/login", req.url));
+  const publicPages = ["/sign-in", "/sign-up", "/forgot-password"].includes(
+    pathname,
+  );
+  const isPublicAssets =
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/static") ||
+    pathname.includes(".");
+
+  if (isPublicAssets) {
+    return NextResponse.next();
   }
-  if (!otp && pathname === "verify-otp") {
-    return NextResponse.redirect(new URL("/sign-up", req.url));
+  if (!token && !publicPages) {
+    return NextResponse.redirect(new URL("/sign-in", req.url));
+  }
+  if (token && publicPages) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/", "/verify-otp"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
