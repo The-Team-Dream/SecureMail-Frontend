@@ -51,9 +51,9 @@ export default function UpdatePassword() {
           <div className="flex flex-col text-center gap-12">
             {/* Text Container */}
             <div className="space-y-8">
-              <h3 className="text-2xl font-semibold text-primary">
+              <h1 className="text-2xl font-semibold text-primary">
                 Update Password
-              </h3>
+              </h1>
               <p className="text-textSecondary text-sm font-medium">
                 Please complete the below data to update your password
               </p>
@@ -85,7 +85,7 @@ export default function UpdatePassword() {
                   disabled={isPending}
                   className={`w-full ${isPending ? "bg-primary/60" : "bg-primary"}`}
                 >
-                  Update    
+                  Update
                 </Button>
               </form>
             </div>

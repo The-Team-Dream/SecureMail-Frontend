@@ -58,7 +58,7 @@ export default function Signin() {
           <Logo />
         </div>
         <div className="space-y-2">
-          <h3 className="text-3xl text-primary">Hello, Welcome back</h3>
+          <h1 className="text-3xl text-primary">Hello, Welcome back</h1>
           <p className="tex-sm lg:text-base text-textSecondary">
             Enter your email address and password to log in.
           </p>
