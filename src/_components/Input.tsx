@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { CircleAlert } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Text } from "./Text";
 interface Input extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   leftIcon?: React.ReactNode;
@@ -11,9 +12,9 @@ interface Input extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string | undefined;
 }
 export const errorVariants = {
-  initial: { x: -10, opacity: 0 },
-  animate: { x: 0, opacity: 1 },
-  exit: { x: -10, opacity: 0 },
+  initial: { y: -10, opacity: 0 },
+  animate: { y: 0, opacity: 1 },
+  exit: { y: -10, opacity: 0 },
 };
 export const Input: React.FC<Input> = ({
   label,
@@ -46,7 +47,7 @@ export const Input: React.FC<Input> = ({
           {...props}
           type={inputType}
           className={cn(
-            "w-full px-4 py-3 border text-primary rounded-xl outline-none focus:border-inputFocus",
+            "w-full px-4 py-3 border text-primary rounded-xl outline-none focus:border-inputFocus transition duration-500",
             leftIcon && "pl-12",
             error
               ? "border-error placeholder:text-error"
@@ -57,7 +58,10 @@ export const Input: React.FC<Input> = ({
           <button
             type="button"
             onClick={togglePassword}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-textMuted hover:text-primary cursor-pointer"
+            className={cn(
+              "absolute right-4 top-1/2 -translate-y-1/2 text-textMuted hover:text-primary cursor-pointer",
+              inputType === "text" ? "text-primary" : "text-textMuted",
+            )}
             aria-label={
               inputType === "password" ? "Show password" : "Hide password"
             }
@@ -111,7 +115,9 @@ export const Input: React.FC<Input> = ({
             className="flex items-center gap-2 text-error mt-1"
           >
             <CircleAlert className="w-4 h-4" />
-            <span className="text-sm font-medium">{error}</span>
+            <Text as={"span"} size={"sm"} color={"error"} font={"medium"}>
+              {error}
+            </Text>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,15 +1,16 @@
 "use client";
 import { Input } from "@/_components/Input";
-import { useUpdatePassword } from "@/APIs/hooks/useAuth";
+import { useResetPassword } from "@/APIs/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { IUpdatePassword, updatePasswordSchema } from "@/schemas/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LockIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 import DOMPurify from "dompurify";
 import Logo from "@/_components/Logo";
+import { Text } from "@/_components/Text";
 export default function UpdatePassword() {
   const {
     handleSubmit,
@@ -21,17 +22,18 @@ export default function UpdatePassword() {
   });
   const router = useRouter();
 
-  const { mutate, isPending } = useUpdatePassword({
+  const { mutate, isPending } = useResetPassword({
     onSuccess: () => {
-      router.push("/update-password");
+      router.push("/sign-in");
       toast.success("Signed in successfully");
     },
-    onError: (err) => {
-      toast.error(err?.response?.data?.message || "login failed");
-    },
+    // onError: (err) => {
+    //   toast.error(err?.response?.data?.message || "login failed");
+    // },
   });
 
   const onSubmit: SubmitHandler<IUpdatePassword> = (data) => {
+    router.push("/sign-in");
     const form = {
       password: DOMPurify.sanitize(data.password),
       confirmPassword: DOMPurify.sanitize(data.confirmPassword),
@@ -51,12 +53,12 @@ export default function UpdatePassword() {
           <div className="flex flex-col text-center gap-12">
             {/* Text Container */}
             <div className="space-y-8">
-              <h1 className="text-2xl font-semibold text-primary">
+              <Text as={"h1"} color={"primary"} font={"semiBold"}>
                 Update Password
-              </h1>
-              <p className="text-textSecondary text-sm font-medium">
+              </Text>
+              <Text color={"secondary"} font={"medium"}>
                 Please complete the below data to update your password
-              </p>
+              </Text>
             </div>
             <div className="space-y-4">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-12">
@@ -79,12 +81,7 @@ export default function UpdatePassword() {
                     error={errors?.confirmPassword?.message}
                   />
                 </div>
-                <Button
-                  size={"lg"}
-                  type="submit"
-                  disabled={isPending}
-                  className={`w-full ${isPending ? "bg-primary/60" : "bg-primary"}`}
-                >
+                <Button size={"lg"} type="submit" disabled={isPending}>
                   Update
                 </Button>
               </form>

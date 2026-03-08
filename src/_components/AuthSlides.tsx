@@ -5,8 +5,12 @@ import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import { useRef, useState } from "react";
 import Image from "next/image";
-
-const slides = [
+import { Text } from "./Text";
+interface Slide {
+  title: string;
+  desc: string;
+}
+const slides: Slide[] = [
   {
     title: "Secure & Reliable",
     desc: "We handle your email as ours. Every piece is protected.",
@@ -32,7 +36,7 @@ export const AuthSlides = () => {
         alt="Auth Image"
         fill
         priority
-        className="object-cover"
+        className="object-cover object-center"
       />
       {/* Overloay */}
       <div className="absolute inset-0 bg-linear-to-b from-[rgba(89,104,79,0.6)] via-[rgba(102,128,68,0.7)] to-[rgba(0,0,0,0.9)]" />
@@ -52,7 +56,14 @@ export const AuthSlides = () => {
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
             <div className="flex flex-col h-full justify-end pb-24 text-center text-white space-y-4">
-              <h3 className="text-3xl font-semibold">{slide.title}</h3>
+              <Text
+                as={"h3"}
+                font={"semiBold"} 
+                size={"3xl"}
+                className="text-white"
+              >
+                {slide.title}
+              </Text>
               <p className="mt-2 text-xl text-white/80 max-w-sm mx-auto">
                 {slide.desc}
               </p>
@@ -61,7 +72,7 @@ export const AuthSlides = () => {
         ))}
 
         {/* Bullets */}
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex justify-center gap-1 z-20">
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex justify-center gap-1">
           {slides.map((_, index) => (
             <button
               key={index}

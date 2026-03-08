@@ -1,21 +1,23 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import {
-  forgotPassword,
-  ForgotPasswordPayload,
+  forgetPassword,
   logout,
-  otpResponse,
-  ResendOtpPayload,
+  oauth,
   signin,
-  SigninPayload,
-  SigninResponse,
   signup,
-  SignupPayload,
-  SignupResponse,
-  updatePassword,
-  UpdatePasswordPayload,
+  SocialProvider,
+  resetPassword,
   verifyOtp,
-  VerifyOtpPayload,
+  resendOtp,
 } from "../features/auth";
+import {
+  ForgetPasswordPayload,
+  ResendOtpPayload,
+  SigninPayload,
+  SignupPayload,
+  ResetPasswordPayload,
+  VerifyOtpPayload,
+} from "../types";
 
 export const useSignup = (options?: {
   onSuccess?: (res: any) => void;
@@ -35,6 +37,15 @@ export const useSignin = (
     ...options,
   });
 };
+
+export const useOauth = (
+  options?: UseMutationOptions<any, any, { provider: SocialProvider }>,
+) => {
+  return useMutation({
+    mutationFn: oauth,
+    ...options,
+  });
+};
 export const useVerifyOtp = (
   options?: UseMutationOptions<any, any, VerifyOtpPayload>,
 ) => {
@@ -47,27 +58,30 @@ export const useResendOtp = (
   options?: UseMutationOptions<any, any, ResendOtpPayload>,
 ) => {
   return useMutation<any, any, ResendOtpPayload>({
-    mutationFn: (data: ResendOtpPayload) => verifyOtp(data),
+    mutationFn: (data: ResendOtpPayload) => resendOtp(data),
     ...options,
   });
 };
-export const useForgotPassword = (
-  options?: UseMutationOptions<any, any, ForgotPasswordPayload>,
+export const useForgetPassword = (
+  options?: UseMutationOptions<any, any, ForgetPasswordPayload>,
 ) => {
-  return useMutation<any, any, ForgotPasswordPayload>({
-    mutationFn: (data: ForgotPasswordPayload) => forgotPassword(data),
+  return useMutation<any, any, ForgetPasswordPayload>({
+    mutationFn: (data: ForgetPasswordPayload) => forgetPassword(data),
+    ...options,
+  });
+};
+export const useResetPassword = (
+  options?: UseMutationOptions<any, any, ResetPasswordPayload>,
+) => {
+  return useMutation<any, any, ResetPasswordPayload>({
+    mutationFn: (data: ResetPasswordPayload) => resetPassword(data),
     ...options,
   });
 };
 
-export const useLogout = () => {
-  return () => logout();
-};
-export const useUpdatePassword = (
-  options?: UseMutationOptions<any, any, UpdatePasswordPayload>,
-) => {
-  return useMutation<any, any, UpdatePasswordPayload>({
-    mutationFn: (data: UpdatePasswordPayload) => updatePassword(data),
+export const useLogout = (options?: UseMutationOptions<any, any, void>) => {
+  return useMutation<any, any, void>({
+    mutationFn: logout,
     ...options,
   });
 };

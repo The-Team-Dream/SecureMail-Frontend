@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "../../styles/globals.css";
 import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
-import { Toaster } from "@/components/ui/sonner";
-import ProtectedRoute from "@/_components/ProtectedRoute";
+import { Toaster } from "react-hot-toast";
+import { CheckCheckIcon, X } from "lucide-react";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     icon: [
       {
         media: "(prefers-color-scheme: dark)",
-        url: "/icons/logo_dark.png",
-        href: "/icons/logo_dark.png",
+        url: "/icons/logo_Dark.webp",
+        href: "/icons/logo_Dark.webp",
       },
       {
         media: "(prefers-color-scheme: light)",
-        url: "/icons/logo_light.png",
-        href: "/icons/logo_light.png",
+        url: "/icons/logo.png",
+        href: "/icons/logo.png",
       },
     ],
   },
@@ -40,7 +40,28 @@ export default function RootLayout({
       <body className={`${montserrat.variable} antialiased`}>
         <ReactQueryProvider>
           {children}
-          <Toaster />
+          <Toaster
+            position="top-left"
+            toastOptions={{
+              className: "",
+              success: {
+                style: {
+                  padding: "16px 24px",
+                  backgroundColor: "#689300",
+                  color: "#fff",
+                },
+                icon: <CheckCheckIcon className="w-4 h-4 " />,
+              },
+              error: {
+                style: {
+                  backgroundColor: "red",
+                  padding: "16px 24px",
+                  color: "#fff",
+                },
+                icon: <X className="w-4 h-4 text-white" />,
+              },
+            }}
+          />
         </ReactQueryProvider>
       </body>
     </html>

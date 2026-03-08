@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export default function useCountDown(initialState: number) {
+export default function useTimer(initialState: number) {
   const [timeLeft, setTimeLeft] = useState(initialState);
   useEffect(() => {
     if (timeLeft <= 0) return;

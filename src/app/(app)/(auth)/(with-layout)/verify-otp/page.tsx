@@ -7,15 +7,16 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
-import useCountDown from "@/hooks/useCountDown";
+import useTimer from "@/hooks/useTimer";
 import Logo from "@/_components/Logo";
 import { useResendOtp, useVerifyOtp } from "@/APIs/hooks/useAuth";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { Text } from "@/_components/Text";
 
 export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
-  const { timeLeft, resend, resetTimer, formattedTime } = useCountDown(30);
+  const { timeLeft, resend, resetTimer, formattedTime } = useTimer(30);
   const router = useRouter();
   const { mutate, isPending } = useVerifyOtp({
     onSuccess: () => {
@@ -36,14 +37,16 @@ export default function VerifyOtp() {
     },
   });
   const handleOtpChange = (value: string) => {
-    setOtp(value);
+    const otpNumbers = value.replace(/[^0-9]/g, "");
+    setOtp(otpNumbers);
   };
 
   const handleVerify = () => {
+    router.push("/sign-in");
     if (otp.length === 6) {
       // mutate({ email, otp });
     } else {
-      alert("Otp must be 6 digits");
+      toast.error("Otp must be 6 digits");
     }
   };
 
@@ -64,20 +67,26 @@ export default function VerifyOtp() {
       <div className="max-w-sm lg:max-w-lg w-full mx-auto flex items-center justify-center min-h-screen -my-4!">
         <div className="flex flex-col text-center gap-8">
           <div className="space-y-8">
-            <h1 className="text-2xl font-semibold text-primary">
+            <Text as={"h1"} font={"semiBold"} color={"primary"} size={"2xl"}>
               Verification code
-            </h1>
-            <p className="text-textSecondary text-sm">
+            </Text>
+
+            <Text color={"secondary"} font={"medium"}>
               Enter OTP sent to mobile number{" "}
               <span className="font-medium">05xxx12345</span> and email address{" "}
               <span className="font-medium">email@email.com</span> to login the
               portal
-            </p>
+            </Text>
           </div>
 
           {/* OTP Input */}
           <div>
-            <InputOTP maxLength={6} onChange={handleOtpChange} value={otp}>
+            <InputOTP
+              maxLength={6}
+              onChange={handleOtpChange}
+              value={otp}
+              inputMode="numeric"
+            >
               <InputOTPGroup className="flex items-center justify-between max-w-95 mx-auto w-full">
                 {[0, 1, 2, 3, 4, 5].map((index) => (
                   <InputOTPSlot
@@ -111,10 +120,10 @@ export default function VerifyOtp() {
           <Button
             onClick={handleVerify}
             disabled={isPending}
-            className="group flex items-center gap-2"
+            className="group"
             size={"lg"}
           >
-            <span>{isPending ? "Sending..." : "Continue"}</span>
+            <span>{isPending ? "Verifying..." : "Verify Now"}</span>
 
             {!isPending && (
               <MoveRight className="w-4 h-4 text-white group-hover:translate-x-2 transition duration-300" />

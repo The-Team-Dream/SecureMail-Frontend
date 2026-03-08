@@ -1,6 +1,6 @@
 "use client";
 import { Input } from "@/_components/Input";
-import { useForgotPassword } from "@/APIs/hooks/useAuth";
+import { useForgetPassword } from "@/APIs/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { forgotPasswordSchema, IForgotPassword } from "@/schemas/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,8 +9,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 import DOMPurify from "dompurify";
+import { Text } from "@/_components/Text";
 export default function ForgotPassword() {
   const {
     handleSubmit,
@@ -22,14 +23,14 @@ export default function ForgotPassword() {
   });
   const router = useRouter();
 
-  const { mutate, isPending } = useForgotPassword({
+  const { mutate, isPending } = useForgetPassword({
     onSuccess: () => {
-      // router.push("/update-password");
-      // toast.success("Signed in successfully");
+      router.push("/update-password");
+      toast.success("Signed in successfully");
     },
-    onError: (err) => {
-      toast.error(err?.response?.data?.message || "login failed");
-    },
+    // onError: (err) => {
+    //   toast.error(err?.response?.data?.message || "login failed");
+    // },
   });
 
   const onSubmit: SubmitHandler<IForgotPassword> = (data) => {
@@ -54,12 +55,13 @@ export default function ForgotPassword() {
         <div className="flex flex-col text-center gap-8">
           {/* Text Container */}
           <div className="space-y-4">
-            <h1 className="text-3xl font-semibold text-primary">
+            <Text as={"h1"} color={"primary"} size={"32"} font={"semiBold"}>
               Forgot your password
-            </h1>
-            <p className="text-textSecondary text-sm">
+            </Text>
+            <Text color={"secondary"} size={"sm"}>
               Enter your email so that we can send you password reset link
-            </p>
+            </Text>
+            <p className="text-textSecondary text-sm"></p>
           </div>
           <div className="space-y-4">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -70,12 +72,7 @@ export default function ForgotPassword() {
                 leftIcon={<Mail />}
                 error={errors?.email?.message}
               />
-              <Button
-                size={"lg"}
-                type="submit"
-                disabled={isPending}
-                className={`w-full ${isPending ? "bg-primary/60" : "bg-primary"}`}
-              >
+              <Button size={"lg"} type="submit" disabled={isPending}>
                 Send
               </Button>
             </form>

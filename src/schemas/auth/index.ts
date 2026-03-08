@@ -17,8 +17,6 @@ export const signupSchema = z
     message: "Password does not match",
   });
 
-export type ISignUp = z.infer<typeof signupSchema>;
-
 // Sign in Schema
 export const signinSchema = z.object({
   email: z
@@ -28,7 +26,6 @@ export const signinSchema = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 });
 
-export type ISignin = z.infer<typeof signinSchema>;
 // Forgot Password Schema
 export const forgotPasswordSchema = z.object({
   email: z
@@ -36,8 +33,6 @@ export const forgotPasswordSchema = z.object({
     .min(1, { message: "Email is required" })
     .email("Invalid Email"),
 });
-
-export type IForgotPassword = z.infer<typeof forgotPasswordSchema>;
 
 // Update Password Schema
 export const updatePasswordSchema = z
@@ -52,4 +47,7 @@ export const updatePasswordSchema = z
     message: "Password does not match",
   });
 
+export type ISignUp = z.infer<typeof signupSchema>;
+export type ISignin = z.infer<typeof signinSchema>;
 export type IUpdatePassword = z.infer<typeof updatePasswordSchema>;
+export type IForgotPassword = z.infer<typeof forgotPasswordSchema>;

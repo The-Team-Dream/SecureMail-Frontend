@@ -1,11 +1,13 @@
 import Image from "next/image";
-import React from "react";
+import { Text } from "./Text";
 
 const Logo = () => {
   return (
-    <div className={`flex items-center  gap-2`}>
-      <Image src={"/icons/logo_dark1.png"} alt="Logo" width={30} height={30} />
-      <h1 className="text-3xl font-black">SecureMail</h1>
+    <div className={`flex items-center gap-2`}>
+      <Image src={"/icons/logo_Dark.webp"} alt="Logo" width={50} height={50} />
+      <Text as={"h1"} font={"black"} size={"3xl"}>
+        SecureMail
+      </Text>
     </div>
   );
 };
