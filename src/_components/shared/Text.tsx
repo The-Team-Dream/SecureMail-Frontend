@@ -65,6 +65,7 @@ const textVariants = cva("transition-colors", {
       extraBold: "font-extrabold",
       bold: "font-bold",
       semiBold: "font-semibold",
+      normal: "font-normal",
       medium: "font-medium",
       light: "font-light",
       thin: "font-thin",
