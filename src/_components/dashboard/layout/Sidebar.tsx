@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Text } from "../shared/Text";
+import { Text } from "../../shared/Text";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
