@@ -1,49 +1,69 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import {
-  AuthError,
-  otpResponse,
-  resendOtpPayload,
+  forgetPassword,
   signin,
-  signinPayload,
-  SigninResponse,
   signup,
-  signupPayload,
-  SignupResponse,
+  resetPassword,
   verifyOtp,
-  verifyOtpPayload,
+  resendOtp,
 } from "../features/auth";
+import {
+  ForgetPasswordPayload,
+  ResendOtpPayload,
+  SigninPayload,
+  SignupPayload,
+  ResetPasswordPayload,
+  VerifyOtpPayload,
+} from "../../types/auth";
 
 export const useSignup = (options?: {
-  onSuccess?: (res: SignupResponse) => void;
-  onError?: (err: AuthError) => void;
+  onSuccess?: (res: any) => void;
+  onError?: (err: any) => void;
 }) => {
-  return useMutation<SignupResponse, AuthError, signupPayload>({
-    mutationFn: (data: signupPayload) => signup(data),
+  return useMutation<any, any, SignupPayload>({
+    mutationFn: signup,
     ...options,
   });
 };
 
 export const useSignin = (
-  options?: UseMutationOptions<SigninResponse, AuthError, signinPayload>,
+  options?: UseMutationOptions<any, any, SigninPayload>,
 ) => {
-  return useMutation<SigninResponse, AuthError, signinPayload>({
-    mutationFn: (data: signinPayload) => signin(data),
+  return useMutation<any, any, SigninPayload>({
+    mutationFn: signin,
     ...options,
   });
 };
+
 export const useVerifyOtp = (
-  options?: UseMutationOptions<any, any, verifyOtpPayload>,
+  options?: UseMutationOptions<any, any, VerifyOtpPayload>,
 ) => {
-  return useMutation<any, any, verifyOtpPayload>({
-    mutationFn: (data: verifyOtpPayload) => verifyOtp(data),
+  return useMutation<any, any, VerifyOtpPayload>({
+    mutationFn: verifyOtp,
     ...options,
   });
 };
 export const useResendOtp = (
-  options?: UseMutationOptions<any, any, resendOtpPayload>,
+  options?: UseMutationOptions<any, any, ResendOtpPayload>,
 ) => {
-  return useMutation<any, any, verifyOtpPayload>({
-    mutationFn: (data: verifyOtpPayload) => verifyOtp(data),
+  return useMutation<any, any, ResendOtpPayload>({
+    mutationFn: resendOtp,
+    ...options,
+  });
+};
+export const useForgetPassword = (
+  options?: UseMutationOptions<any, any, ForgetPasswordPayload>,
+) => {
+  return useMutation<any, any, ForgetPasswordPayload>({
+    mutationFn: forgetPassword,
+    ...options,
+  });
+};
+export const useResetPassword = (
+  options?: UseMutationOptions<any, any, ResetPasswordPayload>,
+) => {
+  return useMutation<any, any, ResetPasswordPayload>({
+    mutationFn: resetPassword,
     ...options,
   });
 };

@@ -1,76 +1,65 @@
 import axiosInstance from "@/lib/axios";
-
-export interface signupPayload {
-  fullName: string;
-  email: string;
-  password: string;
-}
-
-export interface signinPayload {
-  email: string;
-  password: string;
-}
-export interface verifyOtpPayload {
-  email: string;
-  otp: string;
-}
-export interface resendOtpPayload {
-  email: string;
-}
-
-export interface SignupResponse {
-  data: {
-    token: string;
-    user: {
-      id: string;
-      email: string;
-      fullName: string;
-    };
-  };
-  message: string;
-  errors?: Record<string, string>;
-}
-
-export interface SigninResponse {
-  data: {
-    token: string;
-    user: {
-      id: string;
-      email: string;
-    };
-  };
-  message: string;
-  errors?: Record<string, string>;
-}
-
-export interface AuthError {
-  response?: {
-    data?: {
-      message?: string;
-    };
-  };
-}
-
+import {
+  ForgetPasswordPayload,
+  ResendOtpPayload,
+  ResetPasswordPayload,
+  SigninPayload,
+  SignupPayload,
+  VerifyOtpPayload,
+} from "../../types/auth";
 export const signup = async (
-  formData: signupPayload,
-): Promise<SignupResponse> => {
-  const res = await axiosInstance.post<SignupResponse>("/signup", formData);
+  payload: SignupPayload,
+): Promise<SignupPayload> => {
+  const res = await axiosInstance.post<SignupPayload>(
+    "/auth/register",
+    payload,
+  );
   return res.data;
 };
 
 export const signin = async (
-  payload: signinPayload,
-): Promise<SigninResponse> => {
-  const res = await axiosInstance.post<SigninResponse>("/signin", payload);
+  payload: SigninPayload,
+): Promise<SigninPayload> => {
+  const res = await axiosInstance.post<SigninPayload>("/auth/login", payload);
   return res.data;
 };
 
-export const verifyOtp = async (payload: verifyOtpPayload) => {
-  const res = await axiosInstance.post("/verifyOtp", payload);
+export const verifyOtp = async (
+  payload: VerifyOtpPayload,
+): Promise<VerifyOtpPayload> => {
+  const res = await axiosInstance.post<VerifyOtpPayload>(
+    "/auth/verify-register-otp",
+    payload,
+  );
   return res.data;
 };
 
-export const resendOtp = async (payload: resendOtpPayload) => {
-  const res = await axiosInstance.post("/resendOtp", payload);
+export const resendOtp = async (
+  payload: ResendOtpPayload,
+): Promise<ResendOtpPayload> => {
+  const res = await axiosInstance.post<ResendOtpPayload>(
+    "/auth/resend-otp",
+    payload,
+  );
+  return res.data;
+};
+
+export const forgetPassword = async (
+  payload: ForgetPasswordPayload,
+): Promise<ForgetPasswordPayload> => {
+  const res = await axiosInstance.post<ForgetPasswordPayload>(
+    "/auth/forget-password",
+    payload,
+  );
+  return res.data;
+};
+
+export const resetPassword = async (
+  payload: ResetPasswordPayload,
+): Promise<ResetPasswordPayload> => {
+  const res = await axiosInstance.post<ResetPasswordPayload>(
+    "/auth/reset-password",
+    payload,
+  );
   return res.data;
 };

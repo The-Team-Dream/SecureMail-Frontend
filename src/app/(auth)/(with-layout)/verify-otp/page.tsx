@@ -7,20 +7,24 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
-import useCountDown from "@/hooks/useCountDown";
-import Logo from "@/_components/Logo";
+import useTimer from "@/hooks/useTimer";
+import Logo from "@/_components/shared/Logo";
 import { useResendOtp, useVerifyOtp } from "@/APIs/hooks/useAuth";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Text } from "@/_components/shared/Text";
 
 export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
-  const { timeLeft, resend, resetTimer, formattedTime } = useCountDown(30);
+  const { timeLeft, resend, resetTimer, formattedTime } = useTimer(30);
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") ?? "";
   const router = useRouter();
   const { mutate, isPending } = useVerifyOtp({
     onSuccess: () => {
       router.push("/");
       toast.success("Your email has been verified");
+      console.log(otp);
     },
     onError: () => {
       toast.error("Invalid Otp");
@@ -36,14 +40,16 @@ export default function VerifyOtp() {
     },
   });
   const handleOtpChange = (value: string) => {
-    setOtp(value);
+    const otpNumbers = value.replace(/[^0-9]/g, "");
+    setOtp(otpNumbers);
   };
 
   const handleVerify = () => {
+    router.push("/");
     if (otp.length === 6) {
-      // mutate({ email, otp });
+      mutate({ email, otp });
     } else {
-      alert("Otp must be 6 digits");
+      toast.error("Otp must be 6 digits");
     }
   };
 
@@ -60,24 +66,30 @@ export default function VerifyOtp() {
       <div className="absolute top-12 left-1/2 -translate-x-1/2">
         <Logo />
       </div>
-      <div className="max-w-sm lg:max-w-lg w-full mx-auto flex items-center justify-center min-h-screen">
-        {/* Container */}
+      {/* Container */}
+      <div className="max-w-sm lg:max-w-lg w-full mx-auto flex items-center justify-center min-h-screen -my-4!">
         <div className="flex flex-col text-center gap-8">
           <div className="space-y-8">
-            <h3 className="text-2xl font-semibold text-primary">
+            <Text as={"h1"} font={"semiBold"} size={"32"}>
               Verification code
-            </h3>
-            <p className="text-textSecondary text-sm">
+            </Text>
+
+            <Text color={"primary-500"} font={"medium"}>
               Enter OTP sent to mobile number{" "}
-              <span className="font-medium">05xxx12345</span> and email address{" "}
-              <span className="font-medium">email@email.com</span> to login the
-              portal
-            </p>
+              <span className="font-semibold">05xxx12345</span> and email
+              address <span className="font-semibold">email@email.com</span> to
+              login the portal
+            </Text>
           </div>
 
           {/* OTP Input */}
           <div>
-            <InputOTP maxLength={6} onChange={handleOtpChange} value={otp}>
+            <InputOTP
+              maxLength={6}
+              onChange={handleOtpChange}
+              value={otp}
+              inputMode="numeric"
+            >
               <InputOTPGroup className="flex items-center justify-between max-w-95 mx-auto w-full">
                 {[0, 1, 2, 3, 4, 5].map((index) => (
                   <InputOTPSlot
@@ -85,7 +97,7 @@ export default function VerifyOtp() {
                     index={index}
                     data-testid="otp-slot"
                     className={`h-14 w-12 rounded-md text-3xl text-[#333] font-medium border transition-colors ${
-                      otp[index] ? "border-inputFocus" : "border-borderPrimary"
+                      otp[index] ? "border-primary-400" : "border-primary-100"
                     }`}
                   />
                 ))}
@@ -101,7 +113,7 @@ export default function VerifyOtp() {
               className={`${
                 !resend
                   ? "opacity-50 cursor-not-allowed"
-                  : " opacity-100 hover:underline cursor-pointer"
+                  : " text-primary hover:underline cursor-pointer"
               }`}
             >
               {timeLeft > 0 ? `Resend in ${formattedTime}` : "Resend now"}
@@ -111,10 +123,10 @@ export default function VerifyOtp() {
           <Button
             onClick={handleVerify}
             disabled={isPending}
-            className="group flex items-center gap-2"
+            className="group"
             size={"lg"}
           >
-            <span>{isPending ? "Sending..." : "Continue"}</span>
+            <span>{isPending ? "Verifying..." : "Verify Now"}</span>
 
             {!isPending && (
               <MoveRight className="w-4 h-4 text-white group-hover:translate-x-2 transition duration-300" />
