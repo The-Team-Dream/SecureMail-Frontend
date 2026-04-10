@@ -1,32 +1,98 @@
-# dependencies
-/node_modules
+# =========================
+# Node.js
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# next.js
-/.next
-/out
+# =========================
+# Next.js
+# =========================
+.next/
+out/
+build/
 
 # production
-/build
+/dist
 
-# env files
+# =========================
+# Environment variables
+# =========================
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# =========================
+# Logs
+# =========================
+logs
+*.log
 
-# misc
+# =========================
+# OS files
+# =========================
 .DS_Store
-*.pem
+Thumbs.db
 
-# vercel
-.vercel
+# =========================
+# VS Code
+# =========================
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
 
-# typescript
+# =========================
+# IDEs
+# =========================
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# =========================
+# Build & cache
+# =========================
+.cache/
+.parcel-cache/
+.turbo/
+coverage/
+.cache-loader/
+
+# =========================
+# TypeScript
+# =========================
 *.tsbuildinfo
+
+# =========================
+# Package managers
+# =========================
+.pnpm-store/
+.yarn/
+.yarn-cache/
+.yarnrc.yml
+
+# =========================
+# Misc
+# =========================
+*.pem
+*.key
+*.crt
+
+# =========================
+# Debug files
+# =========================
+*.pid
+*.seed
+*.pid.lock
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
