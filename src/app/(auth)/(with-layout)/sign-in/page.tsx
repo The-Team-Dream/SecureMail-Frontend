@@ -115,7 +115,7 @@ export default function Signin() {
             className="text-primary font-medium hover:underline"
             href={"/sign-up"}
           >
-            Registerds
+            Register
           </Link>
         </div>
       </div>
