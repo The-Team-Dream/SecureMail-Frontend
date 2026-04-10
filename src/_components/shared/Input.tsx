@@ -63,7 +63,7 @@ export const Input: React.FC<Input> = ({
       {label && (
         <label className="block text-sm text-primary-400 mb-1">
           {label}
-          {required && <span className="text-error-500 ml-1">**</span>}
+          {required && <span className="text-error-500 ml-1">*</span>}
         </label>
       )}
       <div className="relative w-full">
