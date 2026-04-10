@@ -1,5 +1,5 @@
-import Dashboard from "./(dashboard)/page";
+import Mailbox from "./(dashboard)/mailbox/page";
 
 export default async function Home() {
-  return <Dashboard />;
+  return <Mailbox />;
 }
