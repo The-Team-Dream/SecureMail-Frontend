@@ -8,20 +8,23 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
 import useTimer from "@/hooks/useTimer";
-import Logo from "@/_components/Logo";
+import Logo from "@/_components/shared/Logo";
 import { useResendOtp, useVerifyOtp } from "@/APIs/hooks/useAuth";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { Text } from "@/_components/Text";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Text } from "@/_components/shared/Text";
 
 export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
   const { timeLeft, resend, resetTimer, formattedTime } = useTimer(30);
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") ?? "";
   const router = useRouter();
   const { mutate, isPending } = useVerifyOtp({
     onSuccess: () => {
       router.push("/");
       toast.success("Your email has been verified");
+      console.log(otp);
     },
     onError: () => {
       toast.error("Invalid Otp");
@@ -42,9 +45,9 @@ export default function VerifyOtp() {
   };
 
   const handleVerify = () => {
-    router.push("/sign-in");
+    router.push("/");
     if (otp.length === 6) {
-      // mutate({ email, otp });
+      mutate({ email, otp });
     } else {
       toast.error("Otp must be 6 digits");
     }
@@ -67,15 +70,15 @@ export default function VerifyOtp() {
       <div className="max-w-sm lg:max-w-lg w-full mx-auto flex items-center justify-center min-h-screen -my-4!">
         <div className="flex flex-col text-center gap-8">
           <div className="space-y-8">
-            <Text as={"h1"} font={"semiBold"} color={"primary"} size={"2xl"}>
+            <Text as={"h1"} font={"semiBold"} size={"32"}>
               Verification code
             </Text>
 
-            <Text color={"secondary"} font={"medium"}>
+            <Text color={"primary-500"} font={"medium"}>
               Enter OTP sent to mobile number{" "}
-              <span className="font-medium">05xxx12345</span> and email address{" "}
-              <span className="font-medium">email@email.com</span> to login the
-              portal
+              <span className="font-semibold">05xxx12345</span> and email
+              address <span className="font-semibold">email@email.com</span> to
+              login the portal
             </Text>
           </div>
 
@@ -94,7 +97,7 @@ export default function VerifyOtp() {
                     index={index}
                     data-testid="otp-slot"
                     className={`h-14 w-12 rounded-md text-3xl text-[#333] font-medium border transition-colors ${
-                      otp[index] ? "border-inputFocus" : "border-borderPrimary"
+                      otp[index] ? "border-primary-400" : "border-primary-100"
                     }`}
                   />
                 ))}
@@ -110,7 +113,7 @@ export default function VerifyOtp() {
               className={`${
                 !resend
                   ? "opacity-50 cursor-not-allowed"
-                  : " opacity-100 hover:underline cursor-pointer"
+                  : " text-primary hover:underline cursor-pointer"
               }`}
             >
               {timeLeft > 0 ? `Resend in ${formattedTime}` : "Resend now"}

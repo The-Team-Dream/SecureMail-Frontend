@@ -1,28 +1,30 @@
 "use client";
 import Cookies from "js-cookie";
-import { useOauth, useSignup } from "@/APIs/hooks/useAuth";
+import { useSignup } from "@/APIs/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { CircleAlert, LockIcon, Mail, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { errorVariants, Input } from "@/_components/Input";
-import Logo from "@/_components/Logo";
-import DOMPurify from "dompurify";
-import { ISignUp, signupSchema } from "@/schemas/auth";
+import { errorVariants, Input } from "@/_components/shared/Input";
+import Logo from "@/_components/shared/Logo";
+import { ISignUp, signupSchema } from "@/schemas/auth/signup";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { Text } from "@/_components/Text";
-import SocialAuthWrapper from "@/_components/SocialAuthWrapper";
+import { Text } from "@/_components/shared/Text";
+import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
 export default function Signup() {
   const {
-    register,
     handleSubmit,
-    reset,
+    register,
     formState: { errors },
+    clearErrors,
+    reset,
+    trigger,
   } = useForm<ISignUp>({
     mode: "onBlur",
+    reValidateMode: "onChange",
     resolver: zodResolver(signupSchema),
   });
   const router = useRouter();
@@ -35,7 +37,7 @@ export default function Signup() {
         Cookies.set("token", token, { path: "/", expires: 1 });
       }
       toast.success("Signed up successfully");
-      router.refresh();
+      reset();
       router.push("/verify-otp");
     },
     // onError: (err) => {
@@ -44,17 +46,9 @@ export default function Signup() {
   });
 
   const onSubmit: SubmitHandler<ISignUp> = (data) => {
+    console.log(data);
+    signupMutation.mutate(data);
     router.push("/verify-otp");
-    const form = {
-      fullName: DOMPurify.sanitize(data.fullName),
-      email: DOMPurify.sanitize(data.email),
-      password: DOMPurify.sanitize(data.password),
-      confirmPassword: DOMPurify.sanitize(data.confirmPassword),
-      acceptTerms: data.terms,
-    };
-    console.log(form);
-    signupMutation.mutate(form);
-    reset();
   };
 
   return (
@@ -64,52 +58,81 @@ export default function Signup() {
           <Logo />
         </div>
         <div className="space-y-2">
-          <Text as={"h1"} color={"primary"} size={"32"}>
+          <Text as={"h1"} size={"32"}>
             Hello, Welcome back
           </Text>
-          <Text color={"secondary"} className="text-sm xl:text-base">
+          <Text color={"primary-500"} className="text-sm xl:text-base">
             Enter your email address and password to log in.
           </Text>
         </div>
         {/* Form Input Fields */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {" "}
           <Input
             type="text"
             placeholder="Full Name"
             leftIcon={<User />}
-            {...register("fullName")}
+            {...register("fullName", {
+              onChange: () => {
+                if (errors.fullName) {
+                  clearErrors("fullName");
+                }
+                trigger("confirmPassword");
+              },
+            })}
             error={errors.fullName?.message}
           />
           <Input
             type="email"
             placeholder="Email Address"
             leftIcon={<Mail />}
-            {...register("email")}
+            {...register("email", {
+              onChange: () => {
+                if (errors.email) {
+                  clearErrors("email");
+                }
+              },
+            })}
             error={errors.email?.message}
           />
           <Input
+            {...register("password", {
+              onChange: () => {
+                if (errors.password) {
+                  clearErrors("password");
+                }
+              },
+            })}
             type="password"
-            isPassword
             placeholder="Password"
             leftIcon={<LockIcon />}
-            {...register("password")}
-            error={errors.password?.message}
+            error={errors?.password?.message}
           />
           <Input
+            {...register("confirmPassword", {
+              onChange: () => {
+                if (errors.confirmPassword) {
+                  clearErrors("confirmPassword");
+                }
+              },
+            })}
             type="password"
-            isPassword
             placeholder="Confirm Password"
             leftIcon={<LockIcon />}
-            {...register("confirmPassword")}
-            error={errors.confirmPassword?.message}
+            error={errors?.confirmPassword?.message}
           />
+          {/* Checkbox */}
           <div className="relative">
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="terms"
-                {...register("terms")}
+                {...register("acceptTerms", {
+                  onChange: () => {
+                    if (errors.acceptTerms) {
+                      clearErrors("acceptTerms");
+                    }
+                  },
+                })}
                 className="w-4 h-4 accent-[#87BE00] focus:bg-green-500 hover:bg-green-500"
               />
               <label htmlFor="terms" className="text-primary font-medium">
@@ -120,7 +143,7 @@ export default function Signup() {
               </label>
             </div>
             <AnimatePresence>
-              {errors.terms && (
+              {errors.acceptTerms && (
                 <motion.div
                   variants={errorVariants}
                   initial="initial"
@@ -134,9 +157,9 @@ export default function Signup() {
                   className="flex items-center gap-2 text-error mt-1"
                 >
                   <CircleAlert className="w-4 h-4" />
-                  <span className="text-sm font-medium">
-                    {errors.terms.message}
-                  </span>
+                  <Text as={"span"} font={"medium"} size={"sm"} color={"error"}>
+                    {errors.acceptTerms.message}
+                  </Text>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -153,9 +176,12 @@ export default function Signup() {
         </form>
         {/* OAuth Buttons */}
         <SocialAuthWrapper />
-        <div className="text-primary text-center">
+        <div className="text-primary-600 text-center">
           Already have an account?{" "}
-          <Link className="font-medium hover:underline" href={"/sign-in"}>
+          <Link
+            className="font-medium hover:underline text-primary"
+            href={"/sign-in"}
+          >
             Login
           </Link>
         </div>

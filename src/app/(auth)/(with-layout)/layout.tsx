@@ -1,4 +1,4 @@
-import { AuthSlides } from "@/_components/AuthSlides";
+import { AuthSlides } from "@/_components/auth/AuthSlides";
 import React from "react";
 export default function AuthLayout({
   children,
@@ -6,7 +6,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen grid md:grid-cols-2 bg-bgPrimary">
+    <main className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-bgPrimary">
       {/* Form  */}
       <div className="flex flex-col items-center justify-center py-4">
         <section className="max-w-sm lg:max-w-lg w-full text-center lg:text-left">

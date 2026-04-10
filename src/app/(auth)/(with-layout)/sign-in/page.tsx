@@ -5,15 +5,14 @@ import { Button } from "@/components/ui/button";
 import { LockIcon, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Input } from "@/_components/Input";
-import Logo from "@/_components/Logo";
-import DOMPurify from "dompurify";
+import { Input } from "@/_components/shared/Input";
+import Logo from "@/_components/shared/Logo";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ISignin, signinSchema } from "@/schemas/auth";
+import { ISignin, signinSchema } from "@/schemas/auth/signin";
 import toast from "react-hot-toast";
-import { Text } from "@/_components/Text";
-import SocialAuthWrapper from "@/_components/SocialAuthWrapper";
+import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
+import { Text } from "@/_components/shared/Text";
 
 export default function Signin() {
   const {
@@ -21,8 +20,10 @@ export default function Signin() {
     register,
     reset,
     formState: { errors },
+    clearErrors,
   } = useForm<ISignin>({
     mode: "onBlur",
+    reValidateMode: "onChange",
     resolver: zodResolver(signinSchema),
   });
 
@@ -34,7 +35,7 @@ export default function Signin() {
         Cookies.set("token", token, { path: "/", expires: 1 });
       }
       toast.success("Signed in successfully");
-      router.refresh();
+      reset();
       router.push("/");
     },
     // onError: (err) => {
@@ -42,15 +43,10 @@ export default function Signin() {
     // },
   });
 
-  const onSubmit: SubmitHandler<ISignin> = async (data) => {
+  const onSubmit: SubmitHandler<ISignin> = (data) => {
+    signinMutation.mutate(data);
+    console.log(data);
     router.push("/");
-    const sanitizedForm = {
-      email: DOMPurify.sanitize(data.email),
-      password: DOMPurify.sanitize(data.password),
-    };
-    signinMutation.mutate(sanitizedForm);
-    console.log(sanitizedForm);
-    reset();
   };
 
   return (
@@ -60,28 +56,38 @@ export default function Signin() {
           <Logo />
         </div>
         <div className="space-y-2">
-          <Text as={"h1"} color={"primary"} size={"32"}>
+          <Text as={"h1"} size={"32"}>
             Hello, Welcome back
           </Text>
-          <Text color={"secondary"} className="text-sm lg:text-base">
+          <Text color={"primary-500"} className="text-sm lg:text-base">
             Enter your email address and password to log in.
           </Text>
         </div>
         {/* Form Input Fields */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {" "}
           <Input
-            {...register("email")}
+            {...register("email", {
+              onChange: () => {
+                if (errors.email) {
+                  clearErrors("email");
+                }
+              },
+            })}
             type="email"
             placeholder="Email Address"
             leftIcon={<Mail />}
             error={errors?.email?.message}
           />
           <Input
-            {...register("password")}
+            {...register("password", {
+              onChange: () => {
+                if (errors.password) {
+                  clearErrors("password");
+                }
+              },
+            })}
             type="password"
             placeholder="Password"
-            isPassword
             leftIcon={<LockIcon />}
             error={errors?.password?.message}
           />
@@ -103,7 +109,7 @@ export default function Signin() {
         </form>
         {/* OAuth Buttons */}
         <SocialAuthWrapper />
-        <div className="text-primary text-center">
+        <div className="text-primary-600 text-center">
           Don&apos;t have an account?{" "}
           <Link
             className="text-primary font-medium hover:underline"
