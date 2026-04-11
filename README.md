@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SecureMail Frontend
 
-## Getting Started
+Next.js (App Router) web client for SecureMail: sign-in, mail experience, and integration with the SecureMail REST API.
 
-First, run the development server:
+## Tech stack
+
+- **Next.js** 16 (React 19)
+- **pnpm** (enforced via `preinstall`)
+- **TanStack Query**, **Axios**, **Tailwind CSS**, **Zod**, etc.
+
+## Ports
+
+| Mode | Default URL |
+|------|-------------|
+| Dev (`pnpm dev`) | http://localhost:3000 (Next default; use if backend is elsewhere) |
+| Docker Compose (repo root) | http://localhost:3001 (mapped to container port 3000) |
+
+> In this monorepo, **backend** usually occupies **3000** locally; run the frontend on another port if needed: `pnpm dev -- -p 3001`.
+
+## Environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_API_URL` | **Public** REST base URL the browser calls (e.g. `http://localhost:3000`) |
+
+Must be set at **build time** for production builds (baked into the client bundle).
+
+## API documentation (for this team)
+
+The REST contract is owned by **SecureMail-Backend**:
+
+| Resource | URL (when backend runs locally) |
+|----------|----------------------------------|
+| Swagger UI | http://localhost:3000/api/docs |
+| OpenAPI JSON | http://localhost:3000/api/docs-json |
+
+Use `api/docs-json` with **openapi-typescript**, **orval**, or similar to generate typed clients aligned with the backend.
+
+## Run locally (step-by-step)
+
+1. Install **pnpm**.
+2. From `SecureMail-Frontend`:
+   ```bash
+   pnpm install
+   ```
+3. Create `.env.local`:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:3000
+   ```
+4. Start dev server:
+   ```bash
+   pnpm dev
+   ```
+5. Open the URL printed in the terminal (adjust port if 3000 is taken by the API).
+
+## Run with Docker
+
+From **monorepo root**:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker compose up --build frontend
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Build arg `NEXT_PUBLIC_API_URL` defaults to `http://localhost:3000` (browser on the host calls the published backend port).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Full stack: see root [README.md](../README.md).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Troubleshooting
 
-## Learn More
+| Issue | What to check |
+|-------|----------------|
+| API calls fail / CORS | Backend `FRONTEND_URL` must match your site origin; `NEXT_PUBLIC_API_URL` must point to the API the **browser** can reach. |
+| Wrong API in production | Rebuild image after changing `NEXT_PUBLIC_API_URL` (Next bakes public env at build time). |
+| `only-allow pnpm` | Use `pnpm`, not `npm install`. |
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | Purpose |
+|---------|---------|
+| `pnpm dev` | Development server |
+| `pnpm build` | Production build |
+| `pnpm start` | Run production server (after `build`) |
+| `pnpm lint` | ESLint |

@@ -4,7 +4,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
 import useTimer from "@/hooks/useTimer";
@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Text } from "@/_components/shared/Text";
 
-export default function VerifyOtp() {
+function VerifyOtpContent() {
   const [otp, setOtp] = useState("");
   const { timeLeft, resend, resetTimer, formattedTime } = useTimer(30);
   const searchParams = useSearchParams();
@@ -135,5 +135,19 @@ export default function VerifyOtp() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyOtp() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          Loading…
+        </div>
+      }
+    >
+      <VerifyOtpContent />
+    </Suspense>
   );
 }
