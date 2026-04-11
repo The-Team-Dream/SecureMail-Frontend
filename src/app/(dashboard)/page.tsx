@@ -1,7 +1,6 @@
-import React from "react";
-
+import { redirect } from "next/navigation";
 const Dashboard = () => {
-  return <div>dashboard Page</div>;
+  redirect("/mailbox");
 };
 
 export default Dashboard;
