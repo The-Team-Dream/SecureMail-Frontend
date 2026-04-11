@@ -59,6 +59,7 @@ export const Sidebar = () => {
         </button>
       </div>
 
+      {/* Add Email Button */}
       <Button
         size={"lg"}
         className={cn(
@@ -128,7 +129,7 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      {/* Theme Switcher */}
+      {/* Theme Toggler */}
       <hr className="bg-primary-100 mb-4 -m-2" />
       <div
         className={cn(
@@ -157,14 +158,20 @@ export const Sidebar = () => {
 
             backgroundColor: activeTheme === "light" ? "#ffffff" : "#000000",
           }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          transition={{
+            type: "spring",
+            stiffness: 600,
+            damping: 30,
+          }}
         />
 
         <button
           onClick={() => setActiveTheme("light")}
           className={cn(
-            "relative z-10 flex items-center justify-center gap-2 flex-1 h-10 rounded-lg cursor-pointer transition-colors duration-300 text-sm font-medium",
-            activeTheme === "light" ? "text-primary" : "text-primary-400",
+            "relative z-10 flex items-center justify-center gap-2 flex-1 h-10 rounded-lg cursor-pointer transition-colors duration-300 text-sm",
+            activeTheme === "light"
+              ? "text-primary font-medium"
+              : "text-primary-400",
           )}
         >
           <Sun size={18} />
@@ -174,7 +181,7 @@ export const Sidebar = () => {
         <button
           onClick={() => setActiveTheme("dark")}
           className={cn(
-            "relative z-10 flex items-center justify-center gap-2 flex-1 h-10 rounded-lg cursor-pointer transition-colors duration-300 text-sm font-medium",
+            "relative z-10 flex items-center justify-center gap-2 flex-1 h-10 rounded-lg cursor-pointer transition-colors duration-300 text-sm",
             activeTheme === "dark" ? "text-white" : "text-primary-600",
           )}
         >
