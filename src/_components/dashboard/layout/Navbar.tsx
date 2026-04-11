@@ -1,6 +1,6 @@
 import { Bell } from "lucide-react";
-import Logo from "../shared/Logo";
-import { Text } from "../shared/Text";
+import Logo from "../../shared/Logo";
+import { Text } from "../../shared/Text";
 
 export const Navbar = () => {
   return (

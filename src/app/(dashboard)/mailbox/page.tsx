@@ -1,7 +1,5 @@
-import React from "react";
-
 const Mailbox = () => {
-  return <div>Mailbox</div>;
+  return <div></div>;
 };
 
 export default Mailbox;
