@@ -33,12 +33,12 @@ export const Sidebar = () => {
     <aside
       className={cn(
         "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden",
-        "flex flex-col p-4 border-r border-primary-100 bg-[#F8FAFD] transition-all duration-300",
+        "flex flex-col p-2 border-r border-primary-100 bg-[#F8FAFD] transition-all duration-300",
         "h-full overflow-y-auto",
         isCollapsed ? "w-20" : "w-64",
       )}
     >
-      {/* Header الـ Navigation */}
+      {/* Heading */}
       <div
         className={cn(
           "flex items-center mb-8 px-2",
@@ -56,14 +56,14 @@ export const Sidebar = () => {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="rounded-full"
         >
-          <Menu className="w-5 h-5 cursor-pointer text-primary  hover:bg-primary-100  hover:rounded-full transition-transform" />
+          <Menu className="w-5 h-5 cursor-pointer text-primary  hover:bg-primary-100 hover:rounded-full transition-transform" />
         </Button>
       </div>
 
       <Button
         size={"lg"}
         className={cn(
-          "bg-[#BBFF14] hover:bg-[#dcf79a] transition-all overflow-hidden",
+          "bg-[#BBFF14] hover:bg-[#c8f557] transition-all overflow-hidden",
           isCollapsed ? "p-0 h-12 w-12 mx-auto" : "px-4",
         )}
       >
@@ -77,6 +77,7 @@ export const Sidebar = () => {
         )}
       </Button>
 
+      {/* Nav Links */}
       <nav className="space-y-2 flex-1 mt-8">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -86,8 +87,10 @@ export const Sidebar = () => {
               href={item.href}
               title={isCollapsed ? item.name : ""}
               className={cn(
-                "flex items-center px-3 py-2 rounded-sm transition-all group",
-                isCollapsed ? "justify-center" : "justify-between",
+                "flex items-center rounded-sm transition-all group mx-auto",
+                isCollapsed
+                  ? "justify-center w-10 h-10"
+                  : "justify-between px-3 py-2",
                 isActive
                   ? "bg-primary-100 text-primary"
                   : "text-primary-600 hover:text-primary hover:bg-primary-100",
@@ -99,7 +102,7 @@ export const Sidebar = () => {
                     "w-5 h-5 min-w-5 transition-all",
                     isActive
                       ? "text-primary"
-                      : "text-primary-600 group-hover:text-gray-600",
+                      : "text-primary-600 group-hover:text-primary",
                   )}
                   strokeWidth={isActive ? 2.5 : 2}
                 />
@@ -131,7 +134,7 @@ export const Sidebar = () => {
       <div
         className={cn(
           "w-full p-1 rounded-lg bg-primary-100 flex flex-col gap-2 transition-all",
-          isCollapsed ? "h-26" : "h-12 flex-row",
+          isCollapsed ? "h-22" : "h-12 flex-row",
         )}
       >
         <button
@@ -150,7 +153,7 @@ export const Sidebar = () => {
         <button
           onClick={() => setActiveTheme("dark")}
           className={cn(
-            "flex items-center justify-center gap-2 flex-1 h-10 rounded-lg transition-all cursor-pointer text-sm font-medium hover:bg-background ",
+            "flex items-center justify-center gap-2 flex-1 h-10 rounded-lg transition-all cursor-pointer text-sm font-medium hover:bg-background",
             activeTheme === "dark"
               ? "bg-background text-primary shadow-sm"
               : "text-primary-600",
