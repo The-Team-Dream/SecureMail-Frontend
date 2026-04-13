@@ -110,65 +110,66 @@
     --primary-50: #fafafa;
     --primary-100: #dfdfdf;
     --primary-200: #e5e5e5;
-    --primary-300: ;
+    --primary-300: #a3a3a3;
     --primary-400: #9f9f9f;
     --primary-500: #8a8a8a;
     --primary-600: #747474;
     --primary-700: #5f5f5f;
     --primary-800: #494949;
-    --primary-900: ;
+    --primary-900: #1a1a1a;
+    --primary-950: #0a0a0a;
 
     /* Secondary */
-    --secondary-50: ;
-    --secondary-200: ;
+    --secondary-50: #f8ffec;
     --secondary-100: #edffc0;
-    --secondary-300: ;
-    --secondary-400: ;
+    --secondary-200: #d4f860;
+    --secondary-300: #c4f020;
+    --secondary-400: #bbff14;
     --secondary-500: #bbff14;
     --secondary-600: #a5e900;
     --secondary-700: #87be00;
     --secondary-800: #689300;
     --secondary-900: #4a6800;
-    --secondary-950: ;
+    --secondary-950: #1a2600;
 
     /* Warning */
-    --warning-50: ;
-    --warning-100: ;
-    --warning-200: ;
-    --warning-300: ;
-    --warning-400: ;
-    --warning-500: ;
-    --warning-600: ;
-    --warning-700: ;
-    --warning-800: ;
-    --warning-900: ;
-    --warning-950: ;
+    --warning-50: #fefaed;
+    --warning-100: #fdf0d3;
+    --warning-200: #fbe1a5;
+    --warning-300: #f9cc6a;
+    --warning-400: #f5b030;
+    --warning-500: #e09000;
+    --warning-600: #b37000;
+    --warning-700: #855200;
+    --warning-800: #5c3800;
+    --warning-900: #3d2500;
+    --warning-950: #1e1200;
 
     /* Info */
-    --info-50: ;
-    --info-100: ;
-    --info-200: ;
-    --info-300: ;
-    --info-400: ;
-    --info-500: ;
-    --info-600: ;
+    --info-50: #eaf7fe;
+    --info-100: #d0eefb;
+    --info-200: #a3dcfa;
+    --info-300: #65c6f6;
+    --info-400: #28aaee;
+    --info-500: #0b8fd4;
+    --info-600: #0369b2;
     --info-700: #0280b6;
-    --info-800: ;
-    --info-900: ;
-    --info-950: ;
+    --info-800: #01345e;
+    --info-900: #012244;
+    --info-950: #001529;
 
     /* Error */
-    --error-50: ;
-    --error-100: ;
-    --error-200: ;
-    --error-300: ;
-    --error-400: ;
+    --error-50: #fff0f0;
+    --error-100: #ffd5d7;
+    --error-200: #ffadb1;
+    --error-300: #ff7880;
+    --error-400: #ff3b44;
     --error-500: #fd0611;
     --error-600: #e7020c;
     --error-700: #bc020a;
-    --error-800: ;
-    --error-900: ;
-    --error-950: ;
+    --error-800: #920008;
+    --error-900: #6b0005;
+    --error-950: #3a0003;
 
     /* Main Pallete */
     --bg-grey: #ebe6e6;
