@@ -78,7 +78,7 @@ export const Sidebar = () => {
       </Button>
 
       {/* Nav Links */}
-      <nav className="space-y-2 flex-1 mt-8">
+      <nav className="space-y-2 flex-1 mt-8 relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -87,16 +87,28 @@ export const Sidebar = () => {
               href={item.href}
               title={isCollapsed ? item.name : ""}
               className={cn(
-                "flex items-center rounded-sm transition-all group mx-auto",
+                "flex items-center rounded-sm transition-all group mx-auto relative",
                 isCollapsed
                   ? "justify-center w-10 h-10"
                   : "justify-between px-3 py-2",
                 isActive
-                  ? "bg-primary-100 text-primary"
+                  ? "text-primary"
                   : "text-primary-600 hover:text-primary hover:bg-primary-100",
               )}
             >
-              <div className="flex items-center gap-3">
+              {isActive && (
+                <motion.div
+                  layoutId="activeNavIndicator"
+                  className="absolute inset-0 bg-primary-100 rounded-sm -z-10"
+                  transition={{
+                    type: "spring",
+                    stiffness: 600,
+                    damping: 20,
+                  }}
+                />
+              )}
+
+              <div className="flex items-center gap-3 ">
                 <item.icon
                   className={cn(
                     "w-5 h-5 min-w-5 transition-all",
