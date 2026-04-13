@@ -36,11 +36,6 @@ const Settings = () => {
           <Trash2 className="w-4 h-4 text-error-500" />
         </Button>
       </div>
-      <div className="mt-6 flex justify-end">
-        <Button size={"lg"} className="w-max">
-          Save & Update <ArrowRight className="w-4 h-4" />
-        </Button>
-      </div>
     </Container>
   );
 };
