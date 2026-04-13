@@ -1,10 +1,16 @@
 export interface SignupPayload {
-  fullName: string;
   email: string;
   password: string;
   confirmPassword: string;
-  acceptTerms: boolean;
+  username: string;
 }
+
+export interface SignupResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface SigninPayload {
   email: string;
   password: string;
