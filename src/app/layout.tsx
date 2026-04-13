@@ -5,6 +5,7 @@ import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
 import { CheckCheckIcon, X } from "lucide-react";
+
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],

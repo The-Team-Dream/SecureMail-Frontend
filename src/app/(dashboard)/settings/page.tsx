@@ -1,7 +1,8 @@
+import Container from "@/_components/shared/Container";
 import React from "react";
 
 const Settings = () => {
-  return <div>Settings</div>;
+  return <Container>Settings</Container>;
 };
 
 export default Settings;

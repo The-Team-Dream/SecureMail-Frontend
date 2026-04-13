@@ -16,6 +16,7 @@ import { usePathname } from "next/navigation";
 import { Text } from "../../shared/Text";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 const navItems = [
   { name: "Mailbox", icon: Mail, href: "/mailbox" },
@@ -33,12 +34,12 @@ export const Sidebar = () => {
     <aside
       className={cn(
         "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden",
-        "flex flex-col p-4 border-r border-primary-100 bg-[#F8FAFD] transition-all duration-300",
+        "flex flex-col p-2 border-r border-primary-100 bg-[#F8FAFD] transition-all duration-300",
         "h-full overflow-y-auto",
         isCollapsed ? "w-20" : "w-64",
       )}
     >
-      {/* Header الـ Navigation */}
+      {/* Heading */}
       <div
         className={cn(
           "flex items-center mb-8 px-2",
@@ -50,20 +51,19 @@ export const Sidebar = () => {
             Navigation
           </Text>
         )}
-        <Button
-          variant={"ghost"}
-          size={"icon"}
+        <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="rounded-full"
+          className="rounded-full p-2 hover:bg-primary-100 cursor-pointer transition-transform"
         >
-          <Menu className="w-5 h-5 cursor-pointer text-primary  hover:bg-primary-100  hover:rounded-full transition-transform" />
-        </Button>
+          <Menu className="w-5 h-5 text-primary" />
+        </button>
       </div>
 
+      {/* Add Email Button */}
       <Button
         size={"lg"}
         className={cn(
-          "bg-[#BBFF14] hover:bg-[#dcf79a] transition-all overflow-hidden",
+          "bg-[#BBFF14] hover:bg-[#c8f557] transition-all overflow-hidden",
           isCollapsed ? "p-0 h-12 w-12 mx-auto" : "px-4",
         )}
       >
@@ -77,7 +77,8 @@ export const Sidebar = () => {
         )}
       </Button>
 
-      <nav className="space-y-2 flex-1 mt-8">
+      {/* Nav Links */}
+      <nav className="space-y-2 flex-1 mt-8 relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -86,20 +87,34 @@ export const Sidebar = () => {
               href={item.href}
               title={isCollapsed ? item.name : ""}
               className={cn(
-                "flex items-center px-3 py-2 rounded-sm transition-all group",
-                isCollapsed ? "justify-center" : "justify-between",
+                "flex items-center rounded-sm transition-all group mx-auto relative",
+                isCollapsed
+                  ? "justify-center w-10 h-10"
+                  : "justify-between px-3 py-2",
                 isActive
-                  ? "bg-primary-100 text-primary"
+                  ? "text-primary"
                   : "text-primary-600 hover:text-primary hover:bg-primary-100",
               )}
             >
-              <div className="flex items-center gap-3">
+              {isActive && (
+                <motion.div
+                  layoutId="activeNavIndicator"
+                  className="absolute inset-0 bg-primary-100 rounded-sm -z-10"
+                  transition={{
+                    type: "spring",
+                    stiffness: 600,
+                    damping: 20,
+                  }}
+                />
+              )}
+
+              <div className="flex items-center gap-3 ">
                 <item.icon
                   className={cn(
                     "w-5 h-5 min-w-5 transition-all",
                     isActive
                       ? "text-primary"
-                      : "text-primary-600 group-hover:text-gray-600",
+                      : "text-primary-600 group-hover:text-primary",
                   )}
                   strokeWidth={isActive ? 2.5 : 2}
                 />
@@ -126,21 +141,49 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      {/* Theme Switcher */}
-      <hr className="bg-primary-100 mb-4" />
+      {/* Theme Toggler */}
+      <hr className="bg-primary-100 mb-4 -m-2" />
       <div
         className={cn(
-          "w-full p-1 rounded-lg bg-primary-100 flex flex-col gap-2 transition-all",
-          isCollapsed ? "h-26" : "h-12 flex-row",
+          "relative p-1 rounded-xl bg-primary-100 flex transition-all duration-300",
+          isCollapsed
+            ? "flex-col w-12 h-24 gap-2"
+            : "flex-row w-full h-12 gap-0",
         )}
       >
+        <motion.div
+          className="absolute rounded-lg shadow-sm"
+          initial={false}
+          animate={{
+            top: isCollapsed
+              ? activeTheme === "light"
+                ? "4px"
+                : "calc(50% + 2px)"
+              : "4px",
+            left: isCollapsed
+              ? "4px"
+              : activeTheme === "light"
+                ? "4px"
+                : "calc(50% + 2px)",
+            width: isCollapsed ? "calc(100% - 8px)" : "calc(50% - 6px)",
+            height: isCollapsed ? "calc(50% - 6px)" : "calc(100% - 8px)",
+
+            backgroundColor: activeTheme === "light" ? "#ffffff" : "#000000",
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 600,
+            damping: 30,
+          }}
+        />
+
         <button
           onClick={() => setActiveTheme("light")}
           className={cn(
-            "flex items-center justify-center gap-2 flex-1 h-10 rounded-lg transition-all cursor-pointer text-sm font-medium",
+            "relative z-10 flex items-center justify-center gap-2 flex-1 h-10 rounded-lg cursor-pointer transition-colors duration-300 text-sm",
             activeTheme === "light"
-              ? "bg-background text-primary shadow-sm"
-              : "text-primary-600",
+              ? "text-primary font-medium"
+              : "text-primary-400",
           )}
         >
           <Sun size={18} />
@@ -150,24 +193,21 @@ export const Sidebar = () => {
         <button
           onClick={() => setActiveTheme("dark")}
           className={cn(
-            "flex items-center justify-center gap-2 flex-1 h-10 rounded-lg transition-all cursor-pointer text-sm font-medium hover:bg-background ",
-            activeTheme === "dark"
-              ? "bg-background text-primary shadow-sm"
-              : "text-primary-600",
+            "relative z-10 flex items-center justify-center gap-2 flex-1 h-10 rounded-lg cursor-pointer transition-colors duration-300 text-sm",
+            activeTheme === "dark" ? "text-white" : "text-primary-600",
           )}
         >
           <Moon size={18} />
           {!isCollapsed && "Dark"}
         </button>
       </div>
-      <hr className="bg-primary-100 mt-4" />
+      <hr className="bg-primary-100 mt-4 -m-2" />
+
       <Text
         font={"medium"}
         color={"primary-600"}
-        className={cn(
-          "mt-4 px-2 pt-4 text-left",
-          isCollapsed ? "text-[10px]" : "text-sm",
-        )}
+        size={"sm"}
+        className={cn("mt-4 px-2 pt-4 text-left")}
       >
         {!isCollapsed ? "Version 1.0.1" : "V 1.0.1"}
       </Text>

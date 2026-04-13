@@ -1,8 +1,9 @@
+import Container from '@/_components/shared/Container'
 import React from 'react'
 
 const Analytics = () => {
   return (
-    <div>Analytics</div>
+    <Container>Analyticss</Container>
   )
 }
 
