@@ -3,7 +3,9 @@ import React from 'react'
 
 const Analytics = () => {
   return (
-    <Container>Analyticss</Container>
+    <Container>
+      Test
+    </Container>
   )
 }
 
