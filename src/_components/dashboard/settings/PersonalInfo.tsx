@@ -244,7 +244,11 @@ const PersonalInfo = () => {
 
               {isEditing && (
                 <div className="mt-8 flex justify-end">
-                  <Button type="submit" className="bg-primary text-background">
+                  <Button
+                    size={"sm"}
+                    onClick={() => setIsEditing(false)}
+                    className="w-max"
+                  >
                     <Save className="w-4 h-4" />
                     Save Changes
                   </Button>
