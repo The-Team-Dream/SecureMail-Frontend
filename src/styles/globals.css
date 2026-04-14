@@ -65,6 +65,7 @@
   --color-error-900: var(--error-900);
   --color-error-950: var(--error-950);
 
+  --color-ghostBlue: var(--ghost-blue);
   --color-bgGrey: var(--bg-grey);
   --color-primary: var(--primary);
   --color-primaryHover: var(--primary-hover);
@@ -172,7 +173,7 @@
     --error-900: #6b0005;
     --error-950: #3a0003;
 
-    /* Main Pallete */
+    --ghost-blue: #f8fafd;
     --bg-grey: #ebe6e6;
     --primary: #000000;
     --primary-hover: rgba(0, 0, 0, 0.8);
@@ -283,7 +284,7 @@
     --bg-grey: #1c1818;
     --primary: #ffffff;
     --primary-hover: rgba(255, 255, 255, 0.8);
-
+    --ghost-blue: #f8fafd;
     /* ShadCN Colors */
     --background: oklch(0.147 0.004 49.25);
     --foreground: #ffffff;
