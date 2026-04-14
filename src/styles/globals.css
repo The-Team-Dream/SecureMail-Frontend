@@ -102,6 +102,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-montserrat: var(--font-montserrat);
+  --font-inter: var(--font-inter);
 }
 
 @layer base {
