@@ -11,3 +11,9 @@ services:
     ports:
       - "3001:3001"
     restart: unless-stopped
+    networks:
+      - securemail_network
+
+networks:
+  securemail_network:
+    external: true

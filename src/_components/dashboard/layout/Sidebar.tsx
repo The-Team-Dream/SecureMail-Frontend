@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
-import { useTheme } from "next-themes";
 
 const navItems = [
   { name: "Mailbox", icon: Mail, href: "/mailbox" },
@@ -28,15 +27,13 @@ const navItems = [
 export const Sidebar = () => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { theme } = useTheme();
   return (
     <aside
       className={cn(
-        "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden",
-        "flex flex-col border-r border-primary-100 p-2 transition-all duration-300",
+        "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden bg-ghostBlue",
+        "flex flex-col border-r border-primary-100 py-2 px-2.5 transition-all duration-300",
         "h-full overflow-y-auto",
         isCollapsed ? "w-20" : "w-64",
-        theme === "dark" ? "bg-[#070502]" : "bg-[#F8FAFD]",
       )}
     >
       {/* Heading */}
@@ -51,19 +48,20 @@ export const Sidebar = () => {
             Navigation
           </Text>
         )}
-        <button
+        <Button
+          size={"icon-sm"}
+          variant={"ghost"}
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="cursor-pointer rounded-full p-2 transition-transform hover:bg-primary-200"
         >
           <Menu className="w-5 h-5 text-primary" />
-        </button>
+        </Button>
       </div>
 
       {/* Add Email Button */}
       <Button
         size={"lg"}
         className={cn(
-          "overflow-hidden bg-secondary-500 text-primary transition-all hover:bg-secondary-600",
+          "overflow-hidden bg-secondary-400 text-primary transition-all hover:bg-secondary-600",
           isCollapsed ? "mx-auto h-12 w-12 p-0" : "px-4",
         )}
       >

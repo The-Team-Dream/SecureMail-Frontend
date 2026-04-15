@@ -30,13 +30,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${montserrat.variable} ${inter.variable} antialiased`}>
+      <body
+        className={`${montserrat.variable} ${inter.variable} antialiased transition-colors duration-500`}
+      >
         <ReactQueryProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
-            disableTransitionOnChange
             themes={["light", "dark"]}
           >
             {children}
