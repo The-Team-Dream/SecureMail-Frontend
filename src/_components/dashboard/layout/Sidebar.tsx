@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
+import { useTheme } from "next-themes";
 
 const navItems = [
   { name: "Mailbox", icon: Mail, href: "/mailbox" },
@@ -27,14 +28,15 @@ const navItems = [
 export const Sidebar = () => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
+  const { theme } = useTheme();
   return (
     <aside
       className={cn(
         "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden",
-        "flex flex-col border-r border-sidebar-border bg-sidebar p-2 text-sidebar-foreground transition-all duration-300",
+        "flex flex-col border-r border-primary-100 p-2 transition-all duration-300",
         "h-full overflow-y-auto",
         isCollapsed ? "w-20" : "w-64",
+        theme === "dark" ? "bg-[#070502]" : "bg-[#F8FAFD]",
       )}
     >
       {/* Heading */}
@@ -45,13 +47,13 @@ export const Sidebar = () => {
         )}
       >
         {!isCollapsed && (
-          <Text size={"sm"} font={"medium"}>
+          <Text size={"sm"} font={"medium"} color={"primary-950"}>
             Navigation
           </Text>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="cursor-pointer rounded-full p-2 transition-transform hover:bg-sidebar-accent"
+          className="cursor-pointer rounded-full p-2 transition-transform hover:bg-primary-200"
         >
           <Menu className="w-5 h-5 text-primary" />
         </button>
@@ -90,14 +92,14 @@ export const Sidebar = () => {
                   ? "justify-center w-10 h-10"
                   : "justify-between px-3 py-2",
                 isActive
-                  ? "text-sidebar-primary"
-                  : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                  ? "text-primary"
+                  : "text-primary-600 hover:bg-primary-100 hover:text-primary",
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeNavIndicator"
-                  className="absolute inset-0 -z-10 rounded-sm bg-sidebar-accent"
+                  className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
                   transition={{
                     type: "spring",
                     stiffness: 600,
@@ -106,19 +108,23 @@ export const Sidebar = () => {
                 />
               )}
 
-              <div className="flex items-center gap-3 ">
+              <div className="flex items-center gap-3">
                 <item.icon
                   className={cn(
                     "w-5 h-5 min-w-5 transition-all",
                     isActive
-                      ? "text-sidebar-primary"
-                      : "text-muted-foreground group-hover:text-sidebar-foreground",
+                      ? "text-primary"
+                      : "text-primary-600 group-hover:text-primary-600",
                   )}
                   strokeWidth={isActive ? 2.5 : 2}
                 />
 
                 {!isCollapsed && (
-                  <Text as={"span"} font={isActive ? "medium" : "default"}>
+                  <Text
+                    as={"span"}
+                    font={isActive ? "medium" : "default"}
+                    color={isActive ? "primary-950" : "primary-600"}
+                  >
                     {item.name}
                   </Text>
                 )}
@@ -129,8 +135,8 @@ export const Sidebar = () => {
                   className={cn(
                     "w-4 h-4 transition-transform",
                     isActive
-                      ? "translate-x-1 text-sidebar-primary"
-                      : "text-muted-foreground",
+                      ? "translate-x-1 text-primary"
+                      : "text-primary-600",
                   )}
                 />
               )}
