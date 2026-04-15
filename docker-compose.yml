@@ -1,0 +1,19 @@
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: SecureMail-Frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+    container_name: securemail_frontend
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    networks:
+      - securemail_network
+
+networks:
+  securemail_network:
+    external: true

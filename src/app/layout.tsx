@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Montserrat, Inter } from "next/font/google";
 import "../styles/globals.css";
 import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -9,6 +9,11 @@ import { ThemeProvider } from "@/utils/providers/ThemeProvider";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
@@ -25,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${montserrat.variable} antialiased`}>
+      <body className={`${montserrat.variable} ${inter.variable} antialiased`}>
         <ReactQueryProvider>
           <ThemeProvider
             attribute="class"
