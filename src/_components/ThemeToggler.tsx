@@ -47,7 +47,7 @@ const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
       <hr className="mb-4 -m-2 h-px bg-primary-100" />
       <div
         className={cn(
-          "relative mx-auto flex rounded-xl bg-muted p-1 transition-all duration-300",
+          "relative mx-auto flex rounded-xl bg-primary-100 p-1 transition-all duration-300",
           isCollapsed
             ? "h-24 w-12 flex-col gap-2"
             : "h-12 w-full flex-row gap-0",

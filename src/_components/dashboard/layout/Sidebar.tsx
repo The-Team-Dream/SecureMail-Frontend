@@ -32,11 +32,10 @@ export const Sidebar = () => {
   return (
     <aside
       className={cn(
-        "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden",
+        "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden bg-ghostBlue",
         "flex flex-col border-r border-primary-100 p-2 transition-all duration-300",
         "h-full overflow-y-auto",
         isCollapsed ? "w-20" : "w-64",
-        theme === "dark" ? "bg-[#070502]" : "bg-[#F8FAFD]",
       )}
     >
       {/* Heading */}
