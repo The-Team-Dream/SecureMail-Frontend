@@ -68,10 +68,10 @@ export const Sidebar = () => {
         )}
       >
         <PencilLine
-          className={cn("w-6 h-6 text-primary", !isCollapsed && "mr-2")}
+          className={cn("w-6 h-6 text-black", !isCollapsed && "mr-2")}
         />
         {!isCollapsed && (
-          <Text color={"primary-950"} font={"bold"}>
+          <Text className="text-black" font={"bold"}>
             New Email
           </Text>
         )}
