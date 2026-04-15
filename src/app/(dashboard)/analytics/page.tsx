@@ -153,6 +153,7 @@ const Analytics = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
+          className="min-w-0"
         >
           <AnalyticsChart />
         </motion.div>
@@ -161,7 +162,7 @@ const Analytics = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="border border-primary-100 rounded-lg p-6"
+          className="min-w-0 border border-primary-100 rounded-lg p-6"
         >
           <Text size={"lg"} font={"medium"} className="mb-2">
             Recent Security Events
