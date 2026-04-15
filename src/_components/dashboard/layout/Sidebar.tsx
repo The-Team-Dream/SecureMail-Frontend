@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
-import { useTheme } from "next-themes";
 
 const navItems = [
   { name: "Mailbox", icon: Mail, href: "/mailbox" },
