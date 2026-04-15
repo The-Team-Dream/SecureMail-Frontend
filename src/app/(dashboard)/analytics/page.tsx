@@ -1,5 +1,5 @@
 "use client";
-import { AnalyticsChart } from "@/_components/dashboard/AnalyticsChart";
+import { AnalyticsChart } from "./AnalyticsChart";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { Badge } from "@/components/ui/badge";
@@ -100,7 +100,7 @@ const Analytics = () => {
               whileHover={{ y: -5 }}
               className="flex flex-col gap-4 rounded-xl bg-ghostBlue p-4 transition-shadow hover:shadow-md"
             >
-              <Text color="primary-500" size={'sm'} className="tracking-wide">
+              <Text color="primary-500" size={"sm"} className="tracking-wide">
                 {state.title}
               </Text>
 

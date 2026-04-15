@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Text } from "../shared/Text";
+import { Text } from "../../../_components/shared/Text";
 const chartData = [
   { month: "Jul", spam: 45, phishing: 30 },
   { month: "Aug", spam: 52, phishing: 25 },
@@ -39,10 +39,7 @@ export function AnalyticsChart() {
           config={chartConfig}
           className="h-full w-full min-h-0 min-w-0 aspect-auto"
         >
-          <LineChart
-            data={chartData}
-            margin={{ left: 12, right: 12, top: 20 }}
-          >
+          <LineChart data={chartData} margin={{ left: 12, right: 12, top: 20 }}>
             <CartesianGrid
               vertical={true}
               horizontal={false}
@@ -80,7 +77,8 @@ export function AnalyticsChart() {
           </LineChart>
         </ChartContainer>
       </div>
-      {/* <hr className="bg-primary-100 mt-2 mb-6" /> */}
+      dv
+      <hr className="bg-primary-100 mt-2 mb-4" />
       <div className="flex items-center justify-between max-w-full md:max-w-md w-full">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="w-4 h-4 rounded-full bg-secondary-800" />
