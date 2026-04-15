@@ -28,7 +28,6 @@ const navItems = [
 export const Sidebar = () => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { theme } = useTheme();
   return (
     <aside
       className={cn(
