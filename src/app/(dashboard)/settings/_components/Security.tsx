@@ -38,7 +38,6 @@ const Security = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log("Password Updated Successfully:", data);
-
       setIsEditing(false);
       reset();
     } catch (error) {
@@ -86,27 +85,38 @@ const Security = () => {
 
                 <Button
                   type="button"
-                  variant={"outline"}
+                  variant="outline"
                   size="sm"
                   disabled={isUpdating}
                   className={`gap-2 transition-all ${
                     isEditing
-                      ? "bg-error-500 text-white border-error-200 hover:bg-error-600 group"
-                      : "bg-transparent"
+                      ? "bg-error-500 text-white border-error-200 hover:bg-error-700 group"
+                      : "bg-transparent border-primary-100"
                   }`}
                   onClick={isEditing ? handleCancel : () => setIsEditing(true)}
                 >
                   {isEditing ? (
                     <>
-                      <X className="w-4 h-4 group-hover:text-white" />
-                      <span className="hidden sm:inline group-hover:text-white">
+                      <X className="w-4 h-4 text-white" />
+                      <Text
+                        as={"span"}
+                        font={"medium"}
+                        className="text-white hidden sm:inline"
+                      >
                         Cancel Editing
-                      </span>
+                      </Text>
                     </>
                   ) : (
                     <>
-                      <Pencil className="w-4 h-4" />
-                      <span className="hidden sm:inline">Edit</span>
+                      <Pencil className="w-4 h-4 text-primary-800" />
+                      <Text
+                        as={"span"}
+                        color={"primary-800"}
+                        font={"medium"}
+                        className="hidden sm:inline"
+                      >
+                        Edit
+                      </Text>
                     </>
                   )}
                 </Button>
