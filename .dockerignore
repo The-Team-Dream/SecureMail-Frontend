@@ -1,0 +1,12 @@
+node_modules
+.next
+.turbo
+out
+.env
+.env.*
+.git
+.vscode
+pnpm-debug.log
+README.md
+Dockerfile
+.dockerignore

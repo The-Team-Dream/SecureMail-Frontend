@@ -1,35 +1,48 @@
-# Build from monorepo root (uses full .next + node_modules — works on Windows hosts and Linux CI):
-#   docker build -f SecureMail-Frontend/Dockerfile -t securemail-frontend \
-#     --build-arg NEXT_PUBLIC_API_URL=http://localhost:3000 .
-
-FROM node:20-bookworm-slim AS deps
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# STAGE 1: Install all dependencies
+FROM node:22-alpine AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY SecureMail-Frontend/package.json SecureMail-Frontend/pnpm-lock.yaml ./
+# Enable pnpm
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-COPY SecureMail-Frontend .
+# STAGE 2: Build the application
+FROM node:22-alpine AS builder
+WORKDIR /app
+RUN corepack enable
 
-ARG NEXT_PUBLIC_API_URL=http://localhost:3000
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Static values for build-time (can be overridden by build-args)
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN pnpm run build
+RUN pnpm build
 
-FROM node:20-bookworm-slim AS runner
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# STAGE 3: Minimal production runtime
+FROM node:22-alpine AS runner
 WORKDIR /app
+
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-COPY --from=deps /app/public ./public
-COPY --from=deps /app/.next ./.next
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/package.json ./package.json
-COPY --from=deps /app/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-EXPOSE 3001
-ENV PORT=3001
-ENV HOSTNAME=0.0.0.0
-CMD ["pnpm", "exec", "next", "start", "-H", "0.0.0.0", "-p", "3001"]
+# Copy essential standalone files produced by next build
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# server.js is the entrypoint for Next.js standalone mode
+CMD ["node", "server.js"]
