@@ -1,4 +1,5 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import {
   forgetPassword,
   signin,
@@ -12,15 +13,21 @@ import {
   ResendOtpPayload,
   SigninPayload,
   SignupPayload,
+  SignupResponse,
   ResetPasswordPayload,
   VerifyOtpPayload,
 } from "../../types/auth";
 
-export const useSignup = (options?: {
-  onSuccess?: (res: any) => void;
-  onError?: (err: any) => void;
-}) => {
-  return useMutation<any, any, SignupPayload>({
+type SignupApiError = AxiosError<{ message?: string }>;
+
+export const useSignup = (
+  options?: UseMutationOptions<
+    SignupResponse,
+    SignupApiError,
+    SignupPayload
+  >,
+) => {
+  return useMutation<SignupResponse, SignupApiError, SignupPayload>({
     mutationFn: signup,
     ...options,
   });

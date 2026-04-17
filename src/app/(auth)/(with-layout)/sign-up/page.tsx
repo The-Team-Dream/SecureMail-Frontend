@@ -1,5 +1,4 @@
 "use client";
-import Cookies from "js-cookie";
 import { useSignup } from "@/APIs/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { CircleAlert, LockIcon, Mail, User } from "lucide-react";
@@ -21,7 +20,6 @@ export default function Signup() {
     formState: { errors },
     clearErrors,
     reset,
-    trigger,
   } = useForm<ISignUp>({
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -31,24 +29,20 @@ export default function Signup() {
 
   // Sign up API function
   const signupMutation = useSignup({
-    onSuccess: (res) => {
-      const token = res?.data.token;
-      if (token) {
-        Cookies.set("token", token, { path: "/", expires: 1 });
-      }
-      toast.success("Signed up successfully");
+    onSuccess: (res, variables) => {
+      toast.success(res.data.message);
       reset();
-      router.push("/verify-otp");
+      router.push(`/verify-otp?email=${encodeURIComponent(variables.email)}`);
     },
-    // onError: (err) => {
-    //   toast.error(err?.response?.data?.message || "Signup failed");
-    // },
+    onError: (err) => {
+      toast.error(err.response?.data?.message ?? "Signup failed");
+    },
   });
 
   const onSubmit: SubmitHandler<ISignUp> = (data) => {
-    console.log(data);
-    signupMutation.mutate(data);
-    router.push("/verify-otp");
+    const { acceptTerms, ...formData } = data;
+    void acceptTerms;
+    signupMutation.mutate(formData);
   };
 
   return (
@@ -59,27 +53,26 @@ export default function Signup() {
         </div>
         <div className="space-y-2">
           <Text as={"h1"} size={"32"}>
-            Hello, Welcome back
+            Create your account
           </Text>
           <Text color={"primary-500"} className="text-sm xl:text-base">
-            Enter your email address and password to log in.
+            Please fill the bellow data to create an account
           </Text>
         </div>
         {/* Form Input Fields */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             type="text"
-            placeholder="Full Name"
+            placeholder="Username"
             leftIcon={<User />}
-            {...register("fullName", {
+            {...register("username", {
               onChange: () => {
-                if (errors.fullName) {
-                  clearErrors("fullName");
+                if (errors.username) {
+                  clearErrors("username");
                 }
-                trigger("confirmPassword");
               },
             })}
-            error={errors.fullName?.message}
+            error={errors.username?.message}
           />
           <Input
             type="email"
@@ -120,6 +113,7 @@ export default function Signup() {
             leftIcon={<LockIcon />}
             error={errors?.confirmPassword?.message}
           />
+          
           {/* Checkbox */}
           <div className="relative">
             <div className="flex items-center gap-2">
