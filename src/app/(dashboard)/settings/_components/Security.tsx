@@ -68,11 +68,7 @@ const Security = () => {
                   type="button"
                   variant={"outline"}
                   size="sm"
-                  className={`gap-2 transition-all ${
-                    isEditing
-                      ? "bg-error-600 hover:bg-error-700 text-background border-error-600"
-                      : "bg-transparent border-primary-200"
-                  }`}
+                  className={`gap-2 transition-all ${isEditing ? "bg-error-600 hover:bg-error-700 text-background border-error-600" : "bg-transparent"}`}
                   onClick={isEditing ? handleCancel : () => setIsEditing(true)}
                 >
                   {isEditing ? (
