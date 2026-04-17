@@ -20,10 +20,12 @@ const Settings = () => {
       <hr className="bg-primary-100" />
       <div className="flex items-center justify-between mt-6">
         <div className="flex flex-col gap-2">
-          <Text color={"primary-950"} size={"3xl"} font={"medium"}>
+          <Text color={"primary-950"} size={"2xl"} font={"medium"}>
             Clear cache
           </Text>
-          <Text color={"primary-500"}>124 MB of temporary data</Text>
+          <Text color={"primary-500"} size={"sm"}>
+            124 MB of temporary data
+          </Text>
         </div>
         <Button
           size={"sm"}

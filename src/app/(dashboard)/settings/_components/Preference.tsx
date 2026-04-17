@@ -138,7 +138,11 @@ const Preference = () => {
             {/* Save Button */}
             {isEditing && (
               <div className="flex justify-end pt-4">
-                <Button size={'sm'} onClick={() => setIsEditing(false)} className="w-max">
+                <Button
+                  size={"sm"}
+                  onClick={() => setIsEditing(false)}
+                  className="w-max"
+                >
                   <Save className="w-4 h-4" /> Save Changes
                 </Button>
               </div>

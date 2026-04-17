@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
 import { CheckCheckIcon, X } from "lucide-react";
 import { ThemeProvider } from "@/utils/providers/ThemeProvider";
+import SplashPreloader from "@/_components/SplashScreen";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -40,7 +41,7 @@ export default function RootLayout({
             enableSystem
             themes={["light", "dark"]}
           >
-            {children}
+            <SplashPreloader>{children}</SplashPreloader>
             <Toaster
               position="top-left"
               toastOptions={{
