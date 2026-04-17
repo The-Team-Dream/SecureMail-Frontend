@@ -77,7 +77,6 @@ export function AnalyticsChart() {
           </LineChart>
         </ChartContainer>
       </div>
-      dv
       <hr className="bg-primary-100 mt-2 mb-4" />
       <div className="flex items-center justify-between max-w-full md:max-w-md w-full">
         <div className="flex items-center gap-2 md:gap-4">
