@@ -5,12 +5,13 @@ import {
   ResetPasswordPayload,
   SigninPayload,
   SignupPayload,
+  SignupResponse,
   VerifyOtpPayload,
 } from "../../types/auth";
 export const signup = async (
   payload: SignupPayload,
-): Promise<SignupPayload> => {
-  const res = await axiosInstance.post<SignupPayload>(
+): Promise<SignupResponse> => {
+  const res = await axiosInstance.post<SignupResponse>(
     "/auth/register",
     payload,
   );

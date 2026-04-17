@@ -4,8 +4,8 @@ import { Text } from "../../shared/Text";
 
 export const Navbar = () => {
   return (
-    <nav className="flex items-center justify-between py-6 px-4.5 bg-white border-b border-gray-100 sticky top-0 z-50 shadow-[0_4px_16px_0_rgba(0,0,0,0.1)]">
-      <Logo width={40} height={40} />
+    <nav className="flex items-center justify-between py-6 px-4.5 bg-background sticky top-0 z-50 shadow-[0_4px_16px_0_rgba(0,0,0,0.1)]">
+      <Logo width={40} height={40}  />
       {/* Profile and action */}
       <div className="flex items-center gap-4">
         <button className="rounded-full relative cursor-pointer hover:bg-primary-100 p-2">
