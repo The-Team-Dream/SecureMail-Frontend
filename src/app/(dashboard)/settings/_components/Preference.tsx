@@ -50,7 +50,7 @@ const Preference = () => {
             {/* Header Section */}
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center gap-4">
-                <Bell className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+                <Bell className="shrink-0 w-8 h-8 text-primary" />
                 <div>
                   <Text size={"lg"} color={"primary-950"} as={"h1"}>
                     Notifications
