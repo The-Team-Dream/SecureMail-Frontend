@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-  import { Bell, Check, Plus, Search } from "lucide-react";
+  import { Bell, Check, Mail, Plus } from "lucide-react";
 import Logo from "./Logo";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
@@ -43,15 +43,17 @@ export const Navbar = () => {
       <div className="flex items-center gap-2">
         <MobileSidebar />
         <Logo width={40} height={40} />
+        {isMailPage && (
+          <div className="ml-18">
+            <Input className="w-full" type="search" leftIcon={<Mail className="w-5 h-5 text-primary-500" />} placeholder="Search Email..." />
+          </div>
+        )}
       </div>
       <div className="flex items-center gap-4">
         <Button size={"icon-sm"} variant={"ghost"} className="relative">
           <Bell className="w-6 h-6 text-primary-500" />
           <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-error-700 rounded-full border-2 border-white"></span>
         </Button>
-        <div>
-          <Input type="search" leftIcon={<Search className="w-5 h-5 text-primary-500" />} placeholder="Search Email..." />
-        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 cursor-pointer outline-none overflow-hidden">

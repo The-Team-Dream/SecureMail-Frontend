@@ -1,33 +1,41 @@
 "use client";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
-  Mail,
-  BarChart3,
-  FileText,
-  Settings,
-  Menu,
-  PencilLine,
-  ChevronRight,
-  X,
+  Mail, BarChart3, FileText, Settings, Menu, PencilLine, ChevronRight,
+  X, Send, Star, AlertCircle, ShieldCheck, LineChart, Ghost, ShieldAlert
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
 
-const navItems = [
+const mainNavItems = [
   { name: "Mailbox", icon: Mail, href: "/mailbox" },
   { name: "Analytics", icon: BarChart3, href: "/analytics" },
   { name: "Reports", icon: FileText, href: "/reports" },
   { name: "Settings", icon: Settings, href: "/settings" },
 ];
 
+const mailNavItems = [
+  { name: "Inbox", icon: Mail, href: "/mailbox/inbox" },
+  { name: "Sent", icon: Send, href: "/mailbox/sent" },
+  { name: "Starred", icon: Star, href: "/mailbox/starred" },
+  { name: "Spam", icon: AlertCircle, href: "/mailbox/spam" },
+  { name: "Security Reports", icon: ShieldCheck, href: "/mailbox/security" },
+  { name: "Analytics", icon: LineChart, href: "/mailbox/analytics" },
+  { name: "Phishing", icon: Ghost, href: "/mailbox/phishing" },
+  { name: "Malware", icon: ShieldAlert, href: "/mailbox/malware" },
+];
+
 export const MobileSidebar = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  const isMailPage = pathname.startsWith("/mails"); 
+  const currentNavItems = isMailPage ? mailNavItems : mainNavItems;
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -105,7 +113,7 @@ export const MobileSidebar = () => {
                 {/* Add Email Button */}
                 <Button
                   size={"lg"}
-                  className="overflow-hidden bg-secondary-400 text-primary transition-all hover:bg-secondary-600 px-4"
+                  className="overflow-hidden bg-secondary-400 text-primary transition-all hover:bg-secondary-600 px-4 mb-4"
                 >
                   <PencilLine className="w-6 h-6 text-black mr-2" />
                   <Text className="text-black" font={"bold"}>
@@ -114,74 +122,81 @@ export const MobileSidebar = () => {
                 </Button>
 
                 {/* Nav Links */}
-                <nav className="space-y-2 flex-1 mt-8 relative">
-                  {navItems.map((item) => {
+                <nav className="space-y-1 flex-1 mt-4 relative">
+                  {currentNavItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          "flex items-center rounded-sm transition-all group mx-auto relative",
-                          "justify-between px-3 py-2",
-                          isActive
-                            ? "text-primary"
-                            : "text-primary-600 hover:bg-primary-100 hover:text-primary",
-                        )}
-                      >
-                        {isActive && (
-                          <motion.div
-                            layoutId="mobileActiveNavIndicator"
-                            className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
-                            transition={{
-                              type: "spring",
-                              stiffness: 600,
-                              damping: 20,
-                            }}
-                          />
-                        )}
-
-                        <div className="flex items-center gap-3">
-                          <item.icon
-                            className={cn(
-                              "w-5 h-5 min-w-5 transition-all",
-                              isActive
-                                ? "text-primary"
-                                : "text-primary-600 group-hover:text-primary-600",
-                            )}
-                            strokeWidth={isActive ? 2.5 : 2}
-                          />
-
-                          <Text
-                            as={"span"}
-                            font={isActive ? "medium" : "default"}
-                            color={isActive ? "primary-950" : "primary-600"}
-                          >
-                            {item.name}
-                          </Text>
-                        </div>
-
-                        <ChevronRight
+                      <React.Fragment key={item.name}>
+                        <Link
+                          href={item.href}
+                          onClick={() => setOpen(false)}
                           className={cn(
-                            "w-4 h-4 transition-transform",
+                            "flex items-center rounded-sm transition-all group mx-auto relative",
+                            "justify-between px-3 py-2",
                             isActive
-                              ? "translate-x-1 text-primary"
-                              : "text-primary-600",
+                              ? "text-primary"
+                              : "text-primary-600 hover:bg-primary-100 hover:text-primary"
                           )}
-                        />
-                      </Link>
+                        >
+                          {isActive && (
+                            <motion.div
+                              layoutId="mobileActiveNavIndicator"
+                              className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
+                              transition={{
+                                type: "spring",
+                                stiffness: 600,
+                                damping: 20,
+                              }}
+                            />
+                          )}
+
+                          <div className="flex items-center gap-3">
+                            <item.icon
+                              className={cn(
+                                "w-5 h-5 min-w-5 transition-all",
+                                isActive
+                                  ? "text-primary"
+                                  : "text-primary-600 group-hover:text-primary-600"
+                              )}
+                              strokeWidth={isActive ? 2.5 : 2}
+                            />
+
+                            <Text
+                              as={"span"}
+                              font={isActive ? "medium" : "default"}
+                              color={isActive ? "primary-950" : "primary-600"}
+                            >
+                              {item.name}
+                            </Text>
+                          </div>
+
+                          <ChevronRight
+                            className={cn(
+                              "w-4 h-4 transition-transform",
+                              isActive
+                                ? "translate-x-1 text-primary"
+                                : "text-primary-600 opacity-0 group-hover:opacity-100"
+                            )}
+                          />
+                        </Link>
+
+                        {item.name === "Spam" && (
+                          <div className="my-3 border-t border-primary-100 mx-2" />
+                        )}
+                      </React.Fragment>
                     );
                   })}
                 </nav>
 
-                <ThemeToggler isCollapsed={false} />
+                <div className="mt-4">
+                  <ThemeToggler isCollapsed={false} />
+                </div>
 
                 <Text
                   font={"medium"}
                   color={"muted"}
                   size={"sm"}
-                  className="mt-4 px-2 pt-4 text-left"
+                  className="mt-2 px-2 pt-4 text-left border-t border-primary-100"
                 >
                   Version 1.0.1
                 </Text>
