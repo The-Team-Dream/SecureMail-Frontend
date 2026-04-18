@@ -81,7 +81,7 @@ const Preference = () => {
                       font={"medium"}
                       className={
                         isEditing
-                          ? "text-background hidden"
+                          ? "text-background hidden sm:inline"
                           : "text-primary-800"
                       }
                     >
@@ -138,7 +138,11 @@ const Preference = () => {
             {/* Save Button */}
             {isEditing && (
               <div className="flex justify-end pt-4">
-                <Button onClick={() => setIsEditing(false)}>
+                <Button
+                  size={"sm"}
+                  onClick={() => setIsEditing(false)}
+                  className="w-max"
+                >
                   <Save className="w-4 h-4" /> Save Changes
                 </Button>
               </div>
