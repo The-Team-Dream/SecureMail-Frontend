@@ -27,12 +27,11 @@ const navItems = [
 export const Sidebar = () => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
   return (
     <aside
       className={cn(
-        "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden",
-        "flex flex-col border-r border-sidebar-border bg-sidebar p-2 text-sidebar-foreground transition-all duration-300",
+        "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden bg-ghostBlue",
+        "hidden md:flex flex-col border-r border-primary-100 py-2 px-2.5 transition-[width,padding] duration-200",
         "h-full overflow-y-auto",
         isCollapsed ? "w-20" : "w-64",
       )}
@@ -45,31 +44,32 @@ export const Sidebar = () => {
         )}
       >
         {!isCollapsed && (
-          <Text size={"sm"} font={"medium"}>
+          <Text size={"sm"} font={"medium"} color={"primary-950"}>
             Navigation
           </Text>
         )}
-        <button
+        <Button
+          size={"icon-sm"}
+          variant={"ghost"}
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="cursor-pointer rounded-full p-2 transition-transform hover:bg-sidebar-accent"
         >
           <Menu className="w-5 h-5 text-primary" />
-        </button>
+        </Button>
       </div>
 
       {/* Add Email Button */}
       <Button
         size={"lg"}
         className={cn(
-          "overflow-hidden bg-secondary-500 text-primary transition-all hover:bg-secondary-600",
+          "overflow-hidden bg-secondary-400 text-primary transition-colors hover:bg-secondary-600",
           isCollapsed ? "mx-auto h-12 w-12 p-0" : "px-4",
         )}
       >
         <PencilLine
-          className={cn("w-6 h-6 text-primary", !isCollapsed && "mr-2")}
+          className={cn("w-6 h-6 text-black", !isCollapsed && "mr-2")}
         />
         {!isCollapsed && (
-          <Text color={"primary-950"} font={"bold"}>
+          <Text className="text-black" font={"bold"}>
             New Email
           </Text>
         )}
@@ -85,40 +85,44 @@ export const Sidebar = () => {
               href={item.href}
               title={isCollapsed ? item.name : ""}
               className={cn(
-                "flex items-center rounded-sm transition-all group mx-auto relative",
+                "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative",
                 isCollapsed
                   ? "justify-center w-10 h-10"
                   : "justify-between px-3 py-2",
                 isActive
-                  ? "text-sidebar-primary"
-                  : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                  ? "text-primary"
+                  : "text-primary-600 hover:bg-primary-100 hover:text-primary",
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeNavIndicator"
-                  className="absolute inset-0 -z-10 rounded-sm bg-sidebar-accent"
+                  className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
                   transition={{
                     type: "spring",
-                    stiffness: 600,
-                    damping: 20,
+                    stiffness: 400,
+                    damping: 30,
                   }}
                 />
               )}
 
-              <div className="flex items-center gap-3 ">
+              <div className="flex items-center gap-3">
                 <item.icon
                   className={cn(
-                    "w-5 h-5 min-w-5 transition-all",
+                    "w-5 h-5 min-w-5 transition-colors",
                     isActive
-                      ? "text-sidebar-primary"
-                      : "text-muted-foreground group-hover:text-sidebar-foreground",
+                      ? "text-primary"
+                      : "text-primary-600 group-hover:text-primary-600",
                   )}
                   strokeWidth={isActive ? 2.5 : 2}
                 />
 
                 {!isCollapsed && (
-                  <Text as={"span"} font={isActive ? "medium" : "default"}>
+                  <Text
+                    as={"span"}
+                    font={isActive ? "medium" : "default"}
+                    color={isActive ? "primary-950" : "primary-600"}
+                  >
                     {item.name}
                   </Text>
                 )}
@@ -129,8 +133,8 @@ export const Sidebar = () => {
                   className={cn(
                     "w-4 h-4 transition-transform",
                     isActive
-                      ? "translate-x-1 text-sidebar-primary"
-                      : "text-muted-foreground",
+                      ? "translate-x-1 text-primary"
+                      : "text-primary-600",
                   )}
                 />
               )}
