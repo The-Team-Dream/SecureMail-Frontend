@@ -8,25 +8,41 @@ import {
   Menu,
   PencilLine,
   ChevronRight,
+  Send,
+  Star,
+  AlertCircle,
+  ShieldCheck,
+  LineChart,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Text } from "../../shared/Text";
+import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
 
-const navItems = [
+const mainNavItems = [
   { name: "Mailbox", icon: Mail, href: "/mailbox" },
   { name: "Analytics", icon: BarChart3, href: "/analytics" },
   { name: "Reports", icon: FileText, href: "/reports" },
   { name: "Settings", icon: Settings, href: "/settings" },
 ];
 
+const mailNavItems = [
+  { name: "Inbox", icon: Mail, href: "/mailbox/inbox" }, // أو حسب تقسيم الـ routes عندك
+  { name: "Sent", icon: Send, href: "/mailbox/sent" },
+  { name: "Starred", icon: Star, href: "/mailbox/starred" },
+  { name: "Spam", icon: AlertCircle, href: "/mailbox/spam" },
+  { name: "Security Reports", icon: ShieldCheck, href: "/mailbox/security" },
+  { name: "Analytics", icon: LineChart, href: "/mailbox/analytics" },
+];
+
 export const Sidebar = () => {
-  const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
+  const isMailPage = pathname.startsWith("/mailbox");
+  const currentNavItems = isMailPage ? mailNavItems : mainNavItems;
   return (
     <aside
       className={cn(
@@ -77,7 +93,7 @@ export const Sidebar = () => {
 
       {/* Nav Links */}
       <nav className="space-y-2 flex-1 mt-8 relative">
-        {navItems.map((item) => {
+        {currentNavItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
