@@ -1,0 +1,35 @@
+# Node dependencies
+node_modules/
+
+# Next.js build output
+.next/
+
+# Turbo cache
+.turbo/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+.gitmodules
+
+# Documentation
+*.md
+README*
+
+# Editor / OS
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Logs
+*.log
+logs/
