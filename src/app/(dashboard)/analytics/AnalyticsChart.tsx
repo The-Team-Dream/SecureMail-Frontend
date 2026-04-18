@@ -30,7 +30,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 export function AnalyticsChart() {
   return (
-    <div className="min-w-0 border border-primary-100 rounded-xl p-6">
+    <div className="min-w-0 border border-primary-100 rounded-xl p-6 max-h-[500px] h-full">
       <Text size={"lg"} font={"medium"} className="mb-2">
         Weekly Threat Distribution
       </Text>

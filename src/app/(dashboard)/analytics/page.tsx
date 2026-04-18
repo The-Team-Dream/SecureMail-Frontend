@@ -147,7 +147,7 @@ const Analytics = () => {
       </motion.div>
 
       {/* Container */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 md:mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 md:mt-8">
         {/* Analytics */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -162,7 +162,7 @@ const Analytics = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="min-w-0 border border-primary-100 rounded-lg p-6"
+          className="min-w-0 border border-primary-100 rounded-lg p-6 max-h-[500px] h-full"
         >
           <Text size={"lg"} font={"medium"} className="mb-2">
             Recent Security Events
