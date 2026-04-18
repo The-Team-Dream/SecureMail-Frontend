@@ -24,35 +24,37 @@ export default function SplashPreloader({ children }: SplashPreloaderProps) {
   }, []);
 
   return (
-    <AnimatePresence mode="wait">
-      {loading ? (
-        <motion.div
-          key="splash"
-          className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-background"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-        >
-          <div className="flex flex-col items-center">
-            <Logo />
-            <SyncLoader
-              color="var(--color-primary)"
-              size={10}
-              className="mb-4 mt-2"
-            />
-            <Text>Preparing for a secure journey...</Text>
-          </div>
-        </motion.div>
-      ) : (
-        <motion.div
-          key="content"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <>
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            key="splash"
+            className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-background"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+          >
+            <div className="flex flex-col items-center">
+              <Logo />
+              <SyncLoader
+                color="var(--color-primary)"
+                size={10}
+                className="mb-4 mt-2"
+              />
+              <Text>Preparing for a secure journey...</Text>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        key="content"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: loading ? 0 : 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        {children}
+      </motion.div>
+    </>
   );
 }

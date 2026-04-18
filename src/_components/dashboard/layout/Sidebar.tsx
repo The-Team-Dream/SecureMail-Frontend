@@ -31,7 +31,7 @@ export const Sidebar = () => {
     <aside
       className={cn(
         "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden bg-ghostBlue",
-        "flex flex-col border-r border-primary-100 py-2 px-2.5 transition-all duration-300",
+        "hidden md:flex flex-col border-r border-primary-100 py-2 px-2.5 transition-[width,padding] duration-200",
         "h-full overflow-y-auto",
         isCollapsed ? "w-20" : "w-64",
       )}
@@ -61,7 +61,7 @@ export const Sidebar = () => {
       <Button
         size={"lg"}
         className={cn(
-          "overflow-hidden bg-secondary-400 text-primary transition-all hover:bg-secondary-600",
+          "overflow-hidden bg-secondary-400 text-primary transition-colors hover:bg-secondary-600",
           isCollapsed ? "mx-auto h-12 w-12 p-0" : "px-4",
         )}
       >
@@ -85,7 +85,7 @@ export const Sidebar = () => {
               href={item.href}
               title={isCollapsed ? item.name : ""}
               className={cn(
-                "flex items-center rounded-sm transition-all group mx-auto relative",
+                "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative",
                 isCollapsed
                   ? "justify-center w-10 h-10"
                   : "justify-between px-3 py-2",
@@ -100,8 +100,8 @@ export const Sidebar = () => {
                   className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
                   transition={{
                     type: "spring",
-                    stiffness: 600,
-                    damping: 20,
+                    stiffness: 400,
+                    damping: 30,
                   }}
                 />
               )}
@@ -109,7 +109,7 @@ export const Sidebar = () => {
               <div className="flex items-center gap-3">
                 <item.icon
                   className={cn(
-                    "w-5 h-5 min-w-5 transition-all",
+                    "w-5 h-5 min-w-5 transition-colors",
                     isActive
                       ? "text-primary"
                       : "text-primary-600 group-hover:text-primary-600",
