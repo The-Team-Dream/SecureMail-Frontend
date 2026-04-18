@@ -147,7 +147,7 @@ const Analytics = () => {
       </motion.div>
 
       {/* Container */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 md:mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 md:mt-8">
         {/* Analytics */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
