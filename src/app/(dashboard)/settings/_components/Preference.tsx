@@ -50,7 +50,7 @@ const Preference = () => {
             {/* Header Section */}
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center gap-4">
-                <Bell className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+                <Bell className="shrink-0 w-8 h-8 text-primary" />
                 <div>
                   <Text size={"lg"} color={"primary-950"} as={"h1"}>
                     Notifications
@@ -81,7 +81,7 @@ const Preference = () => {
                       font={"medium"}
                       className={
                         isEditing
-                          ? "text-background hidden"
+                          ? "text-background hidden sm:inline"
                           : "text-primary-800"
                       }
                     >
@@ -138,7 +138,11 @@ const Preference = () => {
             {/* Save Button */}
             {isEditing && (
               <div className="flex justify-end pt-4">
-                <Button onClick={() => setIsEditing(false)}>
+                <Button
+                  size={"sm"}
+                  onClick={() => setIsEditing(false)}
+                  className="w-max"
+                >
                   <Save className="w-4 h-4" /> Save Changes
                 </Button>
               </div>

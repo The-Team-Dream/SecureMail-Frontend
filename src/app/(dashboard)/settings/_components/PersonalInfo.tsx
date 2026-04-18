@@ -1,58 +1,77 @@
 "use client";
+import React, { useRef, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { User, Pencil, Trash2, X, Save, Loader2 } from "lucide-react";
 import { Text } from "@/_components/shared/Text";
+import { Input } from "@/_components/shared/Input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { User, Pencil, Trash2, X, Save } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/_components/shared/Input";
-import { SubmitHandler, useForm } from "react-hook-form";
 import {
   IPersonalInfo,
   personalInfoSchema,
 } from "@/schemas/settings/personalInfo";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { useRef, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 const PersonalInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeletingImg, setIsDeletingImg] = useState(false);
+
   const {
     handleSubmit,
     register,
     reset,
     watch,
-    formState: { errors },
+    formState: { errors, isDirty },
     clearErrors,
   } = useForm<IPersonalInfo>({
     mode: "onBlur",
     reValidateMode: "onChange",
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      fullName: "MO",
-      email: "mohamed@yahoo.com",
-      phoneNumber: "(+20)000 000 0000",
+      fullName: "Emad Ahmed",
+      email: "emad@gmail.com",
+      phoneNumber: "(+20) 123 456 7890",
     },
   });
+
   const currentValues = watch();
-  const onSubmit: SubmitHandler<IPersonalInfo> = (data: IPersonalInfo) => {
-    console.log("Updated Data:", data);
-    setIsEditing(false);
+
+  const onSubmit: SubmitHandler<IPersonalInfo> = async (data) => {
+    setIsUpdating(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Updated Data Successfully:", data);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Update failed:", error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
+
   const handleCancel = () => {
     reset();
+    clearErrors();
     setIsEditing(false);
   };
+
   const [profileImage, setProfileImage] = useState<string | undefined>(
     "https://github.com/shadcn.png",
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleUpdateClick = () => {
     fileInputRef.current?.click();
   };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -60,15 +79,22 @@ const PersonalInfo = () => {
       setProfileImage(imageUrl);
     }
   };
-  const handleDeleteImage = () => {
-    setProfileImage(undefined);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+
+  const handleDeleteImage = async () => {
+    setIsDeletingImg(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setProfileImage(undefined);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } finally {
+      setIsDeletingImg(false);
+    }
   };
 
   return (
     <Accordion type="single" collapsible defaultValue="item-1">
       <AccordionItem value="item-1">
-        <AccordionTrigger>
+        <AccordionTrigger className="hover:no-underline">
           <Text font={"semiBold"} color={"primary-950"} size={"2xl"}>
             Personal Information
           </Text>
@@ -79,9 +105,9 @@ const PersonalInfo = () => {
               {/* Header Section */}
               <div className="flex justify-between items-start mb-10">
                 <div className="flex items-center gap-2 md:gap-4">
-                  <User className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+                  <User className="shrink-0 w-8 h-8 text-primary" />
                   <div>
-                    <Text size={"lg"} color={"primary-950"}>
+                    <Text size={"lg"} color={"primary-950"} font="medium">
                       Profile
                     </Text>
                     <Text
@@ -95,25 +121,30 @@ const PersonalInfo = () => {
 
                 <Button
                   type="button"
-                  variant={"outline"}
+                  variant="outline"
                   size="sm"
-                  className={`gap-2 transition-all ${isEditing ? "bg-error-600 hover:bg-error-700 text-background border-error-600" : "bg-transparent"}`}
+                  disabled={isUpdating}
+                  className={`gap-2 transition-all ${
+                    isEditing
+                      ? "bg-error-500 text-white border-error-200 hover:bg-error-700 group"
+                      : "bg-transparent border-primary-100"
+                  }`}
                   onClick={isEditing ? handleCancel : () => setIsEditing(true)}
                 >
                   {isEditing ? (
                     <>
-                      <X className="w-4 h-4 text-background" />
+                      <X className="w-4 h-4 text-white" />
                       <Text
                         as={"span"}
                         font={"medium"}
-                        className="text-background hidden sm:inline"
+                        className="text-white hidden sm:inline"
                       >
                         Cancel Editing
                       </Text>
                     </>
                   ) : (
                     <>
-                      <Pencil className="w-4 h-4" />
+                      <Pencil className="w-4 h-4 text-primary-800" />
                       <Text
                         as={"span"}
                         color={"primary-800"}
@@ -129,11 +160,9 @@ const PersonalInfo = () => {
 
               {/* Profile Picture */}
               <div className="mt-4 flex flex-col gap-4 md:flex-row items-start md:items-center justify-between max-w-md">
-                <div className="flex-1">
-                  <Text size={"sm"} color={"primary-500"}>
-                    Profile Picture
-                  </Text>
-                </div>
+                <Text size={"sm"} color={"primary-500"}>
+                  Profile Picture
+                </Text>
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -141,36 +170,49 @@ const PersonalInfo = () => {
                   accept="image/*"
                   onChange={handleFileChange}
                 />
-                <div className="flex items-center gap-8 max-w-37.5">
-                  <Avatar>
+
+                <div className="flex items-center gap-6">
+                  <Avatar
+                    className={`w-16 h-16 ${isDeletingImg ? "opacity-40" : ""}`}
+                  >
                     <AvatarImage src={profileImage} className="object-cover" />
                     <AvatarFallback className="bg-primary-100 text-primary-800">
-                      MO
+                      {currentValues.fullName?.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
 
-                  <button
-                    type="button"
-                    onClick={handleUpdateClick}
-                    className="text-info-500 text-sm hover:underline font-medium"
-                  >
-                    Update
-                  </button>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      disabled={isUpdating || isDeletingImg}
+                      onClick={handleUpdateClick}
+                      className="text-info-600 text-sm hover:underline font-medium disabled:text-primary-400"
+                    >
+                      Update
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={handleDeleteImage}
-                    className="flex items-center gap-2 text-sm text-error-500 hover:underline font-medium"
-                  >
-                    Delete <Trash2 className="w-4 h-4" />
-                  </button>
+                    <button
+                      type="button"
+                      disabled={isUpdating || isDeletingImg}
+                      onClick={handleDeleteImage}
+                      className="flex items-center gap-1 text-sm text-error-500 hover:underline font-medium disabled:text-primary-400"
+                    >
+                      {isDeletingImg ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          Delete <Trash2 className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Info Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
                 {/* Full Name */}
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1">
                   <Text size={"sm"} color={"primary-500"}>
                     Full Name
                   </Text>
@@ -185,6 +227,7 @@ const PersonalInfo = () => {
                       })}
                       placeholder="Your Name"
                       error={errors.fullName?.message}
+                      disabled={isUpdating}
                     />
                   ) : (
                     <Text size={"sm"} color={"primary-950"} font={"medium"}>
@@ -193,8 +236,8 @@ const PersonalInfo = () => {
                   )}
                 </div>
 
-                {/* Email Address */}
-                <div className="flex flex-col gap-2">
+                {/* Email */}
+                <div className="flex flex-col gap-1">
                   <Text size={"sm"} color={"primary-500"}>
                     Email address
                   </Text>
@@ -209,6 +252,7 @@ const PersonalInfo = () => {
                       })}
                       placeholder="email@example.com"
                       error={errors.email?.message}
+                      disabled={isUpdating}
                     />
                   ) : (
                     <Text size={"sm"} color={"primary-950"} font={"medium"}>
@@ -217,8 +261,8 @@ const PersonalInfo = () => {
                   )}
                 </div>
 
-                {/* Phone Number */}
-                <div className="flex flex-col gap-2">
+                {/* Phone */}
+                <div className="flex flex-col gap-1">
                   <Text size={"sm"} color={"primary-500"}>
                     Phone Number
                   </Text>
@@ -231,8 +275,9 @@ const PersonalInfo = () => {
                           }
                         },
                       })}
-                      placeholder="20+....."
+                      placeholder="+20..."
                       error={errors.phoneNumber?.message}
+                      disabled={isUpdating}
                     />
                   ) : (
                     <Text size={"sm"} color={"primary-950"} font={"medium"}>
@@ -244,9 +289,23 @@ const PersonalInfo = () => {
 
               {isEditing && (
                 <div className="mt-8 flex justify-end">
-                  <Button type="submit" className="bg-primary text-background">
-                    <Save className="w-4 h-4" />
-                    Save Changes
+                  <Button
+                    type="submit"
+                    size={"sm"}
+                    disabled={isUpdating || !isDirty}
+                    className="w-max gap-2 px-6"
+                  >
+                    {isUpdating ? (
+                      <>
+                        <Spinner />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Save Changes
+                      </>
+                    )}
                   </Button>
                 </div>
               )}

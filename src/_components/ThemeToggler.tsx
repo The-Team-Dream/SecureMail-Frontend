@@ -19,7 +19,8 @@ const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
   }, []);
 
   const activeTheme = mounted
-    ? (resolvedTheme ?? (theme === "dark" || theme === "light" ? theme : "light"))
+    ? (resolvedTheme ??
+      (theme === "dark" || theme === "light" ? theme : "light"))
     : "light";
 
   const setActiveTheme = (t: "light" | "dark") => {
@@ -29,25 +30,27 @@ const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
   if (!mounted) {
     return (
       <div aria-hidden>
-        <hr className="mb-4 -m-2 border-0 h-px bg-border" />
+        <hr className="mb-4 -m-2 h-px bg-primary-100" />
         <div
           className={cn(
             "mx-auto rounded-xl bg-muted",
             isCollapsed ? "h-24 w-12" : "h-12 w-full",
           )}
         />
-        <hr className="mt-4 -m-2 border-0 h-px bg-border" />
+        <hr className="mt-4 -m-2 h-px bg-primary-100" />
       </div>
     );
   }
 
   return (
     <div>
-      <hr className="mb-4 -m-2 border-0 h-px bg-border" />
+      <hr className="mb-4 -m-2 h-px bg-primary-100" />
       <div
         className={cn(
-          "relative mx-auto flex rounded-xl bg-muted p-1 transition-all duration-300",
-          isCollapsed ? "h-24 w-12 flex-col gap-2" : "h-12 w-full flex-row gap-0",
+          "relative mx-auto flex rounded-xl bg-primary-100 p-1 transition-all duration-300",
+          isCollapsed
+            ? "h-24 w-12 flex-col gap-2"
+            : "h-12 w-full flex-row gap-0",
         )}
       >
         <motion.div
@@ -66,9 +69,7 @@ const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
                 : "calc(50% + 2px)",
             width: isCollapsed ? "calc(100% - 8px)" : "calc(50% - 6px)",
             height: isCollapsed ? "calc(50% - 6px)" : "calc(100% - 8px)",
-            /* Pill stays high-contrast on muted track in both page themes */
-            backgroundColor:
-              activeTheme === "light" ? "#ffffff" : "#000000",
+            backgroundColor: activeTheme === "light" ? "#ffffff" : "#000000",
           }}
           transition={{
             type: "spring",
@@ -107,7 +108,7 @@ const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
           {!isCollapsed && "Dark"}
         </button>
       </div>
-      <hr className="mt-4 -m-2 border-0 h-px bg-border" />
+      <hr className="mt-4 -m-2 h-px bg-primary-100" />
     </div>
   );
 };

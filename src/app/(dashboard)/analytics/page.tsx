@@ -1,5 +1,5 @@
 "use client";
-import { AnalyticsChart } from "@/_components/dashboard/AnalyticsChart";
+import { AnalyticsChart } from "./AnalyticsChart";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { Badge } from "@/components/ui/badge";
@@ -78,7 +78,7 @@ const Analytics = () => {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Text size={"3xl"} font={"medium"}>
+        <Text size={"2xl"} font={"medium"}>
           Good Morning, Mohamed
         </Text>
       </motion.div>
@@ -88,7 +88,7 @@ const Analytics = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mt-6 md:mt-12"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mt-6 md:mt-8"
       >
         {stats.map((state: StatItem) => {
           const style = statsConfig[state.type];
@@ -98,13 +98,13 @@ const Analytics = () => {
               variants={itemVariants}
               key={state.id}
               whileHover={{ y: -5 }}
-              className="flex flex-col gap-6 rounded-xl bg-ghostBlue p-4 transition-shadow hover:shadow-md"
+              className="flex flex-col gap-4 rounded-xl bg-ghostBlue p-4 transition-shadow hover:shadow-md"
             >
-              <Text color="primary-500" className="tracking-wide">
+              <Text color="primary-500" size={"sm"} className="tracking-wide">
                 {state.title}
               </Text>
 
-              <Text size={"4xl"} font={"bold"} color={`primary-950`}>
+              <Text size={"3xl"} font={"bold"} color={`primary-950`}>
                 {state.value}
               </Text>
 
@@ -113,7 +113,7 @@ const Analytics = () => {
                   {state.change && (
                     <Badge
                       className={cn(
-                        "text-sm font-medium py-1 px-3 rounded-full flex items-center gap-1",
+                        "text-sm font-medium   px-4 rounded-full flex items-center gap-1",
                         style.badge,
                       )}
                     >
@@ -147,12 +147,13 @@ const Analytics = () => {
       </motion.div>
 
       {/* Container */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 md:mt-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 md:mt-8">
         {/* Analytics */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
+          className="min-w-0"
         >
           <AnalyticsChart />
         </motion.div>
@@ -161,7 +162,7 @@ const Analytics = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="border border-primary-100 rounded-lg p-6"
+          className="min-w-0 border border-primary-100 rounded-lg p-6 max-h-[500px] h-full"
         >
           <Text size={"lg"} font={"medium"} className="mb-2">
             Recent Security Events
