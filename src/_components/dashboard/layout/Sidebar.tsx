@@ -31,7 +31,7 @@ export const Sidebar = () => {
     <aside
       className={cn(
         "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden bg-ghostBlue",
-        "flex flex-col border-r border-primary-100 py-2 px-2.5 transition-all duration-300",
+        "hidden md:flex flex-col border-r border-primary-100 py-2 px-2.5 transition-all duration-300",
         "h-full overflow-y-auto",
         isCollapsed ? "w-20" : "w-64",
       )}
