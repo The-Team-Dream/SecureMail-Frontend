@@ -105,9 +105,7 @@ const PersonalInfo = () => {
               {/* Header Section */}
               <div className="flex justify-between items-start mb-10">
                 <div className="flex items-center gap-2 md:gap-4">
-                  <div className="bg-primary-50 p-2 rounded-full">
-                    <User className="shrink-0 w-8 h-8 text-primary" />
-                  </div>
+                  <User className="shrink-0 w-8 h-8 text-primary" />
                   <div>
                     <Text size={"lg"} color={"primary-950"} font="medium">
                       Profile
