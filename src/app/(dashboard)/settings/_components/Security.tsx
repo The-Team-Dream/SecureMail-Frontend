@@ -67,9 +67,7 @@ const Security = () => {
             <div className="border border-primary-100 py-6 px-8 rounded-lg mb-6 transition-all">
               <div className="flex justify-between items-start mb-10">
                 <div className="flex items-start md:items-center gap-2 md:gap-4">
-                  <div className="bg-primary-50 p-2 rounded-full">
-                    <KeyRound className="shrink-0 w-8 h-8 text-primary" />
-                  </div>
+                  <KeyRound className="shrink-0 w-8 h-8 text-primary" />
                   <div>
                     <Text size={"lg"} color={"primary-950"} font="medium">
                       Change Password
@@ -205,9 +203,7 @@ const Security = () => {
           <div className="border border-primary-100 py-6 px-8 rounded-lg transition-all hover:bg-primary-50/30 cursor-pointer group">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
-                <div className="bg-primary-50 p-2 rounded-full group-hover:bg-white transition-colors">
-                  <Shield className="w-6 h-6 text-primary" />
-                </div>
+                <Shield className="w-6 h-6 text-primary" />
                 <div>
                   <Text color={"primary-950"} font={"medium"}>
                     Two-Factor auth
