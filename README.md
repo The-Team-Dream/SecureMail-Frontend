@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 🛡️ Deep Analysis: Security Visualization
 
-## Getting Started
+The SecureMail Frontend is a **Cinematic Security Operations Center (SOC)** for end-users, designed to make complex security data intuitive and actionable.
 
-First, run the development server:
+### 🎨 Design Philosophy: Cinematic SOC
+We utilize **Framer Motion** and **Tailwind CSS 4** to create a "Living UI" that pulses with service health and animates the lifecycle of email threats. 
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```mermaid
+graph TD
+    A[User Request] --> B[Next.js App Router]
+    B --> C[Auth Middleware]
+    C --> D[Secure Dashboard]
+    D --> E[Real-time Stats]
+    D --> F[Email Analysis Cards]
+    D --> G[Settings & Mailboxes]
+    E & F & G --> H[NestJS Backend API]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🔍 Key Dashboards
+- **Mailbox Explorer**: A high-speed interface for viewing emails with real-time security score overlays.
+- **Threat Simulation**: Cinematic animations that visualize the "Decision Path" (Pipeline) taken for a specific email.
+- **Service Intel**: A dynamic status board showing the health of the entire gRPC microservice ecosystem.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🛠️ Tech Stack
+- **Framework**: Next.js 16 (App Router)
+- **Runtime**: React 19 (Server Components)
+- **Styling**: Tailwind CSS v4 + Lucide Icons
+- **Animation**: Framer Motion
+- **Data Fetching**: React Query v5
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+### 1. Via Turborepo (Root)
+```bash
+npm run dev:ui
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Manual Execution
+1. **Setup**:
+   ```bash
+   npm install
+   ```
+2. **Environment**: Ensure `.env.local` points to the Backend:
+   `NEXT_PUBLIC_API_URL=http://localhost:3000`
+3. **Run**:
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🛠️ Features
+- **Modern UI**: Built with Tailwind CSS and Framer Motion.
+- **Microservice Integration**: Communicates with the NestJS backend on port 3000.

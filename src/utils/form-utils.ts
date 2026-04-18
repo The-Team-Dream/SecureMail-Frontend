@@ -1,37 +1,27 @@
-import { UseFormSetError, FieldValues, Path } from "react-hook-form";
 import { AxiosError } from "axios";
-
-interface ApiErrorDetail {
-  path: string;
-  message: string;
-}
-
-interface ApiErrorResponse {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  errors?: ApiErrorDetail[];
-  path: string;
-  timestamp: string;
-}
+import { UseFormSetError, FieldValues, Path } from "react-hook-form";
 
 export const handleApiErrors = <T extends FieldValues>(
-  error: unknown,
+  error: AxiosError,
   setError: UseFormSetError<T>,
 ) => {
-  const axiosError = error as AxiosError<ApiErrorResponse>;
-  const errorData = axiosError.response?.data;
-  if (errorData?.errors && Array.isArray(errorData.errors)) {
-    errorData.errors.forEach((err) => {
+  const serverData = error.response?.data as {
+    errors?: { path: string; message: string }[];
+    message?: string;
+  };
+
+  if (serverData?.errors && Array.isArray(serverData.errors)) {
+    serverData.errors.forEach((err: { path: string; message: string }) => {
       setError(err.path as Path<T>, {
         type: "server",
         message: err.message,
       });
     });
-  } else if (errorData?.message) {
+  }
+
+  if (serverData?.message) {
     setError("root" as Path<T>, {
-      type: "server",
-      message: errorData.message,
+      message: serverData.message,
     });
   }
 };

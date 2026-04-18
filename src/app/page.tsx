@@ -1,3 +1,5 @@
+import Mailbox from "./(dashboard)/mailbox/page";
+
 export default async function Home() {
-  return <h1>Home Page</h1>;
+  return <Mailbox />;
 }
