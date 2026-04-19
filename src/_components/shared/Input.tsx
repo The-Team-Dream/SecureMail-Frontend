@@ -38,6 +38,7 @@ interface Input extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   leftIcon?: React.ReactNode;
   error?: string | undefined;
+  width?: string;
 }
 export const errorVariants = {
   initial: { y: -10, opacity: 0 },
@@ -50,8 +51,10 @@ export const Input: React.FC<Input> = ({
   type = "text",
   required,
   error,
+  width = "100%",
+  className,
   ...props
-}) => {
+}: Input & { width?: string }) => {
   const [inputType, setInputType] = useState(type);
   const isPassword = type === "password";
   const togglePassword = () => {
@@ -59,7 +62,7 @@ export const Input: React.FC<Input> = ({
   };
 
   return (
-    <div className="w-full">
+    <div style={{ width: width }}>
       {label && (
         <label className="block text-sm text-primary-400 mb-1">
           {label}
@@ -79,11 +82,12 @@ export const Input: React.FC<Input> = ({
           required={required}
           type={inputType}
           className={cn(
-            "w-full px-4 py-3 border text-primary rounded-xl outline-none focus:border-primary-400 transition duration-500",
+            `w-${width} px-4 py-3 border text-primary rounded-xl outline-none focus:border-primary-400 transition duration-500`,
             leftIcon && "pl-12",
             error
               ? "border-error-500 placeholder:text-error-500"
               : "border-primary-100 placeholder:text-primary-400",
+            className
           )}
         />
         {isPassword && (

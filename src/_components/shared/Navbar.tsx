@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bell, Check, Plus } from "lucide-react";
-import Logo from "../../shared/Logo";
-import { Text } from "../../shared/Text";
+import { Bell, Check, Mail, Plus } from "lucide-react";
+import Logo from "./Logo";
+import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
-import { MobileSidebar } from "./MobileSidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,9 +19,14 @@ import {
 } from "@/components/ui/accordion";
 import Image from "next/image";
 import { initialAccounts } from "@/constants/MOCKDATA";
+import { usePathname } from "next/dist/client/components/navigation";
+import { Input } from "./Input";
+import { MobileSidebar } from "./MobileSidebar";
 
 export const Navbar = () => {
+  const pathname = usePathname();
   const [accounts, setAccounts] = useState(initialAccounts);
+  const isMailPage = pathname.includes("/mails");
 
   const activeAccount = accounts.find((user) => user.active) || accounts[0];
 
@@ -38,14 +42,18 @@ export const Navbar = () => {
     <nav className="flex items-center justify-between py-6 px-4.5 bg-background sticky top-0 z-50 shadow-[0_4px_16px_0_rgba(0,0,0,0.1)]">
       <div className="flex items-center gap-2">
         <MobileSidebar />
-        <Logo width={40} height={40} />
+        <Logo width={40} height={40} textSize={'2xl'} />
+        {isMailPage && (
+          <div className="ml-18 hidden md:block">
+            <Input className="w-130 bg-primary-100/20" type="search" leftIcon={<Mail className="w-5 h-5 text-primary-500" />} placeholder="Search Email..." />
+          </div>
+        )}
       </div>
       <div className="flex items-center gap-4">
         <Button size={"icon-sm"} variant={"ghost"} className="relative">
           <Bell className="w-6 h-6 text-primary-500" />
           <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-error-700 rounded-full border-2 border-white"></span>
         </Button>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 cursor-pointer outline-none overflow-hidden">
@@ -114,11 +122,10 @@ export const Navbar = () => {
                         >
                           <div className="flex items-center gap-3">
                             <div
-                              className={`size-10 rounded-full flex items-center justify-center border overflow-hidden ${
-                                user.active
-                                  ? "bg-secondary-100 border-secondary-900"
-                                  : "bg-primary-100 border-primary-500"
-                              }`}
+                              className={`size-10 rounded-full flex items-center justify-center border overflow-hidden ${user.active
+                                ? "bg-secondary-100 border-secondary-900"
+                                : "bg-primary-100 border-primary-500"
+                                }`}
                             >
                               <Text
                                 size="xs"

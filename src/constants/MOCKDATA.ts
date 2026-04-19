@@ -1,3 +1,4 @@
+
 export const initialAccounts = [
   {
     id: 1,
