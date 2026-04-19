@@ -3,7 +3,7 @@
 // MailToolbar + MailTabs + MailList
 //
 // 🏠 تشبيه بـ HTML:
-// تخيل إنك عندك <div class="inbox-container"> 
+// تخيل إنك عندك <div class="inbox-container">
 // وجواه 3 أقسام:
 //   <div class="toolbar">...</div>    ← شريط الأدوات
 //   <div class="tabs">...</div>       ← تابات التصنيف
@@ -12,36 +12,35 @@
 "use client";
 
 import React from "react";
-import { MailToolbar } from "./MailToolbar";
-import { MailTabs } from "./MailTabs";
-import { MailList } from "./MailList";
+import { MailToolbar } from "./mailToolbar";
+import { MailTabs } from "./mailTabs";
+import { MailList } from "./mailList";
 import { useMailStore } from "@/stores/useMailStore";
+import Container from "../shared/Container";
+import { Input } from "../shared/Input";
+import { Mail } from "lucide-react";
 
 export const MailInbox = () => {
   const activeFolder = useMailStore((s) => s.activeFolder);
 
   // === عنوان المجلد الحالي ===
   // بنحوله لحرف كبير في الأول (مثل "inbox" → "Inbox")
-  const folderTitle =
-    activeFolder.charAt(0).toUpperCase() + activeFolder.slice(1);
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* === عنوان المجلد (لو مش inbox) === */}
-      {activeFolder !== "inbox" && (
-        <div className="px-4 pt-4 pb-2">
-          <h1 className="text-lg font-semibold text-primary">{folderTitle}</h1>
+    <Container>
+      <div className="flex flex-col h-full bg-background">
+        <div className="block md:hidden mb-4">
+          <Input
+            className="bg-primary-100/20 w-full"
+            type="search"
+            leftIcon={<Mail className="w-5 h-5 text-primary-500" />}
+            placeholder="Search Email..."
+          />
         </div>
-      )}
-
-      {/* === شريط الأدوات === */}
-      <MailToolbar />
-
-      {/* === تابات التصنيف (بتظهر بس في inbox) === */}
-      <MailTabs />
-
-      {/* === قائمة الإيميلات === */}
-      <MailList />
-    </div>
+        <MailToolbar />
+        <MailTabs />
+        <MailList />
+      </div>
+    </Container>
   );
 };

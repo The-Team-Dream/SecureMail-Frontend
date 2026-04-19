@@ -1,26 +1,26 @@
-// ===== صف الإيميل الواحد (Mail Row) =====
-// الكومبوننت ده بيعرض صف واحد في قائمة الإيميلات
-//
-// 🏠 تشبيه بـ HTML:
-// تخيل إنك عندك <tr> (صف) في <table>
-// كل صف فيه: checkbox + نجمة + اسم المرسل + العنوان + التاريخ
-// الكومبوننت ده هو الـ <tr> بتاعك بس بشكل أحلى
 "use client";
 
 import React from "react";
-import { Star, FileText, GripVertical } from "lucide-react";
+import {
+  Star,
+  FileText,
+  GripVertical,
+  Trash2,
+  MailOpen,
+  Archive,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Email } from "@/types/mail";
 import { useMailStore } from "@/stores/useMailStore";
+import { Text } from "../shared/Text";
+import { Button } from "@/components/ui/button";
 
-// الـ Props دي زي الـ attributes بتاعة HTML tag
-// يعني لما تكتب <img src="..." alt="..."> - الـ src و alt دول props
 interface MailRowProps {
-  email: Email;         // بيانات الإيميل
-  index: number;        // رقم الصف (للسحب والإفلات)
-  onDragStart: (index: number) => void;  // لما تبدأ تسحب
-  onDragOver: (index: number) => void;   // لما تعدي فوق صف تاني
-  onDragEnd: () => void;                 // لما تسيب
+  email: Email;
+  index: number;
+  onDragStart: (index: number) => void;
+  onDragOver: (index: number) => void;
+  onDragEnd: () => void;
 }
 
 export const MailRow = ({
@@ -30,118 +30,149 @@ export const MailRow = ({
   onDragOver,
   onDragEnd,
 }: MailRowProps) => {
-  // === جلب الأفعال من المتجر ===
-  // زي ما تجيب function من ملف JavaScript خارجي
   const toggleSelectEmail = useMailStore((s) => s.toggleSelectEmail);
   const toggleStarEmail = useMailStore((s) => s.toggleStarEmail);
+  const deleteEmail = useMailStore((s) => s.deleteEmail);
+  const toggleReadEmail = useMailStore((s) => s.toggleReadEmail);
   const selectedIds = useMailStore((s) => s.selectedIds);
-
-  // هل الإيميل ده محدد (selected)؟
   const isSelected = selectedIds.includes(email.id);
 
   return (
-    // === الصف الرئيسي ===
-    // draggable="true" بيخلي الصف قابل للسحب - زي drag and drop في HTML5
     <div
       draggable
       onDragStart={() => onDragStart(index)}
       onDragOver={(e) => {
-        e.preventDefault(); // ضروري عشان الـ drop يشتغل
+        e.preventDefault();
         onDragOver(index);
       }}
       onDragEnd={onDragEnd}
       className={cn(
-        // الشكل الأساسي للصف
-        "group flex items-center gap-1 sm:gap-3 px-2 sm:px-4 py-2.5 border-b border-primary-100",
+        "group flex items-start sm:items-center gap-2 sm:gap-3 px-2 sm:px-4 py-3 sm:py-4 border-b-2 border-primary-50",
         "cursor-pointer transition-colors duration-150",
-        // لما تعدي بالماوس فوقه بيتغير لونه (hover effect)
-        "hover:bg-primary-50",
-        // لو محدد (selected) بيكون ليه لون مميز
         isSelected && "bg-secondary-50",
-        // لو مش مقروء بيكون الخلفية أغمق شوية
-        !email.isRead && "bg-white dark:bg-primary-50/50"
       )}
     >
-      {/* === أيقونة السحب (Grip) === */}
-      {/* بتظهر بس لما تعدي بالماوس فوق الصف */}
-      <GripVertical className="w-4 h-4 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab shrink-0 hidden sm:block" />
-
-      {/* === الـ Checkbox === */}
-      {/* زي <input type="checkbox"> في HTML */}
-      <input
-        type="checkbox"
-        checked={isSelected}
-        onChange={() => toggleSelectEmail(email.id)}
-        className="w-4 h-4 rounded border-primary-300 text-secondary-500 
-                   focus:ring-secondary-500 cursor-pointer accent-secondary-500 shrink-0"
-        onClick={(e) => e.stopPropagation()} // عشان الضغط على الـ checkbox ما يفتحش الإيميل
-      />
-
-      {/* === النجمة (Star) === */}
-      {/* لما تضغط عليها بتتحول من فاضية لملونة والعكس */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleStarEmail(email.id);
-        }}
-        className="p-0.5 hover:bg-primary-100 rounded-full transition-colors shrink-0"
-        aria-label={email.isStarred ? "Unstar email" : "Star email"}
-      >
-        <Star
-          className={cn(
-            "w-4 h-4 sm:w-5 sm:h-5 transition-colors",
-            email.isStarred
-              ? "fill-warning-400 text-warning-400" // نجمة ملونة (مميز)
-              : "text-primary-400"                   // نجمة فاضية (مش مميز)
-          )}
+      <div className="flex items-center pt-0.5 sm:pt-0 gap-1 sm:gap-2 shrink-0">
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => toggleSelectEmail(email.id)}
+          className="w-4 h-4 rounded border-[1.5px] border-primary-400 text-secondary-600 focus:ring-secondary-600 cursor-pointer accent-secondary-600 shrink-0"
+          onClick={(e) => e.stopPropagation()}
         />
-      </button>
 
-      {/* === محتوى الإيميل (الاسم + العنوان + التاريخ) === */}
-      <div className="flex-1 flex items-center min-w-0 gap-2 sm:gap-4">
-        {/* اسم المرسل */}
-        <span
-          className={cn(
-            "w-20 sm:w-28 shrink-0 truncate text-xs sm:text-sm",
-            // لو الإيميل مش مقروء → النص بيكون Bold (عريض)
-            // زي ما تحط class="font-bold" في CSS
-            !email.isRead ? "font-bold text-primary" : "font-normal text-primary-700"
-          )}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleStarEmail(email.id);
+          }}
+          className="p-0.5 rounded-full transition-colors shrink-0 cursor-pointer sm:mr-2"
+          aria-label={email.isStarred ? "Unstar email" : "Star email"}
         >
-          {email.sender}
-        </span>
+          <Star
+            className={cn(
+              "w-4 h-4 sm:w-5 sm:h-5 transition-colors",
+              email.isStarred
+                ? "fill-warning-400 text-warning-400"
+                : "text-primary-400",
+            )}
+          />
+        </button>
+      </div>
 
-        {/* العنوان + المرفقات */}
-        <div className="flex-1 min-w-0 flex items-center gap-2">
+      <div className="flex-1 flex flex-col sm:flex-row sm:items-center min-w-0 gap-1 sm:gap-4 w-full">
+        <div className="flex justify-between items-center w-full sm:w-auto">
+          <Text
+            font={!email.isRead ? "semiBold" : "normal"}
+            color={"primary-800"}
+            size={"xs"}
+            className={"truncate sm:w-28 shrink-0 sm:text-sm"}
+          >
+            {email.sender}
+          </Text>
+
+          {/* Date on Mobile */}
           <span
             className={cn(
-              "truncate text-xs sm:text-sm",
-              !email.isRead ? "font-bold text-primary" : "font-normal text-primary-600"
+              "text-[10px] sm:hidden shrink-0 text-primary-800",
+              !email.isRead ? "font-bold" : "font-normal",
+            )}
+          >
+            {email.date}
+          </span>
+        </div>
+
+        {/* Title + Attachment */}
+        <div className="flex-1 min-w-0 max-w-[650px] flex flex-col items-start gap-1 sm:gap-2">
+          <span
+            className={cn(
+              "truncate w-full text-xs sm:text-sm text-primary-800",
+              !email.isRead ? "font-semibold" : "font-normal",
             )}
           >
             {email.subject}
           </span>
 
-          {/* === المرفق (Attachment) === */}
-          {/* لو الإيميل فيه ملف مرفق بيظهر زر صغير بأيقونة PDF */}
+          {/* === (Attachment) === */}
           {email.hasAttachment && email.attachmentName && (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 bg-primary-50 
-                           border border-primary-200 rounded text-xs text-primary-600 shrink-0">
-              <FileText className="w-3 h-3 text-error-500" />
+            <span className="inline-flex items-center gap-1 sm:gap-2 px-2 py-0.5 border border-primary-200 rounded-3xl text-[10px] sm:text-sm text-primary-500 shrink-0 mt-1 sm:mt-0">
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-error-500" />
               {email.attachmentName}
             </span>
           )}
         </div>
 
-        {/* التاريخ */}
+        {/* Date on Desktop */}
         <span
           className={cn(
-            "text-xs shrink-0 ml-auto pl-2",
-            !email.isRead ? "font-bold text-primary" : "font-normal text-primary-500"
+            "text-xs shrink-0 ml-auto pl-2 hidden sm:block",
+            "group-hover:hidden text-primary-800",
+            !email.isRead ? "font-bold" : "font-normal",
           )}
         >
           {email.date}
         </span>
+
+        {/* Actions on Desktop */}
+        <div className="hidden sm:group-hover:flex items-center gap-1 shrink-0 ml-auto pl-2">
+          <Button
+            size={"icon-sm"}
+            variant={"ghost"}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            aria-label="Archive email"
+            title="Archive"
+          >
+            <Archive className="w-4 h-4 text-primary-800" />
+          </Button>
+
+          <Button
+            size={"icon-sm"}
+            variant={"ghost"}
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteEmail(email.id);
+            }}
+            aria-label="Delete email"
+            title="Delete"
+          >
+            <Trash2 className="w-4 h-4 text-primary-800 hover:text-error-500 transition-colors" />
+          </Button>
+
+          <Button
+            size={"icon-sm"}
+            variant={"ghost"}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleReadEmail(email.id);
+            }}
+            aria-label={email.isRead ? "Mark as unread" : "Mark as read"}
+            title={email.isRead ? "Mark as unread" : "Mark as read"}
+          >
+            <MailOpen className="w-4 h-4 text-primary-800" />
+          </Button>
+        </div>
       </div>
     </div>
   );

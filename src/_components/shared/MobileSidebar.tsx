@@ -19,15 +19,16 @@ const mainNavItems = [
     { name: "Settings", icon: Settings, href: "/settings" },
 ];
 
+// 🔧 إصلاح: الروابط دلوقتي بتستخدم /mails/[folder] زي الـ Desktop Sidebar
 const mailNavItems = [
-    { name: "Inbox", icon: Mail, href: "/mailbox/inbox" },
-    { name: "Sent", icon: Send, href: "/mailbox/sent" },
-    { name: "Starred", icon: Star, href: "/mailbox/starred" },
-    { name: "Spam", icon: AlertCircle, href: "/mailbox/spam" },
-    { name: "Security Reports", icon: ShieldCheck, href: "/mailbox/security" },
-    { name: "Analytics", icon: LineChart, href: "/mailbox/analytics" },
-    { name: "Phishing", icon: Ghost, href: "/mailbox/phishing" },
-    { name: "Malware", icon: ShieldAlert, href: "/mailbox/malware" },
+    { name: "Inbox", icon: Mail, href: "/mails/inbox" },
+    { name: "Sent", icon: Send, href: "/mails/sent" },
+    { name: "Starred", icon: Star, href: "/mails/starred" },
+    { name: "Spam", icon: AlertCircle, href: "/mails/spam" },
+    { name: "Security Reports", icon: ShieldCheck, href: "/mails/security-reports" },
+    { name: "Analytics", icon: LineChart, href: "/mails/analytics" },
+    { name: "Phishing", icon: Ghost, href: "/mails/phishing" },
+    { name: "Malware", icon: ShieldAlert, href: "/mails/malware" },
 ];
 
 export const MobileSidebar = () => {

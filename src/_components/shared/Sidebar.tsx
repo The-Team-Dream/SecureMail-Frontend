@@ -1,19 +1,23 @@
 // ===== الشريط الجانبي (Sidebar) =====
 // الشريط اللي على الشمال فيه كل الروابط
 //
-// 🏠 التغييرات اللي عملناها:
-// 1. صلحنا isMailPage عشان يتعرف على مسار /mailbox (كان بيدور على /mails)
-// 2. غيرنا روابط الإيميل (Inbox, Sent, Starred, إلخ) من <a href="..."> 
-//    لأزرار بتغير الـ state فقط - مفيش تنقل حقيقي بين صفحات
-//    ده بيمنع الـ 404 لأن كل حاجة بتحصل في صفحة واحدة
+// 🏠 التغييرات الجديدة مع Dynamic Routing:
+// بدل ما كان كل المجلدات بتغير الـ state بس في صفحة واحدة
+// دلوقتي كل مجلد ليه رابط حقيقي (Dynamic Route):
+//   /mails/inbox    ← صندوق الوارد
+//   /mails/sent     ← المرسلة
+//   /mails/starred  ← المميزة
+//   /mails/spam     ← السبام
 //
-// 🏠 تشبيه بـ HTML/CSS:
-// بدل ما كل رابط في الـ sidebar يوديك لصفحة HTML مختلفة:
-//   <a href="inbox.html">Inbox</a>  ← كان بيحتاج ملف
-//   <a href="sent.html">Sent</a>    ← كان بيحتاج ملف
-// دلوقتي كل الأزرار بتغير "CSS class" بس:
-//   <button onclick="showInbox()">Inbox</button>  ← بيغير display
-//   <button onclick="showSent()">Sent</button>    ← بيغير display
+// 🏠 تشبيه بـ HTML:
+// في الأول (الطريقة القديمة):
+//   <button onclick="showInbox()">Inbox</button>  ← كل حاجة في صفحة واحدة
+// دلوقتي (الطريقة الجديدة مع Dynamic Routes):
+//   <a href="/mails/inbox">Inbox</a>  ← كل مجلد ليه رابط خاص
+// بس ملف واحد [folder]/page.tsx بيتعامل مع كلهم! ✨
+//
+// 🚨 ملحوظة مهمة: الراوت في الفرونت اسمه "mails"
+// لكن في بيانات الـ API بنستخدم "mailboxes" و "emails" - مش "mails"
 "use client";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -22,26 +26,25 @@ import {
   Send, Star, AlertCircle, ShieldCheck, LineChart, Ghost, ShieldAlert
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
-import { useMailStore } from "@/stores/useMailStore";
 import type { Folder } from "@/types/mail";
 
 // 1. القوائم الأساسية (Main Navigation)
 // دي الروابط الرئيسية - كل واحد فيهم صفحة حقيقية
 const mainNavItems = [
-  { name: "Mailbox", icon: Mail, href: "/mailbox" },
+  { name: "Mailbox", icon: Mail, href: "/mailbox" }, // 🔧 إصلاح: الرابط لازم يروح لـ /mailbox مش /mails/inbox
   { name: "Analytics", icon: BarChart3, href: "/analytics" },
   { name: "Reports", icon: FileText, href: "/reports" },
   { name: "Settings", icon: Settings, href: "/settings" },
 ];
 
-// 2. قوائم الإيميل (Mail Navigation)
-// دي مش روابط حقيقية - بتغير الـ state بس
-// folder: المجلد اللي الزر ده بيمثله
+// 2. قوائم الإيميل (Mail Navigation) - Dynamic Routes!
+// دلوقتي كل مجلد ليه رابط حقيقي بدل ما كان state بس
+// كل واحد بيروح لـ /mails/[folder]
 const mailNavItems: {
   name: string;
   icon: React.ElementType;
@@ -55,35 +58,20 @@ const mailNavItems: {
 
 // 3. قوائم الأمان (Security Navigation) - روابط حقيقية
 const securityNavItems = [
-  { name: "Security Reports", icon: ShieldCheck, href: "/mailbox/security" },
-  { name: "Analytics", icon: LineChart, href: "/mailbox/analytics" },
-  { name: "Phishing", icon: Ghost, href: "/mailbox/phishing" },
-  { name: "Malware", icon: ShieldAlert, href: "/mailbox/malware" },
+  { name: "Security Reports", icon: ShieldCheck, href: "/mails/security-reports" },
+  { name: "Analytics", icon: LineChart, href: "/mails/analytics" },
+  { name: "Phishing", icon: Ghost, href: "/mails/phishing" },
+  { name: "Malware", icon: ShieldAlert, href: "/mails/malware" },
 ];
 
 export const Sidebar = () => {
   const pathname = usePathname();
-  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // === جلب المجلد النشط وأفعال المتجر ===
-  const activeFolder = useMailStore((s) => s.activeFolder);
-  const setActiveFolder = useMailStore((s) => s.setActiveFolder);
-
-  // 🔧 الإصلاح: كان بيتحقق من "/mails" بس الروابط على "/mailbox"
-  // دلوقتي بيتحقق من "/mailbox" صح ✅
+  // === هل إحنا في صفحة الإيميلات؟ ===
+  // لو الرابط بيبدأ بـ /mails → نعرض قائمة الإيميل
+  // لو لا → نعرض القائمة الرئيسية
   const isMailPage = pathname.startsWith("/mails");
-
-  // === لما تضغط على رابط إيميل (Inbox, Sent, إلخ) ===
-  // بدل ما يروح لصفحة جديدة (ويطلع 404)
-  // بيغير المجلد في المتجر وبيروح لصفحة inbox
-  const handleMailNavClick = (folder: Folder) => {
-    setActiveFolder(folder);
-    // لو مش في صفحة inbox → روح ليها
-    if (!pathname.startsWith("/mailbox/inbox")) {
-      router.push("/mailbox/inbox");
-    }
-  };
 
   return (
     <aside
@@ -126,14 +114,18 @@ export const Sidebar = () => {
       <nav className="space-y-1 flex-1 mt-4 relative">
         {isMailPage ? (
           <>
-            {/* === روابط الإيميل (State-based) === */}
+            {/* === روابط الإيميل (Dynamic Routes) === */}
+            {/* دلوقتي كل رابط هو <Link> حقيقي بيروح لـ /mails/[folder] */}
+            {/* الـ [folder]/page.tsx هيتعامل مع المجلد تلقائي */}
             {mailNavItems.map((item) => {
-              // هل المجلد ده هو النشط؟
-              const isActive = activeFolder === item.folder && pathname.startsWith("/mailbox/inbox");
+              // === هل الرابط ده هو النشط؟ ===
+              // بنقارن الـ pathname الحالي مع رابط المجلد
+              // مثل: pathname="/mails/inbox" === "/mails/inbox" → true ✅
+              const isActive = pathname === `/mails/${item.folder}`;
               return (
-                <button
+                <Link
                   key={item.name}
-                  onClick={() => handleMailNavClick(item.folder)}
+                  href={`/mails/${item.folder}`}
                   title={isCollapsed ? item.name : ""}
                   className={cn(
                     "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
@@ -172,7 +164,7 @@ export const Sidebar = () => {
                       )}
                     />
                   )}
-                </button>
+                </Link>
               );
             })}
 

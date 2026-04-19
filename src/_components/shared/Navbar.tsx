@@ -5,7 +5,6 @@ import { Bell, Check, Mail, Plus } from "lucide-react";
 import Logo from "./Logo";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
-import MobileSidebar from "./MobileSidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +21,7 @@ import Image from "next/image";
 import { initialAccounts } from "@/constants/MOCKDATA";
 import { usePathname } from "next/dist/client/components/navigation";
 import { Input } from "./Input";
+import { MobileSidebar } from "./MobileSidebar";
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -42,10 +42,10 @@ export const Navbar = () => {
     <nav className="flex items-center justify-between py-6 px-4.5 bg-background sticky top-0 z-50 shadow-[0_4px_16px_0_rgba(0,0,0,0.1)]">
       <div className="flex items-center gap-2">
         <MobileSidebar />
-        <Logo width={40} height={40} />
+        <Logo width={40} height={40} textSize={'2xl'} />
         {isMailPage && (
-          <div className="ml-18">
-            <Input className="w-full" type="search" leftIcon={<Mail className="w-5 h-5 text-primary-500" />} placeholder="Search Email..." />
+          <div className="ml-18 hidden md:block">
+            <Input className="w-130 bg-primary-100/20" type="search" leftIcon={<Mail className="w-5 h-5 text-primary-500" />} placeholder="Search Email..." />
           </div>
         )}
       </div>
@@ -123,8 +123,8 @@ export const Navbar = () => {
                           <div className="flex items-center gap-3">
                             <div
                               className={`size-10 rounded-full flex items-center justify-center border overflow-hidden ${user.active
-                                  ? "bg-secondary-100 border-secondary-900"
-                                  : "bg-primary-100 border-primary-500"
+                                ? "bg-secondary-100 border-secondary-900"
+                                : "bg-primary-100 border-primary-500"
                                 }`}
                             >
                               <Text
