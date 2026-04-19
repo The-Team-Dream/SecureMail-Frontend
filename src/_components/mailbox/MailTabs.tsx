@@ -4,7 +4,7 @@ import { Inbox, Tag, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Classification } from "@/types/mail";
 import { useMailStore } from "@/stores/useMailStore";
-import { MailList } from "./mailList";
+import { MailList } from "./MailList";
 
 const tabs: {
   id: Classification;

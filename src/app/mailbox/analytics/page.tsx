@@ -3,9 +3,10 @@ import Container from "@/_components/shared/Container";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { AnalyticsChart } from "./AnalyticsChart";
-import { StatItem, NotificationItem, stats, notifications } from "./MOCK_DATA";
 import { Text } from "@/_components/shared/Text";
+
+import { AnalyticsChart } from "./AnalyticsChart";
+import { NotificationItem, notifications, StatItem, stats } from "./MOCK_DATA";
 
 const containerVariants = {
   hidden: { opacity: 0 },

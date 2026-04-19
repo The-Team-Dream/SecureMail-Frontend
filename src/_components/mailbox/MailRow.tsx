@@ -4,7 +4,6 @@ import React from "react";
 import {
   Star,
   FileText,
-  GripVertical,
   Trash2,
   MailOpen,
   Archive,

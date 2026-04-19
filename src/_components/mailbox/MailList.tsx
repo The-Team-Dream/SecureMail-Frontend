@@ -1,40 +1,22 @@
-// ===== قائمة الإيميلات (Mail List) =====
-// الكومبوننت ده بيعرض كل الإيميلات في الصفحة الحالية
-// بيستخدم MailRow لعرض كل إيميل + بيدعم السحب والإفلات (Drag & Drop)
-//
-// 🔧 ملحوظة مهمة عن Zustand:
-// لازم نشترك (subscribe) في القيم الأساسية (emails, activeFolder, إلخ)
-// مش بس دوال الـ getter، عشان React يعرف يعمل re-render لما البيانات تتغير
 "use client";
 
 import { useState, useCallback } from "react";
 import { Inbox } from "lucide-react";
-import { MailRow } from "./mailRow";
+import { MailRow } from "./MailRow";
 import { useMailStore } from "@/stores/useMailStore";
 import { Text } from "../shared/Text";
 
 export const MailList = () => {
-  // === الاشتراك في القيم الأساسية عشان React يعمل re-render ===
-  // لازم نجيب القيم دي مباشرة مش بس الـ getters
-  // لأن Zustand بيراقب القيم اللي بنجيبها بالـ selector
-  // لو جبنا الـ getter function بس، مش هيعرف إن البيانات اتغيرت
   const emails = useMailStore((s) => s.emails);
   const activeFolder = useMailStore((s) => s.activeFolder);
   const activeClassification = useMailStore((s) => s.activeClassification);
   const currentPage = useMailStore((s) => s.currentPage);
   const searchQuery = useMailStore((s) => s.searchQuery);
 
-  // === جلب الدوال من المتجر ===
   const getPagedEmails = useMailStore((s) => s.getPagedEmails);
   const reorderEmails = useMailStore((s) => s.reorderEmails);
-
-  // === حساب الإيميلات المعروضة ===
-  // الآن React هيعمل re-render تلقائي لما أي قيمة من اللي فوق تتغير
-  // وبالتالي getPagedEmails() هترجع النتيجة الصح
   const pagedEmails = getPagedEmails();
-
   const [dragIndex, setDragIndex] = useState<number | null>(null);
-
   const handleDragStart = useCallback((index: number) => {
     setDragIndex(index);
   }, []);
