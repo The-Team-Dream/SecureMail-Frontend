@@ -1,0 +1,61 @@
+
+{
+  "project_name": "SecureMail - Web Client",
+  "tech_stack": ["React", "Next.js", "Zustand", "shadcn/ui", "Tailwind CSS"],
+  "developer_level": "Beginner (Knows only basic HTML/CSS. Needs concepts explained by comparing them to HTML/CSS)",
+  "ui_ux_requirements": {
+    "reference": "Gmail UI Clone",
+    "tabs": ["Primary", "Promotions", "Social", "Updates"],
+    "pagination": {
+      "max_items_per_page": 18,
+      "type": "Page-based switching"
+    },
+    "features": [
+      "Select All checkbox",
+      "Drag and Drop (Reorder emails)",
+      "Unread emails must have bold text formatting",
+      "Delete functionality (Moves to trash)",
+      "Toggle Read/Unread status",
+      "Toggle Starred status"
+    ]
+  },
+  "mock_data_schema": {
+    "Email": {
+      "id": "string",
+      "subject": "string",
+      "bodyText": "string",
+      "sender": "string",
+      "isRead": "boolean",
+      "isStarred": "boolean",
+      "folder": "inbox | sent | trash | spam | phishing",
+      "classification": "primary | promotions | social | updates"
+    }
+  },
+  "api_endpoints_reference": [
+    {
+      "method": "GET",
+      "endpoint": "/mailboxes/:mailboxId/inbox?page=1&limit=18",
+      "description": "List inbox emails (paginated)"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/mailboxes/:mailboxId/sent",
+      "description": "List sent emails"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/mailboxes/:mailboxId/emails/:id",
+      "description": "Delete email (Moves to TRASH first)"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/mailboxes/:mailboxId/emails/:id/read",
+      "description": "Mark email as read or unread"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/mailboxes/:mailboxId/emails/:id/reclassify",
+      "description": "Override classification and move folder"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
-import { Navbar } from "@/_components/dashboard/layout/Navbar";
-import { Sidebar } from "@/_components/dashboard/layout/Sidebar";
+import { Navbar } from "@/_components/shared/Navbar";
+import { Sidebar } from "@/_components/shared/Sidebar";
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-col h-screen">
