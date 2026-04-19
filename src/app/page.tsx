@@ -1,5 +1,5 @@
-import Mailbox from "./(dashboard)/mailbox/page";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
-  return <Mailbox />;
+  redirect("/dashboard/mailboxes");
 }
