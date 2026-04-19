@@ -27,6 +27,19 @@ build/
 .env.production.local
 
 # =========================
+# Environment variables
+# =========================
+# Ignore real env files (contain secrets)
+.env
+.env.docker
+.env.standalone
+
+# Allow example templates
+!.env.example
+!.env.docker.example
+!.env.standalone.example
+
+# =========================
 # Logs
 # =========================
 logs
