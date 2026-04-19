@@ -18,50 +18,31 @@ import { cn } from "@/lib/utils";
 import { Text } from "../shared/Text";
 
 export const MailToolbar = () => {
-  // ──────── الحل الصحيح: استخدام الـ store مباشرة بدون selectors مكسورة ────────
-  // 🔧 المشكلة كانت: Zustand مبيعملش re-render لما نجيب getter function
-  // لأن reference الدالة ثابت ومبيتغيرش
-  // الحل: نستخدم useMailStore.getState() جوه الـ render مع الاشتراك في القيم الأساسية
-
-  // === الاشتراك في كل القيم اللي بنعتمد عليها ===
-  // لما أي قيمة من دول تتغير، React هيعمل re-render للكومبوننت
   const currentPage = useMailStore((s) => s.currentPage);
   const selectedIds = useMailStore((s) => s.selectedIds);
 
-  // === الاشتراك في القيم اللي الـ filtering بيعتمد عليها ===
-  // من غير الاشتراك ده، تغيير التاب أو المجلد مش هيحدّث العداد
   const storeEmails = useMailStore((s) => s.emails);
   const storeFolder = useMailStore((s) => s.activeFolder);
   const storeClassification = useMailStore((s) => s.activeClassification);
   const storeSearch = useMailStore((s) => s.searchQuery);
 
-  // === جلب الأفعال (Actions) - دي ثابتة ومش محتاجة re-render ===
   const setCurrentPage = useMailStore((s) => s.setCurrentPage);
   const selectAllOnPage = useMailStore((s) => s.selectAllOnPage);
   const deselectAll = useMailStore((s) => s.deselectAll);
 
-  // ──────── حساب القيم المشتقة مباشرة (Inline Computed) ────────
-  // بدل ما نستخدم الـ getters من المتجر (اللي مش reactive)
-  // بنحسب القيم هنا مباشرة من البيانات اللي اشتركنا فيها
-
-  // === فلترة الإيميلات (نفس لوجيك getFilteredEmails) ===
   const ITEMS_PER_PAGE = 18;
 
   let filtered = storeEmails;
 
-  // --- فلترة حسب المجلد ---
   if (storeFolder === "starred") {
     filtered = filtered.filter((e) => e.isStarred && e.folder !== "trash");
   } else {
     filtered = filtered.filter((e) => e.folder === storeFolder);
   }
-
-  // --- فلترة حسب التصنيف (التاب) - في صندوق الوارد فقط ---
   if (storeFolder === "inbox") {
     filtered = filtered.filter((e) => e.classification === storeClassification);
   }
 
-  // --- فلترة حسب البحث ---
   if (storeSearch.trim()) {
     const q = storeSearch.toLowerCase();
     filtered = filtered.filter(
@@ -71,24 +52,20 @@ export const MailToolbar = () => {
     );
   }
 
-  // === حساب الصفحات ===
   const total = filtered.length;
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE) || 1;
   const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
   const pagedEmails = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
   const pagedIds = pagedEmails.map((e) => e.id);
 
-  // === معلومات الـ Pagination ===
   const start = total === 0 ? 0 : startIdx + 1;
   const end = total === 0 ? 0 : Math.min(currentPage * ITEMS_PER_PAGE, total);
 
-  // === حالة الـ Checkbox ===
   const isAllSelected =
     pagedIds.length > 0 && pagedIds.every((id) => selectedIds.includes(id));
   const isSomeSelected =
     pagedIds.some((id) => selectedIds.includes(id)) && !isAllSelected;
 
-  // ──────── أزرار الصفحات ────────
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -147,7 +124,6 @@ export const MailToolbar = () => {
           {total === 0 ? "0" : `${start}-${end}`} of {total}
         </Text>
 
-        {/* === زر الصفحة السابقة < === */}
         <button
           onClick={handlePrevPage}
           disabled={currentPage <= 1}

@@ -13,7 +13,7 @@
 
 import { create } from "zustand";
 import type { Email, Folder, Classification } from "@/types/mail";
-import { mockEmails } from "@/app/mails/[folder]/MOCKDATA";
+import { mockEmails } from "@/app/mailbox/[folder]/MOCKDATA";
 
 // === ثابت: عدد الإيميلات في كل صفحة ===
 // زي ما تقول: أنا عايز أعرض 18 صف بس في كل صفحة من الجدول

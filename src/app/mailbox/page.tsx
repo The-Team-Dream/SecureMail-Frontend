@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 const Dashboard = () => {
-  redirect("/mailbox");
+  redirect("/mailbox/inbox");
 };
 
 export default Dashboard;

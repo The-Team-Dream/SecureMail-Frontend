@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ConnectedAccounts } from "./_components/ConnectedAccounts";
 import { AddAccountWizard } from "./_components/AddAccountWizard";
 
-export default function Mailbox() {
+export default function Mailboxes() {
   const [view, setView] = useState<'list' | 'add'>('list');
 
   return (

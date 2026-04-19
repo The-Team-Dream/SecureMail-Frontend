@@ -2,10 +2,10 @@ import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { Trash2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PersonalInfo from "@/app/(dashboard)/settings/_components/PersonalInfo";
-import Security from "@/app/(dashboard)/settings/_components/Security";
-import SessionManagement from "@/app/(dashboard)/settings/_components/SessionManagement";
-import Preference from "@/app/(dashboard)/settings/_components/Preference";
+import PersonalInfo from "@/app/dashboard/settings/_components/PersonalInfo";
+import Security from "@/app/dashboard/settings/_components/Security";
+import SessionManagement from "@/app/dashboard/settings/_components/SessionManagement";
+import Preference from "@/app/dashboard/settings/_components/Preference";
 
 const Settings = () => {
   return (

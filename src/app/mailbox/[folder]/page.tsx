@@ -2,7 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useMailStore } from "@/stores/useMailStore";
-import { MailInbox } from "@/_components/mails/mailInbox";
+import { MailInbox } from "@/_components/mailbox/MailInbox";
 import type { Folder } from "@/types/mail";
 const validFolders: Folder[] = [
   "inbox",
