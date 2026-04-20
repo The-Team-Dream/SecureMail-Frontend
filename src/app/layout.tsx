@@ -48,7 +48,6 @@ export default function RootLayout({
                 className: "",
                 success: {
                   style: {
-                    padding: "16px 24px",
                     backgroundColor: "var(--secondary-800)",
                     color: "#ffffff",
                   },
@@ -57,7 +56,6 @@ export default function RootLayout({
                 error: {
                   style: {
                     backgroundColor: "var(--error-600)",
-                    padding: "16px 24px",
                     color: "#ffffff",
                   },
                   icon: <X className="w-4 h-4 text-white" />,
