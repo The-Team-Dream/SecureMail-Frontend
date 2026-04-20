@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-
-export default async function Home() {
+const Dashboard = () => {
   redirect("/dashboard/mailboxes");
-}
+};
+
+export default Dashboard;

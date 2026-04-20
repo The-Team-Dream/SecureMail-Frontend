@@ -1,0 +1,153 @@
+"use client";
+
+import React from "react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+} from "lucide-react";
+import { useMailStore } from "@/stores/useMailStore";
+import { cn } from "@/lib/utils";
+import { Text } from "../shared/Text";
+import toast from "react-hot-toast";
+
+export const MailToolbar = () => {
+  const currentPage = useMailStore((s) => s.currentPage);
+  const selectedIds = useMailStore((s) => s.selectedIds);
+
+  const storeEmails = useMailStore((s) => s.emails);
+  const storeFolder = useMailStore((s) => s.activeFolder);
+  const storeClassification = useMailStore((s) => s.activeClassification);
+  const storeSearch = useMailStore((s) => s.searchQuery);
+
+  const setCurrentPage = useMailStore((s) => s.setCurrentPage);
+  const selectAllOnPage = useMailStore((s) => s.selectAllOnPage);
+  const deselectAll = useMailStore((s) => s.deselectAll);
+
+  const ITEMS_PER_PAGE = 18;
+
+  let filtered = storeEmails;
+
+  if (storeFolder === "starred") {
+    filtered = filtered.filter((e) => e.isStarred && e.folder !== "trash");
+  } else {
+    filtered = filtered.filter((e) => e.folder === storeFolder);
+  }
+  if (storeFolder === "inbox") {
+    filtered = filtered.filter((e) => e.classification === storeClassification);
+  }
+
+  if (storeSearch.trim()) {
+    const q = storeSearch.toLowerCase();
+    filtered = filtered.filter(
+      (e) =>
+        e.subject.toLowerCase().includes(q) ||
+        e.sender.toLowerCase().includes(q),
+    );
+  }
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE) || 1;
+  const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pagedEmails = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+  const pagedIds = pagedEmails.map((e) => e.id);
+
+  const start = total === 0 ? 0 : startIdx + 1;
+  const end = total === 0 ? 0 : Math.min(currentPage * ITEMS_PER_PAGE, total);
+
+  const isAllSelected =
+    pagedIds.length > 0 && pagedIds.every((id) => selectedIds.includes(id));
+  const isSomeSelected =
+    pagedIds.some((id) => selectedIds.includes(id)) && !isAllSelected;
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handleRefresh = () => {
+    deselectAll();
+    toast.success("تم تحديث صندوق البريد");
+  };
+
+  return (
+    <div className="flex items-center justify-between px-2 sm:px-4 py-2">
+      {/* ══════  Checkbox + Refresh ══════ */}
+      <div className="flex items-center gap-1">
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            checked={isAllSelected}
+            ref={(el) => {
+              if (el) {
+                el.indeterminate = isSomeSelected;
+              }
+            }}
+            onChange={selectAllOnPage}
+            className="w-4 h-4 rounded border-primary-900 text-secondary-500 focus:ring-secondary-500 cursor-pointer accent-secondary-500"
+            aria-label="Select all emails on this page"
+          />
+
+          <button
+            onClick={selectAllOnPage}
+            className="p-0.5 hover:bg-primary-100 rounded transition-colors cursor-pointer"
+            aria-label="Toggle select all"
+          >
+            <ChevronDown className="w-4 h-4 text-primary-900" />
+          </button>
+        </div>
+
+        <button
+          onClick={handleRefresh}
+          className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer ml-1"
+          aria-label="Refresh emails"
+        >
+          <RefreshCw className="w-4 h-4 text-primary-900" />
+        </button>
+      </div>
+
+      {/* ══════ Pagination ══════ */}
+      <div className="flex items-center gap-1 sm:gap-2">
+        <Text className=" text-primary select-none">
+          {total === 0 ? "0" : `${start}-${end}`} of {total}
+        </Text>
+
+        <button
+          onClick={handlePrevPage}
+          disabled={currentPage <= 1}
+          className={cn(
+            "p-1 rounded-full transition-colors cursor-pointer",
+            currentPage <= 1
+              ? "text-primary-300 cursor-not-allowed"
+              : "text-primary hover:bg-primary-100",
+          )}
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage >= totalPages}
+          className={cn(
+            "p-1 rounded-full transition-colors cursor-pointer",
+            currentPage >= totalPages
+              ? "text-primary-300 cursor-not-allowed"
+              : "text-primary hover:bg-primary-100",
+          )}
+          aria-label="Next page"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  );
+};

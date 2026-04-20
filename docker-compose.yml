@@ -1,0 +1,37 @@
+# ════════════════════════════════════════════════════════════════════════════
+# SecureMail-Frontend — STANDALONE docker-compose
+#
+# Runs only the Next.js frontend. The backend must be running separately
+# (or via root docker-compose) for API calls to succeed.
+#
+# Usage: cd SecureMail-Frontend && docker compose up --build
+# ════════════════════════════════════════════════════════════════════════════
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_API_URL is baked into the JS bundle at build time.
+        # Browser → Backend: always uses localhost because the browser
+        # accesses via the host machine's port mapping, not the Docker network.
+        NEXT_PUBLIC_API_URL: "http://localhost:3000"
+    container_name: securemail-frontend
+    env_file: .env.standalone
+    ports:
+      - "3001:3001"
+    healthcheck:
+      # Check the sign-in page (public route, no auth needed)
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3001/sign-in', r => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))\""]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 128m
