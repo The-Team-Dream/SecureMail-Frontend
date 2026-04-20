@@ -7,7 +7,15 @@
  * زي فولدرات الملفات على الكمبيوتر - كل إيميل لازم يكون في فولدر واحد
  * 🚨 ملحوظة: بنستخدم "mailbox" مش "mails" عشان يتوافق مع الـ API
  */
-export type Folder = "inbox" | "sent" | "starred" | "trash" | "spam" | "phishing" | "malware";
+export type Folder =
+  | "inbox"
+  | "sent"
+  | "starred"
+  | "trash"
+  | "spam"
+  | "phishing"
+  | "malware"
+  | "archive";
 
 /**
  * تصنيف الإيميل - هل هو أساسي؟ ترويجي؟ اجتماعي؟ تحديثات؟
@@ -15,22 +23,17 @@ export type Folder = "inbox" | "sent" | "starred" | "trash" | "spam" | "phishing
  */
 export type Classification = "primary" | "promotions" | "social" | "updates";
 
-/**
- * شكل بيانات الإيميل الواحد
- * كل إيميل بيحتوي على كل المعلومات دي
- * الأسماء مطابقة لـ api_structure.json تماماً
- */
 export interface Email {
-  id: string;                    // رقم فريد - زي رقم الهوية لكل إيميل
-  subject: string;               // عنوان الإيميل
-  bodyText: string;              // محتوى/نص الإيميل
-  sender: string;                // اسم المرسل
-  senderEmail: string;           // إيميل المرسل
-  isRead: boolean;               // هل الإيميل مقروء؟ true = مقروء، false = جديد
-  isStarred: boolean;            // هل عليه نجمة؟ true = مميز
-  folder: Folder;                // في أنهي مجلد (صندوق الوارد، المرسلة، إلخ)
-  classification: Classification; // تصنيفه (أساسي، ترويجي، إلخ)
-  date: string;                  // تاريخ الإيميل
-  hasAttachment: boolean;        // هل فيه ملف مرفق؟
-  attachmentName?: string;       // اسم الملف المرفق (اختياري)
+  id: string;
+  subject: string;
+  bodyText: string;
+  sender: string;
+  senderEmail: string;
+  isRead: boolean;
+  isStarred: boolean;
+  folder: Folder;
+  classification: Classification;
+  date: string;
+  hasAttachment: boolean;
+  attachmentName?: string;
 }

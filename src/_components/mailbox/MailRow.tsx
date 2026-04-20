@@ -1,18 +1,13 @@
 "use client";
 
 import React from "react";
-import {
-  Star,
-  FileText,
-  Trash2,
-  MailOpen,
-  Archive,
-} from "lucide-react";
+import { Star, FileText, Trash2, MailOpen, Archive } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Email } from "@/types/mail";
 import { useMailStore } from "@/stores/useMailStore";
 import { Text } from "../shared/Text";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 interface MailRowProps {
   email: Email;
@@ -32,6 +27,7 @@ export const MailRow = ({
   const toggleSelectEmail = useMailStore((s) => s.toggleSelectEmail);
   const toggleStarEmail = useMailStore((s) => s.toggleStarEmail);
   const deleteEmail = useMailStore((s) => s.deleteEmail);
+  const archiveEmail = useMailStore((s) => s.archiveEmail);
   const toggleReadEmail = useMailStore((s) => s.toggleReadEmail);
   const selectedIds = useMailStore((s) => s.selectedIds);
   const isSelected = selectedIds.includes(email.id);
@@ -48,7 +44,7 @@ export const MailRow = ({
       className={cn(
         "group flex items-start sm:items-center gap-2 sm:gap-3 px-2 sm:px-4 py-3 sm:py-4 border-b-2 border-primary-50",
         "cursor-pointer transition-colors duration-150",
-        isSelected && "bg-secondary-50",
+        isSelected && "bg-primary-50",
       )}
     >
       <div className="flex items-center pt-0.5 sm:pt-0 gap-1 sm:gap-2 shrink-0">
@@ -139,6 +135,10 @@ export const MailRow = ({
             variant={"ghost"}
             onClick={(e) => {
               e.stopPropagation();
+              archiveEmail(email.id);
+              toast.success("email has been archived", {
+                position: "bottom-left",
+              });
             }}
             aria-label="Archive email"
             title="Archive"
@@ -152,6 +152,9 @@ export const MailRow = ({
             onClick={(e) => {
               e.stopPropagation();
               deleteEmail(email.id);
+              toast.success("email has been deleted", {
+                position: "bottom-left",
+              });
             }}
             aria-label="Delete email"
             title="Delete"
@@ -165,6 +168,12 @@ export const MailRow = ({
             onClick={(e) => {
               e.stopPropagation();
               toggleReadEmail(email.id);
+              toast.success(
+                email.isRead
+                  ? "email has been marked as unread"
+                  : "email has been marked as read",
+                { position: "bottom-left" },
+              );
             }}
             aria-label={email.isRead ? "Mark as unread" : "Mark as read"}
             title={email.isRead ? "Mark as unread" : "Mark as read"}

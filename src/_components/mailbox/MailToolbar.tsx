@@ -1,9 +1,3 @@
-// ===== شريط الأدوات (Mail Toolbar) =====
-// الشريط اللي فوق تابات التصنيف - فيه:
-// 1. Checkbox لتحديد كل الإيميلات
-// 2. زر تحديث (Refresh)
-// 3. معلومات الصفحة (مثل "1-18 of 50")
-// 4. أزرار التنقل بين الصفحات (< و >)
 "use client";
 
 import React from "react";
@@ -16,6 +10,7 @@ import {
 import { useMailStore } from "@/stores/useMailStore";
 import { cn } from "@/lib/utils";
 import { Text } from "../shared/Text";
+import toast from "react-hot-toast";
 
 export const MailToolbar = () => {
   const currentPage = useMailStore((s) => s.currentPage);
@@ -80,6 +75,7 @@ export const MailToolbar = () => {
 
   const handleRefresh = () => {
     deselectAll();
+    toast.success("تم تحديث صندوق البريد");
   };
 
   return (
