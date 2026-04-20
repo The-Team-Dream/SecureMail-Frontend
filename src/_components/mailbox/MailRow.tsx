@@ -138,6 +138,10 @@ export const MailRow = ({
               archiveEmail(email.id);
               toast.success("email has been archived", {
                 position: "bottom-left",
+                style: {
+                  backgroundColor: "#000",
+                  color: "#fff",
+                },
               });
             }}
             aria-label="Archive email"
@@ -154,6 +158,10 @@ export const MailRow = ({
               deleteEmail(email.id);
               toast.success("email has been deleted", {
                 position: "bottom-left",
+                style: {
+                  backgroundColor: "#000",
+                  color: "#fff",
+                },
               });
             }}
             aria-label="Delete email"
@@ -172,7 +180,13 @@ export const MailRow = ({
                 email.isRead
                   ? "email has been marked as unread"
                   : "email has been marked as read",
-                { position: "bottom-left" },
+                {
+                  position: "bottom-left",
+                  style: {
+                    backgroundColor: "#000",
+                    color: "#fff",
+                  },
+                },
               );
             }}
             aria-label={email.isRead ? "Mark as unread" : "Mark as read"}
