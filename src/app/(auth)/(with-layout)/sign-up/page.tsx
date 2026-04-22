@@ -13,12 +13,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { Text } from "@/_components/shared/Text";
 import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
+import { Spinner } from "@/components/ui/spinner";
+import { handleApiErrors } from "@/utils/form-utils";
 export default function Signup() {
   const {
     handleSubmit,
     register,
     formState: { errors },
     clearErrors,
+    setError,
     reset,
   } = useForm<ISignUp>({
     mode: "onBlur",
@@ -42,7 +45,9 @@ export default function Signup() {
   const onSubmit: SubmitHandler<ISignUp> = (data) => {
     const { acceptTerms, ...formData } = data;
     void acceptTerms;
-    signupMutation.mutate(formData);
+    signupMutation.mutate(formData, {
+      onError: (err) => handleApiErrors(err, setError),
+    });
   };
 
   return (
@@ -63,7 +68,7 @@ export default function Signup() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             type="text"
-            placeholder="Username"
+            placeholder="Full Name"
             leftIcon={<User />}
             {...register("username", {
               onChange: () => {
@@ -113,7 +118,6 @@ export default function Signup() {
             leftIcon={<LockIcon />}
             error={errors?.confirmPassword?.message}
           />
-          
           {/* Checkbox */}
           <div className="relative">
             <div className="flex items-center gap-2">
@@ -131,9 +135,13 @@ export default function Signup() {
               />
               <label htmlFor="terms" className="text-primary font-medium">
                 I agree{" "}
-                <span className="underline font-bold cursor-pointer">
+                <Text
+                  as={"span"}
+                  font={"bold"}
+                  className="underline cursor-pointer"
+                >
                   Terms & Conditions
-                </span>
+                </Text>
               </label>
             </div>
             <AnimatePresence>
@@ -158,14 +166,24 @@ export default function Signup() {
               )}
             </AnimatePresence>
           </div>
-          {signupMutation.isError && (
-            <p className="text-error">
-              {signupMutation.error?.response?.data?.message ||
-                "An error occurred"}
-            </p>
-          )}{" "}
-          <Button type="submit" disabled={signupMutation.isPending} size={"lg"}>
-            {signupMutation.isPending ? "Creating an account" : "Register Now"}
+
+          {errors.root && (
+            <div className="p-2 bg-error-500 rounded-lg flex items-start gap-2">
+              <CircleAlert className="w-4 h-4 text-error-100" />
+              <Text size={"xs"} color={"error-50"} className="text-left">
+                {errors.root.message}
+              </Text>
+            </div>
+          )}
+          <Button size={"lg"} type="submit" disabled={signupMutation.isPending}>
+            {signupMutation.isPending ? (
+              <>
+                <Spinner />
+                <Text className="text-white">Creating Account...</Text>
+              </>
+            ) : (
+              <span>Sign Up</span>
+            )}
           </Button>
         </form>
         {/* OAuth Buttons */}

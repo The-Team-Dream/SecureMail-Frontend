@@ -2,7 +2,10 @@
 import { Input } from "@/_components/shared/Input";
 import { useForgetPassword } from "@/APIs/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { forgotPasswordSchema, IForgotPassword } from "@/schemas/auth/forgotPassword";
+import {
+  forgotPasswordSchema,
+  IForgotPassword,
+} from "@/schemas/auth/forgotPassword";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail } from "lucide-react";
 import Image from "next/image";
@@ -11,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Text } from "@/_components/shared/Text";
+import { Spinner } from "@/components/ui/spinner";
 export default function ForgotPassword() {
   const {
     handleSubmit,
@@ -23,22 +27,21 @@ export default function ForgotPassword() {
     resolver: zodResolver(forgotPasswordSchema),
   });
   const router = useRouter();
-
   const { mutate, isPending } = useForgetPassword({
-    onSuccess: () => {
-      router.push("/reset-password");
-      toast.success("Signed in successfully");
+    onSuccess: (res, variables) => {
+      router.push(
+        `/reset-password?email=${encodeURIComponent(variables.email)}`,
+      );
+      toast.success(res.data.message);
     },
-    // onError: (err) => {
-    //   toast.error(err?.response?.data?.message || "login failed");
-    // },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Something went wrong");
+    },
   });
 
   const onSubmit: SubmitHandler<IForgotPassword> = (data) => {
     mutate(data);
     console.log(data);
-
-    router.push("/reset-password");
   };
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
@@ -78,7 +81,7 @@ export default function ForgotPassword() {
                 error={errors?.email?.message}
               />
               <Button size={"lg"} type="submit" disabled={isPending}>
-                Send
+                {isPending ? <Spinner /> : "Send"}
               </Button>
             </form>
             <Link className="hover:underline font-medium" href={"/sign-in"}>

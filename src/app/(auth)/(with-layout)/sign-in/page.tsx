@@ -2,7 +2,7 @@
 import Cookies from "js-cookie";
 import { useSignin } from "@/APIs/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LockIcon, Mail } from "lucide-react";
+import { Loader2, LockIcon, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Input } from "@/_components/shared/Input";
@@ -13,6 +13,7 @@ import { ISignin, signinSchema } from "@/schemas/auth/signin";
 import toast from "react-hot-toast";
 import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
 import { Text } from "@/_components/shared/Text";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Signin() {
   const {
@@ -30,23 +31,22 @@ export default function Signin() {
   const router = useRouter();
   const signinMutation = useSignin({
     onSuccess: (res) => {
-      const token = res?.data?.token;
+      const token = res?.data.token;
       if (token) {
         Cookies.set("token", token, { path: "/", expires: 1 });
       }
-      toast.success("Signed in successfully");
+      toast.success(res?.message);
       reset();
-      router.push("/");
+      router.push("/dashboard");
     },
-    // onError: (err) => {
-    //   toast.error(err?.response?.data?.message || "login failed");
-    // },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "login failed");
+    },
   });
 
   const onSubmit: SubmitHandler<ISignin> = (data) => {
     signinMutation.mutate(data);
     console.log(data);
-    router.push("/");
   };
 
   return (
@@ -103,8 +103,8 @@ export default function Signin() {
                 "An error occurred"}
             </p>
           )}
-          <Button type="submit" disabled={signinMutation.isPending} size={"lg"}>
-            {signinMutation.isPending ? "LOGGING IN..." : "LOGIN"}
+          <Button size={"lg"} type="submit" disabled={signinMutation.isPending}>
+            {signinMutation.isPending ? <Spinner /> : "Sign in"}
           </Button>
         </form>
         {/* OAuth Buttons */}

@@ -13,6 +13,8 @@ import { useResendOtp, useVerifyOtp } from "@/APIs/hooks/useAuth";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Text } from "@/_components/shared/Text";
+import { Spinner } from "@/components/ui/spinner";
+import { AxiosError } from "axios";
 
 function VerifyOtpContent() {
   const [otp, setOtp] = useState("");
@@ -21,22 +23,21 @@ function VerifyOtpContent() {
   const email = searchParams.get("email") ?? "";
   const router = useRouter();
   const { mutate, isPending } = useVerifyOtp({
-    onSuccess: () => {
-      router.push("/");
-      toast.success("Your email has been verified");
-      console.log(otp);
+    onSuccess: (res) => {
+      toast.success(res.data.message);
+      router.push("/sign-in");
     },
-    onError: () => {
-      toast.error("Invalid Otp");
+    onError: (error: any) => {
+      toast.error(error?.response?.data.message || "Error");
     },
   });
 
   const { mutate: resendOtp, isPending: resendPending } = useResendOtp({
-    onSuccess: () => {
-      toast.success("Otp sent successfully");
+    onSuccess: (res) => {
+      toast.success(res.data.message);
     },
-    onError: () => {
-      toast.error("Failed to send otp");
+    onError: (error: AxiosError<{ message: string }>) => {
+      toast.error(error?.response?.data.message || "Error");
     },
   });
   const handleOtpChange = (value: string) => {
@@ -45,7 +46,6 @@ function VerifyOtpContent() {
   };
 
   const handleVerify = () => {
-    router.push("/");
     if (otp.length === 6) {
       mutate({ email, otp });
     } else {
@@ -55,7 +55,8 @@ function VerifyOtpContent() {
 
   const handleResend = () => {
     if (resend) {
-      // resendOtp({ email });
+      resendOtp({ email });
+      toast.success("OTP sent successfully");
       setOtp("");
       resetTimer();
     }
@@ -126,10 +127,10 @@ function VerifyOtpContent() {
             className="group"
             size={"lg"}
           >
-            <span>{isPending ? "Verifying..." : "Verify Now"}</span>
+            {isPending ? <Spinner /> : "Verify"}
 
             {!isPending && (
-              <MoveRight className="w-4 h-4 text-white group-hover:translate-x-2 transition duration-300" />
+              <MoveRight className="w-4 h-4 text-background group-hover:translate-x-2 transition duration-300" />
             )}
           </Button>
         </div>

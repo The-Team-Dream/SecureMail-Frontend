@@ -1,5 +1,10 @@
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+} from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+import Cookies from "js-cookie";
 import {
   forgetPassword,
   signin,
@@ -7,70 +12,79 @@ import {
   resetPassword,
   verifyOtp,
   resendOtp,
+  logout,
+  getUserData,
 } from "../features/auth";
 import {
-  ForgetPasswordPayload,
-  ResendOtpPayload,
-  SigninPayload,
-  SignupPayload,
+  SigninData,
+  SigninResponse,
+  SignupData,
   SignupResponse,
-  ResetPasswordPayload,
-  VerifyOtpPayload,
+  VerifyOtpData,
+  ResendOtpData,
+  ForgetPasswordData,
+  ResetPasswordData,
 } from "../../types/auth";
-
-type SignupApiError = AxiosError<{ message?: string }>;
-
 export const useSignup = (
-  options?: UseMutationOptions<
-    SignupResponse,
-    SignupApiError,
-    SignupPayload
-  >,
+  options?: UseMutationOptions<SignupResponse, AxiosError, SignupData>,
 ) => {
-  return useMutation<SignupResponse, SignupApiError, SignupPayload>({
+  return useMutation<SignupResponse, AxiosError, SignupData>({
     mutationFn: signup,
     ...options,
   });
 };
 
 export const useSignin = (
-  options?: UseMutationOptions<any, any, SigninPayload>,
+  options?: UseMutationOptions<SigninResponse, AxiosError, SigninData>,
 ) => {
-  return useMutation<any, any, SigninPayload>({
+  return useMutation<SigninResponse, AxiosError, SigninData>({
     mutationFn: signin,
     ...options,
   });
 };
 
 export const useVerifyOtp = (
-  options?: UseMutationOptions<any, any, VerifyOtpPayload>,
+  options?: UseMutationOptions<VerifyOtpResponse, AxiosError, VerifyOtpData>,
 ) => {
-  return useMutation<any, any, VerifyOtpPayload>({
+  return useMutation<VerifyOtpResponse, AxiosError, VerifyOtpData>({
     mutationFn: verifyOtp,
     ...options,
   });
 };
 export const useResendOtp = (
-  options?: UseMutationOptions<any, any, ResendOtpPayload>,
+  options?: UseMutationOptions<any, any, ResendOtpData>,
 ) => {
-  return useMutation<any, any, ResendOtpPayload>({
+  return useMutation<any, any, ResendOtpData>({
     mutationFn: resendOtp,
     ...options,
   });
 };
 export const useForgetPassword = (
-  options?: UseMutationOptions<any, any, ForgetPasswordPayload>,
+  options?: UseMutationOptions<any, any, ForgetPasswordData>,
 ) => {
-  return useMutation<any, any, ForgetPasswordPayload>({
+  return useMutation<any, any, ForgetPasswordData>({
     mutationFn: forgetPassword,
     ...options,
   });
 };
 export const useResetPassword = (
-  options?: UseMutationOptions<any, any, ResetPasswordPayload>,
+  options?: UseMutationOptions<any, any, ResetPasswordData>,
 ) => {
-  return useMutation<any, any, ResetPasswordPayload>({
+  return useMutation<any, any, ResetPasswordData>({
     mutationFn: resetPassword,
     ...options,
+  });
+};
+export const useLogout = (options?: UseMutationOptions<any, any, void>) => {
+  return useMutation<any, any, void>({
+    mutationFn: logout,
+    ...options,
+  });
+};
+
+export const useGetUserData = () => {
+  return useQuery({
+    queryKey: ["user-data"],
+    queryFn: () => getUserData(),
   });
 };
