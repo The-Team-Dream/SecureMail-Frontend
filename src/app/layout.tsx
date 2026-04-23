@@ -32,6 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${montserrat.variable} ${inter.variable} antialiased transition-colors duration-500`}
       >
         <ReactQueryProvider>
