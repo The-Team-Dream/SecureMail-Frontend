@@ -12,7 +12,7 @@ const mockAccounts = [
     threats: "23", 
     sync: "2 Min ago", 
     status: "Connected", 
-    statusColor: "text-secondary-600", 
+    statusColor: "text-[#689300]",
     icon: 'wifi' 
   },
   { 
@@ -23,7 +23,7 @@ const mockAccounts = [
     threats: "15", 
     sync: "2 Days ago", 
     status: "Connected", 
-    statusColor: "text-secondary-600", 
+    statusColor: "text-[#689300]", 
     icon: 'wifi' 
   },
   { 
@@ -45,7 +45,7 @@ const mockAccounts = [
     threats: "2", 
     sync: "5 Min ago", 
     status: "DisConnected", 
-    statusColor: "text-error-500", 
+    statusColor: "text-[#E7020C]", 
     icon: 'wifioff' 
   },
 ];
@@ -79,7 +79,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-4 min-w-0 flex-1 pr-4">
                 <div className="w-[46px] h-[46px] min-w-[46px] rounded-2xl bg-primary-50/80 flex items-center justify-center border border-primary-100/50">
-                  <Mail className="w-5 h-5 text-primary-600 stroke-[1.5]" />
+                  <Mail className="w-5 h-5 text-black stroke-[1.5]" />
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                   <div className="truncate w-full">
@@ -98,14 +98,14 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
 
             <div className="flex items-center justify-between">
               <div className="flex flex-col items-center flex-1">
-                <Text size="2xl" className="text-info-400 tracking-tight" font="bold">{acc.emails}</Text>
+                <Text size="2xl" className="text-[#0280B6] tracking-tight" font="bold">{acc.emails}</Text>
                 <Text size="xs" className="text-primary-400 mt-1 font-medium">Total Emails</Text>
               </div>
               
               <div className="w-[1px] h-12 bg-primary-100"></div>
 
               <div className="flex flex-col items-center flex-1">
-                <Text size="2xl" className="text-error-500 tracking-tight" font="bold">{acc.threats}</Text>
+                <Text size="2xl" className="text-[#E7020C] tracking-tight" font="bold">{acc.threats}</Text>
                 <Text size="xs" className="text-primary-400 mt-1 font-medium">Threats</Text>
               </div>
               
@@ -123,12 +123,12 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <Button variant="outline" className="flex-1 rounded-full h-[42px] border-primary-200 text-primary-700 font-medium hover:bg-primary-50 transition-colors shadow-sm bg-card">
-                Sync <RefreshCw className="w-[18px] h-[18px] ml-2 text-primary-500 stroke-[2]"/>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1 rounded-full h-[36px] border-primary-200 text-primary-700 text-sm font-medium hover:bg-primary-50 transition-colors bg-card gap-2">
+                Sync <RefreshCw className="w-4 h-4 text-primary-500 stroke-[2]"/>
               </Button>
-              <Button variant="outline" className="flex-1 rounded-full h-[42px] border-primary-200 text-primary-700 font-medium hover:bg-primary-50 transition-colors shadow-sm bg-card">
-                Scan <Shield className="w-[18px] h-[18px] ml-2 text-primary-500 stroke-[2]"/>
+              <Button variant="outline" className="flex-1 rounded-full h-[36px] border-primary-200 text-primary-700 text-sm font-medium hover:bg-primary-50 transition-colors bg-card gap-2">
+                Scan <Shield className="w-4 h-4 text-primary-500 stroke-[2]"/>
               </Button>
             </div>
 
