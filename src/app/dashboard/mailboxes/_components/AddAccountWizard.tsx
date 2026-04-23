@@ -82,8 +82,7 @@ export function AddAccountWizard({ onCancel, onSuccess }: AddAccountWizardProps)
       }
     }
     if (step === 5) {
-      onSuccess?.();
-      setStep(6);
+      setStep(6); // Go to Success page first, onSuccess called from there
     } else if (step < 6) {
       setStep(step + 1);
     }
@@ -94,7 +93,7 @@ export function AddAccountWizard({ onCancel, onSuccess }: AddAccountWizardProps)
   };
 
   if (step === 6) {
-    return <StepSuccess onCancel={onCancel} resetWizard={resetWizard} />;
+    return <StepSuccess onCancel={() => { onSuccess?.(); onCancel(); }} resetWizard={resetWizard} />;
   }
 
   return (
@@ -107,10 +106,10 @@ export function AddAccountWizard({ onCancel, onSuccess }: AddAccountWizardProps)
         <Text className="text-primary-400 font-medium tracking-wide" size="sm">Add Account</Text>
       </div>
 
-      <div className="flex flex-col flex-1 w-full mx-auto px-8 max-w-5xl pt-6">
+      <div className="flex flex-col flex-1 w-full mx-auto px-10 max-w-6xl pt-6">
         <WizardProgress step={step} steps={steps} />
 
-        <div className={`flex flex-col mb-16 w-full mx-auto flex-1 mt-14 ${step === 5 ? 'max-w-[900px]' : 'max-w-[498px]'}`}>
+        <div className={`flex flex-col mb-16 w-full mx-auto flex-1 mt-14 ${step === 5 ? 'max-w-[900px]' : 'max-w-[560px]'}`}>
           {step === 1 && <StepProvider formData={formData} handleChange={handleChange} provider={provider} setProvider={setProvider} register={register} errors={errors} />}
           {step === 2 && <StepIMAP formData={formData} handleChange={handleChange} register={register} errors={errors} />}
           {step === 3 && <StepSMTP formData={formData} handleChange={handleChange} register={register} errors={errors} />}

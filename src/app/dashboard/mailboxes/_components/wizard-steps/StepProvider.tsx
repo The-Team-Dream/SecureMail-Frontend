@@ -22,7 +22,7 @@ export function StepProvider({ formData, handleChange, provider, setProvider, re
             placeholder="Work Email"
             {...(register ? register("mailboxName") : {})}
             error={errors?.mailboxName?.message}
-            className="w-full"
+            className="w-full h-[52px] focus:placeholder:text-transparent"
           />
         </div>
 

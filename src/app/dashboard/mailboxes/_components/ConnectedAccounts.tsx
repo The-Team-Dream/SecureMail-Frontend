@@ -123,12 +123,12 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <Button variant="outline" className="flex-1 rounded-full h-[42px] border-primary-200 text-primary-700 font-medium hover:bg-primary-50 transition-colors shadow-sm bg-card">
-                Sync <RefreshCw className="w-[18px] h-[18px] ml-2 text-primary-500 stroke-[2]"/>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1 rounded-full h-[36px] border-primary-200 text-primary-700 text-sm font-medium hover:bg-primary-50 transition-colors bg-card gap-2">
+                Sync <RefreshCw className="w-4 h-4 text-primary-500 stroke-[2]"/>
               </Button>
-              <Button variant="outline" className="flex-1 rounded-full h-[42px] border-primary-200 text-primary-700 font-medium hover:bg-primary-50 transition-colors shadow-sm bg-card">
-                Scan <Shield className="w-[18px] h-[18px] ml-2 text-primary-500 stroke-[2]"/>
+              <Button variant="outline" className="flex-1 rounded-full h-[36px] border-primary-200 text-primary-700 text-sm font-medium hover:bg-primary-50 transition-colors bg-card gap-2">
+                Scan <Shield className="w-4 h-4 text-primary-500 stroke-[2]"/>
               </Button>
             </div>
 

@@ -10,11 +10,11 @@ interface EmptyMailboxProps {
 export function EmptyMailbox({ onAddAccount }: EmptyMailboxProps) {
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-160px)] px-4 animate-in fade-in duration-500">
-      <div className="flex flex-col items-center justify-center max-w-[420px] mx-auto text-center">
+      <div className="flex flex-col items-center justify-center max-w-[560px] mx-auto text-center">
         
         {/* Graphic Area */}
         {/* Placeholder if the image isn't in public/images yet */}
-        <div className="w-[200px] h-[200px] mb-8 relative flex items-center justify-center ">
+        <div className="w-[200px] h-[200px] mb-8 relative flex items-center justify-center">
            {/* Fallback SVG logic for presentation, until the user replaces it with the actual PNG file */}
            <Image 
              src="/images/empty-mailbox.png" 
@@ -34,7 +34,7 @@ export function EmptyMailbox({ onAddAccount }: EmptyMailboxProps) {
         </div>
 
         {/* Title */}
-        <Text as="h2" size="3xl" font="normal" className="text-primary-900 tracking-tight mb-3">
+        <Text as="h2" size="4xl" font="normal" className="text-primary-900 tracking-tight mb-3">
           Empty Mailbox
         </Text>
         
@@ -46,7 +46,7 @@ export function EmptyMailbox({ onAddAccount }: EmptyMailboxProps) {
         {/* Action Button */}
         <Button 
           onClick={onAddAccount}
-          className="bg-black text-white hover:bg-gray-900 rounded-[12px] h-[46px] px-8 font-medium transition-all shadow-md flex items-center justify-center gap-1.5"
+          className="bg-black text-white hover:bg-gray-900 rounded-[12px] w-[271px] h-[56px] font-medium transition-all shadow-md flex items-center justify-center gap-2.5 text-base"
         >
           Add Mailbox <span className="font-light text-lg pb-[2px]">+</span>
         </Button>
