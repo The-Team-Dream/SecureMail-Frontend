@@ -28,7 +28,7 @@ export const MailTabs = () => {
   if (activeFolder !== "inbox") return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 md:mb-6 border-b md:border-none border-primary-100">
+    <div className="grid grid-cols-1 md:grid-cols-3 md:mb-6">
       {tabs.map((tab) => {
         const isActive = activeClassification === tab.id;
         const unreadCount = getUnreadCount(tab.id);
