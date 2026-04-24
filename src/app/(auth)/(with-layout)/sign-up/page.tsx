@@ -14,7 +14,8 @@ import toast from "react-hot-toast";
 import { Text } from "@/_components/shared/Text";
 import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
 import { Spinner } from "@/components/ui/spinner";
-import { handleApiErrors } from "@/utils/form-utils";
+import { useServerErrors } from "@/utils/form-utils";
+import BackEndError from "@/_components/shared/BackEndError";
 export default function Signup() {
   const {
     handleSubmit,
@@ -29,25 +30,29 @@ export default function Signup() {
     resolver: zodResolver(signupSchema),
   });
   const router = useRouter();
+  const { handleServerErrors } = useServerErrors<ISignUp>(setError);
 
   // Sign up API function
   const signupMutation = useSignup({
     onSuccess: (res, variables) => {
-      toast.success(res.data.message);
+      console.log(res);
+      toast.success("Account created successfully");
       reset();
       router.push(`/verify-otp?email=${encodeURIComponent(variables.email)}`);
     },
-    onError: (err) => {
-      toast.error(err.response?.data?.message ?? "Signup failed");
-    },
+    onError: (err: any) =>
+      handleServerErrors(err, [
+        "username",
+        "email",
+        "password",
+        "confirmPassword",
+      ]),
   });
 
   const onSubmit: SubmitHandler<ISignUp> = (data) => {
     const { acceptTerms, ...formData } = data;
     void acceptTerms;
-    signupMutation.mutate(formData, {
-      onError: (err) => handleApiErrors(err, setError),
-    });
+    signupMutation.mutate(formData);
   };
 
   return (
@@ -168,12 +173,9 @@ export default function Signup() {
           </div>
 
           {errors.root && (
-            <div className="p-2 bg-error-500 rounded-lg flex items-start gap-2">
-              <CircleAlert className="w-4 h-4 text-error-100" />
-              <Text size={"xs"} color={"error-50"} className="text-left">
-                {errors.root.message}
-              </Text>
-            </div>
+            <BackEndError
+              error={String(errors.root.message || "An error occurred")}
+            />
           )}
           <Button size={"lg"} type="submit" disabled={signupMutation.isPending}>
             {signupMutation.isPending ? (

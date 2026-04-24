@@ -36,7 +36,7 @@ function VerifyOtpContent() {
     onSuccess: (res) => {
       toast.success(res.data.message);
     },
-    onError: (error: AxiosError<{ message: string }>) => {
+    onError: (error: any) => {
       toast.error(error?.response?.data.message || "Error");
     },
   });
@@ -78,8 +78,8 @@ function VerifyOtpContent() {
             <Text color={"primary-500"} font={"medium"}>
               Enter OTP sent to mobile number{" "}
               <span className="font-semibold">05xxx12345</span> and email
-              address <span className="font-semibold">email@email.com</span> to
-              login the portal
+              address <span className="font-semibold">{email}</span> to login
+              the portal
             </Text>
           </div>
 

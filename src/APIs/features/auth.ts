@@ -1,15 +1,17 @@
 import axiosInstance from "@/lib/axios";
+import { baseURL } from "@/lib/axios";
 import {
   SigninData,
   SigninResponse,
   SignupData,
   SignupResponse,
   VerifyOtpData,
+  VerifyOtpResponse,
   ResendOtpData,
   ForgetPasswordData,
   ResetPasswordData,
+  OAuthProvider,
 } from "../../types/auth";
-import Cookies from "js-cookie";
 
 export const signup = async (formData: SignupData): Promise<SignupResponse> => {
   const res = await axiosInstance.post<SignupResponse>(
@@ -26,8 +28,8 @@ export const signin = async (formData: SigninData): Promise<SigninResponse> => {
 
 export const verifyOtp = async (
   formData: VerifyOtpData,
-): Promise<VerifyOtpData> => {
-  const res = await axiosInstance.post<VerifyOtpData>(
+): Promise<VerifyOtpResponse> => {
+  const res = await axiosInstance.post<VerifyOtpResponse>(
     "/auth/verify-register-otp",
     formData,
   );
@@ -36,8 +38,8 @@ export const verifyOtp = async (
 
 export const resendOtp = async (
   formData: ResendOtpData,
-): Promise<ResendOtpData> => {
-  const res = await axiosInstance.post<ResendOtpData>(
+): Promise<VerifyOtpResponse> => {
+  const res = await axiosInstance.post<VerifyOtpResponse>(
     "/auth/verify-register-otp",
     formData,
   );
@@ -71,5 +73,23 @@ export const logout = async (): Promise<{
 };
 export const getUserData = async () => {
   const res = await axiosInstance.get("/user/profile");
+  return res.data;
+};
+
+export const getOAuthLoginUrl = (provider: OAuthProvider): string => {
+  const providerEndpointMap: Record<OAuthProvider, string> = {
+    google: "/auth/google/login",
+    outlook: "/auth/outlook/login",
+  };
+
+  return `${baseURL}${providerEndpointMap[provider]}`;
+};
+
+export const validateOAuthToken = async (token: string) => {
+  const res = await axiosInstance.get("/user/profile", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return res.data;
 };

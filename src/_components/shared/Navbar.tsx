@@ -33,8 +33,7 @@ export const Navbar = () => {
   const isMailPage = pathname.includes("/mails");
   const { mutate, isPending } = useLogout({
     onSuccess: (res) => {
-      console.log(res.message);
-      toast.success(res?.message || "Logout successfully");
+      toast.success(res.data.message || "Logout successfully");
       Cookies.remove("token");
       router.replace("/sign-in");
     },

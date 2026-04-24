@@ -15,7 +15,8 @@ import toast from "react-hot-toast";
 import Logo from "@/_components/shared/Logo";
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
-import { AxiosError } from "axios";
+import { useServerErrors } from "@/utils/form-utils";
+import BackEndError from "@/_components/shared/BackEndError";
 export default function ResetPassword() {
   return (
     <Suspense
@@ -36,6 +37,7 @@ function ResetPasswordContent() {
     register,
     formState: { errors },
     clearErrors,
+    setError,
   } = useForm<IResetPasswordSchema>({
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -44,15 +46,16 @@ function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const { handleServerErrors } =
+    useServerErrors<IResetPasswordSchema>(setError);
 
   const { mutate, isPending } = useResetPassword({
-    onSuccess: () => {
-      toast.success("Password reset successfully");
+    onSuccess: (res) => {
+      toast.success(res.data.message);
       router.push("/sign-in");
     },
-    onError: (err: AxiosError<{ message: string }>) => {
-      toast.error(err?.response?.data?.message || "Reset password failed");
-    },
+    onError: (err) =>
+      handleServerErrors(err, ["newPassword", "confirmPassword"]),
   });
 
   const onSubmit: SubmitHandler<IResetPasswordSchema> = (data) => {
@@ -115,6 +118,11 @@ function ResetPasswordContent() {
                     error={errors?.confirmPassword?.message}
                   />
                 </div>
+                {errors.root && (
+                  <BackEndError
+                    error={String(errors.root.message || "An error occurred")}
+                  />
+                )}
                 <Button size={"lg"} type="submit" disabled={isPending}>
                   {isPending ? <Spinner /> : "Reset Password"}
                 </Button>

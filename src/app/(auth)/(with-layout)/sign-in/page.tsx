@@ -2,9 +2,10 @@
 import Cookies from "js-cookie";
 import { useSignin } from "@/APIs/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Loader2, LockIcon, Mail } from "lucide-react";
+import { LockIcon, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { Input } from "@/_components/shared/Input";
 import Logo from "@/_components/shared/Logo";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,39 +15,42 @@ import toast from "react-hot-toast";
 import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
-
-export default function Signin() {
+import BackEndError from "@/_components/shared/BackEndError";
+import { useServerErrors } from "@/utils/form-utils";
+function SigninContent() {
   const {
     handleSubmit,
     register,
     reset,
     formState: { errors },
+    setError,
     clearErrors,
   } = useForm<ISignin>({
     mode: "onBlur",
     reValidateMode: "onChange",
     resolver: zodResolver(signinSchema),
   });
+  const { handleServerErrors } = useServerErrors<ISignin>(setError);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard/mailboxes";
+
   const signinMutation = useSignin({
     onSuccess: (res) => {
       const token = res?.data.token;
       if (token) {
         Cookies.set("token", token, { path: "/", expires: 1 });
       }
-      toast.success(res?.message);
+      toast.success("Logged in successfully");
       reset();
-      router.push("/dashboard");
+      router.push(callbackUrl);
     },
-    onError: (err) => {
-      toast.error(err?.response?.data?.message || "login failed");
-    },
+    onError: (err) => handleServerErrors(err, ["email", "password"]),
   });
 
   const onSubmit: SubmitHandler<ISignin> = (data) => {
     signinMutation.mutate(data);
-    console.log(data);
   };
 
   return (
@@ -97,11 +101,10 @@ export default function Signin() {
           >
             Forgot Password?
           </Link>
-          {signinMutation.isError && (
-            <p className="text-error">
-              {signinMutation.error?.response?.data?.message ||
-                "An error occurred"}
-            </p>
+          {errors.root && (
+            <BackEndError
+              error={String(errors.root.message || "An error occurred")}
+            />
           )}
           <Button size={"lg"} type="submit" disabled={signinMutation.isPending}>
             {signinMutation.isPending ? <Spinner /> : "Sign in"}
@@ -120,5 +123,13 @@ export default function Signin() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function Signin() {
+  return (
+    <Suspense fallback={<Spinner />}>
+      <SigninContent />
+    </Suspense>
   );
 }

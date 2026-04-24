@@ -1,27 +1,30 @@
-import { AxiosError } from "axios";
+// hooks/use-server-errors.ts
 import { UseFormSetError, FieldValues, Path } from "react-hook-form";
 
-export const handleApiErrors = <T extends FieldValues>(
-  error: AxiosError,
+export const useServerErrors = <T extends FieldValues>(
   setError: UseFormSetError<T>,
 ) => {
-  const serverData = error.response?.data as {
-    errors?: { path: string; message: string }[];
-    message?: string;
+  const handleServerErrors = (err: any, formFields: (keyof T)[]) => {
+    const backendErrors = err?.response?.data?.errors;
+    const message = err?.response?.data?.message;
+
+    if (backendErrors && Array.isArray(backendErrors)) {
+      backendErrors.forEach((error: string) => {
+        const lowerError = error.toLowerCase();
+        const targetField = formFields.find((field) =>
+          lowerError.includes(String(field).toLowerCase()),
+        );
+
+        if (targetField) {
+          setError(targetField as Path<T>, { type: "server", message: error });
+        }
+      });
+    }
+
+    if (message) {
+      setError("root" as Path<T>, { type: "server", message: message });
+    }
   };
 
-  if (serverData?.errors && Array.isArray(serverData.errors)) {
-    serverData.errors.forEach((err: { path: string; message: string }) => {
-      setError(err.path as Path<T>, {
-        type: "server",
-        message: err.message,
-      });
-    });
-  }
-
-  if (serverData?.message) {
-    setError("root" as Path<T>, {
-      message: serverData.message,
-    });
-  }
+  return { handleServerErrors };
 };

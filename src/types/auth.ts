@@ -25,25 +25,62 @@ export interface ResetPasswordData {
   resetPasswordToken: string;
 }
 
+export type OAuthProvider = "google" | "outlook";
+
+export interface SigninResponse {
+  success: boolean;
+  message: string;
+  data: {
+    message: string;
+    token: string;
+  };
+}
+
 export interface SignupResponse {
+  success: boolean;
+  message: string;
   data: {
     message: string;
   };
 }
 
 export interface VerifyOtpResponse {
+  success: boolean;
+  message: string;
   data: {
     message: string;
-    user: {
-      _id: string;
-      email: string;
-      username: string;
-    };
   };
 }
 
-export interface SigninResponse {
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
   data: {
     message: string;
   };
+}
+
+export interface ForgetPasswordResponse {
+  success: boolean;
+  message: string;
+  data: {
+    message: string;
+  };
+}
+
+export interface LogoutResponse {
+  success: boolean;
+  message: string;
+  data: {
+    message: string;
+  };
+}
+
+export interface User {
+  id: number;
+  email: string;
+  username: string;
+  avatar: string | null;
+  isVerified: boolean;
+  is2FAEnabled: boolean;
 }

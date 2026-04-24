@@ -10,38 +10,33 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
+import { useServerErrors } from "@/utils/form-utils";
+import BackEndError from "@/_components/shared/BackEndError";
 export default function ForgotPassword() {
   const {
     handleSubmit,
     register,
     formState: { errors },
     clearErrors,
+    setError,
   } = useForm<IForgotPassword>({
     mode: "onBlur",
     reValidateMode: "onChange",
     resolver: zodResolver(forgotPasswordSchema),
   });
-  const router = useRouter();
   const { mutate, isPending } = useForgetPassword({
-    onSuccess: (res, variables) => {
-      router.push(
-        `/reset-password?email=${encodeURIComponent(variables.email)}`,
-      );
+    onSuccess: (res) => {
       toast.success(res.data.message);
     },
-    onError: (err) => {
-      toast.error(err?.response?.data?.message || "Something went wrong");
-    },
+    onError: (err) => handleServerErrors(err, ["email"]),
   });
-
+  const { handleServerErrors } = useServerErrors(setError);
   const onSubmit: SubmitHandler<IForgotPassword> = (data) => {
     mutate(data);
-    console.log(data);
   };
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
@@ -80,6 +75,11 @@ export default function ForgotPassword() {
                 leftIcon={<Mail />}
                 error={errors?.email?.message}
               />
+              {errors.root && (
+                <BackEndError
+                  error={String(errors.root.message || "An error occurred")}
+                />
+              )}
               <Button size={"lg"} type="submit" disabled={isPending}>
                 {isPending ? <Spinner /> : "Send"}
               </Button>
