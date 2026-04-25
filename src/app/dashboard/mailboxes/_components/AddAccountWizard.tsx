@@ -27,7 +27,7 @@ import { StepSuccess } from "./wizard-steps/StepSuccess";
 
 interface AddAccountWizardProps {
   onCancel: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (data: WizardFormData, provider: string) => void;
 }
 
 export function AddAccountWizard({
@@ -43,6 +43,7 @@ export function AddAccountWizard({
     watch,
     setValue,
     reset,
+    clearErrors,
     formState: { errors },
   } = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
@@ -88,6 +89,7 @@ export function AddAccountWizard({
     if (step === 1) fieldsToValidate = ["mailboxName"];
     if (step === 2) fieldsToValidate = ["imapHost", "imapPort", "imapSecurity"];
     if (step === 3) fieldsToValidate = ["smtpHost", "smtpPort", "smtpSecurity"];
+    if (step === 4) fieldsToValidate = ["syncInterval"];
 
     if (fieldsToValidate.length > 0) {
       return await trigger(fieldsToValidate);
@@ -124,7 +126,7 @@ export function AddAccountWizard({
     return (
       <StepSuccess
         onCancel={() => {
-          onSuccess?.();
+          onSuccess?.(formData, provider);
           onCancel();
         }}
         resetWizard={resetWizard}
@@ -134,23 +136,23 @@ export function AddAccountWizard({
 
   return (
     <div className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-card relative">
-      <div className="flex items-center gap-2.5 px-10 py-5 w-full bg-ghostBlue border-b border-primary-100/80 z-10">
+      <div className="flex items-center gap-2.5 px-10 py-3 w-full bg-ghostBlue border-b border-primary-100/80 z-10">
         <button onClick={onCancel} className="hover:underline cursor-pointer">
-          <Text font="semiBold" size="sm" className="text-primary-900">
+          <Text font="semiBold" size="sm">
             My Accounts
           </Text>
         </button>
         <ChevronRight className="w-4 h-4 text-primary-400 stroke-[2.5px]" />
-        <Text className="text-primary-400 font-medium tracking-wide" size="sm">
+        <Text color={"primary-400"} font={"medium"} size="sm">
           Add Account
         </Text>
       </div>
 
-      <div className="flex flex-col flex-1 w-full mx-auto px-10 max-w-6xl pt-6">
+      <div className="flex flex-col flex-1 w-full mx-auto px-10 max-w-8xl pt-6">
         <WizardProgress step={step} steps={steps} />
-
+        <hr className="h-px bg-primary-100 w-full absolute left-0 top-32" />
         <div
-          className={`flex flex-col mb-16 w-full mx-auto flex-1 mt-14 ${step === 5 ? "max-w-[900px]" : "max-w-[560px]"}`}
+          className={`flex flex-col mb-8 w-full mx-auto flex-1 mt-8 ${step === 5 ? "max-w-[900px]" : "max-w-[560px]"}`}
         >
           {step === 1 && (
             <StepProvider
@@ -159,6 +161,7 @@ export function AddAccountWizard({
               provider={provider}
               setProvider={setProvider}
               register={register}
+              clearErrors={clearErrors}
               errors={errors}
             />
           )}
@@ -168,6 +171,7 @@ export function AddAccountWizard({
               handleChange={handleChange}
               register={register}
               errors={errors}
+              clearErrors={clearErrors}
             />
           )}
           {step === 3 && (
@@ -176,29 +180,30 @@ export function AddAccountWizard({
               handleChange={handleChange}
               register={register}
               errors={errors}
+              clearErrors={clearErrors}
             />
           )}
           {step === 4 && (
-            <StepAdvanced formData={formData} handleChange={handleChange} />
+            <StepAdvanced formData={formData} handleChange={handleChange} errors={errors} />
           )}
           {step === 5 && (
             <StepSummary formData={formData} handleChange={handleChange} />
           )}
         </div>
 
-        <div className="flex justify-between items-center w-full py-6 pb-8 border-t border-transparent mt-auto relative z-20">
+        <div className="flex justify-between items-center w-full py-6 pb-8 relative z-20">
           <Button
             variant="outline"
             onClick={handlePrev}
             disabled={step === 1}
-            className={`w-[124px] px-6 h-[46px] rounded-[12px] bg-transparent border-primary-200 text-primary-700 hover:bg-primary-50 flex items-center justify-center gap-2 font-semibold transition-all shadow-sm ${step === 1 ? "opacity-0 pointer-events-none" : ""}`}
+            className={`w-[110px] h-[46px] border-primary-200 text-primary-800 font-semibold shadow-sm ${step === 1 ? "opacity-0 pointer-events-none" : ""}`}
           >
             <ArrowLeft className="w-4 h-4" /> Previous
           </Button>
 
           <Button
             onClick={handleNext}
-            className="w-[124px] px-6 h-[46px] bg-primary-900 text-primary-50 hover:bg-primary-800 rounded-[12px] flex items-center justify-center gap-2 font-semibold shadow-md"
+            className="w-[110px] h-[46px] font-semibold"
           >
             {step === 5 ? "Save" : "Next"} <ArrowRight className="w-4 h-4" />
           </Button>

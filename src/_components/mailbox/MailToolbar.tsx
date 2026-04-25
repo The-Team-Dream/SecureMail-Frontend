@@ -6,6 +6,9 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  Archive,
+  Trash2,
+  MailOpen,
 } from "lucide-react";
 import { useMailStore } from "@/stores/useMailStore";
 import { cn } from "@/lib/utils";
@@ -24,6 +27,10 @@ export const MailToolbar = () => {
   const setCurrentPage = useMailStore((s) => s.setCurrentPage);
   const selectAllOnPage = useMailStore((s) => s.selectAllOnPage);
   const deselectAll = useMailStore((s) => s.deselectAll);
+
+  const archiveSelected = useMailStore((s) => s.archiveSelected);
+  const deleteSelected = useMailStore((s) => s.deleteSelected);
+  const toggleSelectedRead = useMailStore((s) => s.toggleSelectedRead);
 
   const ITEMS_PER_PAGE = 18;
 
@@ -75,7 +82,12 @@ export const MailToolbar = () => {
 
   const handleRefresh = () => {
     deselectAll();
-    toast.success("تم تحديث صندوق البريد");
+    toast.success("Emails refreshed successfully", {
+      position: "bottom-left",
+      style: {
+        backgroundColor: "#000",
+      },
+    });
   };
 
   return (
@@ -112,6 +124,60 @@ export const MailToolbar = () => {
         >
           <RefreshCw className="w-4 h-4 text-primary-900" />
         </button>
+
+        {/* ══════ Bulk Actions ══════ */}
+        {selectedIds.length > 0 && (
+          <div className="flex items-center gap-1 ml-2 pl-2 border-l border-primary-200">
+            <button
+              onClick={() => {
+                archiveSelected();
+                toast.success("Selected emails archived", {
+                  position: "bottom-left",
+                  style: {
+                    backgroundColor: "#000",
+                  },
+                });
+              }}
+              className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer"
+              aria-label="Archive selected"
+              title="Archive selected"
+            >
+              <Archive className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                deleteSelected();
+                toast.success("Selected emails deleted", {
+                  position: "bottom-left",
+                  style: {
+                    backgroundColor: "#000",
+                  },
+                });
+              }}
+              className="p-1.5 text-primary-900 hover:text-error-500 hover:bg-error-50 rounded-full transition-colors cursor-pointer"
+              aria-label="Delete selected"
+              title="Delete selected"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                toggleSelectedRead();
+                toast.success("Selected emails toggled read status", {
+                  position: "bottom-left",
+                  style: {
+                    backgroundColor: "#000",
+                  },
+                });
+              }}
+              className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer"
+              aria-label="Mark selected as read/unread"
+              title="Mark selected as read/unread"
+            >
+              <MailOpen className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ══════ Pagination ══════ */}

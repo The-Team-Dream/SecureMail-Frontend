@@ -8,6 +8,7 @@ import { useMailStore } from "@/stores/useMailStore";
 import { Text } from "../shared/Text";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { useRouter, usePathname } from "next/navigation";
 
 interface MailRowProps {
   email: Email;
@@ -31,6 +32,8 @@ export const MailRow = ({
   const toggleReadEmail = useMailStore((s) => s.toggleReadEmail);
   const selectedIds = useMailStore((s) => s.selectedIds);
   const isSelected = selectedIds.includes(email.id);
+  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <div
@@ -41,6 +44,7 @@ export const MailRow = ({
         onDragOver(index);
       }}
       onDragEnd={onDragEnd}
+      onClick={() => router.push(`${pathname}/${email.id}`)}
       className={cn(
         "group flex items-start sm:items-center gap-2 sm:gap-3 px-2 sm:px-4 py-3 sm:py-4 border-b-2 border-primary-50",
         "cursor-pointer transition-colors duration-150",

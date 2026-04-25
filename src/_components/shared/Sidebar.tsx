@@ -18,11 +18,12 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
+import { useMailStore } from "@/stores/useMailStore";
 import type { Folder } from "@/types/mail";
 
 const dashboardNavItems = [
@@ -56,9 +57,12 @@ const securityNavItems = [
 
 export const Sidebar = () => {
   const pathname = usePathname();
+  const params = useParams();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const setComposeOpen = useMailStore((s) => s.setComposeOpen);
 
   const isMailPage = pathname.startsWith("/mailbox");
+  const idPath = params.id ? `/${params.id}` : "";
 
   return (
     <aside
@@ -91,6 +95,7 @@ export const Sidebar = () => {
 
       {/* === New Email === */}
       <Button
+        onClick={() => setComposeOpen(true)}
         size={"lg"}
         className={cn(
           "overflow-hidden bg-secondary-400 text-primary transition-colors hover:bg-secondary-600 mb-4",
@@ -111,11 +116,12 @@ export const Sidebar = () => {
         {isMailPage ? (
           <>
             {mailboxNavItems.map((item) => {
-              const isActive = pathname === `/mailbox/${item.folder}`;
+              const targetHref = `/mailbox/${item.folder}${idPath}`;
+              const isActive = pathname.startsWith(`/mailbox/${item.folder}`);
               return (
                 <Link
                   key={item.name}
-                  href={`/mailbox/${item.folder}`}
+                  href={targetHref}
                   title={isCollapsed ? item.name : ""}
                   className={cn(
                     "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
@@ -180,11 +186,12 @@ export const Sidebar = () => {
             )}
             {/* Security Navigation */}
             {securityNavItems.map((item) => {
-              const isActive = pathname === item.href;
+              const targetHref = `${item.href}${idPath}`;
+              const isActive = pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
+                  href={targetHref}
                   title={isCollapsed ? item.name : ""}
                   className={cn(
                     "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative",

@@ -20,8 +20,8 @@ import {
 import Image from "next/image";
 import { initialAccounts } from "@/constants/MOCKDATA";
 import { usePathname } from "next/dist/client/components/navigation";
-import { Input } from "./Input";
 import { MobileSidebar } from "./MobileSidebar";
+import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
 import { useLogout } from "@/APIs/hooks/useAuth";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
@@ -30,7 +30,7 @@ import toast from "react-hot-toast";
 export const Navbar = () => {
   const pathname = usePathname();
   const [accounts, setAccounts] = useState(initialAccounts);
-  const isMailPage = pathname.includes("/mails");
+  const isMailPage = pathname.startsWith("/mailbox");
   const { mutate, isPending } = useLogout({
     onSuccess: (res) => {
       toast.success(res.data.message || "Logout successfully");
@@ -59,12 +59,7 @@ export const Navbar = () => {
         <Logo width={40} height={40} textSize={"2xl"} />
         {isMailPage && (
           <div className="ml-18 hidden md:block">
-            <Input
-              className="w-130 bg-primary-100/20"
-              type="search"
-              leftIcon={<Mail className="w-5 h-5 text-primary-500" />}
-              placeholder="Search Email..."
-            />
+            <SearchAutocomplete inputClassName="w-[600px] bg-primary-100/10" />
           </div>
         )}
       </div>

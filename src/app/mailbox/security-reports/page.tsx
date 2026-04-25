@@ -1,10 +1,5 @@
-import Container from "@/_components/shared/Container";
-const SecurityReports = () => {
-  return (
-    <Container>
-      <h1>Security Reports</h1>
-    </Container>
-  );
-};
+import { redirect } from "next/navigation";
 
-export default SecurityReports;
+export default function SecurityReportsRedirect() {
+  redirect("/dashboard/mailboxes");
+}

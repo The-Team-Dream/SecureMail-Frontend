@@ -1,44 +1,48 @@
-import React from "react";
 import { Text } from "@/_components/shared/Text";
 import { Input } from "@/_components/shared/Input";
 import { WizardStepProps } from "./WizardTypes";
 
-export function StepIMAP({ register, errors }: WizardStepProps) {
+export function StepIMAP({ register, errors, clearErrors }: WizardStepProps) {
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full flex flex-col items-center">
-      <Text
-        as="h2"
-        size="4xl"
-        font="normal"
-        className="text-center mb-2.5 text-primary-900 tracking-tight"
-      >
+    <div className="w-full flex flex-col items-center max-w-2xl mx-auto">
+      <Text as="h2" size="4xl" font="normal" className="mb-2.5">
         IMAP Config
       </Text>
-      <Text
-        size="sm"
-        font="normal"
-        className="text-primary-400 text-center mb-10 tracking-wide"
-      >
+      <Text color={"primary-500"} size="sm" font="normal" className="mb-10">
         Please add the below data to complete adding your account
       </Text>
 
-      <div className="w-full flex flex-col gap-4 text-left max-w-lg mx-auto">
+      <div className="w-full flex flex-col gap-4 max-w-[720px] mx-auto">
         {/* Row 1: IMAP Host + Port */}
         <div className="grid grid-cols-2 gap-4">
           <Input
             label="IMAP Host"
             required
             placeholder="Imap.Company.Com"
-            className="w-full focus:placeholder:text-transparent"
-            {...register("imapHost")}
+            {...(register
+              ? register("imapHost", {
+                  onChange: () => {
+                    if (errors?.imapHost) {
+                      clearErrors?.("imapHost");
+                    }
+                  },
+                })
+              : {})}
             error={errors?.imapHost?.message}
           />
           <Input
             label="Port"
             required
             placeholder="993"
-            className="w-full focus:placeholder:text-transparent"
-            {...register("imapPort")}
+            {...(register
+              ? register("imapPort", {
+                  onChange: () => {
+                    if (errors?.imapPort) {
+                      clearErrors?.("imapPort");
+                    }
+                  },
+                })
+              : {})}
             error={errors?.imapPort?.message}
           />
         </div>
@@ -50,8 +54,16 @@ export function StepIMAP({ register, errors }: WizardStepProps) {
           </label>
           <div className="relative">
             <select
-              className={`w-full h-12 px-4 border text-[14px] text-primary-900 dark:text-primary-100 rounded-xl outline-none transition duration-500 appearance-none bg-card ${errors?.imapSecurity ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
-              {...register("imapSecurity")}
+              className={`w-full h-12 px-4 border text-[14px] text-primary rounded-lg outline-none transition duration-500 appearance-none bg-card ${errors?.imapSecurity ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
+              {...(register
+                ? register("imapSecurity", {
+                    onChange: () => {
+                      if (errors?.imapSecurity) {
+                        clearErrors?.("imapSecurity");
+                      }
+                    },
+                  })
+                : {})}
             >
               <option value="SSL/TLS">SSL/TLS</option>
               <option value="STARTTLS">STARTTLS</option>
@@ -86,7 +98,15 @@ export function StepIMAP({ register, errors }: WizardStepProps) {
         <Input
           label="Username"
           placeholder="Enter Your Username"
-          {...register("imapUsername")}
+          {...(register
+            ? register("imapUsername", {
+                onChange: () => {
+                  if (errors?.imapUsername) {
+                    clearErrors?.("imapUsername");
+                  }
+                },
+              })
+            : {})}
           error={errors?.imapUsername?.message}
         />
 
@@ -95,8 +115,15 @@ export function StepIMAP({ register, errors }: WizardStepProps) {
           label="Password"
           type="password"
           placeholder="Enter Password"
-          className="w-full focus:placeholder:text-transparent"
-          {...register("imapPassword")}
+          {...(register
+            ? register("imapPassword", {
+                onChange: () => {
+                  if (errors?.imapPassword) {
+                    clearErrors?.("imapPassword");
+                  }
+                },
+              })
+            : {})}
           error={errors?.imapPassword?.message}
         />
       </div>

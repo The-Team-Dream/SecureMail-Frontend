@@ -8,7 +8,7 @@ interface WizardProgressProps {
 
 export function WizardProgress({ step, steps }: WizardProgressProps) {
   return (
-    <div className="flex items-center justify-between w-full max-w-[620px] mx-auto mb-8 px-2">
+    <div className="flex items-center justify-between w-full max-w-2xl mx-auto mb-8">
       {steps.map((s, index) => {
         const isCompleted = step > s.id;
         const isActive = step === s.id;

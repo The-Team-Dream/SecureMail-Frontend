@@ -22,7 +22,7 @@ export const stepSMTPSchema = z.object({
 });
 
 export const stepAdvancedSchema = z.object({
-  syncInterval: z.string().optional(),
+  syncInterval: z.string().min(1, "Sync Interval is required"),
 });
 
 export const wizardSchema = z.object({
@@ -34,10 +34,16 @@ export const wizardSchema = z.object({
 
 export type WizardFormData = z.infer<typeof wizardSchema>;
 
+import {
+  UseFormRegister,
+  FieldErrors,
+  UseFormClearErrors,
+} from "react-hook-form";
+
 export interface WizardStepProps {
   formData?: WizardFormData;
   handleChange?: (field: keyof WizardFormData, value: string) => void;
-  // added for react-hook-form compatibility
-  register?: any;
-  errors?: any;
+  register?: UseFormRegister<WizardFormData>;
+  errors?: FieldErrors<WizardFormData>;
+  clearErrors?: UseFormClearErrors<WizardFormData>;
 }

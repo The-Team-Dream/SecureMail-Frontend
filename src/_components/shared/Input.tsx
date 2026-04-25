@@ -50,6 +50,7 @@ export const Input: React.FC<Input> = ({
   type = "text",
   required,
   error,
+  className,
   ...props
 }) => {
   const [inputType, setInputType] = useState(type);
@@ -84,6 +85,7 @@ export const Input: React.FC<Input> = ({
             error
               ? "border-error-500 placeholder:text-error-500"
               : "border-primary-100 placeholder:text-primary-400",
+            className
           )}
         />
         {isPassword && (

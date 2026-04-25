@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Text } from "../../../_components/shared/Text";
+import { Text } from "@/_components/shared/Text";
 const chartData = [
   { month: "Jul", spam: 5, phishing: 10 },
   { month: "Aug", spam: 7, phishing: 15 },

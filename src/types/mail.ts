@@ -15,7 +15,9 @@ export type Folder =
   | "spam"
   | "phishing"
   | "malware"
-  | "archive";
+  | "archive"
+  | "analytics"
+  | "security-reports";
 
 /**
  * تصنيف الإيميل - هل هو أساسي؟ ترويجي؟ اجتماعي؟ تحديثات؟
