@@ -111,7 +111,7 @@
     /* Primary */
     --primary-50: #fafafa;
     --primary-100: #dfdfdf;
-    --primary-200: #e5e5e5;
+    --primary-200: #cacaca;
     --primary-300: #a3a3a3;
     --primary-400: #9f9f9f;
     --primary-500: #8a8a8a;
@@ -124,7 +124,7 @@
     /* Secondary */
     --secondary-50: #f8ffec;
     --secondary-100: #edffc0;
-    --secondary-200: #d4f860;
+    --secondary-200: #e0ff95;
     --secondary-300: #c4f020;
     --secondary-400: #bbff14;
     --secondary-500: #bbff14;
@@ -141,7 +141,7 @@
     --warning-300: #f9cc6a;
     --warning-400: #f5b030;
     --warning-500: #e09000;
-    --warning-600: #D6A313;
+    --warning-600: #d6a313;
     --warning-700: #855200;
     --warning-800: #5c3800;
     --warning-900: #3d2500;

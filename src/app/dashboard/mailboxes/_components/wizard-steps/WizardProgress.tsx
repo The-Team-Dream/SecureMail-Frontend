@@ -15,25 +15,27 @@ export function WizardProgress({ step, steps }: WizardProgressProps) {
 
         return (
           <React.Fragment key={s.id}>
-            <div className="flex flex-col items-center flex-shrink-0">
+            <div className="flex flex-col items-center shrink-0">
               {isActive ? (
-                <div className="w-[36px] h-[36px] rounded-full border-[1.5px] border-dashed border-[#87BE00] flex items-center justify-center bg-card p-[3px]">
-                  <div className="w-full h-full rounded-full flex items-center justify-center bg-[#E0FF95]">
-                    <s.icon className="w-4 h-4 stroke-[2] text-[#87BE00]" />
+                <div className="w-[46px] h-[46px] rounded-full border-dashed border-2 border-secondary-600 flex items-center justify-center p-[3px]">
+                  <div className="w-full h-full rounded-full flex items-center justify-center bg-secondary-200">
+                    <s.icon className="w-4 h-4 stroke-2 text-secondary-800" />
                   </div>
                 </div>
               ) : isCompleted ? (
-                <div className="w-8 h-8 rounded-full bg-[#87BE00] flex items-center justify-center relative">
-                  <Check className="w-4 h-4 stroke-[3] text-white" />
+                <div className="w-8 h-8 rounded-full bg-secondary-700 flex items-center justify-center relative">
+                  <Check className="w-4 h-4 stroke-3 text-background" />
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-full bg-[#DFDFDF] flex items-center justify-center relative">
-                  <s.icon className="w-4 h-4 stroke-[2] text-[#8A8A8A]" />
+                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center relative">
+                  <s.icon className="w-4 h-4 stroke-2 text-primary-500" />
                 </div>
               )}
             </div>
             {index < steps.length - 1 && (
-              <div className={`h-[1px] flex-1 mx-3 transition-colors duration-300 ${s.id < step ? 'bg-[#87BE00]' : 'bg-[#DFDFDF]'}`} />
+              <div
+                className={`h-[2.5px] flex-1 mx-3 transition-colors duration-300 rounded-[5px] ${s.id < step ? "bg-secondary-600" : "bg-primary-100"}`}
+              />
             )}
           </React.Fragment>
         );

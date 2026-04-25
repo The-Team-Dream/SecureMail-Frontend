@@ -46,7 +46,7 @@ export function AddAccountWizard({
     formState: { errors },
   } = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
-    mode: "onTouched",
+    mode: "onBlur",
     defaultValues: {
       mailboxName: "",
       emailAddress: "",
@@ -134,8 +134,8 @@ export function AddAccountWizard({
 
   return (
     <div className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-card relative">
-      <div className="flex items-center gap-2.5 px-10 py-5 w-full bg-primary-50 border-b border-primary-100/80 z-10">
-        <button onClick={onCancel} className="hover:underline">
+      <div className="flex items-center gap-2.5 px-10 py-5 w-full bg-ghostBlue border-b border-primary-100/80 z-10">
+        <button onClick={onCancel} className="hover:underline cursor-pointer">
           <Text font="semiBold" size="sm" className="text-primary-900">
             My Accounts
           </Text>
