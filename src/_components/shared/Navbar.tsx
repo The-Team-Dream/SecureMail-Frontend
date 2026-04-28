@@ -22,7 +22,7 @@ import { initialAccounts } from "@/constants/MOCKDATA";
 import { usePathname } from "next/dist/client/components/navigation";
 import { MobileSidebar } from "./MobileSidebar";
 import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
-import { useLogout } from "@/APIs/hooks/useAuth";
+import { useGetUserData, useLogout } from "@/APIs/hooks/useAuth";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";

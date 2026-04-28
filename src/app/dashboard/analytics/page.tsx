@@ -2,6 +2,8 @@
 import { AnalyticsChart } from "./AnalyticsChart";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
+import { AnalyticsSkeleton } from "@/_components/skeleton/AnalyticsSkeleton";
+import { useAnalyticsOverview } from "@/APIs/hooks/useAnalytics";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
@@ -31,6 +33,9 @@ const itemVariants = {
 };
 
 const Analytics = () => {
+  const { data, isLoading, isError } = useAnalyticsOverview();
+  if (isLoading) return <AnalyticsSkeleton />
+  if (isError) return <Container><Text color="error-500">Cannot load analytics, try again later.</Text></Container>
   const severityConfig: Record<
     string,
     { container: string; iconBg: string; textColor: string }

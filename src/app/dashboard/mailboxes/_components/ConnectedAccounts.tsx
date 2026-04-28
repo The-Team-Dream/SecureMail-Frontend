@@ -10,9 +10,15 @@ import {
   Wifi,
   WifiOff,
   Search,
+  CircleX,
 } from "lucide-react";
 import Container from "@/_components/shared/Container";
 import { Input } from "@/_components/shared/Input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useMailboxes, useMailboxOperations } from "@/APIs/hooks/useMailboxes";
+import { Mailbox } from "@/APIs/types/Mailbox";
+import { AccountCardSkeleton } from "@/_components/skeleton/AccountCardSkeleton";
+import { ConnectedAccountsSkeleton } from "@/_components/skeleton/ConnectedAccountsSkeleton";
 
 export interface ConnectedAccountType {
   id: number;
@@ -87,6 +93,15 @@ export function ConnectedAccounts({
   accounts,
   onAddAccount,
 }: ConnectedAccountsProps) {
+  const { data: mailboxes, isLoading, isError } = useMailboxes();
+  const { deleteMailbox, syncMailbox, isDeleting } = useMailboxOperations();
+
+  // if (isLoading) {
+  //   return <ConnectedAccountsSkeleton />;
+  // }
+
+  if (isError) return 
+    <Text size={'2xl'} color="error-600" className="flex items-center gap-2"><CircleX className="w-24 h-24" /> loading mailboxes...</Text>
   return (
     <Container>
       <div className="flex justify-between items-center mb-8 w-full mt-2">

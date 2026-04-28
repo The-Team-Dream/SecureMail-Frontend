@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Text } from "@/_components/shared/Text";
-import { ChevronDown, ChevronRight, CircleAlert } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { WizardFormData, WizardStepProps } from "./WizardTypes";
 import Error from "@/_components/shared/Error";
 

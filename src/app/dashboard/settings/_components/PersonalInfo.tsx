@@ -18,12 +18,12 @@ import {
   personalInfoSchema,
 } from "@/schemas/settings/personalInfo";
 import { Spinner } from "@/components/ui/spinner";
+import { useSettingsOperations } from "@/APIs/hooks/useUserSettings";
 
 const PersonalInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeletingImg, setIsDeletingImg] = useState(false);
-
   const {
     handleSubmit,
     register,
