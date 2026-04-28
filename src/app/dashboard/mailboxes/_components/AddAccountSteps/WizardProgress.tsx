@@ -12,6 +12,7 @@ export function WizardProgress({ step, steps }: WizardProgressProps) {
       {steps.map((s, index) => {
         const isCompleted = step > s.id;
         const isActive = step === s.id;
+        const Icon = s.icon;
 
         return (
           <React.Fragment key={s.id}>
@@ -19,16 +20,16 @@ export function WizardProgress({ step, steps }: WizardProgressProps) {
               {isActive ? (
                 <div className="w-[46px] h-[46px] rounded-full border-dashed border-2 border-secondary-600 flex items-center justify-center p-[3px]">
                   <div className="w-full h-full rounded-full flex items-center justify-center bg-secondary-200">
-                    <s.icon className="w-4 h-4 stroke-2 text-secondary-800" />
+                    <Icon className="w-5 h-5 text-secondary-800" />
                   </div>
                 </div>
               ) : isCompleted ? (
                 <div className="w-8 h-8 rounded-full bg-secondary-700 flex items-center justify-center relative">
-                  <Check className="w-4 h-4 stroke-3 text-background" />
+                  <Check className="w-5 h-5 stroke-3 text-background" />
                 </div>
               ) : (
                 <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center relative">
-                  <s.icon className="w-4 h-4 stroke-2 text-primary-500" />
+                  <Icon className="w-5 h-5 text-primary-700" />
                 </div>
               )}
             </div>

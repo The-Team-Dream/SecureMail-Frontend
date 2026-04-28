@@ -8,7 +8,7 @@ import {
 } from "./_components/ConnectedAccounts";
 import { AddAccountWizard } from "./_components/AddAccountWizard";
 import { EmptyMailbox } from "./_components/EmptyMailbox";
-import { WizardFormData } from "./_components/wizard-steps/WizardTypes";
+import { WizardFormData } from "../../../schemas/CustomAccount";
 
 export default function Mailboxes() {
   const [view, setView] = useState<"list" | "add">("list");

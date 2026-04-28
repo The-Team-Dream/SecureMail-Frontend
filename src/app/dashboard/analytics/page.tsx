@@ -34,7 +34,7 @@ const itemVariants = {
 
 const Analytics = () => {
   const { data, isLoading, isError } = useAnalyticsOverview();
-  if (isLoading) return <AnalyticsSkeleton />
+  // if (isLoading) return <AnalyticsSkeleton />
   if (isError) return <Container><Text color="error-500">Cannot load analytics, try again later.</Text></Container>
   const severityConfig: Record<
     string,

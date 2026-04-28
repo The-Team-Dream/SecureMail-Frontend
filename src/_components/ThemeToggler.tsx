@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { Icons } from "@/constants/icons";
 
 type ThemeTogglerProps = {
   isCollapsed?: boolean;
@@ -89,7 +90,7 @@ const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
               : "text-muted-foreground",
           )}
         >
-          <Sun size={18} />
+          <Icons.Light size={18} />
           {!isCollapsed && "Light"}
         </button>
 
@@ -104,7 +105,7 @@ const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
               : "text-muted-foreground",
           )}
         >
-          <Moon size={18} />
+          <Icons.Dark size={18} />
           {!isCollapsed && "Dark"}
         </button>
       </div>

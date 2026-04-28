@@ -26,21 +26,13 @@ import { useGetUserData, useLogout } from "@/APIs/hooks/useAuth";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 export const Navbar = () => {
   const pathname = usePathname();
   const [accounts, setAccounts] = useState(initialAccounts);
   const isMailPage = pathname.startsWith("/mailbox");
-  const { mutate, isPending } = useLogout({
-    onSuccess: (res) => {
-      toast.success(res.data.message || "Logout successfully");
-      Cookies.remove("token");
-      router.replace("/sign-in");
-    },
-    onError: (error) => {
-      toast.error(error?.message || "Logout failed");
-    },
-  });
+
   const activeAccount = accounts.find((user) => user.active) || accounts[0];
 
   const handleSwitchAccount = (id: number) => {
@@ -68,14 +60,7 @@ export const Navbar = () => {
           <Bell className="w-6 h-6 text-primary-500" />
           <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-error-700 rounded-full border-2 border-white"></span>
         </Button>
-        <Button
-          disabled={isPending}
-          onClick={() => mutate()}
-          size={"sm"}
-          variant={"destructive"}
-        >
-          Log out
-        </Button>
+ 
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -97,7 +82,7 @@ export const Navbar = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="min-w-[400px] bg-primary-100 border-0 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] p-5 flex flex-col gap-5"
+            className="min-w-[400px] bg-primary-50 border border-primary-100 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] p-5 flex flex-col gap-5"
           >
             <div className="flex flex-col items-center justify-center pt-2">
               <div className="w-[72px] h-[72px] rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 overflow-hidden">
@@ -186,10 +171,15 @@ export const Navbar = () => {
               </Accordion>
 
               <DropdownMenuItem className="p-4 flex items-center gap-3 cursor-pointer bg-background hover:bg-primary-50 transition-colors outline-none rounded-bl-lg rounded-br-lg">
-                <Plus className="size-5 text-primary" />
-                <Text font="medium" size="sm">
-                  Add New Account
-                </Text>
+                <Link
+                  href={"/dashboard/mailboxes"}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="size-5 text-primary" />
+                  <Text font="medium" size="sm">
+                    Add New Account
+                  </Text>
+                </Link>
               </DropdownMenuItem>
             </div>
           </DropdownMenuContent>

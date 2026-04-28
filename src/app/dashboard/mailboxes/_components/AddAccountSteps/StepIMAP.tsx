@@ -1,50 +1,49 @@
-import React from "react";
 import { Text } from "@/_components/shared/Text";
 import { Input } from "@/_components/shared/Input";
-import { WizardStepProps } from "./WizardTypes";
+import { WizardStepProps } from "../../../../../schemas/CustomAccount";
 
-export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
+export function StepIMAP({ register, errors, clearErrors }: WizardStepProps) {
   return (
     <div className="w-full flex flex-col items-center max-w-2xl mx-auto">
       <Text as="h2" size="4xl" font="normal" className="mb-2.5">
-        SMTP Config
+        IMAP Config
       </Text>
-      <Text size="sm" font="normal" color={"primary-500"} className="mb-10">
+      <Text color={"primary-500"} size="sm" font="normal" className="mb-10">
         Please add the below data to complete adding your account
       </Text>
 
-      <div className="w-full flex flex-col gap-4 max-w-2xl mx-auto">
-        {/* Row 1: SMTP Host + Port */}
+      <div className="w-full flex flex-col gap-4 max-w-[720px] mx-auto">
+        {/* Row 1: IMAP Host + Port */}
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="SMTP Host"
+            label="IMAP Host"
             required
-            placeholder="Smtp.Company.Com"
+            placeholder="Imap.Company.Com"
             {...(register
-              ? register("smtpHost", {
+              ? register("imapHost", {
                   onChange: () => {
-                    if (errors?.smtpHost) {
-                      clearErrors?.("smtpHost");
+                    if (errors?.imapHost) {
+                      clearErrors?.("imapHost");
                     }
                   },
                 })
               : {})}
-            error={errors?.smtpHost?.message}
+            error={errors?.imapHost?.message}
           />
           <Input
             label="Port"
             required
-            placeholder="465"
+            placeholder="993"
             {...(register
-              ? register("smtpPort", {
+              ? register("imapPort", {
                   onChange: () => {
-                    if (errors?.smtpPort) {
-                      clearErrors?.("smtpPort");
+                    if (errors?.imapPort) {
+                      clearErrors?.("imapPort");
                     }
                   },
                 })
               : {})}
-            error={errors?.smtpPort?.message}
+            error={errors?.imapPort?.message}
           />
         </div>
 
@@ -55,12 +54,12 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
           </label>
           <div className="relative">
             <select
-              className={`w-full h-12 px-4 border text-[14px] text-primary rounded-lg outline-none transition duration-500 appearance-none bg-card ${errors?.smtpSecurity ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
+              className={`w-full h-12 px-4 border text-[14px] text-primary rounded-lg outline-none transition duration-500 appearance-none bg-card ${errors?.imapSecurity ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
               {...(register
-                ? register("smtpSecurity", {
+                ? register("imapSecurity", {
                     onChange: () => {
-                      if (errors?.smtpSecurity) {
-                        clearErrors?.("smtpSecurity");
+                      if (errors?.imapSecurity) {
+                        clearErrors?.("imapSecurity");
                       }
                     },
                   })
@@ -88,9 +87,9 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
               </svg>
             </div>
           </div>
-          {errors?.smtpSecurity && (
+          {errors?.imapSecurity && (
             <span className="text-error-500 text-sm mt-1">
-              {errors.smtpSecurity.message}
+              {errors.imapSecurity.message}
             </span>
           )}
         </div>
@@ -100,32 +99,32 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
           label="Username"
           placeholder="Enter Your Username"
           {...(register
-            ? register("smtpUsername", {
+            ? register("imapUsername", {
                 onChange: () => {
-                  if (errors?.smtpUsername) {
-                    clearErrors?.("smtpUsername");
+                  if (errors?.imapUsername) {
+                    clearErrors?.("imapUsername");
                   }
                 },
               })
             : {})}
-          error={errors?.smtpUsername?.message}
+          error={errors?.imapUsername?.message}
         />
 
-        {/* Row 4: App Password */}
+        {/* Row 4: Password */}
         <Input
-          label="App Password"
+          label="Password"
           type="password"
           placeholder="Enter Password"
           {...(register
-            ? register("smtpPassword", {
+            ? register("imapPassword", {
                 onChange: () => {
-                  if (errors?.smtpPassword) {
-                    clearErrors?.("smtpPassword");
+                  if (errors?.imapPassword) {
+                    clearErrors?.("imapPassword");
                   }
                 },
               })
             : {})}
-          error={errors?.smtpPassword?.message}
+          error={errors?.imapPassword?.message}
         />
       </div>
     </div>

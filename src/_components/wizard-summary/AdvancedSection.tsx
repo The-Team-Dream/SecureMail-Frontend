@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Rocket, Save, Loader2, ChevronDown, ChevronRight } from "lucide-react";
-import { WizardFormData } from "@/app/dashboard/mailboxes/_components/wizard-steps/WizardTypes";
+import { WizardFormData } from "@/schemas/CustomAccount";
 import { SectionBlock, ViewField, AdvancedDraft } from "./Shared";
 
 export function AdvancedSection({

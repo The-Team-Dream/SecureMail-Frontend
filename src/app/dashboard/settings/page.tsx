@@ -1,13 +1,29 @@
+"use client"
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
-import { Trash2, ArrowRight } from "lucide-react";
+import { Trash2, ArrowRight, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PersonalInfo from "@/app/dashboard/settings/_components/PersonalInfo";
 import Security from "@/app/dashboard/settings/_components/Security";
 import SessionManagement from "@/app/dashboard/settings/_components/SessionManagement";
 import Preference from "@/app/dashboard/settings/_components/Preference";
+import { useLogout } from "@/APIs/hooks/useAuth";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const Settings = () => {
+    const router = useRouter();
+    const { mutate, isPending } = useLogout({
+    onSuccess: (res) => {
+      toast.success(res.data.message || "Logout successfully");
+      Cookies.remove("token");
+      router.replace("/sign-in");
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Logout failed");
+    },
+  });
   return (
     <Container>
       <PersonalInfo />
@@ -42,6 +58,15 @@ const Settings = () => {
           <Trash2 className="w-4 h-4 text-error-500 group-hover:text-white" />
         </Button>
       </div>
+        <Button
+        className="w-fit px-6 py-2  mt-4 bg-error-500 hover:bg-error-600 "
+          disabled={isPending}
+          onClick={() => mutate()}
+          size={"sm"}
+        >
+          <LogOut className="w-4 h-4" />
+          Log out
+        </Button>
     </Container>
   );
 };

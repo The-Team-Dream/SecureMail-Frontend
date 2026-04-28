@@ -2,7 +2,7 @@
 import React, { useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { User, Pencil, Trash2, X, Save, Loader2 } from "lucide-react";
+import { Pencil, Trash2, X, Save, Loader2, UserRound } from "lucide-react";
 import { Text } from "@/_components/shared/Text";
 import { Input } from "@/_components/shared/Input";
 import { Button } from "@/components/ui/button";
@@ -105,7 +105,7 @@ const PersonalInfo = () => {
               {/* Header Section */}
               <div className="flex justify-between items-start mb-10">
                 <div className="flex items-center gap-2 md:gap-4">
-                  <User className="shrink-0 w-8 h-8 text-primary" />
+                  <UserRound className="shrink-0 w-8 h-8 text-primary" />
                   <div>
                     <Text size={"lg"} color={"primary-950"} font="medium">
                       Profile

@@ -2,10 +2,10 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Input } from "../shared/Input";
-import { Mail } from "lucide-react";
 import { useMailStore } from "@/stores/useMailStore";
 import { Text } from "../shared/Text";
 import { useRouter, usePathname } from "next/navigation";
+import { Icons } from "@/constants/icons";
 
 interface SearchAutocompleteProps {
   inputClassName?: string;
@@ -55,7 +55,7 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       <Input
         className={inputClassName}
         type="search"
-        leftIcon={<Mail className="w-5 h-5 text-primary-500" />}
+        leftIcon={<Icons.Mail className="w-5 h-5 text-primary-500" />}
         placeholder="Search Email..."
         value={searchQuery}
         onChange={(e) => {

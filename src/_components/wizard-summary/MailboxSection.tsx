@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Input } from "@/_components/shared/Input";
 import { Button } from "@/components/ui/button";
 import { Mail, Save, Loader2 } from "lucide-react";
-import { WizardFormData } from "@/app/dashboard/mailboxes/_components/wizard-steps/WizardTypes";
+import { WizardFormData } from "@/schemas/CustomAccount";
 import { SectionBlock, ViewField, MailboxDraft } from "./Shared";
 
 export function MailboxSection({

@@ -1,29 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import  { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import {
-  Mail,
-  Settings,
-  Lock,
-  Rocket,
-  FileText,
   ArrowRight,
   ArrowLeft,
   ChevronRight,
 } from "lucide-react";
+import { Icons } from "@/constants/icons";
 
-import { WizardFormData, wizardSchema } from "./wizard-steps/WizardTypes";
-import { WizardProgress } from "./wizard-steps/WizardProgress";
-import { StepProvider } from "./wizard-steps/StepProvider";
-import { StepIMAP } from "./wizard-steps/StepIMAP";
-import { StepSMTP } from "./wizard-steps/StepSMTP";
-import { StepAdvanced } from "./wizard-steps/StepAdvanced";
-import { StepSummary } from "./wizard-steps/StepSummary";
-import { StepSuccess } from "./wizard-steps/StepSuccess";
+import { WizardFormData, wizardSchema } from "../../../../schemas/CustomAccount";
+import { WizardProgress } from "./AddAccountSteps/WizardProgress";
+import { StepProvider } from "./AddAccountSteps/StepProvider";
+import { StepIMAP } from "./AddAccountSteps/StepIMAP";
+import { StepSMTP } from "./AddAccountSteps/StepSMTP";
+import { StepAdvanced } from "./AddAccountSteps/StepAdvanced";
+import { StepSummary } from "./AddAccountSteps/StepSummary";
+import { StepSuccess } from "./AddAccountSteps/StepSuccess";
 
 interface AddAccountWizardProps {
   onCancel: () => void;
@@ -77,18 +73,18 @@ export function AddAccountWizard({
   };
 
   const steps = [
-    { id: 1, icon: Mail },
-    { id: 2, icon: Settings },
-    { id: 3, icon: Lock },
-    { id: 4, icon: Rocket },
-    { id: 5, icon: FileText },
+    { id: 1, icon: Icons.Mail },
+    { id: 2, icon: Icons.Settings2 },
+    { id: 3, icon: Icons.Lock },
+    { id: 4, icon: Icons.Rocket },
+    { id: 5, icon: Icons.Report },
   ];
 
   const validateStep = async () => {
     let fieldsToValidate: (keyof WizardFormData)[] = [];
     if (step === 1) fieldsToValidate = ["mailboxName"];
-    if (step === 2) fieldsToValidate = ["imapHost", "imapPort", "imapSecurity"];
-    if (step === 3) fieldsToValidate = ["smtpHost", "smtpPort", "smtpSecurity"];
+    if (step === 2) fieldsToValidate = ["imapHost", "imapPort", "imapSecurity", "imapUsername", "imapPassword"];
+    if (step === 3) fieldsToValidate = ["smtpHost", "smtpPort", "smtpSecurity", "smtpUsername", "smtpPassword"];
     if (step === 4) fieldsToValidate = ["syncInterval"];
 
     if (fieldsToValidate.length > 0) {

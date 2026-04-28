@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Text } from "@/_components/shared/Text";
-import { WizardFormData, WizardStepProps } from "./WizardTypes";
+import { WizardFormData, WizardStepProps } from "../../../../../schemas/CustomAccount";
 import { MailboxSection } from "@/_components/wizard-summary/MailboxSection";
 import { IMAPSection } from "@/_components/wizard-summary/IMAPSection";
 import { SMTPSection } from "@/_components/wizard-summary/SMTPSection";

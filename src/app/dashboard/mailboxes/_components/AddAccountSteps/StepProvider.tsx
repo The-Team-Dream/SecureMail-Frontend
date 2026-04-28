@@ -1,7 +1,7 @@
 import React from "react";
 import { Text } from "@/_components/shared/Text";
 import { Input } from "@/_components/shared/Input";
-import { WizardStepProps } from "./WizardTypes";
+import { WizardStepProps } from "../../../../../schemas/CustomAccount";
 
 interface StepProviderProps extends WizardStepProps {
   provider: string;

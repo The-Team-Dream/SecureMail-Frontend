@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import {
-  Mail,
   RefreshCw,
   Shield,
   Loader,
@@ -13,12 +12,10 @@ import {
   CircleX,
 } from "lucide-react";
 import Container from "@/_components/shared/Container";
-import { Input } from "@/_components/shared/Input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useMailboxes, useMailboxOperations } from "@/APIs/hooks/useMailboxes";
 import { Mailbox } from "@/APIs/types/Mailbox";
-import { AccountCardSkeleton } from "@/_components/skeleton/AccountCardSkeleton";
 import { ConnectedAccountsSkeleton } from "@/_components/skeleton/ConnectedAccountsSkeleton";
+import { Icons } from "@/constants/icons";
 
 export interface ConnectedAccountType {
   id: number;
@@ -133,7 +130,7 @@ export function ConnectedAccounts({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-4 min-w-0 flex-1 pr-4">
                   <div className="w-[46px] h-[46px] min-w-[46px] rounded-full bg-primary-50 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-primary-900 stroke-[1.5]" />
+                    <Icons.Mail className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                     <div className="truncate w-full">
@@ -215,7 +212,7 @@ export function ConnectedAccounts({
                       e.stopPropagation();
                     }}
                   >
-                    Sync <RefreshCw className="w-4 h-4 text-primary stroke-2" />
+                    Sync <Icons.Sync className="w-4 h-4 text-primary stroke-2" />
                   </div>
                 </Button>
                 <Button
@@ -231,7 +228,7 @@ export function ConnectedAccounts({
                       e.stopPropagation();
                     }}
                   >
-                    Scan <Shield className="w-4 h-4 text-primary stroke-2" />
+                    Scan <Icons.Reports className="w-4 h-4 text-primary stroke-2" />
                   </div>
                 </Button>
               </div>

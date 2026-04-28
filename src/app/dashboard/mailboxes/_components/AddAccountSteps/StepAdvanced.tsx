@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Text } from "@/_components/shared/Text";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { WizardFormData, WizardStepProps } from "./WizardTypes";
+import { WizardFormData, WizardStepProps } from "../../../../../schemas/CustomAccount";
 import Error from "@/_components/shared/Error";
 
 export function StepAdvanced({
