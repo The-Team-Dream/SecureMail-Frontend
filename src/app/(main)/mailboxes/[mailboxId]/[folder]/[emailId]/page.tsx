@@ -4,7 +4,7 @@ import { MailDetails } from "@/_components/mailbox/MailDetails";
 export default async function EmailDetailsPage({
   params,
 }: {
-  params: Promise<{ folder: string; id: string; emailId: string }>;
+  params: Promise<{ folder: string; mailboxId: string; emailId: string }>;
 }) {
   const { emailId } = await params;
   return <MailDetails emailId={emailId} />;

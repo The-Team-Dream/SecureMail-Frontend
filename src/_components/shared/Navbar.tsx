@@ -31,7 +31,7 @@ import Link from "next/link";
 export const Navbar = () => {
   const pathname = usePathname();
   const [accounts, setAccounts] = useState(initialAccounts);
-  const isMailPage = pathname.startsWith("/mailbox");
+  const isMailPage = pathname.split('/').length >= 3 && pathname.startsWith('/mailboxes');
 
   const activeAccount = accounts.find((user) => user.active) || accounts[0];
 
@@ -172,7 +172,7 @@ export const Navbar = () => {
 
               <DropdownMenuItem className="p-4 flex items-center gap-3 cursor-pointer bg-background hover:bg-primary-50 transition-colors outline-none rounded-bl-lg rounded-br-lg">
                 <Link
-                  href={"/dashboard/mailboxes"}
+                  href={"/mailboxes"}
                   className="flex items-center gap-2"
                 >
                   <Plus className="size-5 text-primary" />

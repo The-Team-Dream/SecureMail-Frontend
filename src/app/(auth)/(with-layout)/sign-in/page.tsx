@@ -34,7 +34,7 @@ function SigninContent() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard/mailboxes";
+  const callbackUrl = searchParams.get("callbackUrl") || "/mailboxes";
 
   const signinMutation = useSignin({
     onSuccess: (res) => {

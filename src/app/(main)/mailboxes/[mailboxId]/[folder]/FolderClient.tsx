@@ -1,5 +1,5 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useMailStore } from "@/stores/useMailStore";
 import { MailInbox } from "@/_components/mailbox/MailInbox";
@@ -22,16 +22,18 @@ const validSections: string[] = [
   ...mailFolders,
 ];
 
-export default function FolderPage() {
-  const params = useParams();
+interface FolderClientProps {
+  mailboxId: string;
+  folder: string;
+}
+
+export function FolderClient({ mailboxId, folder }: FolderClientProps) {
   const router = useRouter();
   const setActiveFolder = useMailStore((s) => s.setActiveFolder);
-  const folder = params.folder as string;
-  const id = params.id as string;
 
   useEffect(() => {
     if (!validSections.includes(folder)) {
-      router.replace("/dashboard/mailboxes");
+      router.replace("/mailboxes");
       return;
     }
     // Set active folder for mail folders

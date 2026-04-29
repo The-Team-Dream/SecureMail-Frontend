@@ -122,7 +122,7 @@ export function ConnectedAccounts({
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
           {accounts.map((acc) => (
             <Link
-              href={`/mailbox/inbox/${acc.id}`}
+              href={`/mailboxes/${acc.id}/inbox`}
               key={acc.id}
               className="bg-background border hover:scale-101 transition-all duration-100 hover:bg-background/20 border-primary-100/60 rounded-lg py-6 px-8 flex flex-col gap-8 shadow-[0_4px_16px_rgba(223, 223, 223, 0.5)] transition-all hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] cursor-pointer"
             >

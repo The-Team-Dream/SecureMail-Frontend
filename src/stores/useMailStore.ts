@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { Email, Folder, Classification } from "@/types/mail";
-import { mockEmails } from "@/app/mailbox/[folder]/MOCKDATA";
+import { mockEmails } from "@/app/(main)/mailboxes/[mailboxId]/[folder]/MOCKDATA"; 
 
 const ITEMS_PER_PAGE = 18;
 

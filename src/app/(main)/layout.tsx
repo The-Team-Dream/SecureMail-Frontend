@@ -1,6 +1,6 @@
 import { Navbar } from "@/_components/shared/Navbar";
 import { Sidebar } from "@/_components/shared/Sidebar";
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-col h-screen">
       <Navbar />
@@ -12,4 +12,4 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default DashboardLayout;
+export default MainLayout;

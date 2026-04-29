@@ -18,10 +18,10 @@ import { useMailStore } from "@/stores/useMailStore";
 import type { Folder } from "@/types/mail";
 
 const dashboardNavItems = [
-  { name: "Mailboxes", icon: Icons.Inbox, href: "/dashboard/mailboxes" },
-  { name: "Analytics", icon: Icons.Analytics, href: "/dashboard/analytics" },
-  { name: "Reports", icon: Icons.Reports, href: "/dashboard/reports" },
-  { name: "Settings", icon: Icons.Settings, href: "/dashboard/settings" },
+  { name: "Mailboxes", icon: Icons.Inbox, href: "/mailboxes" },
+  { name: "Analytics", icon: Icons.Analytics, href: "/analytics" },
+  { name: "Reports", icon: Icons.Reports, href: "/reports" },
+  { name: "Settings", icon: Icons.Settings, href: "/settings" },
 ];
 
 const mailboxNavItems: {
@@ -40,12 +40,12 @@ const securityNavItems = [
   {
     name: "Security Reports",
     icon: Icons.Reports,
-    href: "/mailbox/security-reports",
+    href: "security-reports",
   },
-  { name: "Analytics", icon: Icons.Analytics, href: "/mailbox/analytics" },
-  { name: "Phishing", icon: Icons.Phishing, href: "/mailbox/phishing" },
-  { name: "Malware", icon: Icons.Malware, href: "/mailbox/malware" },
-  { name: "Reclassify", icon: Icons.Reclassify, href: "/mailbox/reclassify" },
+  { name: "Analytics", icon: Icons.Analytics, href: "analytics" },
+  { name: "Phishing", icon: Icons.Phishing, href: "phishing" },
+  { name: "Malware", icon: Icons.Malware, href: "malware" },
+  { name: "Reclassify", icon: Icons.Reclassify, href: "reclassify" },
 ];
 
 export const Sidebar = () => {
@@ -54,8 +54,7 @@ export const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
 
-  const isMailPage = pathname.startsWith("/mailbox");
-  const idPath = params.id ? `/${params.id}` : "";
+  const isMailPage = !!params.mailboxId;
 
   return (
     <aside
@@ -109,8 +108,8 @@ export const Sidebar = () => {
         {isMailPage ? (
           <>
             {mailboxNavItems.map((item) => {
-              const targetHref = `/mailbox/${item.folder}${idPath}`;
-              const isActive = pathname.startsWith(`/mailbox/${item.folder}`);
+              const targetHref = `/mailboxes/${params.mailboxId}/${item.folder}`;
+              const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.folder}`);
               return (
                 <Link
                   key={item.name}
@@ -174,8 +173,8 @@ export const Sidebar = () => {
             )}
             {/* Security Navigation */}
             {securityNavItems.map((item) => {
-              const targetHref = `${item.href}${idPath}`;
-              const isActive = pathname.startsWith(item.href);
+              const targetHref = `/mailboxes/${params.mailboxId}/${item.href}`;
+              const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.href}`);
               return (
                 <Link
                   key={item.name}

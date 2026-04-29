@@ -3,14 +3,14 @@ import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { Trash2, ArrowRight, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PersonalInfo from "@/app/dashboard/settings/_components/PersonalInfo";
-import Security from "@/app/dashboard/settings/_components/Security";
-import SessionManagement from "@/app/dashboard/settings/_components/SessionManagement";
-import Preference from "@/app/dashboard/settings/_components/Preference";
 import { useLogout } from "@/APIs/hooks/useAuth";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import PersonalInfo from "./_components/PersonalInfo";
+import Security from "./_components/Security";
+import Preference from "./_components/Preference";
+import SessionManagement from "./_components/SessionManagement";
 
 const Settings = () => {
     const router = useRouter();

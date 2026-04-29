@@ -26,7 +26,7 @@ const itemVariants = {
   },
 };
 
-const Analytics = () => {
+const Analytics = ({ mailboxId }: { mailboxId: string }) => {
   const severityConfig: Record<
     string,
     { container: string; iconBg: string; textColor: string }
