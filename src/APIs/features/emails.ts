@@ -42,7 +42,16 @@ export const emailsApi = {
   
   // Reply & Forward
   replyEmail: async (mailboxId: string, emailId: string, formData: FormData): Promise<{ id: string }> => {
-    const res = await axiosInstance.post(`/mailboxes/${mailboxId}/emails/${emailId}/reply`, formData);
+    const res = await axiosInstance.post(`/mailboxes/${mailboxId}/emails/${emailId}/reply`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
+
+  forwardEmail: async (mailboxId: string, emailId: string, formData: FormData): Promise<{ id: string }> => {
+    const res = await axiosInstance.post(`/mailboxes/${mailboxId}/emails/${emailId}/forward`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return res.data;
   },
 };

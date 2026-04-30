@@ -440,4 +440,15 @@ export const Icons = {
       />
     </CustomIcon>
   ),
+  Attachment: (props: any) => (
+    <CustomIcon {...props} viewBox="0 0 20 20" size={20}>
+      <path
+        d="M26 16.0001V18.0001C26 23.5229 21.5228 28.0001 16 28.0001C10.4771 28.0001 6 23.5229 6 18.0001V10.6667C6 6.98477 8.98477 4 12.6667 4C16.3485 4 19.3333 6.98477 19.3333 10.6667V18C19.3333 19.8409 17.8409 21.3333 16 21.3333C14.1591 21.3333 12.6667 19.8409 12.6667 18V12.6667"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </CustomIcon>
+  ),
 };

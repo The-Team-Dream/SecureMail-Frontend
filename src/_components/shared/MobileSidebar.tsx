@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
 import type { Folder } from "@/types/mail";
+import { useMailStore } from "@/stores/useMailStore";
 
 const dashboardNavItems = [
   { name: "Mailboxes", icon: Mail, href: "/mailboxes" },
@@ -61,6 +62,7 @@ export const MobileSidebar = () => {
   const [open, setOpen] = useState(false);
 
   const isMailPage = !!params.mailboxId;
+  const setComposeOpen = useMailStore((s) => s.setComposeOpen);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -139,6 +141,10 @@ export const MobileSidebar = () => {
                 <Button
                   size={"lg"}
                   className="overflow-hidden bg-secondary-400 text-primary transition-all hover:bg-secondary-600 px-4 mb-4"
+                  onClick={() => {
+                    setOpen(false);
+                    setTimeout(() => setComposeOpen(true, { mode: "new" }), 150);
+                  }}
                 >
                   <PencilLine className="w-6 h-6 text-black mr-2" />
                   <Text className="text-black" font={"bold"}>

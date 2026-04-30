@@ -1,10 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMailStore } from "@/stores/useMailStore";
+import React from "react";
+import { Controller } from "react-hook-form";
 import {
   Sheet,
   SheetContent,
@@ -21,95 +18,73 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Paperclip,
-  Smile,
-  Link as LinkIcon,
-  Image as ImageIcon,
-  Trash2,
-  Send,
-} from "lucide-react";
+import { Paperclip, Smile, Link as LinkIcon, Image as ImageIcon, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
+import EmojiPicker, { Theme } from "emoji-picker-react";
+import { useTheme } from "next-themes";
+import { Text } from "../shared/Text";
+import { Icons } from "@/constants/icons";
+import { Spinner } from "@/components/ui/spinner";
+import { useComposeEmail, MOCK_ACCOUNTS } from "@/hooks/useComposeEmail";
 
-const emailSchema = z.object({
-  from: z.string().email("Invalid sender email"),
-  to: z.string().email("Valid email is required"),
-  subject: z.string().min(1, "Subject is required"),
-  cc: z.string().optional(),
-  bcc: z.string().optional(),
-  bodyText: z.string().optional(),
-  bodyHtml: z.string().optional(),
-});
-
-type EmailFormValues = z.infer<typeof emailSchema>;
-
+// ─── Component ─────────────────────────────────────────────────────────────
 export const ComposeEmailSheet = () => {
-  const isOpen = useMailStore((s) => s.isComposeOpen);
-  const setOpen = useMailStore((s) => s.setComposeOpen);
+  const { resolvedTheme } = useTheme();
+  
+  const {
+    isOpen,
+    setOpen,
+    composeMode,
+    form,
+    attachments,
+    setAttachments,
+    fileInputRef,
+    showEmoji,
+    setShowEmoji,
+    emojiRef,
+    showCc,
+    setShowCc,
+    showBcc,
+    setShowBcc,
+    handleAddFiles,
+    removeAttachment,
+    insertEmoji,
+    onSubmit,
+    isPending,
+  } = useComposeEmail();
 
-  const connectedAccounts = [
-    { id: 1, email: "m.tarek@4horizons.com.sa" },
-    { id: 2, email: "personal@gmail.com" },
-  ];
-
-  const form = useForm<EmailFormValues>({
-    resolver: zodResolver(emailSchema),
-    defaultValues: {
-      from: connectedAccounts[0]?.email || "",
-      to: "",
-      subject: "Test from securemail",
-      cc: "",
-      bcc: "",
-      bodyText: "",
-      bodyHtml: "",
-    },
-  });
-
-  useEffect(() => {
-    if (isOpen) {
-      form.reset({
-        from: connectedAccounts[0]?.email || "",
-        to: "",
-        subject: "",
-        cc: "",
-        bcc: "",
-        bodyText: "",
-        bodyHtml: "",
-      });
-    }
-  }, [isOpen, form]);
-
-  const onSubmit = (data: EmailFormValues) => {
-    console.log("Sending email:", data);
-    toast.success("Email sent successfully!", {
-      position: "bottom-left",
-      style: {
-        backgroundColor: "#000",
-      },
-    });
-    setOpen(false);
+  const titleMap = {
+    new: "New Email",
+    reply: "Reply",
+    forward: "Forward Email",
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setOpen}>
-      <SheetContent className="w-full sm:max-w-2xl p-0 flex flex-col bg-white">
-        <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
+    <Sheet open={isOpen} onOpenChange={(v) => setOpen(v)}>
+      <SheetContent
+        className="w-full sm:max-w-2xl p-0 flex flex-col bg-background [&>button]:top-5 [&>button]:right-5 rounded-l-xl"
+        side="right"
+      >
+        {/* ── Header ────────────────────────────────────────────────── */}
+        <SheetHeader className="px-6 pt-6 pb-2 flex flex-row items-center justify-between shrink-0">
           <SheetTitle className="text-xl font-semibold text-primary-950">
-            New Email
+            {titleMap[composeMode]}
           </SheetTitle>
         </SheetHeader>
-
+        <hr className="border-primary-100 mx-6" />
+        
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col flex-1 overflow-hidden"
         >
-          <div className="flex-1 overflow-y-auto p-6 space-y-5">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {/* From */}
-            <div className="flex items-center gap-4">
-              <label className="w-16 text-sm font-medium text-primary-500">
-                From
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-primary-700 shrink-0">
+                From <span className="text-error-500">*</span>
               </label>
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <Controller
                   name="from"
                   control={form.control}
@@ -118,11 +93,11 @@ export const ComposeEmailSheet = () => {
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <SelectTrigger className="w-full border-gray-200 rounded-lg">
+                      <SelectTrigger className="w-full border-primary-100 rounded-xl">
                         <SelectValue placeholder="Select sender" />
                       </SelectTrigger>
                       <SelectContent>
-                        {connectedAccounts.map((acc) => (
+                        {MOCK_ACCOUNTS.map((acc) => (
                           <SelectItem key={acc.id} value={acc.email}>
                             {acc.email}
                           </SelectItem>
@@ -132,111 +107,278 @@ export const ComposeEmailSheet = () => {
                   )}
                 />
                 {form.formState.errors.from && (
-                  <p className="text-sm text-error-500 mt-1">
+                  <Text color="error-500" size="sm">
                     {form.formState.errors.from.message}
-                  </p>
+                  </Text>
                 )}
               </div>
             </div>
 
             {/* To */}
-            <div className="flex items-center gap-4">
-              <label className="w-16 text-sm font-medium text-primary-500 flex items-center">
-                To <span className="text-error-500 ml-1">*</span>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-primary-700 shrink-0">
+                To <span className="text-error-500">*</span>
               </label>
               <div className="flex-1">
-                <Input
-                  {...form.register("to")}
-                  className="w-full border-gray-200"
-                  placeholder="Recipient email..."
-                  error={form.formState.errors.to?.message}
-                />
+                <div className="flex items-center gap-1">
+                  <div className="flex-1 w-full">
+                    <Input
+                      {...form.register("to")}
+                      className="w-full"
+                      placeholder="recipient@example.com"
+                      error={form.formState.errors.to?.message}
+                    />
+                  </div>
+                  <div className="flex items-center gap-1 ml-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowCc((v) => !v)}
+                      className="text-xs text-primary-500 hover:text-primary-800 font-medium px-1.5 py-0.5 rounded hover:bg-primary-50 transition-colors"
+                    >
+                      CC
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowBcc((v) => !v)}
+                      className="text-xs text-primary-500 hover:text-primary-800 font-medium px-1.5 py-0.5 rounded hover:bg-primary-50 transition-colors"
+                    >
+                      BCC
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
+            {/* CC */}
+            {showCc && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-primary-700">
+                  CC
+                </label>
+                <div className="flex-1">
+                  <Input
+                    {...form.register("cc")}
+                    className="w-full border-primary-200"
+                    placeholder="cc@example.com, ..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* BCC */}
+            {showBcc && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-primary-700">
+                  BCC
+                </label>
+                <div className="flex-1">
+                  <Input
+                    {...form.register("bcc")}
+                    className="w-full border-primary-200"
+                    placeholder="bcc@example.com, ..."
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Subject */}
-            <div className="flex items-center gap-4">
-              <label className="w-16 text-sm font-medium text-primary-500">
-                Subject
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-primary-700 shrink-0">
+                Subject <span className="text-error-500">*</span>
               </label>
               <div className="flex-1">
                 <Input
                   {...form.register("subject")}
-                  className="w-full border-gray-200"
-                  placeholder="Subject..."
+                  placeholder="Email subject..."
                   error={form.formState.errors.subject?.message}
                 />
               </div>
             </div>
 
             {/* Body */}
-            <div className="flex flex-col gap-2 pt-2 h-full">
+            <div className="flex flex-col gap-2 pt-1">
+              <label className="text-sm font-medium text-primary-700 shrink-0">
+                Your Message <span className="text-error-500">*</span>
+              </label>
               <Controller
                 name="bodyText"
                 control={form.control}
                 render={({ field }) => (
                   <Textarea
                     {...field}
-                    placeholder="Type Here..."
-                    className="min-h-[300px] flex-1 resize-none border-gray-200 rounded-lg focus-visible:ring-primary-400 p-4"
+                    placeholder="Type your message here..."
+                    className=""
                   />
                 )}
               />
             </div>
+
+            {/* Attachments Preview */}
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {attachments.map((file, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-1.5 bg-primary-50 border border-primary-100 rounded-lg px-3 py-1.5 text-xs text-primary-700"
+                  >
+                    <Paperclip className="w-3 h-3 shrink-0" />
+                    <Text as={"span"} className="max-w-[140px] truncate">
+                      {file.name}
+                    </Text>
+                    <Text color={"primary-400"} as={"span"}>
+                      ({(file.size / 1024).toFixed(0)} KB)
+                    </Text>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(idx)}
+                      className="ml-1 text-primary-400 hover:text-red-500 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Footer Actions */}
-          <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-white">
-            <div className="flex items-center gap-4">
+          {/* ── Footer ──────────────────────────────────────────────── */}
+          <div className="p-4 flex items-center justify-between bg-background shrink-0">
+            <div className="flex items-center gap-2">
+              {/* Send Button */}
               <Button
                 type="submit"
-                className="bg-black hover:bg-gray-800 text-white rounded-lg px-6 flex items-center gap-2"
+                disabled={isPending}
+                className="w-[100px] h-[46px] rounded-lg"
               >
-                Send
-                <Send className="w-4 h-4" />
+                {isPending ? (
+                  <Spinner />
+                ) : (
+                  <>
+                    <span>Send</span>
+                    <Icons.Sent className="w-4 h-4 text-background" />
+                  </>
+                )}
               </Button>
-              <div className="flex items-center gap-1 border-l border-gray-200 pl-4">
+
+              {/* Toolbar icons */}
+              <div className="flex items-center gap-0.5">
+                {/* Attach file */}
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  className="text-primary-500 hover:text-primary-900 rounded-full"
+                  size={"icon-sm"}
+                  title="Attach file (max 10, 10 MB each)"
+                  className="text-primary-500 hover:text-primary-900"
+                  onClick={() => fileInputRef.current?.click()}
                 >
                   <Paperclip className="w-5 h-5" />
                 </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleAddFiles}
+                  accept="*/*"
+                />
+
+                {/* Emoji picker */}
+                <div className="relative" ref={emojiRef}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Insert emoji"
+                    className={cn(
+                      "text-primary-500 hover:text-primary-900",
+                      showEmoji && "bg-primary-100 text-primary-900",
+                    )}
+                    onClick={() => setShowEmoji((v) => !v)}
+                  >
+                    <Smile className="w-5 h-5 text-primary-500 hover:text-primary-900" />
+                  </Button>
+
+                  {showEmoji && (
+                    <div className="absolute bottom-full mb-2 left-0 z-9999">
+                      <EmojiPicker
+                        onEmojiClick={insertEmoji}
+                        theme={
+                          resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT
+                        }
+                        searchPlaceholder="Search emoji..."
+                        lazyLoadEmojis
+                        height={360}
+                        width={320}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Insert Link (UI only) */}
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  className="text-primary-500 hover:text-primary-900 rounded-full"
-                >
-                  <Smile className="w-5 h-5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="text-primary-500 hover:text-primary-900 rounded-full"
+                  size="icon-sm"
+                  title="Insert link"
+                  className="text-primary-500 hover:text-primary-900"
+                  onClick={() => {
+                    const url = window.prompt("Enter URL:");
+                    if (url) {
+                      const current = form.getValues("bodyText") ?? "";
+                      form.setValue("bodyText", `${current} ${url}`);
+                    }
+                  }}
                 >
                   <LinkIcon className="w-5 h-5" />
                 </Button>
+
+                {/* Insert Image (UI only) */}
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  className="text-primary-500 hover:text-primary-900 rounded-full"
+                  size="icon-sm"
+                  title="Attach image"
+                  className="text-primary-500 hover:text-primary-900"
+                  onClick={() => {
+                    const imgInput = document.createElement("input");
+                    imgInput.type = "file";
+                    imgInput.accept = "image/*";
+                    imgInput.multiple = true;
+                    imgInput.onchange = (e) => {
+                      const files = Array.from(
+                        (e.target as HTMLInputElement).files ?? [],
+                      );
+                      setAttachments((prev) => {
+                        const combined = [...prev, ...files];
+                        if (combined.length > 10) {
+                          toast.error("Max 10 attachments allowed");
+                          return prev;
+                        }
+                        return combined;
+                      });
+                    };
+                    imgInput.click();
+                  }}
                 >
                   <ImageIcon className="w-5 h-5" />
                 </Button>
               </div>
+
+              {/* Attachment count badge */}
+              {attachments.length > 0 && (
+                <span className="text-xs text-primary-500 bg-primary-50 px-2 py-0.5 rounded-full border border-primary-100">
+                  {attachments.length} file{attachments.length > 1 ? "s" : ""}
+                </span>
+              )}
             </div>
 
+            {/* Discard */}
             <Button
               type="button"
               variant="ghost"
               size="icon"
               onClick={() => setOpen(false)}
-              className="text-primary-500 hover:text-error-500 hover:bg-error-50 rounded-full"
+              className="text-primary-400 hover:text-error-500 hover:bg-error-50 rounded-full"
               title="Discard draft"
             >
               <Trash2 className="w-5 h-5" />

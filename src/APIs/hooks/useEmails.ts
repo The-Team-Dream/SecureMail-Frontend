@@ -53,5 +53,42 @@ export const useEmailActions = (mailboxId: string) => {
     },
   });
 
-  return { readMutation, reclassifyMutation, deleteMutation };
+  // Compose / Reply / Forward Mutations
+  const sendMutation = useMutation({
+    mutationFn: (formData: FormData) => emailsApi.sendEmail(mailboxId, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emails', mailboxId] });
+      toast.success("Email sent successfully");
+    },
+    onError: () => toast.error("Failed to send email"),
+  });
+
+  const replyMutation = useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: FormData }) => 
+      emailsApi.replyEmail(mailboxId, id, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emails', mailboxId] });
+      toast.success("Reply sent successfully");
+    },
+    onError: () => toast.error("Failed to send reply"),
+  });
+
+  const forwardMutation = useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: FormData }) => 
+      emailsApi.forwardEmail(mailboxId, id, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emails', mailboxId] });
+      toast.success("Email forwarded successfully");
+    },
+    onError: () => toast.error("Failed to forward email"),
+  });
+
+  return { 
+    readMutation, 
+    reclassifyMutation, 
+    deleteMutation,
+    sendMutation,
+    replyMutation,
+    forwardMutation
+  };
 };

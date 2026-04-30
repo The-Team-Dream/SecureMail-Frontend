@@ -20,7 +20,6 @@ const dashboardNavItems = [
   { name: "Mailboxes", icon: Icons.Inbox, href: "/mailboxes" },
   { name: "Analytics", icon: Icons.Analytics, href: "/analytics" },
   { name: "Reports", icon: Icons.Reports, href: "/reports" },
-  { name: "Settings", icon: Icons.Settings, href: "/settings" },
 ];
 
 const mailboxNavItems: {
@@ -86,7 +85,7 @@ export const Sidebar = () => {
 
       {/* === New Email === */}
       <Button
-        onClick={() => setComposeOpen(true)}
+        onClick={() => setComposeOpen(true, { mode: "new" })}
         size={"lg"}
         className={cn(
           "overflow-hidden bg-secondary-400 text-primary transition-colors hover:bg-secondary-600 mb-2",

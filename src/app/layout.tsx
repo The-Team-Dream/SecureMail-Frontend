@@ -43,26 +43,7 @@ export default function RootLayout({
             themes={["light", "dark"]}
           >
             <SplashPreloader>{children}</SplashPreloader>
-            <Toaster
-              position="top-left"
-              toastOptions={{
-                className: "",
-                success: {
-                  style: {
-                    backgroundColor: "var(--secondary-800)",
-                    color: "#ffffff",
-                  },
-                  icon: <CheckCheckIcon className="h-4 w-4" />,
-                },
-                error: {
-                  style: {
-                    backgroundColor: "var(--error-600)",
-                    color: "#ffffff",
-                  },
-                  icon: <X className="w-4 h-4 text-white" />,
-                },
-              }}
-            />
+            <Toaster position="top-left" />
           </ThemeProvider>
           <ReactQueryDevtools initialIsOpen={false} />
         </ReactQueryProvider>

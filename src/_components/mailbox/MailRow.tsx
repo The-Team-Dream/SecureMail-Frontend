@@ -140,13 +140,7 @@ export const MailRow = ({
             onClick={(e) => {
               e.stopPropagation();
               archiveEmail(email.id);
-              toast.success("email has been archived", {
-                position: "bottom-left",
-                style: {
-                  backgroundColor: "#000",
-                  color: "#fff",
-                },
-              });
+              toast.success("email has been archived");
             }}
             aria-label="Archive email"
             title="Archive"
@@ -160,13 +154,7 @@ export const MailRow = ({
             onClick={(e) => {
               e.stopPropagation();
               deleteEmail(email.id);
-              toast.success("email has been deleted", {
-                position: "bottom-left",
-                style: {
-                  backgroundColor: "#000",
-                  color: "#fff",
-                },
-              });
+              toast.success("email has been deleted");
             }}
             aria-label="Delete email"
             title="Delete"
@@ -184,13 +172,6 @@ export const MailRow = ({
                 email.isRead
                   ? "email has been marked as unread"
                   : "email has been marked as read",
-                {
-                  position: "bottom-left",
-                  style: {
-                    backgroundColor: "#000",
-                    color: "#fff",
-                  },
-                },
               );
             }}
             aria-label={email.isRead ? "Mark as unread" : "Mark as read"}

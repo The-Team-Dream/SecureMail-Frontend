@@ -331,3 +331,41 @@
     @apply bg-background text-foreground font-montserrat;
   }
 }
+
+/* ── emoji-picker-react theme overrides ───────────────────────────────────── */
+.EmojiPickerReact {
+  --epr-bg-color: var(--background) !important;
+  --epr-category-label-bg-color: var(--background) !important;
+  --epr-text-color: var(--foreground) !important;
+  --epr-hover-bg-color: var(--primary-100) !important;
+  --epr-focus-bg-color: var(--primary-100) !important;
+  --epr-highlight-color: var(--secondary-400) !important;
+  --epr-search-input-bg-color: var(--primary-50) !important;
+  --epr-search-input-text-color: var(--foreground) !important;
+  --epr-search-input-placeholder-color: var(--primary-500) !important;
+  --epr-search-border-color: var(--primary-200) !important;
+  --epr-border-color: var(--primary-100) !important;
+  --epr-category-icon-active-color: var(--secondary-500) !important;
+  --epr-skin-tone-picker-menu-color: var(--background) !important;
+  --epr-header-overlay-z-index: 1 !important;
+  border: 1px solid var(--primary-100) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  font-family: var(--font-montserrat), sans-serif !important;
+}
+
+.dark .EmojiPickerReact {
+  --epr-bg-color: var(--primary-100) !important;
+  --epr-category-label-bg-color: var(--primary-100) !important;
+  --epr-text-color: var(--primary-950) !important;
+  --epr-hover-bg-color: var(--primary-200) !important;
+  --epr-focus-bg-color: var(--primary-200) !important;
+  --epr-highlight-color: var(--secondary-400) !important;
+  --epr-search-input-bg-color: var(--primary-200) !important;
+  --epr-search-input-text-color: var(--primary-950) !important;
+  --epr-search-input-placeholder-color: var(--primary-500) !important;
+  --epr-search-border-color: var(--primary-300) !important;
+  --epr-border-color: var(--primary-200) !important;
+  --epr-category-icon-active-color: var(--secondary-500) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}

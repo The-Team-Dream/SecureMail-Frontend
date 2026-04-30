@@ -12,12 +12,25 @@ interface MailState {
   selectedIds: string[];
   searchQuery: string;
   isComposeOpen: boolean;
+  composeMode: "new" | "reply" | "forward";
+  composeData: {
+    to?: string;
+    subject?: string;
+    body?: string;
+    emailId?: string;
+  } | null;
 
   setActiveFolder: (folder: Folder) => void;
   setActiveClassification: (classification: Classification) => void;
   setCurrentPage: (page: number) => void;
   setSearchQuery: (query: string) => void;
-  setComposeOpen: (isOpen: boolean) => void;
+  setComposeOpen: (
+    isOpen: boolean,
+    config?: {
+      mode: "new" | "reply" | "forward";
+      data?: { to?: string; subject?: string; body?: string; emailId?: string };
+    },
+  ) => void;
   toggleSelectEmail: (id: string) => void;
   selectAllOnPage: () => void;
   deselectAll: () => void;
@@ -44,6 +57,8 @@ export const useMailStore = create<MailState>((set, get) => ({
   selectedIds: [],
   searchQuery: "",
   isComposeOpen: false,
+  composeMode: "new" as "new" | "reply" | "forward",
+  composeData: null,
 
   setActiveFolder: (folder: Folder) => {
     set({
@@ -74,8 +89,12 @@ export const useMailStore = create<MailState>((set, get) => ({
     });
   },
 
-  setComposeOpen: (isOpen: boolean) => {
-    set({ isComposeOpen: isOpen });
+  setComposeOpen: (isOpen: boolean, config) => {
+    set({
+      isComposeOpen: isOpen,
+      composeMode: config?.mode || "new",
+      composeData: config?.data || null,
+    });
   },
 
   toggleSelectEmail: (id: string) => {

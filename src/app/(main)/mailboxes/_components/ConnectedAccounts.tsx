@@ -3,11 +3,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
-import {
-  Loader,
-  Wifi,
-  WifiOff,
-} from "lucide-react";
+import { Loader, Wifi, WifiOff } from "lucide-react";
 import Container from "@/_components/shared/Container";
 import { useMailboxes, useMailboxOperations } from "@/APIs/hooks/useMailboxes";
 import { Mailbox } from "@/APIs/types/Mailbox";
@@ -122,7 +118,7 @@ export function ConnectedAccounts({
   // />
   return (
     <Container>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
@@ -137,7 +133,7 @@ export function ConnectedAccounts({
           </Text>
         </div>
         <Button
-          size={'lg'}
+          size={"lg"}
           className="w-auto rounded-xl font-medium"
           onClick={onAddAccount}
         >
@@ -146,14 +142,14 @@ export function ConnectedAccounts({
       </motion.div>
 
       <div className="bg-ghostBlue rounded-lg p-2 lg:py-6 lg:px-4  w-full">
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full"
         >
           {accounts.map((acc) => (
-            <motion.div 
+            <motion.div
               key={acc.id}
               variants={itemVariants}
               whileHover={{ y: -5 }}
@@ -204,7 +200,7 @@ export function ConnectedAccounts({
                     </Text>
                   </div>
 
-                  <div className="w-px h-12 bg-primary-200"></div>
+                  <div className="w-px h-12 bg-primary-200" />
 
                   <div className="flex flex-col items-center flex-1">
                     <Text size="2xl" color={"error-600"} font="semiBold">
@@ -214,8 +210,7 @@ export function ConnectedAccounts({
                       Threats
                     </Text>
                   </div>
-
-                  <div className="w-px h-12 bg-primary-200"></div>
+                  <div className="w-px h-12 bg-primary-200" />
 
                   <div className="flex flex-col items-center flex-1">
                     {acc.sync === "Syncing..." ? (
@@ -249,7 +244,8 @@ export function ConnectedAccounts({
                         e.stopPropagation();
                       }}
                     >
-                      Sync <Icons.Refresh className="w-4 h-4 text-primary stroke-2" />
+                      Sync{" "}
+                      <Icons.Refresh className="w-4 h-4 text-primary stroke-2" />
                     </div>
                   </Button>
                   <Button
@@ -265,7 +261,8 @@ export function ConnectedAccounts({
                         e.stopPropagation();
                       }}
                     >
-                      Scan <Icons.Reports className="w-4 h-4 text-primary stroke-2" />
+                      Scan{" "}
+                      <Icons.Reports className="w-4 h-4 text-primary stroke-2" />
                     </div>
                   </Button>
                 </div>
