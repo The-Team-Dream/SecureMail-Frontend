@@ -19,7 +19,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,10 +27,10 @@ import ThemeToggler from "@/_components/ThemeToggler";
 import type { Folder } from "@/types/mail";
 
 const dashboardNavItems = [
-  { name: "Mailboxes", icon: Mail, href: "/dashboard/mailboxes" },
-  { name: "Analytics", icon: BarChart3, href: "/dashboard/analytics" },
-  { name: "Reports", icon: FileText, href: "/dashboard/reports" },
-  { name: "Settings", icon: Settings, href: "/dashboard/settings" },
+  { name: "Mailboxes", icon: Mail, href: "/mailboxes" },
+  { name: "Analytics", icon: BarChart3, href: "/analytics" },
+  { name: "Reports", icon: FileText, href: "/reports" },
+  { name: "Settings", icon: Settings, href: "/settings" },
 ];
 
 const mailboxNavItems: {
@@ -48,18 +48,19 @@ const securityNavItems = [
   {
     name: "Security Reports",
     icon: ShieldCheck,
-    href: "/mailbox/security-reports",
+    href: "security-reports",
   },
-  { name: "Analytics", icon: LineChart, href: "/mailbox/analytics" },
-  { name: "Phishing", icon: Ghost, href: "/mailbox/phishing" },
-  { name: "Malware", icon: ShieldAlert, href: "/mailbox/malware" },
+  { name: "Analytics", icon: LineChart, href: "analytics" },
+  { name: "Phishing", icon: Ghost, href: "phishing" },
+  { name: "Malware", icon: ShieldAlert, href: "malware" },
 ];
 
 export const MobileSidebar = () => {
   const pathname = usePathname();
+  const params = useParams();
   const [open, setOpen] = useState(false);
 
-  const isMailPage = pathname.startsWith("/mailbox");
+  const isMailPage = !!params.mailboxId;
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -150,11 +151,12 @@ export const MobileSidebar = () => {
                   {isMailPage ? (
                     <>
                       {mailboxNavItems.map((item) => {
-                        const isActive = pathname === `/mailbox/${item.folder}`;
+                        const targetHref = `/mailboxes/${params.mailboxId}/${item.folder}`;
+                        const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.folder}`);
                         return (
                           <Link
                             key={item.name}
-                            href={`/mailbox/${item.folder}`}
+                            href={targetHref}
                             onClick={() => setOpen(false)}
                             className={cn(
                               "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
@@ -212,11 +214,12 @@ export const MobileSidebar = () => {
 
                       {/* Security Navigation */}
                       {securityNavItems.map((item) => {
-                        const isActive = pathname === item.href;
+                        const targetHref = `/mailboxes/${params.mailboxId}/${item.href}`;
+                        const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.href}`);
                         return (
                           <Link
                             key={item.name}
-                            href={item.href}
+                            href={targetHref}
                             onClick={() => setOpen(false)}
                             className={cn(
                               "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative",

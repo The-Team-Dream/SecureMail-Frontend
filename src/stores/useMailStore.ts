@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { Email, Folder, Classification } from "@/types/mail";
-import { mockEmails } from "@/app/mailbox/[folder]/MOCKDATA";
+import { mockEmails } from "@/app/(main)/mailboxes/[mailboxId]/[folder]/MOCKDATA"; 
 
 const ITEMS_PER_PAGE = 18;
 
@@ -11,18 +11,23 @@ interface MailState {
   currentPage: number;
   selectedIds: string[];
   searchQuery: string;
+  isComposeOpen: boolean;
 
   setActiveFolder: (folder: Folder) => void;
   setActiveClassification: (classification: Classification) => void;
   setCurrentPage: (page: number) => void;
   setSearchQuery: (query: string) => void;
+  setComposeOpen: (isOpen: boolean) => void;
   toggleSelectEmail: (id: string) => void;
   selectAllOnPage: () => void;
   deselectAll: () => void;
   toggleStarEmail: (id: string) => void;
   toggleReadEmail: (id: string) => void;
   deleteEmail: (id: string) => void;
+  deleteSelected: () => void;
   archiveEmail: (id: string) => void;
+  archiveSelected: () => void;
+  toggleSelectedRead: () => void;
   reorderEmails: (fromIndex: number, toIndex: number) => void;
   getFilteredEmails: () => Email[];
   getPagedEmails: () => Email[];
@@ -38,6 +43,7 @@ export const useMailStore = create<MailState>((set, get) => ({
   currentPage: 1,
   selectedIds: [],
   searchQuery: "",
+  isComposeOpen: false,
 
   setActiveFolder: (folder: Folder) => {
     set({
@@ -66,6 +72,10 @@ export const useMailStore = create<MailState>((set, get) => ({
       searchQuery: query,
       currentPage: 1,
     });
+  },
+
+  setComposeOpen: (isOpen: boolean) => {
+    set({ isComposeOpen: isOpen });
   },
 
   toggleSelectEmail: (id: string) => {
@@ -130,6 +140,42 @@ export const useMailStore = create<MailState>((set, get) => ({
         email.id === id ? { ...email, folder: "archive" as Folder } : email,
       ),
       selectedIds: get().selectedIds.filter((sid) => sid !== id),
+    });
+  },
+
+  deleteSelected: () => {
+    const { selectedIds, emails } = get();
+    set({
+      emails: emails.map((email) =>
+        selectedIds.includes(email.id)
+          ? { ...email, folder: "trash" as Folder, isStarred: false }
+          : email,
+      ),
+      selectedIds: [],
+    });
+  },
+
+  archiveSelected: () => {
+    const { selectedIds, emails } = get();
+    set({
+      emails: emails.map((email) =>
+        selectedIds.includes(email.id)
+          ? { ...email, folder: "archive" as Folder }
+          : email,
+      ),
+      selectedIds: [],
+    });
+  },
+
+  toggleSelectedRead: () => {
+    const { selectedIds, emails } = get();
+    set({
+      emails: emails.map((email) =>
+        selectedIds.includes(email.id)
+          ? { ...email, isRead: !email.isRead }
+          : email,
+      ),
+      selectedIds: [],
     });
   },
 

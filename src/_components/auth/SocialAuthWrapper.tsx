@@ -16,19 +16,12 @@ const SocialAuthWrapper = () => {
         <div className="flex-1 h-px bg-primary-200 rounded-xs" />
       </div>
 
-      <div className="grid grid-cols-2 gap-6 md:gap-12">
+      <div className="grid grid-cols-1 gap-6 md:gap-12">
         <SocialAuthButton
           provider="google"
           title="Google"
           iconSrc="/icons/google.svg"
           onClick={() => handleOAuthClick("google")}
-          // isLoading={oauthLoginMutation.isPending}
-        />
-        <SocialAuthButton
-          provider="outlook"
-          title="Outlook"
-          iconSrc="/icons/outlook.svg"
-          onClick={() => handleOAuthClick("outlook")}
           // isLoading={oauthLoginMutation.isPending}
         />
       </div>

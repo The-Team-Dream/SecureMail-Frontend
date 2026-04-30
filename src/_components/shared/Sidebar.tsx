@@ -1,35 +1,26 @@
 "use client";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Icons } from "@/constants/icons";
 import {
-  Mail,
-  BarChart3,
-  FileText,
-  Settings,
   Menu,
   PencilLine,
   ChevronRight,
-  Send,
-  Star,
-  AlertCircle,
-  ShieldCheck,
-  LineChart,
-  Ghost,
-  ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
+import { useMailStore } from "@/stores/useMailStore";
 import type { Folder } from "@/types/mail";
 
 const dashboardNavItems = [
-  { name: "Mailboxes", icon: Mail, href: "/dashboard/mailboxes" },
-  { name: "Analytics", icon: BarChart3, href: "/dashboard/analytics" },
-  { name: "Reports", icon: FileText, href: "/dashboard/reports" },
-  { name: "Settings", icon: Settings, href: "/dashboard/settings" },
+  { name: "Mailboxes", icon: Icons.Inbox, href: "/mailboxes" },
+  { name: "Analytics", icon: Icons.Analytics, href: "/analytics" },
+  { name: "Reports", icon: Icons.Reports, href: "/reports" },
+  { name: "Settings", icon: Icons.Settings, href: "/settings" },
 ];
 
 const mailboxNavItems: {
@@ -37,28 +28,32 @@ const mailboxNavItems: {
   icon: React.ElementType;
   folder: Folder;
 }[] = [
-  { name: "Inbox", icon: Mail, folder: "inbox" },
-  { name: "Sent", icon: Send, folder: "sent" },
-  { name: "Starred", icon: Star, folder: "starred" },
-  { name: "Spam", icon: AlertCircle, folder: "spam" },
+  { name: "Inbox", icon: Icons.Inbox, folder: "inbox" },
+  { name: "Sent", icon: Icons.Sent, folder: "sent" },
+  { name: "Star", icon: Icons.Star, folder: "starred" },
+  { name: "Spam", icon: Icons.Spam, folder: "spam" },
+  
 ];
 
 const securityNavItems = [
   {
     name: "Security Reports",
-    icon: ShieldCheck,
-    href: "/mailbox/security-reports",
+    icon: Icons.Reports,
+    href: "security-reports",
   },
-  { name: "Analytics", icon: LineChart, href: "/mailbox/analytics" },
-  { name: "Phishing", icon: Ghost, href: "/mailbox/phishing" },
-  { name: "Malware", icon: ShieldAlert, href: "/mailbox/malware" },
+  { name: "Analytics", icon: Icons.Analytics, href: "analytics" },
+  { name: "Phishing", icon: Icons.Phishing, href: "phishing" },
+  { name: "Malware", icon: Icons.Malware, href: "malware" },
+  { name: "Reclassify", icon: Icons.Reclassify, href: "reclassify" },
 ];
 
 export const Sidebar = () => {
   const pathname = usePathname();
+  const params = useParams();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const setComposeOpen = useMailStore((s) => s.setComposeOpen);
 
-  const isMailPage = pathname.startsWith("/mailbox");
+  const isMailPage = !!params.mailboxId;
 
   return (
     <aside
@@ -71,7 +66,7 @@ export const Sidebar = () => {
     >
       <div
         className={cn(
-          "flex items-center mb-8 px-2",
+          "flex items-center mb-4 px-2",
           isCollapsed ? "justify-center" : "justify-between",
         )}
       >
@@ -91,9 +86,10 @@ export const Sidebar = () => {
 
       {/* === New Email === */}
       <Button
+        onClick={() => setComposeOpen(true)}
         size={"lg"}
         className={cn(
-          "overflow-hidden bg-secondary-400 text-primary transition-colors hover:bg-secondary-600 mb-4",
+          "overflow-hidden bg-secondary-400 text-primary transition-colors hover:bg-secondary-600 mb-2",
           isCollapsed ? "mx-auto h-12 w-12 p-0" : "px-4",
         )}
       >
@@ -111,11 +107,12 @@ export const Sidebar = () => {
         {isMailPage ? (
           <>
             {mailboxNavItems.map((item) => {
-              const isActive = pathname === `/mailbox/${item.folder}`;
+              const targetHref = `/mailboxes/${params.mailboxId}/${item.folder}`;
+              const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.folder}`);
               return (
                 <Link
                   key={item.name}
-                  href={`/mailbox/${item.folder}`}
+                  href={targetHref}
                   title={isCollapsed ? item.name : ""}
                   className={cn(
                     "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
@@ -141,13 +138,8 @@ export const Sidebar = () => {
 
                   <div className="flex items-center gap-3">
                     <item.icon
-                      className={cn(
-                        "w-5 h-5 min-w-5 transition-colors",
-                        isActive
-                          ? "text-primary"
-                          : "text-primary-600 group-hover:text-primary-600",
-                      )}
-                      strokeWidth={isActive ? 2.5 : 2}
+                      active={isActive}
+                      className="w-[22px] h-[22px] min-w-[22px]"
                     />
                     {!isCollapsed && (
                       <Text
@@ -180,11 +172,12 @@ export const Sidebar = () => {
             )}
             {/* Security Navigation */}
             {securityNavItems.map((item) => {
-              const isActive = pathname === item.href;
+              const targetHref = `/mailboxes/${params.mailboxId}/${item.href}`;
+              const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.href}`);
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
+                  href={targetHref}
                   title={isCollapsed ? item.name : ""}
                   className={cn(
                     "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative",
@@ -210,13 +203,8 @@ export const Sidebar = () => {
 
                   <div className="flex items-center gap-3">
                     <item.icon
-                      className={cn(
-                        "w-5 h-5 min-w-5 transition-colors",
-                        isActive
-                          ? "text-primary"
-                          : "text-primary-600 group-hover:text-primary-600",
-                      )}
-                      strokeWidth={isActive ? 2.5 : 2}
+                      active={isActive}
+                      className="w-[22px] h-[22px] min-w-[22px]"
                     />
                     {!isCollapsed && (
                       <Text
@@ -271,13 +259,8 @@ export const Sidebar = () => {
 
                 <div className="flex items-center gap-3">
                   <item.icon
-                    className={cn(
-                      "w-5 h-5 min-w-5 transition-colors",
-                      isActive
-                        ? "text-primary"
-                        : "text-primary-600 group-hover:text-primary-600",
-                    )}
-                    strokeWidth={isActive ? 2.5 : 2}
+                    active={isActive}
+                    className="w-[22px] h-[22px] min-w-[22px]"
                   />
                   {!isCollapsed && (
                     <Text

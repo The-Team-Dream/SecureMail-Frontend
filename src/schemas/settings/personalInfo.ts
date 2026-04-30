@@ -4,7 +4,7 @@ export const personalInfoSchema = z.object({
   fullName: z
     .string()
     .min(1, { message: "Full Name is required" })
-    .min(3, { message: "Name must be at least 3 characters" }),
+    .min(3, { message: "Full Name must be at least 3 characters" }),
   email: z
     .string()
     .min(1, { message: "Email is required" })
