@@ -85,7 +85,7 @@ export const Input: React.FC<Input> = ({
             error
               ? "border-error-500 placeholder:text-error-500"
               : "border-primary-100 placeholder:text-primary-400",
-            className
+            className,
           )}
         />
         {isPassword && (

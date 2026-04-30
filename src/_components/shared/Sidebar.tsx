@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/constants/icons";
 import {
-  Settings,
   Menu,
   PencilLine,
   ChevronRight,

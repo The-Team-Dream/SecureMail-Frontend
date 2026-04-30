@@ -2,7 +2,7 @@ import axiosInstance from "@/lib/axios";
 import type { EmailDetails, EmailsResponse } from "../types/Email";
 
 export const emailsApi = {
-  // Get Lists (Inbox, Sent, Spam, Phishing)
+  // Get Emails List (Inbox, Sent, Spam, Phishing)
   getEmails: async (mailboxId: string, folder: string, page = 1, limit = 20): Promise<EmailsResponse> => {
     const res = await axiosInstance.get<EmailsResponse>(`/mailboxes/${mailboxId}/${folder}`, {
       params: { page, limit },
@@ -10,22 +10,23 @@ export const emailsApi = {
     return res.data;
   },
 
+  // Get Email Details
   getEmailDetails: async (mailboxId: string, emailId: string): Promise<EmailDetails> => {
     const res = await axiosInstance.get<EmailDetails>(`/mailboxes/${mailboxId}/emails/${emailId}`);
     return res.data;
   },
 
-  // Actions
+  // Delete Email
   deleteEmail: async (mailboxId: string, emailId: string): Promise<void> => {
     const res = await axiosInstance.delete(`/mailboxes/${mailboxId}/emails/${emailId}`);
     return res.data;
   },
-
+// Mark as Read
   markAsRead: async (mailboxId: string, emailId: string, read: boolean): Promise<void> => {
     const res = await axiosInstance.patch(`/mailboxes/${mailboxId}/emails/${emailId}/read`, { read });
     return res.data;
   },
-
+// Reclassify Email
   reclassify: async (mailboxId: string, emailId: string, folder: string): Promise<void> => {
     const res = await axiosInstance.patch(`/mailboxes/${mailboxId}/emails/${emailId}/reclassify`, { folder });
     return res.data;

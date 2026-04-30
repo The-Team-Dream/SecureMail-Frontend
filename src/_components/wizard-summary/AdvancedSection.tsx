@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Rocket, Save, Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { WizardFormData } from "@/schemas/CustomAccount";
 import { SectionBlock, ViewField, AdvancedDraft } from "./Shared";
+import { Icons } from "@/constants/icons";
 
 export function AdvancedSection({
   formData,
@@ -43,7 +44,7 @@ export function AdvancedSection({
 
   return (
     <SectionBlock
-      icon={<Rocket className="w-5 h-5 stroke-[2.5] text-secondary-800" />}
+      icon={<Icons.Rocket className="w-5 h-5 text-secondary-800" />}
       title="Advanced Settings"
       isEditing={isEditing}
       onEdit={handleEdit}

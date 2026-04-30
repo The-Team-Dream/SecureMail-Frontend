@@ -14,6 +14,8 @@ import {
 } from "@/types/analytics";
 
 import { motion } from "framer-motion";
+import { StateMessage } from "@/_components/shared/StateMessage";
+import { AlertCircle, Mail } from "lucide-react";
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -33,9 +35,14 @@ const itemVariants = {
 };
 
 const Analytics = () => {
-  const { data, isLoading, isError } = useAnalyticsOverview();
-  // if (isLoading) return <AnalyticsSkeleton />
-  if (isError) return <Container><Text color="error-500">Cannot load analytics, try again later.</Text></Container>
+  const { data, isLoading, isError,refetch } = useAnalyticsOverview();
+//   if (isLoading) return <AnalyticsSkeleton />
+//   if (isError) return <StateMessage 
+//   variant="error"
+//   title="Analytics Interrupted"
+//   description="We're having trouble connecting to the security server. Your data is safe."
+//   onRetry={() => refetch()}
+// />
   const severityConfig: Record<
     string,
     { container: string; iconBg: string; textColor: string }

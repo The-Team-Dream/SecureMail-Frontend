@@ -12,6 +12,7 @@ import {
   SecuritySelect,
   MailConfigDraft,
 } from "./Shared";
+import { Icons } from "@/constants/icons";
 
 export function IMAPSection({
   formData,
@@ -65,7 +66,7 @@ export function IMAPSection({
 
   return (
     <SectionBlock
-      icon={<Settings className="w-5 h-5 stroke-[2.5]" />}
+      icon={<Icons.Settings2 className="w-5 h-5 text-secondary-800" />}
       title="IMAP Config"
       isEditing={isEditing}
       onEdit={handleEdit}

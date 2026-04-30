@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Check, Mail, Plus } from "lucide-react";
+import { Bell, Check, Plus } from "lucide-react";
 import Logo from "./Logo";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
@@ -19,17 +19,16 @@ import {
 } from "@/components/ui/accordion";
 import Image from "next/image";
 import { initialAccounts } from "@/constants/MOCKDATA";
-import { usePathname } from "next/dist/client/components/navigation";
+import { usePathname, useRouter, useParams } from "next/navigation";
 import { MobileSidebar } from "./MobileSidebar";
 import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
-import { useGetUserData, useLogout } from "@/APIs/hooks/useAuth";
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import Link from "next/link";
+import { Icons } from "@/constants/icons";
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const params = useParams();
+  const mailboxId = params?.mailboxId;
   const [accounts, setAccounts] = useState(initialAccounts);
   const isMailPage = pathname.split('/').length >= 3 && pathname.startsWith('/mailboxes');
 
@@ -55,13 +54,12 @@ export const Navbar = () => {
           </div>
         )}
       </div>
-      <div className="flex items-center gap-4">
-        <Button size={"icon-sm"} variant={"ghost"} className="relative">
-          <Bell className="w-6 h-6 text-primary-500" />
-          <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-error-700 rounded-full border-2 border-white"></span>
+      <div className="flex items-center gap-2">
+       <Link href={mailboxId ? `/mailboxes/${mailboxId}/settings` : '/settings'}>
+        <Button size="icon-sm" variant="ghost" className={`${pathname.includes('/settings') ? 'bg-primary-200 text-primary' : 'text-primary-600'} relative`}>
+          <Icons.Settings className={`${pathname.includes('/settings') ? 'text-primary' : 'text-primary-600'} w-10 h-10 `} />
         </Button>
- 
-
+        </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 cursor-pointer outline-none overflow-hidden">

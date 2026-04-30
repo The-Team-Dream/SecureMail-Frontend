@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Save, Loader2 } from "lucide-react";
 import { WizardFormData } from "@/schemas/CustomAccount";
 import { SectionBlock, ViewField, MailboxDraft } from "./Shared";
+import { Icons } from "@/constants/icons";
 
 export function MailboxSection({
   formData,
@@ -45,7 +46,7 @@ export function MailboxSection({
 
   return (
     <SectionBlock
-      icon={<Mail className="w-5 h-5 stroke-[2.5]" />}
+      icon={<Icons.Mail className="w-5 h-5 text-secondary-800" />}
       title="Mailbox Name"
       isEditing={isEditing}
       onEdit={handleEdit}

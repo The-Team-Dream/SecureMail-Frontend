@@ -29,29 +29,29 @@ export const stats: Stat[] = [
     id: 1,
     label: "Critical",
     value: "12,482",
-    badgeClass: "bg-secondary-100 text-secondary-800",
+    badgeClass: "bg-secondary-200 text-secondary-900",
     badgeText: "+14%",
   },
   {
     id: 2,
     label: "Resolved",
     value: "649.64",
-    badgeClass: "bg-error-50 text-error-600",
+    badgeClass: "bg-error-50 text-error-500",
     badgeText: "+82%",
   },
   {
     id: 3,
     label: "Pending",
     value: "5",
-    badgeClass: "bg-secondary-100 text-secondary-800",
-    badgeText: "0%",
+    badgeClass: "bg-secondary-200 text-secondary-900",
+    badgeText: "0%",  
   },
 ];
 
 export const listItems: ListItem[] = [
   {
     id: 1,
-    badgeClass: "bg-error-50 text-error-600",
+    badgeClass: "bg-error-50 text-error-500",
     badge: "CRITICAL THREAT",
     time: "2m ago",
     title: "Phishing Attempt: IT Support",
@@ -80,8 +80,8 @@ export const listItems: ListItem[] = [
     title: "Bulk Data Export Request",
     description: "Origin: Unusual IP (Shanghai) · Volume: 4.2GB",
     meta: (
-      <div className="flex items-center gap-1 mt-1 text-sm text-secondary-800">
-        <MapPin className="w-4 h-4" />
+      <div className="flex items-center gap-1 mt-1 text-xs text-secondary-800">
+        <MapPin className="w-3 h-3" />
         <span className="font-medium">Shanghai, CN</span>
       </div>
     ),
@@ -89,13 +89,13 @@ export const listItems: ListItem[] = [
   },
   {
     id: 3,
-    badgeClass: "bg-white text-secondary-600",
+    badgeClass: "bg-background text-secondary-600",
     badge: "SYSTEM UPDATE",
     time: "2h ago",
     title: "Firewall Rules Updated",
     description: "Auto-remediation successful for port 8080",
     meta: (
-      <div className="flex items-center gap-1.5 mt-1 text-sm text-secondary-800">
+      <div className="flex items-center gap-1.5 mt-1 text-xs text-secondary-800">
         <CheckCircle className="w-3 h-3" />
         <span className="font-medium">Resolved Automatically</span>
       </div>
