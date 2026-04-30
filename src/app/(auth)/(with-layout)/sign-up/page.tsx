@@ -16,6 +16,7 @@ import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
 import { Spinner } from "@/components/ui/spinner";
 import { useServerErrors } from "@/utils/form-utils";
 import BackEndError from "@/_components/shared/BackEndError";
+import Error from "@/_components/shared/Error";
 export default function Signup() {
   const {
     handleSubmit,
@@ -76,11 +77,7 @@ export default function Signup() {
             placeholder="Full Name"
             leftIcon={<User />}
             {...register("username", {
-              onChange: () => {
-                if (errors.username) {
-                  clearErrors("username");
-                }
-              },
+              onChange: () => clearErrors("username"),
             })}
             error={errors.username?.message}
           />
@@ -89,21 +86,13 @@ export default function Signup() {
             placeholder="Email Address"
             leftIcon={<Mail />}
             {...register("email", {
-              onChange: () => {
-                if (errors.email) {
-                  clearErrors("email");
-                }
-              },
+              onChange: () => clearErrors("email"),
             })}
             error={errors.email?.message}
           />
           <Input
             {...register("password", {
-              onChange: () => {
-                if (errors.password) {
-                  clearErrors("password");
-                }
-              },
+              onChange: () => clearErrors("password"),
             })}
             type="password"
             placeholder="Password"
@@ -112,11 +101,7 @@ export default function Signup() {
           />
           <Input
             {...register("confirmPassword", {
-              onChange: () => {
-                if (errors.confirmPassword) {
-                  clearErrors("confirmPassword");
-                }
-              },
+              onChange: () => clearErrors("confirmPassword"),
             })}
             type="password"
             placeholder="Confirm Password"
@@ -130,11 +115,7 @@ export default function Signup() {
                 type="checkbox"
                 id="terms"
                 {...register("acceptTerms", {
-                  onChange: () => {
-                    if (errors.acceptTerms) {
-                      clearErrors("acceptTerms");
-                    }
-                  },
+                  onChange: () => clearErrors("acceptTerms"),
                 })}
                 className="w-4 h-4 accent-[#87BE00] focus:bg-green-500 hover:bg-green-500"
               />
@@ -149,27 +130,7 @@ export default function Signup() {
                 </Text>
               </label>
             </div>
-            <AnimatePresence>
-              {errors.acceptTerms && (
-                <motion.div
-                  variants={errorVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={{
-                    ease: "easeInOut",
-                    duration: 0.2,
-                    stiffness: 120,
-                  }}
-                  className="flex items-center gap-2 text-error mt-1"
-                >
-                  <CircleAlert className="w-4 h-4" />
-                  <Text as={"span"} font={"medium"} size={"sm"} color={"error"}>
-                    {errors.acceptTerms.message}
-                  </Text>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <Error error={errors?.acceptTerms?.message} />
           </div>
 
           {errors.root && (
@@ -181,10 +142,14 @@ export default function Signup() {
             {signupMutation.isPending ? (
               <>
                 <Spinner />
-                <Text className="text-white">Creating Account...</Text>
+                <Text font={"medium"} className="text-white">
+                  Creating Account...
+                </Text>
               </>
             ) : (
-              <span>Sign Up</span>
+              <Text font={"medium"} className="text-white">
+                Sign Up
+              </Text>
             )}
           </Button>
         </form>

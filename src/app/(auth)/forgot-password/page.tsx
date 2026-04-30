@@ -64,11 +64,7 @@ export default function ForgotPassword() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <Input
                 {...register("email", {
-                  onChange: () => {
-                    if (errors.email) {
-                      clearErrors("email");
-                    }
-                  },
+                  onChange: () => clearErrors("email"),
                 })}
                 type="email"
                 placeholder="Email Address"
@@ -81,7 +77,18 @@ export default function ForgotPassword() {
                 />
               )}
               <Button size={"lg"} type="submit" disabled={isPending}>
-                {isPending ? <Spinner /> : "Send"}
+                {isPending ? (
+                  <>
+                    <Spinner />
+                    <Text className="text-white" font={"medium"}>
+                      Sending...
+                    </Text>
+                  </>
+                ) : (
+                  <Text className="text-white" font={"medium"}>
+                    Send
+                  </Text>
+                )}
               </Button>
             </form>
             <Link className="hover:underline font-medium" href={"/sign-in"}>

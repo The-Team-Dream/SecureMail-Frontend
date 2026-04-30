@@ -93,11 +93,7 @@ function ResetPasswordContent() {
                 <div className="flex flex-col gap-4">
                   <Input
                     {...register("newPassword", {
-                      onChange: () => {
-                        if (errors.newPassword) {
-                          clearErrors("newPassword");
-                        }
-                      },
+                      onChange: () => clearErrors("newPassword"),
                     })}
                     type="password"
                     placeholder="New Password"
@@ -106,11 +102,7 @@ function ResetPasswordContent() {
                   />
                   <Input
                     {...register("confirmPassword", {
-                      onChange: () => {
-                        if (errors.confirmPassword) {
-                          clearErrors("confirmPassword");
-                        }
-                      },
+                      onChange: () => clearErrors("confirmPassword"),
                     })}
                     type="password"
                     placeholder="Confirm Password"
@@ -124,7 +116,18 @@ function ResetPasswordContent() {
                   />
                 )}
                 <Button size={"lg"} type="submit" disabled={isPending}>
-                  {isPending ? <Spinner /> : "Reset Password"}
+                  {isPending ? (
+                    <>
+                      <Spinner />
+                      <Text className="text-white" font={"medium"}>
+                        Resetting...
+                      </Text>
+                    </>
+                  ) : (
+                    <Text className="text-white" font={"medium"}>
+                      Reset Password
+                    </Text>
+                  )}
                 </Button>
               </form>
             </div>

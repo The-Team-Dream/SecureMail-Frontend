@@ -10,9 +10,9 @@ const SocialAuthWrapper = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-primary-200 rounded-xs" />
-        <span className="text-center text-primary-500">Or</span>
+        <span className="text-center text-primary-500">OR</span>
         <div className="flex-1 h-px bg-primary-200 rounded-xs" />
       </div>
 

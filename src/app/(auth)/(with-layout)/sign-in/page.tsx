@@ -71,11 +71,7 @@ function SigninContent() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Input
             {...register("email", {
-              onChange: () => {
-                if (errors.email) {
-                  clearErrors("email");
-                }
-              },
+              onChange: () => clearErrors("email"),
             })}
             type="email"
             placeholder="Email Address"
@@ -84,11 +80,7 @@ function SigninContent() {
           />
           <Input
             {...register("password", {
-              onChange: () => {
-                if (errors.password) {
-                  clearErrors("password");
-                }
-              },
+              onChange: () => clearErrors("password"),
             })}
             type="password"
             placeholder="Password"
@@ -107,7 +99,18 @@ function SigninContent() {
             />
           )}
           <Button size={"lg"} type="submit" disabled={signinMutation.isPending}>
-            {signinMutation.isPending ? <Spinner /> : "Sign in"}
+            {signinMutation.isPending ? (
+              <>
+                <Spinner />
+                <Text font={"medium"} className="text-white">
+                  Logging in...
+                </Text>
+              </>
+            ) : (
+              <Text font={"medium"} className="text-white">
+                Login
+              </Text>
+            )}
           </Button>
         </form>
         {/* OAuth Buttons */}
