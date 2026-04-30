@@ -1,4 +1,9 @@
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import {
   forgetPassword,
@@ -7,70 +12,119 @@ import {
   resetPassword,
   verifyOtp,
   resendOtp,
+  logout,
+  getUserData,
+  getOAuthLoginUrl,
+  validateOAuthToken,
 } from "../features/auth";
 import {
-  ForgetPasswordPayload,
-  ResendOtpPayload,
-  SigninPayload,
-  SignupPayload,
+  SigninData,
+  SigninResponse,
+  SignupData,
   SignupResponse,
-  ResetPasswordPayload,
-  VerifyOtpPayload,
+  VerifyOtpData,
+  VerifyOtpResponse,
+  ResendOtpData,
+  ForgetPasswordData,
+  ResetPasswordData,
+  OAuthProvider,
+  ForgetPasswordResponse,
 } from "../../types/auth";
 
-type SignupApiError = AxiosError<{ message?: string }>;
-
 export const useSignup = (
-  options?: UseMutationOptions<
-    SignupResponse,
-    SignupApiError,
-    SignupPayload
-  >,
+  options?: UseMutationOptions<SignupResponse, AxiosError, SignupData>,
 ) => {
-  return useMutation<SignupResponse, SignupApiError, SignupPayload>({
+  const queryClient = useQueryClient();
+  return useMutation<SignupResponse, AxiosError, SignupData>({
     mutationFn: signup,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+    },
     ...options,
   });
 };
 
 export const useSignin = (
-  options?: UseMutationOptions<any, any, SigninPayload>,
+  options?: UseMutationOptions<SigninResponse, AxiosError, SigninData>,
 ) => {
-  return useMutation<any, any, SigninPayload>({
+  const queryClient = useQueryClient();
+  return useMutation<SigninResponse, AxiosError, SigninData>({
     mutationFn: signin,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+    },
     ...options,
   });
 };
 
 export const useVerifyOtp = (
-  options?: UseMutationOptions<any, any, VerifyOtpPayload>,
+  options?: UseMutationOptions<VerifyOtpResponse, AxiosError, VerifyOtpData>,
 ) => {
-  return useMutation<any, any, VerifyOtpPayload>({
+  const queryClient = useQueryClient();
+  return useMutation<VerifyOtpResponse, AxiosError, VerifyOtpData>({
     mutationFn: verifyOtp,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+    },
     ...options,
   });
 };
 export const useResendOtp = (
-  options?: UseMutationOptions<any, any, ResendOtpPayload>,
+  options?: UseMutationOptions<VerifyOtpResponse, AxiosError, ResendOtpData>,
 ) => {
-  return useMutation<any, any, ResendOtpPayload>({
+  const queryClient = useQueryClient();
+  return useMutation<VerifyOtpResponse, AxiosError, ResendOtpData>({
     mutationFn: resendOtp,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+    },
     ...options,
   });
 };
 export const useForgetPassword = (
-  options?: UseMutationOptions<any, any, ForgetPasswordPayload>,
+  options?: UseMutationOptions<
+    ForgetPasswordResponse,
+    AxiosError,
+    ForgetPasswordData
+  >,
 ) => {
-  return useMutation<any, any, ForgetPasswordPayload>({
+  const queryClient = useQueryClient();
+  return useMutation<any, AxiosError, ForgetPasswordData>({
     mutationFn: forgetPassword,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+    },
     ...options,
   });
 };
 export const useResetPassword = (
-  options?: UseMutationOptions<any, any, ResetPasswordPayload>,
+  options?: UseMutationOptions<any, AxiosError, ResetPasswordData>,
 ) => {
-  return useMutation<any, any, ResetPasswordPayload>({
+  const queryClient = useQueryClient();
+  return useMutation<any, AxiosError, ResetPasswordData>({
     mutationFn: resetPassword,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+    },
     ...options,
+  });
+};
+export const useLogout = (
+  options?: UseMutationOptions<any, AxiosError, void>,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation<any, AxiosError, void>({
+    mutationFn: logout,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+    },
+    ...options,
+  });
+};
+
+export const useGetUserData = () => {
+  return useQuery({
+    queryKey: ["user-data"],
+    queryFn: () => getUserData(),
   });
 };

@@ -1,5 +1,4 @@
 import Container from "@/_components/shared/Container";
-
 const SecurityReports = () => {
   return (
     <Container>

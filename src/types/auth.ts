@@ -1,31 +1,86 @@
-export interface SignupPayload {
+export interface SignupData {
   email: string;
   password: string;
   confirmPassword: string;
   username: string;
 }
 
+export interface SigninData {
+  email: string;
+  password: string;
+}
+
+export interface VerifyOtpData {
+  email: string;
+  otp: string;
+}
+export interface ResendOtpData {
+  email: string;
+}
+export interface ForgetPasswordData {
+  email: string;
+}
+export interface ResetPasswordData {
+  newPassword: string;
+  resetPasswordToken: string;
+}
+
+export type OAuthProvider = "google" | "outlook";
+
+export interface SigninResponse {
+  success: boolean;
+  message: string;
+  data: {
+    message: string;
+    token: string;
+  };
+}
+
 export interface SignupResponse {
+  success: boolean;
+  message: string;
   data: {
     message: string;
   };
 }
 
-export interface SigninPayload {
-  email: string;
-  password: string;
+export interface VerifyOtpResponse {
+  success: boolean;
+  message: string;
+  data: {
+    message: string;
+  };
 }
-export interface VerifyOtpPayload {
-  email: string;
-  otp: string;
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+  data: {
+    message: string;
+  };
 }
-export interface ResendOtpPayload {
-  email: string;
+
+export interface ForgetPasswordResponse {
+  success: boolean;
+  message: string;
+  data: {
+    message: string;
+  };
 }
-export interface ForgetPasswordPayload {
-  email: string;
+
+export interface LogoutResponse {
+  success: boolean;
+  message: string;
+  data: {
+    message: string;
+  };
 }
-export interface ResetPasswordPayload {
-  password: string;
-  confirmPassword: string;
+
+export interface User {
+  id: number;
+  email: string;
+  username: string;
+  avatar: string | null;
+  isVerified: boolean;
+  is2FAEnabled: boolean;
 }

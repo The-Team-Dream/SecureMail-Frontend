@@ -1,5 +1,6 @@
 "use client";
 import { Input } from "@/_components/shared/Input";
+import { Suspense } from "react";
 import { useResetPassword } from "@/APIs/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,38 +9,64 @@ import {
 } from "@/schemas/auth/resetPassword";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LockIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Logo from "@/_components/shared/Logo";
 import { Text } from "@/_components/shared/Text";
+import { Spinner } from "@/components/ui/spinner";
+import { useServerErrors } from "@/utils/form-utils";
+import BackEndError from "@/_components/shared/BackEndError";
 export default function ResetPassword() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Spinner />
+        </div>
+      }
+    >
+      <ResetPasswordContent />
+    </Suspense>
+  );
+}
+
+function ResetPasswordContent() {
   const {
     handleSubmit,
     register,
     formState: { errors },
     clearErrors,
+    setError,
   } = useForm<IResetPasswordSchema>({
     mode: "onBlur",
     reValidateMode: "onChange",
     resolver: zodResolver(resetPasswordSchema),
   });
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const { handleServerErrors } =
+    useServerErrors<IResetPasswordSchema>(setError);
 
   const { mutate, isPending } = useResetPassword({
-    onSuccess: () => {
-      toast.success("Signed in successfully");
+    onSuccess: (res) => {
+      toast.success(res.data.message);
       router.push("/sign-in");
     },
-    // onError: (err) => {
-    //   toast.error(err?.response?.data?.message || "login failed");
-    // },
+    onError: (err) =>
+      handleServerErrors(err, ["newPassword", "confirmPassword"]),
   });
 
   const onSubmit: SubmitHandler<IResetPasswordSchema> = (data) => {
-    mutate(data);
-    console.log(data);
-    router.push("/sign-in");
+    if (!token) {
+      toast.error("Reset token is missing. Please check your email link.");
+      return;
+    }
+    mutate({
+      newPassword: data.newPassword,
+      resetPasswordToken: token,
+    });
   };
   return (
     <div className="relative w-full">
@@ -54,10 +81,10 @@ export default function ResetPassword() {
             {/* Text Container */}
             <div className="space-y-8">
               <Text as={"h1"} font={"semiBold"} size={"2xl"}>
-                Update Password
+                Reset Password
               </Text>
               <Text color={"primary-500"} font={"medium"}>
-                Please complete the below data to update your password
+                Please complete the below data to reset your password
               </Text>
             </div>
             <div className="space-y-4">
@@ -65,17 +92,17 @@ export default function ResetPassword() {
                 {/* Input Fields */}
                 <div className="flex flex-col gap-4">
                   <Input
-                    {...register("password", {
+                    {...register("newPassword", {
                       onChange: () => {
-                        if (errors.password) {
-                          clearErrors("password");
+                        if (errors.newPassword) {
+                          clearErrors("newPassword");
                         }
                       },
                     })}
                     type="password"
-                    placeholder="Password"
+                    placeholder="New Password"
                     leftIcon={<LockIcon />}
-                    error={errors?.password?.message}
+                    error={errors?.newPassword?.message}
                   />
                   <Input
                     {...register("confirmPassword", {
@@ -91,8 +118,13 @@ export default function ResetPassword() {
                     error={errors?.confirmPassword?.message}
                   />
                 </div>
+                {errors.root && (
+                  <BackEndError
+                    error={String(errors.root.message || "An error occurred")}
+                  />
+                )}
                 <Button size={"lg"} type="submit" disabled={isPending}>
-                  Update
+                  {isPending ? <Spinner /> : "Reset Password"}
                 </Button>
               </form>
             </div>

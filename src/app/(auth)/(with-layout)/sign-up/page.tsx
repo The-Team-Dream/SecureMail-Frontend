@@ -13,12 +13,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { Text } from "@/_components/shared/Text";
 import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
+import { Spinner } from "@/components/ui/spinner";
+import { useServerErrors } from "@/utils/form-utils";
+import BackEndError from "@/_components/shared/BackEndError";
 export default function Signup() {
   const {
     handleSubmit,
     register,
     formState: { errors },
     clearErrors,
+    setError,
     reset,
   } = useForm<ISignUp>({
     mode: "onBlur",
@@ -26,17 +30,23 @@ export default function Signup() {
     resolver: zodResolver(signupSchema),
   });
   const router = useRouter();
+  const { handleServerErrors } = useServerErrors<ISignUp>(setError);
 
   // Sign up API function
   const signupMutation = useSignup({
     onSuccess: (res, variables) => {
-      toast.success(res.data.message);
+      console.log(res);
+      toast.success("Account created successfully");
       reset();
       router.push(`/verify-otp?email=${encodeURIComponent(variables.email)}`);
     },
-    onError: (err) => {
-      toast.error(err.response?.data?.message ?? "Signup failed");
-    },
+    onError: (err: any) =>
+      handleServerErrors(err, [
+        "username",
+        "email",
+        "password",
+        "confirmPassword",
+      ]),
   });
 
   const onSubmit: SubmitHandler<ISignUp> = (data) => {
@@ -63,7 +73,7 @@ export default function Signup() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             type="text"
-            placeholder="Username"
+            placeholder="Full Name"
             leftIcon={<User />}
             {...register("username", {
               onChange: () => {
@@ -113,7 +123,6 @@ export default function Signup() {
             leftIcon={<LockIcon />}
             error={errors?.confirmPassword?.message}
           />
-          
           {/* Checkbox */}
           <div className="relative">
             <div className="flex items-center gap-2">
@@ -131,9 +140,13 @@ export default function Signup() {
               />
               <label htmlFor="terms" className="text-primary font-medium">
                 I agree{" "}
-                <span className="underline font-bold cursor-pointer">
+                <Text
+                  as={"span"}
+                  font={"bold"}
+                  className="underline cursor-pointer"
+                >
                   Terms & Conditions
-                </span>
+                </Text>
               </label>
             </div>
             <AnimatePresence>
@@ -158,14 +171,21 @@ export default function Signup() {
               )}
             </AnimatePresence>
           </div>
-          {signupMutation.isError && (
-            <p className="text-error">
-              {signupMutation.error?.response?.data?.message ||
-                "An error occurred"}
-            </p>
-          )}{" "}
-          <Button type="submit" disabled={signupMutation.isPending} size={"lg"}>
-            {signupMutation.isPending ? "Creating an account" : "Register Now"}
+
+          {errors.root && (
+            <BackEndError
+              error={String(errors.root.message || "An error occurred")}
+            />
+          )}
+          <Button size={"lg"} type="submit" disabled={signupMutation.isPending}>
+            {signupMutation.isPending ? (
+              <>
+                <Spinner />
+                <Text className="text-white">Creating Account...</Text>
+              </>
+            ) : (
+              <span>Sign Up</span>
+            )}
           </Button>
         </form>
         {/* OAuth Buttons */}
