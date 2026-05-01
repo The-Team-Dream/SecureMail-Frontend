@@ -30,7 +30,8 @@ export const Navbar = () => {
   const params = useParams();
   const mailboxId = params?.mailboxId;
   const [accounts, setAccounts] = useState(initialAccounts);
-  const isMailPage = pathname.split('/').length >= 3 && pathname.startsWith('/mailboxes');
+  const isMailPage =
+    pathname.split("/").length >= 3 && pathname.startsWith("/mailboxes");
 
   const activeAccount = accounts.find((user) => user.active) || accounts[0];
 
@@ -41,7 +42,6 @@ export const Navbar = () => {
     }));
     setAccounts(updatedAccounts);
   };
-  const router = useRouter();
 
   return (
     <nav className="flex items-center justify-between py-6 px-4.5 bg-background sticky top-0 z-50 shadow-[0_4px_16px_0_rgba(0,0,0,0.1)]">
@@ -55,10 +55,18 @@ export const Navbar = () => {
         )}
       </div>
       <div className="flex items-center gap-2">
-       <Link href={mailboxId ? `/mailboxes/${mailboxId}/settings` : '/settings'}>
-        <Button size="icon-sm" variant="ghost" className={`${pathname.includes('/settings') ? 'bg-primary-200 text-primary' : 'text-primary-600'} relative`}>
-          <Icons.Settings className={`${pathname.includes('/settings') ? 'text-primary' : 'text-primary-600'} w-10 h-10 `} />
-        </Button>
+        <Link
+          href={mailboxId ? `/mailboxes/${mailboxId}/settings` : "/settings"}
+        >
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            className={`${pathname.includes("/settings") ? "bg-primary-200 text-primary" : "text-primary-600"} relative`}
+          >
+            <Icons.Settings
+              className={`${pathname.includes("/settings") ? "text-primary" : "text-primary-600"}  `}
+            />
+          </Button>
         </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -169,10 +177,7 @@ export const Navbar = () => {
               </Accordion>
 
               <DropdownMenuItem className="p-4 flex items-center gap-3 cursor-pointer bg-background hover:bg-primary-50 transition-colors outline-none rounded-bl-lg rounded-br-lg">
-                <Link
-                  href={"/mailboxes"}
-                  className="flex items-center gap-2"
-                >
+                <Link href={"/mailboxes"} className="flex items-center gap-2">
                   <Plus className="size-5 text-primary" />
                   <Text font="medium" size="sm">
                     Add New Account

@@ -2,11 +2,7 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/constants/icons";
-import {
-  Menu,
-  PencilLine,
-  ChevronRight,
-} from "lucide-react";
+import { Menu, PencilLine, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { Text } from "./Text";
@@ -31,7 +27,6 @@ const mailboxNavItems: {
   { name: "Sent", icon: Icons.Sent, folder: "sent" },
   { name: "Star", icon: Icons.Star, folder: "starred" },
   { name: "Spam", icon: Icons.Spam, folder: "spam" },
-  
 ];
 
 const securityNavItems = [
@@ -43,7 +38,6 @@ const securityNavItems = [
   { name: "Analytics", icon: Icons.Analytics, href: "analytics" },
   { name: "Phishing", icon: Icons.Phishing, href: "phishing" },
   { name: "Malware", icon: Icons.Malware, href: "malware" },
-  { name: "Reclassify", icon: Icons.Reclassify, href: "reclassify" },
 ];
 
 export const Sidebar = () => {
@@ -107,7 +101,9 @@ export const Sidebar = () => {
           <>
             {mailboxNavItems.map((item) => {
               const targetHref = `/mailboxes/${params.mailboxId}/${item.folder}`;
-              const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.folder}`);
+              const isActive = pathname.startsWith(
+                `/mailboxes/${params.mailboxId}/${item.folder}`,
+              );
               return (
                 <Link
                   key={item.name}
@@ -172,7 +168,9 @@ export const Sidebar = () => {
             {/* Security Navigation */}
             {securityNavItems.map((item) => {
               const targetHref = `/mailboxes/${params.mailboxId}/${item.href}`;
-              const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.href}`);
+              const isActive = pathname.startsWith(
+                `/mailboxes/${params.mailboxId}/${item.href}`,
+              );
               return (
                 <Link
                   key={item.name}
