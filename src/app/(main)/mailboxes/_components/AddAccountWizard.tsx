@@ -1,17 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, ChevronRight } from "lucide-react";
-import { Icons } from "@/constants/icons";
 
-import {
-  WizardFormData,
-  wizardSchema,
-} from "../../../../schemas/CustomAccount";
+import { WizardFormData } from "../../../../schemas/CustomAccount";
 import { WizardProgress } from "./AddAccountSteps/WizardProgress";
 import { StepProvider } from "./AddAccountSteps/StepProvider";
 import { StepIMAP } from "./AddAccountSteps/StepIMAP";
@@ -19,6 +12,7 @@ import { StepSMTP } from "./AddAccountSteps/StepSMTP";
 import { StepAdvanced } from "./AddAccountSteps/StepAdvanced";
 import { StepSummary } from "./AddAccountSteps/StepSummary";
 import { StepSuccess } from "./AddAccountSteps/StepSuccess";
+import { useAddAccountWizard } from "../../../../hooks/useAddAccountWizard";
 
 interface AddAccountWizardProps {
   onCancel: () => void;
@@ -29,116 +23,28 @@ export function AddAccountWizard({
   onCancel,
   onSuccess,
 }: AddAccountWizardProps) {
-  const [step, setStep] = useState(1);
-  const [provider, setProvider] = useState("Gmail");
-
   const {
+    step,
+    provider,
+    setProvider,
+    formData,
     register,
-    trigger,
-    watch,
-    setValue,
-    reset,
+    errors,
     clearErrors,
-    formState: { errors },
-  } = useForm<WizardFormData>({
-    resolver: zodResolver(wizardSchema),
-    mode: "onBlur",
-    defaultValues: {
-      mailboxName: "",
-      emailAddress: "",
-      imapHost: "",
-      imapPort: "",
-      imapSecurity: "SSL/TLS",
-      imapUsername: "",
-      imapPassword: "",
-      smtpHost: "",
-      smtpPort: "",
-      smtpSecurity: "SSL/TLS",
-      smtpUsername: "",
-      smtpPassword: "",
-      syncInterval: "",
-    },
-  });
-
-  const formData = watch();
-
-  const handleChange = (field: keyof WizardFormData, value: string) => {
-    setValue(field, value, { shouldValidate: true, shouldDirty: true });
-  };
-
-  const resetWizard = () => {
-    setStep(1);
-    reset();
-  };
-
-  const steps = [
-    { id: 1, icon: Icons.Mail },
-    { id: 2, icon: Icons.Settings2 },
-    { id: 3, icon: Icons.Lock },
-    { id: 4, icon: Icons.Rocket },
-    { id: 5, icon: Icons.Report },
-  ];
-
-  const validateStep = async () => {
-    let fieldsToValidate: (keyof WizardFormData)[] = [];
-    if (step === 1) fieldsToValidate = ["mailboxName"];
-    if (step === 2)
-      fieldsToValidate = [
-        "imapHost",
-        "imapPort",
-        "imapSecurity",
-        "imapUsername",
-        "imapPassword",
-      ];
-    if (step === 3)
-      fieldsToValidate = [
-        "smtpHost",
-        "smtpPort",
-        "smtpSecurity",
-        "smtpUsername",
-        "smtpPassword",
-      ];
-    if (step === 4) fieldsToValidate = ["syncInterval"];
-
-    if (fieldsToValidate.length > 0) {
-      return await trigger(fieldsToValidate);
-    }
-    return true;
-  };
-
-  const handleNext = async () => {
-    const isValid = await validateStep();
-    if (!isValid) return;
-
-    if (step === 1) {
-      if (provider === "Gmail") {
-        alert("Redirecting to Google OAuth...");
-        return;
-      }
-      if (provider === "Outlook") {
-        alert("Redirecting to Microsoft OAuth...");
-        return;
-      }
-    }
-    if (step === 5) {
-      setStep(6); // Go to Success page first, onSuccess called from there
-    } else if (step < 6) {
-      setStep(step + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (step > 1) setStep(step - 1);
-  };
+    steps,
+    handleNext,
+    handlePrev,
+    handleCancel,
+    handleChange,
+    handleSuccessCancel,
+    handleResetWizard,
+  } = useAddAccountWizard({ onCancel, onSuccess });
 
   if (step === 6) {
     return (
       <StepSuccess
-        onCancel={() => {
-          onSuccess?.(formData, provider);
-          onCancel();
-        }}
-        resetWizard={resetWizard}
+        onCancel={handleSuccessCancel}
+        resetWizard={handleResetWizard}
       />
     );
   }
@@ -146,7 +52,10 @@ export function AddAccountWizard({
   return (
     <div className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-card relative">
       <div className="flex items-center gap-2.5 px-10 py-3 w-full bg-ghostBlue border-b border-primary-100/80 z-10">
-        <button onClick={onCancel} className="hover:underline cursor-pointer">
+        <button
+          onClick={handleCancel}
+          className="hover:underline cursor-pointer"
+        >
           <Text font="semiBold" size="sm">
             My Accounts
           </Text>

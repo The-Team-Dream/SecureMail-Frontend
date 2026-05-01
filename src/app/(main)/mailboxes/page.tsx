@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ConnectedAccounts,
   mockAccounts,
@@ -11,9 +12,17 @@ import { EmptyMailbox } from "./_components/EmptyMailbox";
 import { WizardFormData } from "../../../schemas/CustomAccount";
 
 export default function Mailboxes() {
+  const searchParams = useSearchParams();
   const [view, setView] = useState<"list" | "add">("list");
   const [accounts, setAccounts] =
     useState<ConnectedAccountType[]>(mockAccounts);
+
+  useEffect(() => {
+    const step = searchParams.get("step");
+    if (step) {
+      setView("add");
+    }
+  }, [searchParams]);
   const hasAccounts = accounts.length > 0;
 
   const handleAccountAdded = (data: WizardFormData, provider: string) => {

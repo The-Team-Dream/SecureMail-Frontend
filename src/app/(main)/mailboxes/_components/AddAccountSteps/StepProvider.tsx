@@ -35,14 +35,10 @@ export function StepProvider({
         <Input
           label="Mailbox Name"
           required
-          placeholder="Add a name for your mailbox"
+          placeholder="Mailbox Name"
           {...(register
             ? register("mailboxName", {
-                onChange: () => {
-                  if (errors?.mailboxName) {
-                    clearErrors?.("mailboxName");
-                  }
-                },
+                onChange: () => clearErrors?.("mailboxName"),
               })
             : {})}
           error={errors?.mailboxName?.message}

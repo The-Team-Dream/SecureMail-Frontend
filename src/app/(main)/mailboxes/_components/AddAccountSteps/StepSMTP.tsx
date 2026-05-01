@@ -22,11 +22,7 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
             placeholder="Smtp.Company.Com"
             {...(register
               ? register("smtpHost", {
-                  onChange: () => {
-                    if (errors?.smtpHost) {
-                      clearErrors?.("smtpHost");
-                    }
-                  },
+                  onChange: () => clearErrors?.("smtpHost"),
                 })
               : {})}
             error={errors?.smtpHost?.message}
@@ -37,11 +33,7 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
             placeholder="465"
             {...(register
               ? register("smtpPort", {
-                  onChange: () => {
-                    if (errors?.smtpPort) {
-                      clearErrors?.("smtpPort");
-                    }
-                  },
+                  onChange: () => clearErrors?.("smtpPort"),
                 })
               : {})}
             error={errors?.smtpPort?.message}
@@ -58,11 +50,7 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
               className={`w-full h-12 px-4 border text-[14px] text-primary rounded-lg outline-none transition duration-500 appearance-none bg-card ${errors?.smtpSecurity ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
               {...(register
                 ? register("smtpSecurity", {
-                    onChange: () => {
-                      if (errors?.smtpSecurity) {
-                        clearErrors?.("smtpSecurity");
-                      }
-                    },
+                    onChange: () => clearErrors?.("smtpSecurity"),
                   })
                 : {})}
             >
@@ -101,11 +89,7 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
           placeholder="Enter Your Username"
           {...(register
             ? register("smtpUsername", {
-                onChange: () => {
-                  if (errors?.smtpUsername) {
-                    clearErrors?.("smtpUsername");
-                  }
-                },
+                onChange: () => clearErrors?.("smtpUsername"),
               })
             : {})}
           error={errors?.smtpUsername?.message}
@@ -118,11 +102,7 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
           placeholder="Enter Password"
           {...(register
             ? register("smtpPassword", {
-                onChange: () => {
-                  if (errors?.smtpPassword) {
-                    clearErrors?.("smtpPassword");
-                  }
-                },
+                onChange: () => clearErrors?.("smtpPassword"),
               })
             : {})}
           error={errors?.smtpPassword?.message}

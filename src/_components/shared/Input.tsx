@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { CircleAlert, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Text } from "./Text";
 /**
@@ -34,7 +34,7 @@ import { Text } from "./Text";
  *   error="Password is too short"
  * />
  */
-interface Input extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   leftIcon?: React.ReactNode;
   error?: string | undefined;
@@ -44,83 +44,96 @@ export const errorVariants = {
   animate: { y: 0, opacity: 1 },
   exit: { y: -10, opacity: 0 },
 };
-export const Input: React.FC<Input> = ({
-  label,
-  leftIcon,
-  type = "text",
-  required,
-  error,
-  className,
-  ...props
-}) => {
-  const [inputType, setInputType] = useState(type);
-  const isPassword = type === "password";
-  const togglePassword = () => {
-    setInputType((prev) => (prev === "password" ? "text" : "password"));
-  };
 
-  return (
-    <div className="w-full">
-      {label && (
-        <label className="block text-sm text-primary-400 mb-1">
-          {label}
-          {required && <span className="text-error-500 ml-1">*</span>}
-        </label>
-      )}
-      <div className="relative w-full">
-        {leftIcon && (
-          <span
-            className={`absolute left-4 top-1/2 -translate-y-1/2 ${error ? "text-error-500" : "text-primary-400"}`}
-          >
-            {leftIcon}
-          </span>
+/**
+ * ⚠️ IMPORTANT: forwardRef is required here so that React Hook Form's
+ * register() can attach its ref to the underlying <input> element.
+ */
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  (
+    {
+      label,
+      leftIcon,
+      type = "text",
+      required,
+      error,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    const [inputType, setInputType] = useState(type);
+    const isPassword = type === "password";
+    const togglePassword = () => {
+      setInputType((prev) => (prev === "password" ? "text" : "password"));
+    };
+
+    return (
+      <div className="w-full">
+        {label && (
+          <label className="block text-sm text-primary-400 mb-1">
+            {label}
+            {required && <span className="text-error-500 ml-1">*</span>}
+          </label>
         )}
-        <input
-          {...props}
-          required={required}
-          type={inputType}
-          className={cn(
-            "w-full px-4 py-3 border text-primary rounded-xl outline-none focus:border-primary-400 transition duration-500",
-            leftIcon && "pl-12",
-            error
-              ? "border-error-500 placeholder:text-error-500"
-              : "border-primary-100 placeholder:text-primary-400",
-            className,
+        <div className="relative w-full">
+          {leftIcon && (
+            <span
+              className={`absolute left-4 top-1/2 -translate-y-1/2 ${error ? "text-error-500" : "text-primary-400"}`}
+            >
+              {leftIcon}
+            </span>
           )}
-        />
-        {isPassword && (
-          <button
-            type="button"
-            onClick={togglePassword}
+          <input
+            {...props}
+            ref={ref}
+            required={required}
+            type={inputType}
             className={cn(
-              "absolute right-4 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary cursor-pointer",
-              inputType === "text" ? "text-primary" : "text-primary-400",
+              "w-full px-4 py-3 border text-primary rounded-xl outline-none focus:border-primary-400 transition duration-500",
+              leftIcon && "pl-12",
+              error
+                ? "border-error-500 placeholder:text-error-500"
+                : "border-primary-100 placeholder:text-primary-400",
+              className,
             )}
-            aria-label={
-              inputType === "password" ? "Show password" : "Hide password"
-            }
-          >
-            {inputType === "password" ? <Eye /> : <EyeOff />}
-          </button>
-        )}
+          />
+          {isPassword && (
+            <button
+              type="button"
+              onClick={togglePassword}
+              className={cn(
+                "absolute right-4 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary cursor-pointer",
+                inputType === "text" ? "text-primary" : "text-primary-400",
+              )}
+              aria-label={
+                inputType === "password" ? "Show password" : "Hide password"
+              }
+            >
+              {inputType === "password" ? <Eye /> : <EyeOff />}
+            </button>
+          )}
+        </div>
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              variants={errorVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ ease: "easeInOut", duration: 0.2, stiffness: 120 }}
+              className="flex items-center gap-2 text-error mt-1"
+            >
+              <CircleAlert className="w-4 h-4 text-error-500" />
+              <Text as={"span"} size={"sm"} color={"error"} font={"medium"}>
+                {error}
+              </Text>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            variants={errorVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ ease: "easeInOut", duration: 0.2, stiffness: 120 }}
-            className="flex items-center gap-2 text-error mt-1"
-          >
-            <CircleAlert className="w-4 h-4 text-error-500" />
-            <Text as={"span"} size={"sm"} color={"error"} font={"medium"}>
-              {error}
-            </Text>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
+    );
+  },
+);
+
+Input.displayName = "Input";
