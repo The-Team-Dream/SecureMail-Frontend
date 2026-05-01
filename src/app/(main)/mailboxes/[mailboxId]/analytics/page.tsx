@@ -1,4 +1,4 @@
-import AnalyticsClient from "./AnalyticsClient";
+import AnalyticsClient from "@/_components/analytics/AnalyticsClient";
 
 interface AnalyticsPageProps {
   params: Promise<{

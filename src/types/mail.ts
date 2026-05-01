@@ -1,12 +1,3 @@
-// ===== أنواع البيانات الخاصة بالإيميلات =====
-// دي زي ما تعمل "قالب" أو "نموذج" بيقول الإيميل شكله إيه
-// فكر فيها كأنك بتصمم <form> في HTML وبتحدد كل الحقول اللي المستخدم لازم يملاها
-
-/**
- * المجلدات اللي ممكن الإيميل يكون فيها
- * زي فولدرات الملفات على الكمبيوتر - كل إيميل لازم يكون في فولدر واحد
- * 🚨 ملحوظة: بنستخدم "mailbox" مش "mails" عشان يتوافق مع الـ API
- */
 export type Folder =
   | "inbox"
   | "sent"
@@ -19,10 +10,6 @@ export type Folder =
   | "analytics"
   | "security-reports";
 
-/**
- * تصنيف الإيميل - هل هو أساسي؟ ترويجي؟ اجتماعي؟ تحديثات؟
- * زي ما Gmail بيفرز الإيميلات في تابات
- */
 export type Classification = "primary" | "promotions" | "social" | "updates";
 
 export interface Email {
@@ -38,4 +25,12 @@ export interface Email {
   date: string;
   hasAttachment: boolean;
   attachmentName?: string;
+  riskLevel?: string;
+}
+
+export interface MalwareThreat {
+  id: string;
+  fileName: string;
+  threatType: string;
+  senderEmail: string;
 }

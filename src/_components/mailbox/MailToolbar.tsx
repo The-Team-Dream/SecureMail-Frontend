@@ -1,6 +1,4 @@
 "use client";
-
-import React from "react";
 import {
   ChevronDown,
   ChevronLeft,
@@ -15,7 +13,15 @@ import { cn } from "@/lib/utils";
 import { Text } from "../shared/Text";
 import toast from "react-hot-toast";
 
-export const MailToolbar = () => {
+interface MailToolbarProps {
+  showCheckbox?: boolean;
+  showRefresh?: boolean;
+}
+
+export const MailToolbar = ({
+  showCheckbox = true,
+  showRefresh = true,
+}: MailToolbarProps) => {
   const currentPage = useMailStore((s) => s.currentPage);
   const selectedIds = useMailStore((s) => s.selectedIds);
 
@@ -82,48 +88,47 @@ export const MailToolbar = () => {
 
   const handleRefresh = () => {
     deselectAll();
-    toast.success("Emails refreshed successfully", {
-      position: "bottom-left",
-      style: {
-        backgroundColor: "#000",
-      },
-    });
+    toast.success("Emails refreshed successfully");
   };
 
   return (
     <div className="flex items-center justify-between px-2 sm:px-4 py-2">
       {/* ══════  Checkbox + Refresh ══════ */}
       <div className="flex items-center gap-1">
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            checked={isAllSelected}
-            ref={(el) => {
-              if (el) {
-                el.indeterminate = isSomeSelected;
-              }
-            }}
-            onChange={selectAllOnPage}
-            className="w-4 h-4 rounded border-primary-900 text-secondary-500 focus:ring-secondary-500 cursor-pointer accent-secondary-500"
-            aria-label="Select all emails on this page"
-          />
+        {showCheckbox && (
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              checked={isAllSelected}
+              ref={(el) => {
+                if (el) {
+                  el.indeterminate = isSomeSelected;
+                }
+              }}
+              onChange={selectAllOnPage}
+              className="w-4 h-4 rounded border-primary-900 text-secondary-500 focus:ring-secondary-500 cursor-pointer accent-secondary-500"
+              aria-label="Select all emails on this page"
+            />
 
+            <button
+              onClick={selectAllOnPage}
+              className="p-0.5 hover:bg-primary-100 rounded transition-colors cursor-pointer"
+              aria-label="Toggle select all"
+            >
+              <ChevronDown className="w-4 h-4 text-primary-900" />
+            </button>
+          </div>
+        )}
+
+        {showRefresh && (
           <button
-            onClick={selectAllOnPage}
-            className="p-0.5 hover:bg-primary-100 rounded transition-colors cursor-pointer"
-            aria-label="Toggle select all"
+            onClick={handleRefresh}
+            className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer ml-1"
+            aria-label="Refresh emails"
           >
-            <ChevronDown className="w-4 h-4 text-primary-900" />
+            <RefreshCw className="w-4 h-4 text-primary-900" />
           </button>
-        </div>
-
-        <button
-          onClick={handleRefresh}
-          className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer ml-1"
-          aria-label="Refresh emails"
-        >
-          <RefreshCw className="w-4 h-4 text-primary-900" />
-        </button>
+        )}
 
         {/* ══════ Bulk Actions ══════ */}
         {selectedIds.length > 0 && (
@@ -131,12 +136,7 @@ export const MailToolbar = () => {
             <button
               onClick={() => {
                 archiveSelected();
-                toast.success("Selected emails archived", {
-                  position: "bottom-left",
-                  style: {
-                    backgroundColor: "#000",
-                  },
-                });
+                toast.success("Selected emails archived");
               }}
               className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer"
               aria-label="Archive selected"
@@ -147,12 +147,7 @@ export const MailToolbar = () => {
             <button
               onClick={() => {
                 deleteSelected();
-                toast.success("Selected emails deleted", {
-                  position: "bottom-left",
-                  style: {
-                    backgroundColor: "#000",
-                  },
-                });
+                toast.success("Selected emails deleted");
               }}
               className="p-1.5 text-primary-900 hover:text-error-500 hover:bg-error-50 rounded-full transition-colors cursor-pointer"
               aria-label="Delete selected"
@@ -163,12 +158,7 @@ export const MailToolbar = () => {
             <button
               onClick={() => {
                 toggleSelectedRead();
-                toast.success("Selected emails toggled read status", {
-                  position: "bottom-left",
-                  style: {
-                    backgroundColor: "#000",
-                  },
-                });
+                toast.success("Selected emails toggled read status");
               }}
               className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer"
               aria-label="Mark selected as read/unread"

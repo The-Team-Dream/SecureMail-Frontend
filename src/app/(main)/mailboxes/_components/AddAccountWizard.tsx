@@ -1,18 +1,17 @@
 "use client";
 
-import  { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowRight,
-  ArrowLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowRight, ArrowLeft, ChevronRight } from "lucide-react";
 import { Icons } from "@/constants/icons";
 
-import { WizardFormData, wizardSchema } from "../../../../schemas/CustomAccount";
+import {
+  WizardFormData,
+  wizardSchema,
+} from "../../../../schemas/CustomAccount";
 import { WizardProgress } from "./AddAccountSteps/WizardProgress";
 import { StepProvider } from "./AddAccountSteps/StepProvider";
 import { StepIMAP } from "./AddAccountSteps/StepIMAP";
@@ -83,8 +82,22 @@ export function AddAccountWizard({
   const validateStep = async () => {
     let fieldsToValidate: (keyof WizardFormData)[] = [];
     if (step === 1) fieldsToValidate = ["mailboxName"];
-    if (step === 2) fieldsToValidate = ["imapHost", "imapPort", "imapSecurity", "imapUsername", "imapPassword"];
-    if (step === 3) fieldsToValidate = ["smtpHost", "smtpPort", "smtpSecurity", "smtpUsername", "smtpPassword"];
+    if (step === 2)
+      fieldsToValidate = [
+        "imapHost",
+        "imapPort",
+        "imapSecurity",
+        "imapUsername",
+        "imapPassword",
+      ];
+    if (step === 3)
+      fieldsToValidate = [
+        "smtpHost",
+        "smtpPort",
+        "smtpSecurity",
+        "smtpUsername",
+        "smtpPassword",
+      ];
     if (step === 4) fieldsToValidate = ["syncInterval"];
 
     if (fieldsToValidate.length > 0) {
@@ -180,7 +193,11 @@ export function AddAccountWizard({
             />
           )}
           {step === 4 && (
-            <StepAdvanced formData={formData} handleChange={handleChange} errors={errors} />
+            <StepAdvanced
+              formData={formData}
+              handleChange={handleChange}
+              errors={errors}
+            />
           )}
           {step === 5 && (
             <StepSummary formData={formData} handleChange={handleChange} />

@@ -1,4 +1,5 @@
-import { Email } from "@/types/mail";
+import { Email, MalwareThreat } from "@/types/mail";
+import { RISK_LEVELS } from "@/constants/security";
 
 export const mockEmails: Email[] = [
   {
@@ -450,8 +451,6 @@ export const mockEmails: Email[] = [
     date: "30 Dec 2025",
     hasAttachment: false,
   },
-
-  // ===== إيميلات التحديثات (Updates) =====
   {
     id: "34",
     subject: "System maintenance scheduled for Jan 15",
@@ -583,7 +582,8 @@ export const mockEmails: Email[] = [
   {
     id: "43",
     subject: "Security Update: Reset your PayPal password immediately",
-    bodyText: "We have detected unusual activity on your PayPal account. Please click here to reset your password...",
+    bodyText:
+      "We have detected unusual activity on your PayPal account. Please click here to reset your password...",
     sender: "PayPal Security",
     senderEmail: "security-update@paypa1-support.com",
     isRead: false,
@@ -592,11 +592,13 @@ export const mockEmails: Email[] = [
     classification: "primary",
     date: "Today",
     hasAttachment: false,
+    riskLevel: RISK_LEVELS.HIGH_RISK,
   },
   {
     id: "44",
     subject: "Action Required: Microsoft 365 Account Expiration",
-    bodyText: "Your Microsoft 365 subscription will expire in 24 hours. Please update your billing information...",
+    bodyText:
+      "Your Microsoft 365 subscription will expire in 24 hours. Please update your billing information...",
     sender: "Microsoft Support",
     senderEmail: "admin@micro-soft-billing.com",
     isRead: true,
@@ -605,11 +607,13 @@ export const mockEmails: Email[] = [
     classification: "primary",
     date: "Yesterday",
     hasAttachment: false,
+    riskLevel: RISK_LEVELS.CREDENTIAL_THEFT,
   },
   {
     id: "45",
     subject: "You received a secure document via DocuSign",
-    bodyText: "Please review and sign the attached document. Click the link below to access...",
+    bodyText:
+      "Please review and sign the attached document. Click the link below to access...",
     sender: "DocuSign Service",
     senderEmail: "noreply@docusign-docs-secure.net",
     isRead: false,
@@ -619,13 +623,30 @@ export const mockEmails: Email[] = [
     date: "2 days ago",
     hasAttachment: true,
     attachmentName: "Important_Contract.pdf",
+    riskLevel: RISK_LEVELS.SUSPICIOUS_LINK,
+  },
+  {
+    id: "49",
+    subject: "Don't Miss This Only Promotion For The Year!",
+    bodyText:
+      "This is your last chance to grab our biggest discount of the year...",
+    sender: "Gurifocus",
+    senderEmail: "promo@gurifocus.com",
+    isRead: false,
+    isStarred: false,
+    folder: "phishing",
+    classification: "primary",
+    date: "Yesterday",
+    hasAttachment: false,
+    riskLevel: RISK_LEVELS.SCAM_ALERT,
   },
 
-  // ===== إيميلات برمجيات خبيثة (Malware) =====
+  // (Malware)
   {
     id: "46",
     subject: "Invoice #98234 Payment Overdue",
-    bodyText: "Please find attached the overdue invoice #98234. Immediate payment is required to avoid service interruption...",
+    bodyText:
+      "Please find attached the overdue invoice #98234. Immediate payment is required to avoid service interruption...",
     sender: "Billing Department",
     senderEmail: "billing@finance-dept-services.com",
     isRead: false,
@@ -639,7 +660,8 @@ export const mockEmails: Email[] = [
   {
     id: "47",
     subject: "Urgent: Your device has been infected",
-    bodyText: "We have detected multiple viruses on your system. Download the attached removal tool immediately to clean your PC...",
+    bodyText:
+      "We have detected multiple viruses on your system. Download the attached removal tool immediately to clean your PC...",
     sender: "IT Security Team",
     senderEmail: "support@antivirus-alert-system.net",
     isRead: true,
@@ -653,7 +675,8 @@ export const mockEmails: Email[] = [
   {
     id: "48",
     subject: "New Voicemail Message from +1 (555) 019-2384",
-    bodyText: "You have received a new voice message. Length: 02:14. Click the attachment to listen to the recording...",
+    bodyText:
+      "You have received a new voice message. Length: 02:14. Click the attachment to listen to the recording...",
     sender: "PBX Phone System",
     senderEmail: "voicemail@pbx-internal.com",
     isRead: false,
@@ -663,5 +686,26 @@ export const mockEmails: Email[] = [
     date: "3 days ago",
     hasAttachment: true,
     attachmentName: "VoiceMessage.vbs",
-  }
+  },
+];
+
+export const mockMalwareThreats: MalwareThreat[] = [
+  {
+    id: "1",
+    fileName: "Urgent_Invoice_9221.js",
+    threatType: "Trojan.js.downloader",
+    senderEmail: "billing-spoof@unsecured-node.net",
+  },
+  {
+    id: "2",
+    fileName: "System_Update_Patch.exe",
+    threatType: "Ransom.wannacrypt.v2",
+    senderEmail: "admin-alert@corporate-spoof.io",
+  },
+  {
+    id: "3",
+    fileName: "Shipping_details_vic.zip",
+    threatType: "Spyware.keylogger.x",
+    senderEmail: "dhl-support@malicious-redirect.com",
+  },
 ];

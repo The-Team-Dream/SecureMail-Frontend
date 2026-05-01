@@ -41,6 +41,8 @@ interface MailState {
   archiveEmail: (id: string) => void;
   archiveSelected: () => void;
   toggleSelectedRead: () => void;
+  reclassifyEmail: (id: string, folder: Folder) => void;
+  moveSelectedTo: (folder: Folder) => void;
   reorderEmails: (fromIndex: number, toIndex: number) => void;
   getFilteredEmails: () => Email[];
   getPagedEmails: () => Email[];
@@ -193,6 +195,25 @@ export const useMailStore = create<MailState>((set, get) => ({
         selectedIds.includes(email.id)
           ? { ...email, isRead: !email.isRead }
           : email,
+      ),
+      selectedIds: [],
+    });
+  },
+
+  reclassifyEmail: (id: string, folder: Folder) => {
+    set({
+      emails: get().emails.map((email) =>
+        email.id === id ? { ...email, folder } : email,
+      ),
+      selectedIds: get().selectedIds.filter((sid) => sid !== id),
+    });
+  },
+
+  moveSelectedTo: (folder: Folder) => {
+    const { selectedIds, emails } = get();
+    set({
+      emails: emails.map((email) =>
+        selectedIds.includes(email.id) ? { ...email, folder } : email,
       ),
       selectedIds: [],
     });

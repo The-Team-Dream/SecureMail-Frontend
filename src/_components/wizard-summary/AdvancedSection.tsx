@@ -95,9 +95,18 @@ export function AdvancedSection({
             </div>
           </div>
           <div className="flex justify-end">
-            <Button size={"sm"} className="w-fit" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              {isSaving ? "Saving..." : "Save"}
+            <Button
+              size={"sm"}
+              className="w-fit"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>

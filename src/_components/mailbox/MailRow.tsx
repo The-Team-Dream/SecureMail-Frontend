@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { useRouter, usePathname } from "next/navigation";
 
+import { RISK_STYLE_MAP, RiskLevel } from "@/constants/security";
+
 interface MailRowProps {
   email: Email;
   index: number;
@@ -111,6 +113,21 @@ export const MailRow = ({
           >
             {email.subject}
           </span>
+
+          {/* Risk Level Indicator */}
+          {email.riskLevel && (
+            <div
+              className={cn(
+                "flex items-center gap-1.5",
+                RISK_STYLE_MAP[email.riskLevel as RiskLevel],
+              )}
+            >
+              <div className="w-1 h-1 rounded-full bg-current" />
+              <span className="text-xs font-medium leading-none">
+                {email.riskLevel}
+              </span>
+            </div>
+          )}
 
           {/* === (Attachment) === */}
           {email.hasAttachment && email.attachmentName && (

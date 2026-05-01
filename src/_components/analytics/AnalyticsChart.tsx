@@ -6,17 +6,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Text } from "../../../_components/shared/Text";
-const chartData = [
-  { month: "Jul", spam: 45, phishing: 30 },
-  { month: "Aug", spam: 52, phishing: 25 },
-  { month: "Sep", spam: 48, phishing: 35 },
-  { month: "Oct", spam: 70, phishing: 20 },
-  { month: "Nov", spam: 40, phishing: 55 },
-  { month: "Dec", spam: 35, phishing: 45 },
-  { month: "Jan", spam: 50, phishing: 40 },
-  { month: "Feb", spam: 65, phishing: 30 },
-];
+import { Text } from "@/_components/shared/Text";
+
+interface AnalyticsChartProps {
+  data: { month: string; spam: number; phishing: number }[];
+  spamCount: string;
+  phishingCount: string;
+}
 
 const chartConfig = {
   spam: {
@@ -28,7 +24,8 @@ const chartConfig = {
     color: "#ef4444",
   },
 } satisfies ChartConfig;
-export function AnalyticsChart() {
+
+export function AnalyticsChart({ data, spamCount, phishingCount }: AnalyticsChartProps) {
   return (
     <div className="min-w-0 border border-primary-100 rounded-xl p-6 max-h-[500px] h-full">
       <Text size={"lg"} font={"medium"} className="mb-2">
@@ -39,7 +36,7 @@ export function AnalyticsChart() {
           config={chartConfig}
           className="h-full w-full min-h-0 min-w-0 aspect-auto"
         >
-          <LineChart data={chartData} margin={{ left: 12, right: 12, top: 20 }}>
+          <LineChart data={data} margin={{ left: 12, right: 12, top: 20 }}>
             <CartesianGrid
               vertical={true}
               horizontal={false}
@@ -86,7 +83,7 @@ export function AnalyticsChart() {
               Spam Detection
             </Text>
             <Text size="sm" font="medium">
-              8,429 blocked
+              {spamCount} blocked
             </Text>
           </div>
         </div>
@@ -98,7 +95,7 @@ export function AnalyticsChart() {
               Phishing Attempts
             </Text>
             <Text size="sm" font={"medium"}>
-              4,053 blocked
+              {phishingCount} blocked
             </Text>
           </div>
         </div>

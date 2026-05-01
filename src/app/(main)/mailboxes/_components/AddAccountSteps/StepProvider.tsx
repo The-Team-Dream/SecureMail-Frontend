@@ -35,7 +35,7 @@ export function StepProvider({
         <Input
           label="Mailbox Name"
           required
-          placeholder="Work Email"
+          placeholder="Add a name for your mailbox"
           {...(register
             ? register("mailboxName", {
                 onChange: () => {

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { Text } from "./Text";
+import { cn } from "@/lib/utils";
 import { ComponentProps } from "react";
+import Link from "next/link";
 /**
  *  Logo Component
  ** Props:
@@ -20,6 +22,8 @@ interface LogoProps {
   height?: number;
   className?: string;
   textSize?: TextSize;
+  imgClassName?: string;
+  textClassName?: string;
 }
 
 const Logo = ({
@@ -27,14 +31,22 @@ const Logo = ({
   height = 50,
   className,
   textSize = "3xl",
+  imgClassName,
+  textClassName,
 }: LogoProps) => {
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <Image src={"/icons/logo.png"} alt="Logo" width={width} height={height} />
-      <Text as={"h1"} font={"black"} size={textSize}>
+    <Link href={"/"} className={`flex items-center gap-2 ${className}`}>
+      <Image
+        src={"/icons/logo.png"}
+        alt="Logo"
+        width={width}
+        height={height}
+        className={imgClassName}
+      />
+      <Text as={"h1"} font={"black"} size={textSize} className={textClassName}>
         SecureMail
       </Text>
-    </div>
+    </Link>
   );
 };
 
