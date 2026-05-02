@@ -22,25 +22,17 @@ import { Notification } from "@/APIs/types/Notification";
 import { MOCK_NOTIFICATIONS } from "./MOCKDATA";
 import Container from "@/_components/shared/Container";
 import { cn } from "@/lib/utils";
-import { NotificationCardSkeleton, NotificationPageSkeleton } from "@/_components/skeleton/NotificationSkeleton";
+import {
+  NotificationCardSkeleton,
+  NotificationPageSkeleton,
+} from "@/_components/skeleton/NotificationSkeleton";
 import { Icons } from "@/constants/icons";
-
-const NotificationIcon = ({ type }: { type: string }) => {
-  const iconClass = "w-5 h-5";
-  switch (type) {
-    case "error":
-      return <XCircle className={`${iconClass} text-error-500`} />;
-    case "warning":
-      return <AlertTriangle className={`${iconClass} text-warning-500`} />;
-    case "success":
-      return <CheckCircle2 className={`${iconClass} text-secondary-700`} />;
-    default:
-      return <Info className={`${iconClass} text-info-500`} />;
-  }
-};
+import { NotificationCard } from "@/_components/NotificationCard";
 
 const Notifications = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS.data);
+  const [notifications, setNotifications] = useState<Notification[]>(
+    MOCK_NOTIFICATIONS.data,
+  );
   const [currentPage, setCurrentPage] = useState(MOCK_NOTIFICATIONS.page);
   const [activeTab, setActiveTab] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
@@ -87,8 +79,8 @@ const Notifications = () => {
   }, [currentPage]);
 
   const ITEMS_PER_PAGE = 10;
-  const filteredNotifications = notifications.filter((n) => 
-    activeTab === "all" ? true : n.category === activeTab
+  const filteredNotifications = notifications.filter((n) =>
+    activeTab === "all" ? true : n.category === activeTab,
   );
 
   const totalItems = filteredNotifications.length;
@@ -98,115 +90,6 @@ const Notifications = () => {
   const currentData = filteredNotifications.slice(startIndex, endIndex);
 
   if (isLoading) return <NotificationPageSkeleton />;
-
-  const renderNotificationCard = (
-    notification: Notification,
-  ) => {
-    const isUnread = !notification.isRead;
-    const MotionCard = motion.create(Card);
-    return (
-      <MotionCard
-        initial={{ boxShadow: "none" }}
-        whileHover={{
-          boxShadow:
-            "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px",
-        }}
-        transition={{ duration: 0.2 }}
-        key={notification.id}
-        className={cn(
-          "group relative mb-4 overflow-hidden",
-          isUnread ? "bg-primary-50" : "bg-transparent",
-          notification.type === "error" && "border-l-error-500",
-        )}
-      >
-        <CardContent className="p-0">
-          {notification.link ? (
-            <Link
-              href={notification.link}
-              className="block p-5 focus:outline-none"
-            >
-              {renderContent(notification, isUnread)}
-            </Link>
-          ) : (
-            <div className="p-5">{renderContent(notification, isUnread)}</div>
-          )}
-        </CardContent>
-      </MotionCard>
-    );
-  };
-
-  const renderContent = (notification: any, isUnread: boolean) => (
-    <div className="flex items-start gap-2">
-      <div className="p-1">
-        <NotificationIcon type={notification.type} />
-      </div>
-
-      <div className="flex-1 space-y-1">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Text font="semiBold" size="lg" color="secondary-950">
-              {notification.title}
-            </Text>
-            {isUnread && (
-              <Badge
-                variant="secondary"
-                className="h-5 px-1.5 text-[10px] uppercase bg-primary text-background"
-              >
-                New
-              </Badge>
-            )}
-          </div>
-          <div className="relative flex items-center justify-end min-w-[80px]">
-            <div className="absolute inset-0 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-primary hover:text-primary hover:bg-primary/10"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleToggleReadStatus(notification.id, notification.isRead);
-                }}
-              >
-                {notification.isRead ? (
-                  <Icons.Mail className="h-4 w-4" />
-                ) : (
-                  <CheckCheck className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-error-500 hover:text-error-600 hover:bg-error-50"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleDelete(notification.id);
-                }}
-              >
-                <Icons.Delete className="h-4 w-4 text-error-500 hover:scale-105 transition-transform" />
-              </Button>
-            </div>
-            <div className="opacity-100 group-hover:opacity-0 transition-opacity whitespace-nowrap">
-              <Text size="xs" color="primary-800">
-                {formatDistanceToNow(new Date(notification.createdAt), {
-                  addSuffix: true,
-                })}
-              </Text>
-            </div>
-          </div>
-        </div>
-
-        <Text
-          size="sm"
-          color="secondary-700"
-          className="leading-relaxed max-w-[90%]"
-        >
-          {notification.message}
-        </Text>
-      </div>
-    </div>
-  );
 
   return (
     <Container>
@@ -225,7 +108,11 @@ const Notifications = () => {
           {allRead ? "Mark all as unread" : "Mark all as read"}
         </Button>
       </header>
-      <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
+      <Tabs
+        value={activeTab}
+        className="w-full"
+        onValueChange={handleTabChange}
+      >
         <div className="mb-8">
           <TabsList className="bg-ghostBlue/50 h-auto p-1 gap-1 border border-primary-100 rounded-lg">
             {["all", "threats", "updates", "system"].map((tab) => (
@@ -236,7 +123,7 @@ const Notifications = () => {
                   "relative px-6 py-2 rounded-md transition-all duration-300 capitalize min-w-[100px]",
                   "data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none",
                   "hover:text-primary transition-colors",
-                  activeTab === tab ? "text-primary" : "text-primary-600"
+                  activeTab === tab ? "text-primary" : "text-primary-600",
                 )}
               >
                 {activeTab === tab && (
@@ -250,7 +137,10 @@ const Notifications = () => {
                     }}
                   />
                 )}
-                <Text font={activeTab === tab ? "semiBold" : "default"} size="sm">
+                <Text
+                  font={activeTab === tab ? "semiBold" : "default"}
+                  size="sm"
+                >
                   {tab}
                 </Text>
               </TabsTrigger>
@@ -273,12 +163,24 @@ const Notifications = () => {
                     <NotificationCardSkeleton key={i} />
                   ))
                 ) : currentData.length > 0 ? (
-                  currentData.map(renderNotificationCard)
+                  currentData.map((notification) => (
+                    <NotificationCard
+                      key={notification.id}
+                      notification={notification}
+                      onDelete={handleDelete}
+                      onToggleRead={handleToggleReadStatus}
+                      variant="page"
+                    />
+                  ))
                 ) : (
                   <div className="py-20 flex flex-col items-center justify-center bg-white rounded-xl border border-dashed border-primary-200">
                     <Icons.Inbox className="w-12 h-12 text-primary-200 mb-4" />
-                    <Text font="semiBold" size="lg" color="primary-900">No {activeTab === "all" ? "" : activeTab} notifications</Text>
-                    <Text size="sm" color="primary-500">You're all caught up for today!</Text>
+                    <Text font="semiBold" size="lg" color="primary-900">
+                      No {activeTab === "all" ? "" : activeTab} notifications
+                    </Text>
+                    <Text size="sm" color="primary-500">
+                      You're all caught up for today!
+                    </Text>
                   </div>
                 )}
               </div>

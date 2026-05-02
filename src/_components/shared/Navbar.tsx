@@ -23,7 +23,7 @@ import { usePathname, useParams } from "next/navigation";
 import { MobileSidebar } from "./MobileSidebar";
 import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
 import Link from "next/link";
-import { NotificationDropdown } from "./NotificationDropdown";
+import { NotificationDropdown } from "../Notification";
 import { Icons } from "@/constants/icons";
 import { getInitials } from "@/lib/utils";
 

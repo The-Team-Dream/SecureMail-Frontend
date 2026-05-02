@@ -1,19 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { formatDistanceToNow } from "date-fns";
-import {
-  Bell,
-  Info,
-  AlertTriangle,
-  XCircle,
-  CheckCircle2,
-  CheckCheck,
-  Loader2,
-} from "lucide-react";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { Text } from "./Text";
+import { Text } from "./shared/Text";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { NotificationCardSkeleton } from "@/_components/skeleton/NotificationSkeleton";
@@ -25,26 +15,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Icons } from "@/constants/icons";
 import { MOCK_NOTIFICATIONS } from "@/app/(main)/notifications/MOCKDATA";
 import { Notification } from "@/APIs/types/Notification";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { StateMessage } from "./StateMessage";
-
-const NotificationIcon = ({ type }: { type: string }) => {
-  const iconClass = "w-5 h-5";
-  switch (type) {
-    case "error":
-      return <XCircle className={`${iconClass} text-error-500`} />;
-    case "warning":
-      return <AlertTriangle className={`${iconClass} text-warning-500`} />;
-    case "success":
-      return <CheckCircle2 className={`${iconClass} text-secondary-700`} />;
-    default:
-      return <Info className={`${iconClass} text-info-500`} />;
-  }
-};
+import { StateMessage } from "./shared/StateMessage";
+import { NotificationCard } from "./NotificationCard";
+import { Bell } from "lucide-react";
 
 export const NotificationDropdown = () => {
   const pathname = usePathname();
@@ -91,97 +67,6 @@ export const NotificationDropdown = () => {
     );
   };
 
-  const renderNotificationCard = (notification: Notification) => {
-    const isUnread = !notification.isRead;
-
-    const content = (
-      <div className="flex items-start gap-3">
-        <div className="pt-0.5">
-          <NotificationIcon type={notification.type} />
-        </div>
-
-        <div className="flex-1 space-y-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Text font="semiBold" size="sm">
-                {notification.title}
-              </Text>
-            </div>
-            <div className="relative flex items-center justify-end min-w-[70px]">
-              <div className="absolute inset-0 flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-primary hover:text-primary hover:bg-primary/10"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleToggleReadStatus(
-                      notification.id,
-                      notification.isRead,
-                    );
-                  }}
-                >
-                  {notification.isRead ? (
-                    <Icons.Mail className="h-3.5 w-3.5" />
-                  ) : (
-                    <CheckCheck className="h-3.5 w-3.5" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className="h-6 w-6 text-error-500 hover:text-error-600"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleDelete(notification.id);
-                  }}
-                >
-                  <Icons.Delete className="h-3.5 w-3.5 text-error-500 hover:scale-105 transition-transform" />
-                </Button>
-              </div>
-              <div className="opacity-100 group-hover:opacity-0 transition-opacity whitespace-nowrap">
-                <Text size="xs" color="primary-800">
-                  {formatDistanceToNow(new Date(notification.createdAt), {
-                    addSuffix: true,
-                  })}
-                </Text>
-              </div>
-            </div>
-          </div>
-
-          <Text
-            size="xs"
-            color="primary-500"
-            className="leading-relaxed line-clamp-2 pr-2"
-          >
-            {notification.message}
-          </Text>
-        </div>
-      </div>
-    );
-
-    return (
-      <div
-        key={notification.id}
-        className={cn(
-          "group relative p-4 border-b last:border-0 transition-colors hover:bg-primary-50/50 cursor-pointer",
-          isUnread ? "bg-primary-50/30" : "bg-transparent",
-          notification.type === "error" && "border-l-4 border-l-error-500",
-        )}
-      >
-        {notification.link ? (
-          <Link href={notification.link} className="block focus:outline-none">
-            {content}
-          </Link>
-        ) : (
-          <div>{content}</div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -216,7 +101,7 @@ export const NotificationDropdown = () => {
               Notifications
             </Text>
             <button
-              className="text-xs text-primary hover:text-primary hover:underline"
+              className="text-xs text-primary hover:text-primary hover:underline cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 handleToggleAllRead();
@@ -280,7 +165,15 @@ export const NotificationDropdown = () => {
                         .filter((n) =>
                           activeTab === "all" ? true : n.category === activeTab,
                         )
-                        .map(renderNotificationCard)}
+                        .map((notification) => (
+                          <NotificationCard
+                            key={notification.id}
+                            notification={notification}
+                            onDelete={handleDelete}
+                            onToggleRead={handleToggleReadStatus}
+                            variant="dropdown"
+                          />
+                        ))}
                     </div>
                   ) : (
                     <div className="h-[400px] flex items-center justify-center">
