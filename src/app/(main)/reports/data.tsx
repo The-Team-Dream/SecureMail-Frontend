@@ -19,7 +19,6 @@ export type ListItem = {
   title: string;
   description: string;
   meta: React.ReactNode;
-  buttonLabel: string;
 };
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -44,7 +43,7 @@ export const stats: Stat[] = [
     label: "Pending",
     value: "5",
     badgeClass: "bg-secondary-200 text-secondary-900",
-    badgeText: "0%",  
+    badgeText: "0%",
   },
 ];
 
@@ -70,7 +69,6 @@ export const listItems: ListItem[] = [
         </div>
       </div>
     ),
-    buttonLabel: "Review Details",
   },
   {
     id: 2,
@@ -85,7 +83,6 @@ export const listItems: ListItem[] = [
         <span className="font-medium">Shanghai, CN</span>
       </div>
     ),
-    buttonLabel: "Investigate",
   },
   {
     id: 3,
@@ -100,6 +97,5 @@ export const listItems: ListItem[] = [
         <span className="font-medium">Resolved Automatically</span>
       </div>
     ),
-    buttonLabel: "View Log",
   },
 ];

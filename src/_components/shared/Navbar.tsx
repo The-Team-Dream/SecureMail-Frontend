@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Plus } from "lucide-react";
+import { Bell, Check, Plus } from "lucide-react";
 import Logo from "./Logo";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { usePathname, useParams } from "next/navigation";
 import { MobileSidebar } from "./MobileSidebar";
 import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
 import Link from "next/link";
+import { NotificationDropdown } from "./NotificationDropdown";
 import { Icons } from "@/constants/icons";
 import { getInitials } from "@/lib/utils";
 
@@ -62,6 +63,7 @@ export const Navbar = () => {
         )}
       </div>
       <div className="flex items-center gap-2">
+        <NotificationDropdown />
         <Link
           href={mailboxId ? `/mailboxes/${mailboxId}/settings` : "/settings"}
         >
@@ -75,6 +77,7 @@ export const Navbar = () => {
             />
           </Button>
         </Link>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 cursor-pointer outline-none overflow-hidden">

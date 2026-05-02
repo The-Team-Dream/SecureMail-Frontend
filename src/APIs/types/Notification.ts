@@ -3,6 +3,7 @@ export interface Notification {
   title: string;
   message: string;
   type: 'info' | 'warning' | 'error' | 'success';
+  category: 'threats' | 'updates' | 'system';
   isRead: boolean;
   createdAt: string;
   link?: string; 

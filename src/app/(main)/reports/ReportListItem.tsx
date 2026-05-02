@@ -14,7 +14,14 @@ const itemVariants = {
   },
 };
 
-export function ReportListItem({ badgeClass, badge, time, title, description, meta, buttonLabel }: ReportListItemProps) {
+export function ReportListItem({
+  badgeClass,
+  badge,
+  time,
+  title,
+  description,
+  meta,
+}: ReportListItemProps) {
   return (
     <motion.div
       variants={itemVariants}
@@ -24,26 +31,31 @@ export function ReportListItem({ badgeClass, badge, time, title, description, me
       <div className="flex flex-col gap-3">
         {/* Badge + Time */}
         <div className="flex items-center gap-2">
-          <Text as={'span'} font={'bold'} className={`inline-flex items-center px-4 py-1 rounded-full text-[10px] tracking-wide uppercase ${badgeClass}`}>
+          <Text
+            as={"span"}
+            font={"bold"}
+            className={`inline-flex items-center px-4 py-1 rounded-full text-[10px] tracking-wide uppercase ${badgeClass}`}
+          >
             {badge}
           </Text>
-          <Text as={'span'} size={'xs'} color={'primary-500'} font={'medium'}>{time}</Text>
+          <Text as={"span"} size={"xs"} color={"primary-500"} font={"medium"}>
+            {time}
+          </Text>
         </div>
 
         {/* Title + Description */}
         <div className="flex flex-col gap-2">
-          <Text as={'h3'} font={'bold'} color={'primary-950'}>{title}</Text>
-          <Text as={'p'} size={'xs'} color={'primary-500'} font={'light'}>{description}</Text>
+          <Text as={"h3"} font={"bold"} color={"primary-950"}>
+            {title}
+          </Text>
+          <Text as={"p"} size={"xs"} color={"primary-500"} font={"light"}>
+            {description}
+          </Text>
         </div>
 
         {/* Meta (avatars / location / status) */}
         {meta}
       </div>
-
-      {/* Action Button */}
-      <button className="flex items-center gap-1.5 text-sm font-medium text-primary-950 hover:text-primary-700 transition-colors whitespace-nowrap">
-        {buttonLabel} <ArrowRight className="w-4 h-4" />
-      </button>
     </motion.div>
   );
 }

@@ -1,4 +1,4 @@
-export type EmailFolder = 'inbox' | 'sent' | 'spam' | 'phishing' | 'trash';
+export type EmailFolder = 'inbox' | 'sent' | 'spam' | 'phishing' | 'starred' | 'malware' | 'trash';
 
 export type SecurityVerdict = 'clean' | 'suspicious' | 'malicious' | 'unknown';
 

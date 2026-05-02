@@ -17,10 +17,12 @@ export const MOCK_ACCOUNTS = [
 ];
 
 export const useComposeEmail = () => {
-  const isOpen = useMailStore((s) => s.isComposeOpen);
-  const setOpen = useMailStore((s) => s.setComposeOpen);
-  const composeMode = useMailStore((s) => s.composeMode);
-  const composeData = useMailStore((s) => s.composeData);
+  const {
+    isComposeOpen: isOpen,
+    setComposeOpen: setOpen,
+    composeMode,
+    composeData,
+  } = useMailStore();
 
   const params = useParams();
   const mailboxId = (params?.mailboxId as string) ?? "mock-mailbox-1";

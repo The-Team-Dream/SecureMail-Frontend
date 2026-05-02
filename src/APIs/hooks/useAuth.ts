@@ -13,9 +13,9 @@ import {
   verifyOtp,
   resendOtp,
   logout,
-  getUserData,
   getOAuthLoginUrl,
   validateOAuthToken,
+  getAuthMe,
 } from "../features/auth";
 import {
   SigninData,
@@ -38,7 +38,7 @@ export const useSignup = (
   return useMutation<SignupResponse, AxiosError, SignupData>({
     mutationFn: signup,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-me"] });
     },
     ...options,
   });
@@ -51,7 +51,7 @@ export const useSignin = (
   return useMutation<SigninResponse, AxiosError, SigninData>({
     mutationFn: signin,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-me"] });
     },
     ...options,
   });
@@ -64,7 +64,7 @@ export const useVerifyOtp = (
   return useMutation<VerifyOtpResponse, AxiosError, VerifyOtpData>({
     mutationFn: verifyOtp,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-me"] });
     },
     ...options,
   });
@@ -76,7 +76,7 @@ export const useResendOtp = (
   return useMutation<VerifyOtpResponse, AxiosError, ResendOtpData>({
     mutationFn: resendOtp,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-me"] });
     },
     ...options,
   });
@@ -92,7 +92,7 @@ export const useForgetPassword = (
   return useMutation<any, AxiosError, ForgetPasswordData>({
     mutationFn: forgetPassword,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-me"] });
     },
     ...options,
   });
@@ -104,7 +104,7 @@ export const useResetPassword = (
   return useMutation<any, AxiosError, ResetPasswordData>({
     mutationFn: resetPassword,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-me"] });
     },
     ...options,
   });
@@ -116,15 +116,15 @@ export const useLogout = (
   return useMutation<any, AxiosError, void>({
     mutationFn: logout,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-me"] });
     },
     ...options,
   });
 };
 
-export const useGetUserData = () => {
+export const useGetAuthMe = () => {
   return useQuery({
-    queryKey: ["user-data"],
-    queryFn: () => getUserData(),
+    queryKey: ["auth-me"],
+    queryFn: () => getAuthMe(),
   });
 };

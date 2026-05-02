@@ -16,6 +16,7 @@ const dashboardNavItems = [
   { name: "Mailboxes", icon: Icons.Inbox, href: "/mailboxes" },
   { name: "Analytics", icon: Icons.Analytics, href: "/analytics" },
   { name: "Reports", icon: Icons.Reports, href: "/reports" },
+  { name: "Settings", icon: Icons.Settings, href: "/settings" },
 ];
 
 const mailboxNavItems: {
@@ -27,6 +28,7 @@ const mailboxNavItems: {
   { name: "Sent", icon: Icons.Sent, folder: "sent" },
   { name: "Star", icon: Icons.Star, folder: "starred" },
   { name: "Spam", icon: Icons.Spam, folder: "spam" },
+  { name: "Trash", icon: Icons.Delete, folder: "trash" },
 ];
 
 const securityNavItems = [

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
-import { notificationsApi } from '../features/notification';
+import { notificationsApi } from '../features/notifications';
 
 
 export const useNotifications = (page = 1) => {

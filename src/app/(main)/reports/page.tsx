@@ -8,6 +8,7 @@ import { ReportListItem } from "./ReportListItem";
 import { ReportsSkeleton } from "@/_components/skeleton/ReportsSkeleton";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { useMailboxes } from "@/APIs/hooks/useMailboxes";
+import { useGetAuthMe } from "@/APIs/hooks/useAuth";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -20,16 +21,26 @@ const containerVariants = {
 };
 
 export default function Reports() {
-  const {data:reports, isLoading, isError, refetch } = useMailboxes();
-  // if (isLoading) return <ReportsSkeleton />;
+  const {
+    data: reports,
+    isLoading: mailboxesLoading,
+    isError: mailboxesIsError,
+    refetch: mailboxesRefetch,
+  } = useMailboxes();
+  const {
+    data: user,
+    isLoading: userIsLoading,
+    isError: userIsError,
+  } = useGetAuthMe();
+  // if (userIsLoading || mailboxesLoading) return <ReportsSkeleton />;
 
-  // if (isError) {
+  // if (userIsError || mailboxesIsError) {
   //   return (
   //     <StateMessage
   //       variant="error"
   //       title="Reports Unavailable"
   //       description="We couldn't retrieve your security reports. Please check your connection and try again."
-  //       onRetry={() => refetch()}
+  //       onRetry={() => mailboxesRefetch()}
   //     />
   //   );
   // }
@@ -44,7 +55,7 @@ export default function Reports() {
           transition={{ duration: 0.5 }}
         >
           <Text size="xl" font="medium">
-            Good Morning, Mohamed
+            Good Morning, {user?.name || "Mohamed"}
           </Text>
         </motion.div>
 

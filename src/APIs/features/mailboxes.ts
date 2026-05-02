@@ -44,4 +44,21 @@ export const mailboxApi = {
     });
     return res.data;
   },
+
+  connectGmail: async (code: string, redirectUri: string): Promise<Mailbox> => {
+    const res = await axiosInstance.post<Mailbox>('/mailboxes/gmail', { code, redirectUri });
+    return res.data;
+  },
+
+  getOutlookAuthUrl: async (redirectUri: string): Promise<{ url: string }> => {
+    const res = await axiosInstance.get<{ url: string }>(`/mailboxes/outlook/auth-url`, { 
+      params: { redirectUri } 
+    });
+    return res.data;
+  },
+
+  connectOutlook: async (code: string, redirectUri: string): Promise<Mailbox> => {
+    const res = await axiosInstance.post<Mailbox>('/mailboxes/outlook', { code, redirectUri });
+    return res.data;
+  },
 };

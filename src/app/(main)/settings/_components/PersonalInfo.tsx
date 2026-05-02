@@ -19,6 +19,7 @@ import {
 } from "@/schemas/settings/personalInfo";
 import { Spinner } from "@/components/ui/spinner";
 import { useSettingsOperations } from "@/APIs/hooks/useUserSettings";
+import { Icons } from "@/constants/icons";
 
 const PersonalInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -36,9 +37,8 @@ const PersonalInfo = () => {
     reValidateMode: "onChange",
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      fullName: "Emad Ahmed",
+      username: "Emad Ahmed",
       email: "emad@gmail.com",
-      phoneNumber: "(+20) 123 456 7890",
     },
   });
 
@@ -177,7 +177,7 @@ const PersonalInfo = () => {
                   >
                     <AvatarImage src={profileImage} className="object-cover" />
                     <AvatarFallback className="bg-primary-100 text-primary-800">
-                      {currentValues.fullName?.substring(0, 2).toUpperCase()}
+                      {currentValues.username?.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
 
@@ -195,13 +195,14 @@ const PersonalInfo = () => {
                       type="button"
                       disabled={isUpdating || isDeletingImg}
                       onClick={handleDeleteImage}
-                      className="flex items-center gap-1 text-sm text-error-500 hover:underline font-medium disabled:text-primary-400"
+                      className="flex items-center gap-1 text-sm text-error-500 hover:underline font-medium disabled:text-primary-400 cursor-pointer"
                     >
                       {isDeletingImg ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
                         <>
-                          Delete <Trash2 className="w-4 h-4" />
+                          Delete{" "}
+                          <Icons.Delete className="w-4 h-4 text-error-500" />
                         </>
                       )}
                     </button>
@@ -218,20 +219,20 @@ const PersonalInfo = () => {
                   </Text>
                   {isEditing ? (
                     <Input
-                      {...register("fullName", {
+                      {...register("username", {
                         onChange: () => {
-                          if (errors.fullName) {
-                            clearErrors("fullName");
+                          if (errors.username) {
+                            clearErrors("username");
                           }
                         },
                       })}
                       placeholder="Your Name"
-                      error={errors.fullName?.message}
+                      error={errors.username?.message}
                       disabled={isUpdating}
                     />
                   ) : (
                     <Text size={"sm"} color={"primary-950"} font={"medium"}>
-                      {currentValues.fullName}
+                      {currentValues.username}
                     </Text>
                   )}
                 </div>
@@ -257,31 +258,6 @@ const PersonalInfo = () => {
                   ) : (
                     <Text size={"sm"} color={"primary-950"} font={"medium"}>
                       {currentValues.email}
-                    </Text>
-                  )}
-                </div>
-
-                {/* Phone */}
-                <div className="flex flex-col gap-1">
-                  <Text size={"sm"} color={"primary-500"}>
-                    Phone Number
-                  </Text>
-                  {isEditing ? (
-                    <Input
-                      {...register("phoneNumber", {
-                        onChange: () => {
-                          if (errors.phoneNumber) {
-                            clearErrors("phoneNumber");
-                          }
-                        },
-                      })}
-                      placeholder="+20..."
-                      error={errors.phoneNumber?.message}
-                      disabled={isUpdating}
-                    />
-                  ) : (
-                    <Text size={"sm"} color={"primary-950"} font={"medium"}>
-                      {currentValues.phoneNumber}
                     </Text>
                   )}
                 </div>

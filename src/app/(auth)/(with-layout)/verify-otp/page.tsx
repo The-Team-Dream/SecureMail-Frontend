@@ -76,10 +76,8 @@ function VerifyOtpContent() {
             </Text>
 
             <Text color={"primary-500"} font={"medium"}>
-              Enter OTP sent to mobile number{" "}
-              <span className="font-semibold">05xxx12345</span> and email
-              address <span className="font-semibold">{email}</span> to login
-              the portal
+              Enter OTP sent to your email address{" "}
+              <span className="font-semibold">{email}</span> to login to the portal
             </Text>
           </div>
 

@@ -129,11 +129,7 @@ const Security = () => {
                       type="password"
                       disabled={isUpdating}
                       {...register("currentPassword", {
-                        onChange: () => {
-                          if (errors.currentPassword) {
-                            clearErrors("currentPassword");
-                          }
-                        },
+                        onChange: () => clearErrors("currentPassword"),
                       })}
                       placeholder="••••••••"
                       error={errors.currentPassword?.message}
@@ -145,11 +141,7 @@ const Security = () => {
                       type="password"
                       disabled={isUpdating}
                       {...register("newPassword", {
-                        onChange: () => {
-                          if (errors.newPassword) {
-                            clearErrors("newPassword");
-                          }
-                        },
+                        onChange: () => clearErrors("newPassword"),
                       })}
                       placeholder="••••••••"
                       error={errors.newPassword?.message}
@@ -161,11 +153,7 @@ const Security = () => {
                       type="password"
                       disabled={isUpdating}
                       {...register("confirmPassword", {
-                        onChange: () => {
-                          if (errors.confirmPassword) {
-                            clearErrors("confirmPassword");
-                          }
-                        },
+                        onChange: () => clearErrors("confirmPassword"),
                       })}
                       placeholder="••••••••"
                       error={errors.confirmPassword?.message}
@@ -198,30 +186,6 @@ const Security = () => {
               )}
             </div>
           </form>
-
-          {/* Two-Factor Section */}
-          <div className="border border-primary-100 py-6 px-8 rounded-lg transition-all hover:bg-primary-50/30 cursor-pointer group">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <Shield className="w-6 h-6 text-primary" />
-                <div>
-                  <Text color={"primary-950"} font={"medium"}>
-                    Two-Factor auth
-                  </Text>
-                  <Text color={"primary-500"} size={"sm"}>
-                    Enhanced account protection
-                  </Text>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:text-primary transition-colors"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </Button>
-            </div>
-          </div>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

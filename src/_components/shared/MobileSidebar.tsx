@@ -17,6 +17,7 @@ import {
   LineChart,
   Ghost,
   ShieldAlert,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
@@ -43,6 +44,7 @@ const mailboxNavItems: {
   { name: "Sent", icon: Send, folder: "sent" },
   { name: "Starred", icon: Star, folder: "starred" },
   { name: "Spam", icon: AlertCircle, folder: "spam" },
+  { name: "Trash", icon: Trash2, folder: "trash" },
 ];
 
 const securityNavItems = [
