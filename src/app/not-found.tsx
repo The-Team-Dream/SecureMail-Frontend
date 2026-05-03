@@ -1,73 +1,174 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Text } from "@/_components/shared/Text";
+import { motion } from "framer-motion";
+import {
+  Shield,
+  Lock,
+  Mail,
+  ChevronLeft,
+  Search,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Text } from "@/_components/shared/Text";
+import Logo from "@/_components/shared/Logo";
 
 const NotFound = () => {
   return (
-    <main className="grid min-h-screen place-items-center bg-primary/90 px-6 py-24 sm:py-32 lg:px-8 overflow-hidden">
-      <div className="absolute -top-2 -left-2 -trnslate-x-1/2 w-[400px] h-[400px] bg-red-600/20 z-10 rounded-full blur-[100px] shadow-[0_0_150px_50px_rgba(239,68,68,0.2),inset_0_0_150px_50px_rgba(239,68,68,0.2)]" />
-      <div className="text-center flex flex-col items-center justify-center z-99">
-        <div className="flex items-center gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="120"
-            height="120"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#ef4444"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-circle-x-icon lucide-circle-x"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="m15 9-6 6" />
-            <path d="m9 9 6 6" />
-          </svg>
-          <Text font={"semiBold"} className="text-[#ef4444] text-5xl">
-            404
-          </Text>
-        </div>
-        <Text
-          as={"h1"}
-          font={"semiBold"}
-          className="text-background mt-4 text-5xl font-semibold tracking-tight text-balance sm:text-7xl"
-        >
-          Page not found
-        </Text>
-        <Text
-          color={"primary-400"}
-          font={"medium"}
-          className="mt-6 text-lg font-medium text-pretty sm:text-xl/8"
-        >
-          Sorry, we couldn&apos;t find the page you&apos;re looking for.
-        </Text>
-        <div className="mt-10 flex items-center justify-center gap-x-6">
-          <Link href="/">
-            <Button
-              size={"lg"}
-              className="bg-secondary-500 hover:bg-secondary-700 text-black"
-            >
-              <Text as={"span"} font={"bold"} className="underline">
-                Go back home
-              </Text>
-            </Button>
-          </Link>
-          <Link
-            href="#"
-            className="text-sm font-semibold text-background group inline-flex hover:text-info-500"
-          >
-            Contact support{" "}
-            <span
-              className="ml-2 transition-transform duration-200 group-hover:translate-x-1"
-              aria-hidden="true"
-            >
-              &rarr;
-            </span>
-          </Link>
-        </div>
+    <main className="relative min-h-screen w-full bg-background overflow-hidden flex flex-col items-center justify-center p-6">
+      {/* Background Grid and Effects */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[40px_40px]" />
+        <div className="absolute inset-0 bg-radial-gradient from-secondary-500/5 via-transparent to-transparent opacity-50" />
+
+        {/* Animated Scanning Line */}
+        <motion.div
+          className="absolute left-0 right-0 h-px bg-secondary-500/20 z-10"
+          animate={{ top: ["0%", "100%", "0%"] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        />
       </div>
+
+      {/* Floating Icons */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[Shield, Lock, Mail, Search, AlertCircle].map((Icon, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-secondary-500/10"
+            initial={{
+              x: `${Math.random() * 100}%`,
+              y: `${Math.random() * 100}%`,
+              opacity: 0,
+            }}
+            animate={{
+              y: ["-10%", "110%"],
+              opacity: [0, 1, 1, 0],
+              rotate: [0, 360],
+            }}
+            transition={{
+              duration: 15 + Math.random() * 10,
+              repeat: Infinity,
+              delay: i * 2,
+              ease: "linear",
+            }}
+          >
+            <Icon size={40 + Math.random() * 60} strokeWidth={1} />
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="relative z-20 flex flex-col items-center text-center max-w-3xl">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <Logo textSize="4xl" width={80} height={80}  />
+        </motion.div>
+
+        <div className="relative mb-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, type: "spring" }}
+            className="relative"
+          >
+            <Text
+              font="black"
+              className="text-[12rem] md:text-[18rem] leading-none text-transparent bg-clip-text bg-linear-to-b from-secondary-500 to-secondary-900/20 select-none opacity-20"
+            >
+              404
+            </Text>
+
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                animate={{
+                  textShadow: [
+                    "0 0 20px rgba(187, 255, 20, 0)",
+                    "0 0 20px rgba(187, 255, 20, 0.5)",
+                    "0 0 20px rgba(187, 255, 20, 0)",
+                  ],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Text
+                  font="bold"
+                  className="text-6xl md:text-8xl tracking-tighter text-foreground"
+                >
+                  LOST SIGNAL
+                </Text>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+        >
+          <Text
+            size="2xl"
+            font="semiBold"
+            className="text-secondary-500 mb-4 tracking-[0.2em] uppercase"
+          >
+            Unencrypted Sector Detected
+          </Text>
+          <Text
+            size="lg"
+            color="primary-400"
+            className="mb-12 max-w-lg mx-auto leading-relaxed"
+          >
+            The transmission you&apos;re looking for has been intercepted or
+            moved to a more secure location. Verify your credentials and try
+            again.
+          </Text>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/">
+              <Button
+                size="lg"
+                className="bg-secondary-500 hover:bg-secondary-600 text-black px-8 py-6 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(187,255,20,0.3)]"
+              >
+                <ChevronLeft className="mr-2" />
+                Return to Base
+              </Button>
+            </Link>
+
+            <Link href="/contact">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-secondary-500/50 text-secondary-500 hover:bg-secondary-500/10 px-8 py-6 text-lg font-bold transition-all"
+              >
+                Contact Security
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Security Status Bar (Bottom) */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="absolute bottom-8 left-8 right-8 flex items-center justify-between text-[10px] uppercase tracking-widest text-primary-500 font-mono"
+      >
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-error-500 rounded-full animate-pulse" />
+            Connection Status: Severed
+          </span>
+          <span>Encryption: AES-256</span>
+        </div>
+        <div className="hidden sm:block">
+          Error Log: 0x404_PAGE_NOT_FOUND_SECURE_MAIL_TRANS
+        </div>
+      </motion.div>
     </main>
   );
 };

@@ -121,13 +121,15 @@ export default function Signup() {
               />
               <label htmlFor="terms" className="text-primary font-medium">
                 I agree{" "}
-                <Text
-                  as={"span"}
-                  font={"bold"}
-                  className="underline cursor-pointer"
-                >
-                  Terms & Conditions
-                </Text>
+                <Link href="/terms">
+                  <Text
+                    as={"span"}
+                    font={"bold"}
+                    className="underline cursor-pointer hover:text-secondary-800 transition-colors"
+                  >
+                    Terms & Conditions
+                  </Text>
+                </Link>
               </label>
             </div>
             <Error error={errors?.acceptTerms?.message} />

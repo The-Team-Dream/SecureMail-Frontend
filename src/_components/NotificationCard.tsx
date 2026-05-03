@@ -186,7 +186,7 @@ export const NotificationCard = ({
     <div
       className={cn(
         "group relative p-4 border-b last:border-0 transition-colors hover:bg-primary-50/50 cursor-pointer",
-        isUnread ? "bg-primary-50/30" : "bg-transparent",
+        isUnread ? "bg-primary-50" : "bg-transparent",
         notification.type === "error" && "border-l-4 border-l-error-500",
       )}
     >

@@ -27,6 +27,7 @@ export const NotificationDropdown = () => {
   const [notifications, setNotifications] = useState<Notification[]>(
     MOCK_NOTIFICATIONS.data,
   );
+
   const [activeTab, setActiveTab] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -101,7 +102,7 @@ export const NotificationDropdown = () => {
               Notifications
             </Text>
             <button
-              className="text-xs text-primary hover:text-primary hover:underline cursor-pointer"
+              className="text-xs text-primary-600 hover:text-primary hover:underline cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 handleToggleAllRead();
