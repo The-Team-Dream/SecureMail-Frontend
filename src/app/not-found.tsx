@@ -66,7 +66,7 @@ const NotFound = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <Logo textSize="4xl" width={80} height={80}  />
+          <Logo textSize="4xl" width={80} height={80} />
         </motion.div>
 
         <div className="relative mb-8">
@@ -113,7 +113,7 @@ const NotFound = () => {
           <Text
             size="2xl"
             font="semiBold"
-            className="text-secondary-500 mb-4 tracking-[0.2em] uppercase"
+            className="text-primary mb-4 tracking-[0.2em] uppercase"
           >
             Unencrypted Sector Detected
           </Text>
@@ -131,7 +131,7 @@ const NotFound = () => {
             <Link href="/">
               <Button
                 size="lg"
-                className="bg-secondary-500 hover:bg-secondary-600 text-black px-8 py-6 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(187,255,20,0.3)]"
+                className=" px-8 py-6 text-lg font-bold transition-all"
               >
                 <ChevronLeft className="mr-2" />
                 Return to Base
@@ -142,7 +142,7 @@ const NotFound = () => {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-secondary-500/50 text-secondary-500 hover:bg-secondary-500/10 px-8 py-6 text-lg font-bold transition-all"
+                className="border-secondary-500/50 text-secondary-500 hover:bg-secondary-500/10 px-8 py-6 text-lg font-bold "
               >
                 Contact Security
               </Button>

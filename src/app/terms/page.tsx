@@ -4,11 +4,12 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ChevronLeft, ShieldCheck, Lock, FileText, Scale } from "lucide-react";
+import { ShieldCheck, Lock, FileText, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/_components/shared/Text";
-import Logo from "@/_components/shared/Logo";
+import PublicNavbar from "@/_components/shared/PublicNavbar";
 import { Spinner } from "@/components/ui/spinner";
+import { Icons } from "@/constants/icons";
 
 const TermsPage = () => {
   const router = useRouter();
@@ -23,31 +24,31 @@ const TermsPage = () => {
   const sections = [
     {
       title: "1. Acceptance of Terms",
-      icon: <FileText className="w-5 h-5 text-secondary-800" />,
+      icon: <Icons.Report className="w-5 h-5 text-primary-600" />,
       content:
         "By accessing or using SecureMail, you agree to be bound by these Terms and Conditions and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.",
     },
     {
       title: "2. User Accounts & Security",
-      icon: <Lock className="w-5 h-5 text-secondary-800" />,
+      icon: <Icons.Lock className="w-5 h-5 text-primary-600" />,
       content:
         "You are responsible for maintaining the confidentiality of your account and password. SecureMail employs AES-256 bit encryption to protect your data, but user-side security (like strong passwords and 2FA) remains your responsibility. Any unauthorized use of your account must be reported immediately.",
     },
     {
       title: "3. Privacy & Data Protection",
-      icon: <ShieldCheck className="w-5 h-5 text-secondary-800" />,
+      icon: <Icons.Reports className="w-5 h-5 text-primary-600" />,
       content:
         "Your privacy is our priority. We do not sell your personal data. Our end-to-end encryption ensures that only you and your intended recipients can read your communications. For more details, please refer to our Privacy Policy.",
     },
     {
       title: "4. Prohibited Use",
-      icon: <Scale className="w-5 h-5 text-secondary-800" />,
+      icon: <Scale className="w-5 h-5 text-primary-600" />,
       content:
         "You may not use SecureMail for any illegal purposes, including but not limited to: phishing, distribution of malware, harassment, or transmitting copyrighted material without permission. We reserve the right to terminate accounts that violate these terms.",
     },
     {
       title: "5. Service Availability",
-      icon: <FileText className="w-5 h-5 text-secondary-800" />,
+      icon: <Icons.Report className="w-5 h-5 text-primary-600" />,
       content:
         "While we strive for 99.9% uptime, SecureMail is provided 'as is' without warranties of any kind. We may perform maintenance or updates that could briefly interrupt service.",
     },
@@ -55,22 +56,13 @@ const TermsPage = () => {
 
   return (
     <main className="min-h-screen bg-background pb-20">
-      {/* Header / Navbar */}
-      <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-primary-100/10 py-4 px-6 md:px-12 flex items-center justify-between">
-        <Logo />
-        <Link href="/sign-up">
-          <Button
-            variant="secondary"
-            className="hover:text-secondary-800 transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Back to Sign Up
-          </Button>
-        </Link>
-      </nav>
+      <PublicNavbar
+        backLink="/sign-up"
+        backLabel="Back to Sign Up"
+      />
 
       {/* Hero Section */}
-      <section className="relative py-20 px-6 overflow-hidden">
+      <section className="relative py-20 pt-32 px-6 overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full bg-radial-gradient from-secondary-500/10 via-transparent to-transparent opacity-30" />
         </div>
@@ -86,7 +78,7 @@ const TermsPage = () => {
               size="4xl"
               className="mb-4 tracking-tight md:text-6xl"
             >
-              Terms & <span className="text-secondary-500">Conditions</span>
+              Terms & Conditions
             </Text>
             <Text color="primary-400" size="lg" className="max-w-2xl mx-auto">
               Last Updated: May 3, 2026. Please read these terms carefully
@@ -113,7 +105,7 @@ const TermsPage = () => {
               className="group p-6 rounded-2xl bg-primary-100/5 border border-primary-100/10 hover:border-secondary-500/30 transition-all duration-300"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-secondary-800/10 group-hover:bg-secondary-500/20 transition-colors">
+                <div className="p-2 rounded-lg bg-primary-800/10 group-hover:bg-primary-500/20 transition-colors">
                   {section.icon}
                 </div>
                 <Text font="bold" size="xl">
@@ -125,10 +117,17 @@ const TermsPage = () => {
               </Text>
             </motion.div>
           ))}
+          <label
+            htmlFor="agree"
+            className="flex items-center gap-2 accent-[#87BE00]"
+          >
+            <input type="checkbox" id="agree" />I agree to the terms and
+            conditions
+          </label>
           <Button
             onClick={handleAgree}
             disabled={isLoading}
-            className="bg-secondary-500 hover:bg-secondary-600 text-black font-bold px-8 py-3 h-auto text-lg rounded-full shadow-[0_0_20px_rgba(187,255,20,0.2)] hover:shadow-[0_0_30px_rgba(187,255,20,0.4)] transition-all flex items-center justify-center gap-2"
+            className="font-bold px-8 py-3 h-auto text-lg shadow-[0_0_20px_rgba(0,0,0,0.2)]"
           >
             {isLoading ? (
               <>
@@ -144,7 +143,7 @@ const TermsPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9 }}
-            className="mt-16 p-8 rounded-3xl bg-linear-to-br from-secondary-500/10 to-primary-500/5 border border-secondary-500/20 text-center"
+            className="mt-16 p-8 rounded-3xl bg-linear-to-br from-primary-500/10 to-primary-500/5 border border-secondary-500/20 text-center"
           >
             <Text font="bold" size="2xl" className="mb-4">
               Questions about our terms?
@@ -154,7 +153,7 @@ const TermsPage = () => {
               we protect your data.
             </Text>
             <Link href="/contact">
-              <Button className="bg-secondary-500 hover:bg-secondary-600 text-black font-bold px-8 py-6 h-auto text-lg rounded-full shadow-[0_0_20px_rgba(187,255,20,0.2)] hover:shadow-[0_0_30px_rgba(187,255,20,0.4)] transition-all">
+              <Button className="font-bold px-8 py-3 h-auto text-lg shadow-[0_0_20px_rgba(0,0,0,0.2)]">
                 Contact Legal Support
               </Button>
             </Link>

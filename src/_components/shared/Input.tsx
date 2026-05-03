@@ -4,6 +4,7 @@ import { CircleAlert, Eye, EyeOff } from "lucide-react";
 import { forwardRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Text } from "./Text";
+import Error from "./Error";
 /**
  * 📦 Input Component
  *
@@ -51,15 +52,7 @@ export const errorVariants = {
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    {
-      label,
-      leftIcon,
-      type = "text",
-      required,
-      error,
-      className,
-      ...props
-    },
+    { label, leftIcon, type = "text", required, error, className, ...props },
     ref,
   ) => {
     const [inputType, setInputType] = useState(type);
@@ -114,23 +107,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             </button>
           )}
         </div>
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              variants={errorVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ ease: "easeInOut", duration: 0.2, stiffness: 120 }}
-              className="flex items-center gap-2 text-error mt-1"
-            >
-              <CircleAlert className="w-4 h-4 text-error-500" />
-              <Text as={"span"} size={"sm"} color={"error"} font={"medium"}>
-                {error}
-              </Text>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {error && <Error error={error} />}
       </div>
     );
   },
