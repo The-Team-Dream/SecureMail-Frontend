@@ -23,24 +23,24 @@ const containerVariants = {
 export default function Reports() {
   const {
     data: reports,
-    isLoading: mailboxesLoading,
-    isError: mailboxesIsError,
-    refetch: mailboxesRefetch,
+    isLoading: reportsLoading,
+    isError: reportsIsError,
+    refetch: reportsRefetch,
   } = useMailboxes();
   const {
     data: user,
     isLoading: userIsLoading,
     isError: userIsError,
   } = useGetAuthMe();
-  // if (userIsLoading || mailboxesLoading) return <ReportsSkeleton />;
+  // if (userIsLoading || reportsLoading) return <ReportsSkeleton />;
 
-  // if (userIsError || mailboxesIsError) {
+  // if (userIsError || reportsIsError) {
   //   return (
   //     <StateMessage
   //       variant="error"
   //       title="Reports Unavailable"
   //       description="We couldn't retrieve your security reports. Please check your connection and try again."
-  //       onRetry={() => mailboxesRefetch()}
+  //       onRetry={reportsRefetch}
   //     />
   //   );
   // }

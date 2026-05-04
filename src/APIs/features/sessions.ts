@@ -14,7 +14,7 @@ export const sessionsApi = {
   },
 
   // Revoke all sessions except current
-  revokeOtherSessions: async (): Promise<UserSession[]> => {
+  revokeOtherSessions: async (): Promise<UserSession> => {
     const res = await axiosInstance.delete("/sessions");
     return res.data;
   },

@@ -26,17 +26,24 @@ import Link from "next/link";
 import { NotificationDropdown } from "../Notification";
 import { Icons } from "@/constants/icons";
 import { getInitials } from "@/lib/utils";
+import { useGetAuthMe } from "@/APIs/hooks/useAuth";
 
 export const Navbar = () => {
   const pathname = usePathname();
   const params = useParams();
   const mailboxId = params?.mailboxId;
   const [accounts, setAccounts] = useState(initialAccounts);
+  const { data: user } = useGetAuthMe();
 
   const isMailPage =
     pathname.split("/").length >= 3 && pathname.startsWith("/mailboxes");
   const activeAccount = accounts.find((user) => user.active) || accounts[0];
-  const initials = getInitials(activeAccount.username);
+
+  // Use live API name/email/avatar when available, fallback to mock account
+  const displayName = user?.username ?? activeAccount.username;
+  const displayEmail = user?.email ?? activeAccount.email;
+  const displayAvatar = user?.avatar ?? activeAccount.avatar;
+  const initials = getInitials(displayName);
 
   const handleSwitchAccount = (id: number) => {
     const updatedAccounts = accounts.map((account) => ({
@@ -81,9 +88,9 @@ export const Navbar = () => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 cursor-pointer outline-none overflow-hidden">
-              {activeAccount.avatar ? (
+              {displayAvatar ? (
                 <Image
-                  src={activeAccount.avatar}
+                  src={displayAvatar}
                   alt="avatar"
                   width={48}
                   height={48}
@@ -102,9 +109,9 @@ export const Navbar = () => {
           >
             <div className="flex flex-col items-center justify-center pt-2">
               <div className="w-16 h-16 md:w-[72px] md:h-[72px] rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 overflow-hidden">
-                {activeAccount.avatar ? (
+                {displayAvatar ? (
                   <Image
-                    src={activeAccount.avatar}
+                    src={displayAvatar}
                     alt="avatar"
                     width={72}
                     height={72}
@@ -118,10 +125,10 @@ export const Navbar = () => {
               </div>
               <div className="mt-3 text-center">
                 <Text as="h3" font="bold" size="lg" color={"primary-950"}>
-                  Hi, {activeAccount.username.split(" ")[0]}!
+                  Hi, {displayName.split(" ")[0]}!
                 </Text>
                 <Text as="p" size="sm" color={"primary-500"} className="mt-0.5">
-                  {activeAccount.email}
+                  {displayEmail}
                 </Text>
               </div>
             </div>

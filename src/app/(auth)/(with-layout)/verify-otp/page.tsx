@@ -122,7 +122,7 @@ function VerifyOtpContent() {
           <Button
             onClick={handleVerify}
             disabled={isPending}
-            className="group"
+            className="group w-full"
             size={"lg"}
           >
             {isPending ? <Spinner /> : "Verify"}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil, Trash2, X, Save, Loader2, UserRound } from "lucide-react";
@@ -20,8 +20,14 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useSettingsOperations } from "@/APIs/hooks/useUserSettings";
 import { Icons } from "@/constants/icons";
+import { useGetAuthMe } from "@/APIs/hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const PersonalInfo = () => {
+  const { data: user } = useGetAuthMe();
+  const { updateProfile } = useSettingsOperations();
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeletingImg, setIsDeletingImg] = useState(false);
@@ -37,21 +43,42 @@ const PersonalInfo = () => {
     reValidateMode: "onChange",
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      username: "Emad Ahmed",
-      email: "emad@gmail.com",
+      username: user?.username ?? "",
+      email: user?.email ?? "",
     },
   });
+
+  // Sync form values once the user data loads
+  useEffect(() => {
+    if (user) {
+      reset({
+        username: user.username,
+        email: user.email,
+      });
+    }
+  }, [user, reset]);
 
   const currentValues = watch();
 
   const onSubmit: SubmitHandler<IPersonalInfo> = async (data) => {
     setIsUpdating(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Updated Data Successfully:", data);
+      const formData = new FormData();
+      formData.append("username", data.username);
+      // Append avatar file if a new one was selected
+      const file = fileInputRef.current?.files?.[0];
+      if (file) formData.append("avatar", file);
+
+      await new Promise<void>((resolve, reject) =>
+        updateProfile(formData, { onSuccess: () => resolve(), onError: (e) => reject(e) })
+      );
+
+      // Invalidate auth-me so Navbar picks up the new name immediately
+      await queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+      toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
-      console.error("Update failed:", error);
+      toast.error("Update failed. Please try again.");
     } finally {
       setIsUpdating(false);
     }

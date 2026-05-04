@@ -4,7 +4,7 @@ export interface AnalyticsOverview {
   totalThreatsBlocked: number;
   phishingDetected: number;
   malwareDetected: number;
-  safetyScore: number; 
+  safetyScore: number;
 }
 
 export interface MailboxStats {
@@ -15,7 +15,7 @@ export interface MailboxStats {
     count: number;
   }[];
   topThreatTypes: {
-    type: string; 
+    type: string;
     value: number;
   }[];
 }
@@ -27,4 +27,4 @@ export interface ActivityData {
   blocked: number;
 }
 
-export type ActivityPeriod = 'daily' | 'weekly' | 'monthly';
+export type ActivityPeriod = "daily" | "weekly" | "monthly";

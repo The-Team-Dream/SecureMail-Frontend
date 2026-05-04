@@ -76,7 +76,7 @@ export default function ForgotPassword() {
                   error={String(errors.root.message || "An error occurred")}
                 />
               )}
-              <Button size={"lg"} type="submit" disabled={isPending}>
+              <Button size={"lg"} type="submit" disabled={isPending} className="w-full">
                 {isPending ? (
                   <>
                     <Spinner />

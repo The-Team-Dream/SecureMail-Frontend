@@ -11,7 +11,7 @@ import {
   ForgetPasswordData,
   ResetPasswordData,
   OAuthProvider,
-} from "../../types/auth";
+} from "../types/auth";
 
 export const signup = async (formData: SignupData): Promise<SignupResponse> => {
   const res = await axiosInstance.post<SignupResponse>(

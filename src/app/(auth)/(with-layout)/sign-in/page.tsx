@@ -98,7 +98,12 @@ function SigninContent() {
               error={String(errors.root.message || "An error occurred")}
             />
           )}
-          <Button size={"lg"} type="submit" disabled={signinMutation.isPending}>
+          <Button
+            size={"lg"}
+            type="submit"
+            disabled={signinMutation.isPending}
+            className="w-full"
+          >
             {signinMutation.isPending ? (
               <>
                 <Spinner />

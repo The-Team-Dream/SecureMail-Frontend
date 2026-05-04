@@ -140,7 +140,7 @@ export default function Signup() {
               error={String(errors.root.message || "An error occurred")}
             />
           )}
-          <Button size={"lg"} type="submit" disabled={signupMutation.isPending}>
+          <Button size={"lg"} type="submit" disabled={signupMutation.isPending} className="w-full">
             {signupMutation.isPending ? (
               <>
                 <Spinner />

@@ -29,7 +29,7 @@ import {
   ResetPasswordData,
   OAuthProvider,
   ForgetPasswordResponse,
-} from "../../types/auth";
+} from "../types/auth";
 
 export const useSignup = (
   options?: UseMutationOptions<SignupResponse, AxiosError, SignupData>,
