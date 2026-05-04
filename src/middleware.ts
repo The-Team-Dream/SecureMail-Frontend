@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
+  console.log(token);
   const { pathname } = req.nextUrl;
 
   const publicPages = [
@@ -11,15 +12,14 @@ export async function middleware(req: NextRequest) {
     "/forgot-password",
     "/reset-password",
     "/auth/callback",
+    "/verify-otp",
   ];
 
   const isPublicPage =
     publicPages.includes(pathname) || pathname.startsWith("/auth/callback");
 
   if (!token && !isPublicPage) {
-    const url = new URL("/sign-in", req.url);
-    url.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL("/sign-in", req.url));
   }
   if (token && isPublicPage && pathname !== "/") {
     return NextResponse.redirect(new URL("/mailboxes", req.url));

@@ -1,10 +1,15 @@
 import axiosInstance from "@/lib/axios";
-import { UserSession } from "@/APIs/types/Session";
+import { UserSession, GetSessionsResponse } from "@/APIs/types/Session";
 
 export const sessionsApi = {
   getSessions: async (): Promise<UserSession[]> => {
-    const res = await axiosInstance.get<UserSession[]>("/sessions");
-    return res.data;
+    const res = await axiosInstance.get<GetSessionsResponse>("/sessions");
+    const data = res.data;
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.data?.sessions)) return data.data.sessions;
+    if (Array.isArray(data?.sessions)) return data.sessions;
+    return [];
   },
 
   // Revoke a specific session

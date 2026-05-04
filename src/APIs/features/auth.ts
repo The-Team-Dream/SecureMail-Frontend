@@ -36,13 +36,8 @@ export const verifyOtp = async (
   return res.data;
 };
 
-export const resendOtp = async (
-  formData: ResendOtpData,
-): Promise<VerifyOtpResponse> => {
-  const res = await axiosInstance.post<VerifyOtpResponse>(
-    "/auth/resend-otp",
-    formData,
-  );
+export const resendOtp = async (formData: ResendOtpData): Promise<void> => {
+  const res = await axiosInstance.post("/auth/resend-otp", formData);
   return res.data;
 };
 
@@ -73,7 +68,7 @@ export const logout = async (): Promise<{
 };
 export const getAuthMe = async () => {
   const res = await axiosInstance.get("/user/profile");
-  return res.data;
+  return res.data?.data;
 };
 
 export const getOAuthLoginUrl = (provider: OAuthProvider): string => {

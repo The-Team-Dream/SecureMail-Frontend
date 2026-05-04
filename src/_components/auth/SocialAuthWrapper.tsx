@@ -1,11 +1,44 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+import { getOAuthLoginUrl } from "@/APIs/features/auth";
 import { SocialAuthButton } from "./SocialAuthButton";
 
 const SocialAuthWrapper = () => {
 
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // In a real app, verify the origin here if needed
+      if (event.data?.type === "OAUTH_SUCCESS" && event.data?.token) {
+        import("js-cookie").then((Cookies) => {
+          Cookies.default.set("token", event.data.token, { path: "/", expires: 1 });
+          router.push("/mailboxes");
+        });
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [router]);
+
   const handleOAuthClick = (provider: "google" | "outlook") => {
-    // test
+    const url = getOAuthLoginUrl(provider);
+    
+    // Open a popup window centered on the screen
+    const width = 500;
+    const height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    
+    window.open(
+      url,
+      "OAuthLogin",
+      `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
+    );
   };
 
   return (

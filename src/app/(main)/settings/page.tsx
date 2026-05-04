@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { Trash2, ArrowRight, LogOut } from "lucide-react";
@@ -13,15 +13,15 @@ import Preference from "./_components/Preference";
 import SessionManagement from "./_components/SessionManagement";
 
 const Settings = () => {
-    const router = useRouter();
-    const { mutate, isPending } = useLogout({
+  const router = useRouter();
+  const { mutate, isPending } = useLogout({
     onSuccess: (res) => {
       toast.success(res.data.message || "Logout successfully");
       Cookies.remove("token");
       router.replace("/sign-in");
     },
-    onError: (error) => {
-      toast.error(error?.message || "Logout failed");
+    onError: (error: any) => {
+      toast.error(error?.response?.data.message || "Logout failed");
     },
   });
   return (
@@ -58,15 +58,15 @@ const Settings = () => {
           <Trash2 className="w-4 h-4 text-error-500 group-hover:text-white" />
         </Button>
       </div>
-        <Button
+      <Button
         className="w-fit px-6 py-2  mt-4 bg-error-500 hover:bg-error-600 "
-          disabled={isPending}
-          onClick={() => mutate()}
-          size={"sm"}
-        >
-          <LogOut className="w-4 h-4" />
-          Log out
-        </Button>
+        disabled={isPending}
+        onClick={() => mutate()}
+        size={"sm"}
+      >
+        <LogOut className="w-4 h-4" />
+        Log out
+      </Button>
     </Container>
   );
 };

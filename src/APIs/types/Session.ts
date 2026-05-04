@@ -8,3 +8,10 @@ export interface UserSession {
   expiresAt: string;
   isCurrent: boolean;
 }
+
+export type GetSessionsResponse = 
+  | UserSession[]
+  | {
+      data?: UserSession[] | { sessions?: UserSession[] };
+      sessions?: UserSession[];
+    };

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Bell, Check, Plus } from "lucide-react";
 import Logo from "./Logo";
 import { Text } from "./Text";
@@ -17,40 +16,48 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import Image from "next/image";
-import { initialAccounts } from "@/constants/MOCKDATA";
-import { usePathname, useParams } from "next/navigation";
+// Image removed in favor of standard img
+import { usePathname, useParams, useRouter } from "next/navigation";
 import { MobileSidebar } from "./MobileSidebar";
 import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
 import Link from "next/link";
 import { NotificationDropdown } from "../Notification";
 import { Icons } from "@/constants/icons";
-import { getInitials } from "@/lib/utils";
+import { getInitials, getImageUrl } from "@/lib/utils";
 import { useGetAuthMe } from "@/APIs/hooks/useAuth";
+import { useMailboxes } from "@/APIs/hooks/useMailboxes";
+import Image from "next/image";
 
 export const Navbar = () => {
   const pathname = usePathname();
   const params = useParams();
-  const mailboxId = params?.mailboxId;
-  const [accounts, setAccounts] = useState(initialAccounts);
-  const { data: user } = useGetAuthMe();
+  const router = useRouter();
+  const mailboxId = params?.mailboxId as string | undefined;
+
+  const { data: mailboxes = [], isPending: mailboxesLoading } = useMailboxes();
+  const { data: user, isPending, isError } = useGetAuthMe();
 
   const isMailPage =
     pathname.split("/").length >= 3 && pathname.startsWith("/mailboxes");
-  const activeAccount = accounts.find((user) => user.active) || accounts[0];
+  const activeAccount =
+    mailboxes.find((m) => m.id === mailboxId) || mailboxes[0] || null;
 
-  // Use live API name/email/avatar when available, fallback to mock account
-  const displayName = user?.username ?? activeAccount.username;
-  const displayEmail = user?.email ?? activeAccount.email;
-  const displayAvatar = user?.avatar ?? activeAccount.avatar;
+  const userData = user?.user || user;
+  const displayName =
+    userData?.username ?? activeAccount?.displayName ?? "User";
+
+  const displayEmail = userData?.email ?? activeAccount?.email ?? "";
+  const displayAvatar = userData?.avatar ?? null;
   const initials = getInitials(displayName);
 
-  const handleSwitchAccount = (id: number) => {
-    const updatedAccounts = accounts.map((account) => ({
-      ...account,
-      active: account.id === id,
-    }));
-    setAccounts(updatedAccounts);
+  const handleSwitchAccount = (id: string) => {
+    if (mailboxId) {
+      router.push(
+        pathname.replace(`/mailboxes/${mailboxId}`, `/mailboxes/${id}`),
+      );
+    } else {
+      router.push(`/mailboxes/${id}`);
+    }
   };
 
   return (
@@ -90,11 +97,11 @@ export const Navbar = () => {
             <button className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 cursor-pointer outline-none overflow-hidden">
               {displayAvatar ? (
                 <Image
-                  src={displayAvatar}
+                  src={getImageUrl(displayAvatar)}
                   alt="avatar"
                   width={48}
                   height={48}
-                  className="object-cover"
+                  className="w-12 h-12 rounded-full object-cover"
                 />
               ) : (
                 <Text color="secondary-900" font="medium">
@@ -111,11 +118,11 @@ export const Navbar = () => {
               <div className="w-16 h-16 md:w-[72px] md:h-[72px] rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 overflow-hidden">
                 {displayAvatar ? (
                   <Image
-                    src={displayAvatar}
+                    src={getImageUrl(displayAvatar)}
                     alt="avatar"
                     width={72}
                     height={72}
-                    className="md:w-full md:h-full w-10 h-10 object-cover"
+                    className="w-[72px] h-[72px] rounded-full object-cover"
                   />
                 ) : (
                   <Text color="secondary-900" font="bold" size="2xl">
@@ -144,50 +151,55 @@ export const Navbar = () => {
 
                   <AccordionContent className="w-full p-0">
                     <div className="flex flex-col w-full">
-                      {accounts.map((user) => (
-                        <DropdownMenuItem
-                          key={user.id}
-                          onClick={() => handleSwitchAccount(user.id)}
-                          className="flex items-center justify-between p-4 cursor-pointer hover:bg-primary-50 transition-colors outline-none bg-background mb-1"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`md:size-10 size-8 rounded-full flex items-center justify-center border overflow-hidden ${
-                                user.active
-                                  ? "bg-secondary-100 border-secondary-900"
-                                  : "bg-primary-100 border-primary-500"
-                              }`}
-                            >
-                              <Text
-                                font="bold"
-                                className="text-[10px] md:text-base"
-                                color={
-                                  user.active ? "secondary-900" : "primary-500"
-                                }
+                      {mailboxes.map((mailbox) => {
+                        const isActive = mailbox.id === activeAccount?.id;
+                        return (
+                          <DropdownMenuItem
+                            key={mailbox.id}
+                            onClick={() => handleSwitchAccount(mailbox.id)}
+                            className="flex items-center justify-between p-4 cursor-pointer hover:bg-primary-50 transition-colors outline-none bg-background mb-1"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`md:size-10 size-8 rounded-full flex items-center justify-center border overflow-hidden ${
+                                  isActive
+                                    ? "bg-secondary-100 border-secondary-900"
+                                    : "bg-primary-100 border-primary-500"
+                                }`}
                               >
-                                {getInitials(user.username)}
-                              </Text>
+                                <Text
+                                  font="bold"
+                                  className="text-[10px] md:text-base"
+                                  color={
+                                    isActive ? "secondary-900" : "primary-500"
+                                  }
+                                >
+                                  {getInitials(
+                                    mailbox.displayName || mailbox.email,
+                                  )}
+                                </Text>
+                              </div>
+                              <div className="flex flex-col">
+                                <Text font="bold" className="md:text-sm">
+                                  {mailbox.displayName}
+                                </Text>
+                                <Text
+                                  size={"sm"}
+                                  color={"primary-500"}
+                                  className="text-[10px] md:text-sm"
+                                >
+                                  {mailbox.email}
+                                </Text>
+                              </div>
                             </div>
-                            <div className="flex flex-col">
-                              <Text font="bold" className="md:text-sm">
-                                {user.username}
-                              </Text>
-                              <Text
-                                size={"sm"}
-                                color={"primary-500"}
-                                className="text-[10px] md:text-sm"
-                              >
-                                {user.email}
-                              </Text>
-                            </div>
-                          </div>
-                          {user.active && (
-                            <div className="size-6 rounded-full bg-secondary-700 flex items-center justify-center">
-                              <Check className="size-3.5 text-background stroke-[3px]" />
-                            </div>
-                          )}
-                        </DropdownMenuItem>
-                      ))}
+                            {isActive && (
+                              <div className="size-6 rounded-full bg-secondary-700 flex items-center justify-center">
+                                <Check className="size-3.5 text-background stroke-[3px]" />
+                              </div>
+                            )}
+                          </DropdownMenuItem>
+                        );
+                      })}
                     </div>
                   </AccordionContent>
                 </AccordionItem>

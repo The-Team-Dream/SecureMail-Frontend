@@ -1,14 +1,14 @@
-export type MailboxProvider = 'GMAIL' | 'OUTLOOK' | 'IMAP';
+export type MailboxProvider = "GMAIL" | "OUTLOOK" | "IMAP";
 
 export interface Mailbox {
   id: string;
   email: string;
   displayName: string;
   provider: MailboxProvider;
-  status: 'connected' | 'disconnected' | 'syncing' | 'error';
+  status: "connected" | "disconnected" | "syncing" | "error";
   totalEmails: number;
   threatsCount: number;
-  lastSync: string; 
+  lastSync: string;
   pushNotificationsEnabled: boolean;
 }
 
@@ -22,3 +22,10 @@ export interface IMAPConfig {
   smtpHost?: string;
   smtpPort?: number;
 }
+
+export type Mailboxes =
+  | Mailbox[]
+  | {
+      data?: Mailbox[] | { mailboxes?: Mailbox[] };
+      mailboxes?: Mailbox[];
+    };

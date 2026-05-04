@@ -22,6 +22,7 @@ import {
   stats as mailboxStats,
   notifications as mailboxNotifications,
 } from "@/app/(main)/mailboxes/[mailboxId]/analytics/MOCK_DATA";
+import { useGetAuthMe } from "@/APIs/hooks/useAuth";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -49,6 +50,7 @@ interface AnalyticsClientProps {
 const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
   const overviewQuery = useAnalyticsOverview();
   const mailboxQuery = useMailboxStats(mailboxId || "");
+  const { data: user } = useGetAuthMe();
 
   const query = mailboxId ? mailboxQuery : overviewQuery;
   // const { data, isLoading, isError, refetch } = query;
@@ -143,7 +145,7 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
         transition={{ duration: 0.5 }}
       >
         <Text size={"2xl"} font={"medium"}>
-          Good Morning, Mohamed
+          Good Morning, {user?.user?.username || "User"}
         </Text>
       </motion.div>
 

@@ -1,10 +1,9 @@
 "use client";
-
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { KeyRound, Pencil, Shield, ChevronRight, X, Save } from "lucide-react";
-
+import { KeyRound, Pencil, X, Save } from "lucide-react";
+import toast from "react-hot-toast";
 import { Text } from "@/_components/shared/Text";
 import { Input } from "@/_components/shared/Input";
 import { Button } from "@/components/ui/button";
@@ -16,15 +15,19 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ISecurity, securitySchema } from "@/schemas/settings/security";
+import { useSettingsOperations } from "@/APIs/hooks/useUserSettings";
+import { useServerErrors } from "@/utils/form-utils";
+import BackEndError from "@/_components/shared/BackEndError";
 
 const Security = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const { changePassword, isChangingPassword } = useSettingsOperations();
 
   const {
     handleSubmit,
     register,
     reset,
+    setError,
     formState: { errors, isDirty },
     clearErrors,
   } = useForm<ISecurity>({
@@ -33,18 +36,26 @@ const Security = () => {
     resolver: zodResolver(securitySchema),
   });
 
-  const onSubmit: SubmitHandler<ISecurity> = async (data: ISecurity) => {
-    setIsUpdating(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Password Updated Successfully:", data);
-      setIsEditing(false);
-      reset();
-    } catch (error) {
-      console.error("Password change failed:", error);
-    } finally {
-      setIsUpdating(false);
-    }
+  const { handleServerErrors } = useServerErrors<ISecurity>(setError);
+
+  const onSubmit: SubmitHandler<ISecurity> = (data: ISecurity) => {
+    changePassword(
+      { currentPassword: data.currentPassword, newPassword: data.newPassword },
+      {
+        onSuccess: (res) => {
+          toast.success(res?.data?.message || "Password changed successfully");
+          setIsEditing(false);
+          reset();
+        },
+        onError: (error) => {
+          handleServerErrors(error, [
+            "currentPassword",
+            "newPassword",
+            "confirmPassword",
+          ]);
+        },
+      },
+    );
   };
 
   const handleCancel = () => {
@@ -76,7 +87,7 @@ const Security = () => {
                       color={"primary-600"}
                       className="text-[10px] md:text-sm"
                     >
-                      Last changed 3 months ago
+                      Last changed {new Date().toDateString()}
                     </Text>
                   </div>
                 </div>
@@ -85,7 +96,7 @@ const Security = () => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  disabled={isUpdating}
+                  disabled={isChangingPassword}
                   className={`gap-2 transition-all ${
                     isEditing
                       ? "bg-error-500 text-white border-error-200 hover:bg-error-700 group"
@@ -127,7 +138,7 @@ const Security = () => {
                     <Input
                       label="Current Password"
                       type="password"
-                      disabled={isUpdating}
+                      disabled={isChangingPassword}
                       {...register("currentPassword", {
                         onChange: () => clearErrors("currentPassword"),
                       })}
@@ -139,7 +150,7 @@ const Security = () => {
                     <Input
                       label="New Password"
                       type="password"
-                      disabled={isUpdating}
+                      disabled={isChangingPassword}
                       {...register("newPassword", {
                         onChange: () => clearErrors("newPassword"),
                       })}
@@ -151,7 +162,7 @@ const Security = () => {
                     <Input
                       label="Confirm Password"
                       type="password"
-                      disabled={isUpdating}
+                      disabled={isChangingPassword}
                       {...register("confirmPassword", {
                         onChange: () => clearErrors("confirmPassword"),
                       })}
@@ -162,15 +173,23 @@ const Security = () => {
                 </div>
               )}
 
+              {errors.root && (
+                <div className="mt-4">
+                  <BackEndError
+                    error={String(errors.root.message || "An error occurred")}
+                  />
+                </div>
+              )}
+
               {isEditing && (
                 <div className="mt-8 flex justify-end">
                   <Button
                     type="submit"
                     size={"sm"}
-                    disabled={isUpdating || !isDirty}
+                    disabled={isChangingPassword || !isDirty}
                     className="w-max gap-2 px-6"
                   >
-                    {isUpdating ? (
+                    {isChangingPassword ? (
                       <>
                         <Spinner />
                         Saving...

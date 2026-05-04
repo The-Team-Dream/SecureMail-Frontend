@@ -55,7 +55,7 @@ export default function Reports() {
           transition={{ duration: 0.5 }}
         >
           <Text size="xl" font="medium">
-            Good Morning, {user?.name || "Mohamed"}
+            Good Morning, {user?.user?.username || "User"}
           </Text>
         </motion.div>
 

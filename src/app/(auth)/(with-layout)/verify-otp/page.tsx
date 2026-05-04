@@ -24,6 +24,7 @@ function VerifyOtpContent() {
   const router = useRouter();
   const { mutate, isPending } = useVerifyOtp({
     onSuccess: (res) => {
+      console.log(res.data);
       toast.success(res.data.message);
       router.push("/sign-in");
     },

@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pencil, Trash2, X, Save, Loader2, UserRound } from "lucide-react";
+import { Pencil, X, Save, Loader2, UserRound } from "lucide-react";
 import { Text } from "@/_components/shared/Text";
 import { Input } from "@/_components/shared/Input";
 import { Button } from "@/components/ui/button";
@@ -23,14 +23,18 @@ import { Icons } from "@/constants/icons";
 import { useGetAuthMe } from "@/APIs/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { getInitials } from "@/lib/utils";
 
 const PersonalInfo = () => {
   const { data: user } = useGetAuthMe();
-  const { updateProfile } = useSettingsOperations();
+  const { updateProfile, isUpdating } = useSettingsOperations();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [isDeletingImg, setIsDeletingImg] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | undefined>(
+    user?.user?.avatar || undefined,
+  );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const {
     handleSubmit,
     register,
@@ -43,8 +47,8 @@ const PersonalInfo = () => {
     reValidateMode: "onChange",
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      username: user?.username ?? "",
-      email: user?.email ?? "",
+      username: user?.user?.username ?? "",
+      email: user?.user?.email ?? "",
     },
   });
 
@@ -52,35 +56,45 @@ const PersonalInfo = () => {
   useEffect(() => {
     if (user) {
       reset({
-        username: user.username,
-        email: user.email,
+        username: user.user.username,
+        email: user.user.email,
       });
+      if (user.user.avatar) {
+        setProfileImage(user.user.avatar);
+      } else {
+        setProfileImage(undefined);
+      }
+      setSelectedFile(null);
     }
   }, [user, reset]);
 
   const currentValues = watch();
 
   const onSubmit: SubmitHandler<IPersonalInfo> = async (data) => {
-    setIsUpdating(true);
     try {
       const formData = new FormData();
       formData.append("username", data.username);
-      // Append avatar file if a new one was selected
-      const file = fileInputRef.current?.files?.[0];
-      if (file) formData.append("avatar", file);
+      // Append avatar file if a new one was selected (actual File object, NOT a URL)
+      if (selectedFile) formData.append("avatar", selectedFile);
 
       await new Promise<void>((resolve, reject) =>
-        updateProfile(formData, { onSuccess: () => resolve(), onError: (e) => reject(e) })
+        updateProfile(formData, {
+          onSuccess: () => resolve(),
+          onError: (e) => reject(e),
+        }),
       );
 
-      // Invalidate auth-me so Navbar picks up the new name immediately
-      await queryClient.invalidateQueries({ queryKey: ["auth-me"] });
       toast.success("Profile updated successfully!");
       setIsEditing(false);
-    } catch (error) {
-      toast.error("Update failed. Please try again.");
-    } finally {
-      setIsUpdating(false);
+      setSelectedFile(null);
+    } catch (error: any) {
+      const serverMsg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        JSON.stringify(error?.response?.data) ||
+        "Update failed. Please try again.";
+      console.error("[ProfileUpdate] Error:", error?.response?.data ?? error);
+      toast.error(serverMsg);
     }
   };
 
@@ -88,11 +102,10 @@ const PersonalInfo = () => {
     reset();
     clearErrors();
     setIsEditing(false);
+    setSelectedFile(null);
+    setProfileImage(user?.user?.avatar || undefined);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
-
-  const [profileImage, setProfileImage] = useState<string | undefined>(
-    "https://github.com/shadcn.png",
-  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUpdateClick = () => {
@@ -104,6 +117,7 @@ const PersonalInfo = () => {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setProfileImage(imageUrl);
+      setSelectedFile(file);
     }
   };
 
@@ -112,6 +126,7 @@ const PersonalInfo = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       setProfileImage(undefined);
+      setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } finally {
       setIsDeletingImg(false);
@@ -204,25 +219,25 @@ const PersonalInfo = () => {
                   >
                     <AvatarImage src={profileImage} className="object-cover" />
                     <AvatarFallback className="bg-primary-100 text-primary-800">
-                      {currentValues.username?.substring(0, 2).toUpperCase()}
+                      {getInitials(currentValues.username || "")}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="flex gap-4">
                     <button
                       type="button"
-                      disabled={isUpdating || isDeletingImg}
+                      disabled={!isEditing || isUpdating || isDeletingImg}
                       onClick={handleUpdateClick}
-                      className="text-info-600 text-sm hover:underline font-medium disabled:text-primary-400"
+                      className="text-info-600 text-sm hover:underline font-medium disabled:text-primary-400 disabled:cursor-not-allowed"
                     >
                       Update
                     </button>
 
                     <button
                       type="button"
-                      disabled={isUpdating || isDeletingImg}
+                      disabled={!isEditing || isUpdating || isDeletingImg}
                       onClick={handleDeleteImage}
-                      className="flex items-center gap-1 text-sm text-error-500 hover:underline font-medium disabled:text-primary-400 cursor-pointer"
+                      className="flex items-center gap-1 text-sm text-error-500 hover:underline font-medium disabled:text-primary-400 disabled:cursor-not-allowed cursor-pointer"
                     >
                       {isDeletingImg ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -295,7 +310,7 @@ const PersonalInfo = () => {
                   <Button
                     type="submit"
                     size={"sm"}
-                    disabled={isUpdating || !isDirty}
+                    disabled={isUpdating || (!isDirty && !selectedFile)}
                     className="w-max gap-2 px-6"
                   >
                     {isUpdating ? (

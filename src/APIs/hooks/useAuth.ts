@@ -70,10 +70,10 @@ export const useVerifyOtp = (
   });
 };
 export const useResendOtp = (
-  options?: UseMutationOptions<VerifyOtpResponse, AxiosError, ResendOtpData>,
+  options?: UseMutationOptions<any, AxiosError, ResendOtpData>,
 ) => {
   const queryClient = useQueryClient();
-  return useMutation<VerifyOtpResponse, AxiosError, ResendOtpData>({
+  return useMutation<any, AxiosError, ResendOtpData>({
     mutationFn: resendOtp,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["auth-me"] });

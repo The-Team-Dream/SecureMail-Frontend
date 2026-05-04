@@ -100,6 +100,6 @@ export default function Mailboxes() {
           onSuccess={handleAccountAdded}
         />
       )}
-    </>
+    </>  
   );
 }
