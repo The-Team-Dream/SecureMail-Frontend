@@ -41,7 +41,7 @@ export function useAddAccountWizard({
     mode: "onBlur",
     defaultValues: {
       mailboxName: "",
-      emailAddress: "",
+      mailboxEmail: "",
       imapHost: "",
       imapPort: "",
       imapSecurity: "SSL/TLS",
@@ -123,7 +123,7 @@ export function useAddAccountWizard({
 
   const validateStep = async () => {
     let fieldsToValidate: (keyof WizardFormData)[] = [];
-    if (step === 1) fieldsToValidate = ["mailboxName"];
+    if (step === 1) fieldsToValidate = ["mailboxName", "mailboxEmail"];
     if (step === 2)
       fieldsToValidate = [
         "imapHost",

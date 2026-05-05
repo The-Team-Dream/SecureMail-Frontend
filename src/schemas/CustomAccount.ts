@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const stepProviderSchema = z.object({
   mailboxName: z.string().min(1, "Mailbox Name is required"),
-  emailAddress: z.string().optional(),
+  mailboxEmail: z.string().email().min(1, "Mailbox Email is required"),
 });
 // Step 1
 export const stepIMAPSchema = z.object({
@@ -15,11 +15,11 @@ export const stepIMAPSchema = z.object({
     .trim()
     .min(3, { message: "Username must be between 3 and 20 characters" })
     .max(20, { message: "Username must be between 3 and 20 characters" }),
-  imapPassword:  z
-      .string()
-      .min(1, { message: "Password is required" })
-      .min(8, { message: "Password must be between 8 and 32 characters" })
-      .max(32, { message: "Password must be between 8 and 32 characters" }),
+  imapPassword: z
+    .string()
+    .min(1, { message: "Password is required" })
+    .min(8, { message: "Password must be between 8 and 32 characters" })
+    .max(32, { message: "Password must be between 8 and 32 characters" }),
 });
 // Step 2
 export const stepSMTPSchema = z.object({
@@ -32,11 +32,11 @@ export const stepSMTPSchema = z.object({
     .trim()
     .min(3, { message: "Username must be between 3 and 20 characters" })
     .max(20, { message: "Username must be between 3 and 20 characters" }),
-  smtpPassword:  z
-      .string()
-      .min(1, { message: "Password is required" })
-      .min(8, { message: "Password must be between 8 and 32 characters" })
-      .max(32, { message: "Password must be between 8 and 32 characters" }),
+  smtpPassword: z
+    .string()
+    .min(1, { message: "Password is required" })
+    .min(8, { message: "Password must be between 8 and 32 characters" })
+    .max(32, { message: "Password must be between 8 and 32 characters" }),
 });
 // Step 3
 export const stepAdvancedSchema = z.object({

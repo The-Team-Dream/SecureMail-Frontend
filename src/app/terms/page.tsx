@@ -4,18 +4,26 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ShieldCheck, Lock, FileText, Scale } from "lucide-react";
+import { Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/_components/shared/Text";
 import PublicNavbar from "@/_components/shared/PublicNavbar";
 import { Spinner } from "@/components/ui/spinner";
 import { Icons } from "@/constants/icons";
+import Error from "@/_components/shared/Error";
 
 const TermsPage = () => {
   const router = useRouter();
+  const [isAgreed, setIsAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleAgree = () => {
+    if (!isAgreed) {
+      setError("agreement is required");
+      return;
+    }
+    setError("");
     setIsLoading(true);
     setTimeout(() => {
       router.push("/sign-up");
@@ -56,10 +64,7 @@ const TermsPage = () => {
 
   return (
     <main className="min-h-screen bg-background pb-20">
-      <PublicNavbar
-        backLink="/sign-up"
-        backLabel="Back to Sign Up"
-      />
+      <PublicNavbar backLink="/sign-up" backLabel="Back to Sign Up" />
 
       {/* Hero Section */}
       <section className="relative py-20 pt-32 px-6 overflow-hidden">
@@ -102,7 +107,7 @@ const TermsPage = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 * index + 0.3 }}
-              className="group p-6 rounded-2xl bg-primary-100/5 border border-primary-100/10 hover:border-secondary-500/30 transition-all duration-300"
+              className="group p-6 rounded-2xl bg-primary-100/5 border border-primary-100/10 hover:border-primary-500/30 transition-all duration-300"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-lg bg-primary-800/10 group-hover:bg-primary-500/20 transition-colors">
@@ -117,17 +122,28 @@ const TermsPage = () => {
               </Text>
             </motion.div>
           ))}
-          <label
-            htmlFor="agree"
-            className="flex items-center gap-2 accent-[#87BE00]"
-          >
-            <input type="checkbox" id="agree" />I agree to the terms and
-            conditions
-          </label>
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="agree"
+              className="flex items-center gap-2 accent-[#87BE00] cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                id="agree"
+                checked={isAgreed}
+                onChange={(e) => {
+                  setIsAgreed(e.target.checked);
+                  if (e.target.checked) setError("");
+                }}
+              />
+              I agree to the terms and conditions
+            </label>
+            {error && <Error error={error} />}
+          </div>
           <Button
             onClick={handleAgree}
             disabled={isLoading}
-            className="font-bold px-8 py-3 h-auto text-lg shadow-[0_0_20px_rgba(0,0,0,0.2)]"
+            className="px-8 py-3 h-auto text-lg shadow-[0_0_20px_rgba(0,0,0,0.2)]"
           >
             {isLoading ? (
               <>

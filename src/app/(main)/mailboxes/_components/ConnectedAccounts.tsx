@@ -81,12 +81,16 @@ export function ConnectedAccounts({
   //   return <ConnectedAccountsSkeleton />;
   // }
 
-  // if (isError) return <StateMessage
-  //   variant='error'
-  //   title='Failed to load mailboxes'
-  //   description='Failed to load mailboxes'
-  //   onRetry={() => refetch()}
-  // />
+  // if (isError)
+  //   return (
+  //     <StateMessage
+  //       variant="error"
+  //       title="Failed to load mailboxes"
+  //       description="Failed to load mailboxes"
+  //       onRetry={() => refetch()}
+  //       className="h-screen"
+  //     />
+  //   );
   return (
     <Container>
       <motion.div

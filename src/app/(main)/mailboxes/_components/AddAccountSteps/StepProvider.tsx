@@ -32,17 +32,31 @@ export function StepProvider({
       </Text>
 
       <div className="w-full flex flex-col gap-8 text-left">
-        <Input
-          label="Mailbox Name"
-          required
-          placeholder="Mailbox Name"
-          {...(register
-            ? register("mailboxName", {
-                onChange: () => clearErrors?.("mailboxName"),
-              })
-            : {})}
-          error={errors?.mailboxName?.message}
-        />
+        <div className="flex flex-col md:flex-row gap-4 ">
+          <Input
+            label="Mailbox Name"
+            required
+            placeholder="Mailbox Name"
+            {...(register
+              ? register("mailboxName", {
+                  onChange: () => clearErrors?.("mailboxName"),
+                })
+              : {})}
+            error={errors?.mailboxName?.message}
+          />
+          <Input
+            label="Email"
+            required
+            type="email"
+            placeholder="Email"
+            {...(register
+              ? register("mailboxEmail", {
+                  onChange: () => clearErrors?.("mailboxEmail"),
+                })
+              : {})}
+            error={errors?.mailboxEmail?.message}
+          />
+        </div>
 
         <div className="w-full">
           <label className="block text-sm text-primary-400 mb-1">

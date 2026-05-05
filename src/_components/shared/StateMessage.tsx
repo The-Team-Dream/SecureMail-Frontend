@@ -2,6 +2,7 @@ import { LucideIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Text } from "./Text";
 import { Icons } from "@/constants/icons";
+import { cn } from "@/lib/utils";
 
 interface StateMessageProps {
   title: string;
@@ -22,7 +23,6 @@ export const StateMessage = ({
   actionText = "Try Again",
   className,
 }: StateMessageProps) => {
-  
   const variants = {
     error: "bg-error-50 text-error-600 border-error-100",
     empty: "bg-primary-50 text-primary-400 border-primary-100",
@@ -30,24 +30,34 @@ export const StateMessage = ({
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-[calc(100vh-100px)] p-8 text-center transition-all ${className}`}>
+    <div
+      className={cn(
+        `flex flex-col items-center justify-center w-full p-8 text-center transition-all`,
+        className,
+      )}
+    >
       {/* Icon Container */}
-      <div className={`flex items-center justify-center w-16 h-16 mb-4 rounded-full ${variants[variant]}`}>
+      <div
+        className={`flex items-center justify-center w-16 h-16 mb-4 rounded-full ${variants[variant]}`}
+      >
         <Icon size={32} />
       </div>
 
       {/* Content */}
-      <Text size="xl" font="bold" className="mb-2">{title}</Text>
-      <Text size="sm" color="primary-500" font="medium" className="max-w-[320px] mb-6 leading-relaxed">
+      <Text size="xl" font="bold" className="mb-2">
+        {title}
+      </Text>
+      <Text
+        size="sm"
+        color="primary-500"
+        font="medium"
+        className="max-w-[320px] mb-6 leading-relaxed"
+      >
         {description}
-
       </Text>
 
       {onRetry && (
-        <Button 
-          onClick={onRetry}
-          variant="outline"
-        >
+        <Button onClick={onRetry} variant="outline">
           <Icons.Refresh size={14} className="text-primary" />
           {actionText}
         </Button>

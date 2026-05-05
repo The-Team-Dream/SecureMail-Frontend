@@ -58,7 +58,7 @@ export default function Mailboxes() {
   const handleAccountAdded = (data: WizardFormData, provider: string) => {
     const newAccount: Mailbox = {
       id: Date.now().toString(),
-      email: data.emailAddress || data.mailboxName,
+      email: data.mailboxEmail || data.mailboxName,
       displayName: data.mailboxName,
       provider: normalizeProvider(provider),
       totalEmails: 0,

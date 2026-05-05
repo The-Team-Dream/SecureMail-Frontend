@@ -6,22 +6,25 @@ import { AnalyticsSkeleton } from "@/_components/skeleton/AnalyticsSkeleton";
 import {
   useAnalyticsOverview,
   useMailboxStats,
+  useActivityStats,
 } from "@/APIs/hooks/useAnalytics";
+import { useNotifications } from "@/APIs/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { StateMessage } from "@/_components/shared/StateMessage";
+import { StatItem, NotificationItem } from "@/types/analytics";
 import {
-  stats as generalStats,
-  notifications as generalNotifications,
-  StatItem,
-  NotificationItem,
-} from "@/types/analytics";
+  Mail,
+  ShieldCheck,
+  ShieldAlert,
+  TrendingUp,
+  TrendingDown,
+  CircleX,
+  AlertTriangle,
+  Info,
+} from "lucide-react";
 
-import {
-  stats as mailboxStats,
-  notifications as mailboxNotifications,
-} from "@/app/(main)/mailboxes/[mailboxId]/analytics/MOCK_DATA";
 import { useGetAuthMe } from "@/APIs/hooks/useAuth";
 
 const containerVariants = {
@@ -48,53 +51,237 @@ interface AnalyticsClientProps {
 }
 
 const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
-  const overviewQuery = useAnalyticsOverview();
-  const mailboxQuery = useMailboxStats(mailboxId || "");
   const { data: user } = useGetAuthMe();
 
-  const query = mailboxId ? mailboxQuery : overviewQuery;
-  // const { data, isLoading, isError, refetch } = query;
+  // Mock Data mimicking Backend structure
+  const MOCK_OVERVIEW_DATA = {
+    totalMailboxes: 8,
+    totalEmailsScanned: 24582,
+    totalThreatsBlocked: 1482,
+    phishingDetected: 642,
+    malwareDetected: 840,
+    safetyScore: 98,
+  };
 
-  const stats = mailboxId ? mailboxStats : generalStats;
-  const notifications = mailboxId ? mailboxNotifications : generalNotifications;
+  const MOCK_MAILBOX_DATA = {
+    mailboxId: mailboxId || "mock-id",
+    emailCount: 1240,
+    threatsHistory: Array.from({ length: 7 }, (_, i) => ({
+      date: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toISOString(),
+      count: Math.floor(Math.random() * 20) + 5,
+    })),
+    topThreatTypes: [
+      { type: "Spam Detection", value: 85 },
+      { type: "Phishing Attempts", value: 42 },
+      { type: "Malware Blocks", value: 12 },
+    ],
+  };
 
-  // Analytics Chart Overview
-  const generalChartData = [
-    { month: "Jul", spam: 45, phishing: 30 },
-    { month: "Aug", spam: 52, phishing: 25 },
-    { month: "Sep", spam: 48, phishing: 35 },
-    { month: "Oct", spam: 70, phishing: 20 },
-    { month: "Nov", spam: 40, phishing: 55 },
-    { month: "Dec", spam: 35, phishing: 45 },
-    { month: "Jan", spam: 50, phishing: 40 },
-    { month: "Feb", spam: 65, phishing: 30 },
-  ];
-  // Mailbox Chart Overview
-  const mailboxChartData = [
-    { month: "Jul", spam: 5, phishing: 10 },
-    { month: "Aug", spam: 7, phishing: 15 },
-    { month: "Sep", spam: 8, phishing: 10 },
-    { month: "Oct", spam: 2, phishing: 12 },
-    { month: "Nov", spam: 8, phishing: 12 },
-    { month: "Dec", spam: 12, phishing: 9 },
-    { month: "Jan", spam: 4, phishing: 16 },
-    { month: "Feb", spam: 16, phishing: 14 },
-  ];
+  const MOCK_ACTIVITY_DATA = Array.from({ length: 8 }, (_, i) => ({
+    timestamp: new Date(
+      Date.now() - (7 - i) * 24 * 60 * 60 * 1000,
+    ).toISOString(),
+    sent: Math.floor(Math.random() * 100) + 50,
+    received: Math.floor(Math.random() * 200) + 100,
+    blocked: Math.floor(Math.random() * 30) + 5,
+  }));
 
-  const chartData = mailboxId ? mailboxChartData : generalChartData;
-  const spamCount = mailboxId ? "105" : "8,429";
-  const phishingCount = mailboxId ? "131" : "4,053";
+  const MOCK_NOTIFICATIONS_DATA = {
+    data: [
+      {
+        id: 1,
+        title: "Unauthorized Access Attempt",
+        message: "IP: 192.168.1.254 • Location: Unknown",
+        type: "error" as const,
+        category: "threats" as const,
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 2,
+        title: "SSL Certificate Renewed",
+        message: "Domain: secure.mail-service.io",
+        type: "info" as const,
+        category: "system" as const,
+        isRead: true,
+        createdAt: new Date(Date.now() - 3600000).toISOString(),
+      },
+      {
+        id: 3,
+        title: "Policy Update Detected",
+        message: "Filter: Restricted Attachments",
+        type: "warning" as const,
+        category: "updates" as const,
+        isRead: false,
+        createdAt: new Date(Date.now() - 7200000).toISOString(),
+      },
+    ],
+    total: 3,
+    page: 1,
+    totalPages: 1,
+  };
 
-  // if (isLoading) return <AnalyticsSkeleton />;
-  // if (isError)
-  //   return (
-  //     <StateMessage
-  //       variant="error"
-  //       title="Analytics Interrupted"
-  //       description="Can not load analytics data right now."
-  //       onRetry={() => refetch()}
-  //     />
-  //   );
+  // Uncomment hooks when ready to link
+  /*
+  const { data: overviewData, isLoading: isOverviewLoading, isError: isOverviewError, refetch: refetchOverview } = useAnalyticsOverview();
+  const { data: mailboxData, isLoading: isMailboxLoading, isError: isMailboxError, refetch: refetchMailbox } = useMailboxStats(mailboxId || "");
+  const { data: activityData, isLoading: isActivityLoading } = useActivityStats('weekly');
+  const { data: notificationsData, isLoading: isNotificationsLoading } = useNotifications(1);
+  */
+
+  // Using Mock Data instead of API hooks
+  const overviewData = MOCK_OVERVIEW_DATA;
+  const mailboxData = mailboxId ? MOCK_MAILBOX_DATA : null;
+  const activityData = MOCK_ACTIVITY_DATA;
+  const notificationsData = MOCK_NOTIFICATIONS_DATA;
+
+  const isLoading = false; // Set to true to test skeletons
+  const isError = false;
+  const refetch = () => console.log("Refetching...");
+
+  if (isLoading) return <AnalyticsSkeleton />;
+
+  if (isError)
+    return (
+      <StateMessage
+        variant="error"
+        title="Analytics Interrupted"
+        description="Can not load analytics data right now."
+        onRetry={() => refetch()}
+        className="h-screen"
+      />
+    );
+
+  // Stats Mapping Logic
+  let stats: StatItem[] = [];
+  if (mailboxId && mailboxData) {
+    const totalThreats = mailboxData.topThreatTypes.reduce(
+      (acc, curr) => acc + curr.value,
+      0,
+    );
+    stats = [
+      {
+        id: 1,
+        title: "Mailbox Emails",
+        value: mailboxData.emailCount.toLocaleString(),
+        type: "healthy",
+        icon: Mail,
+        description: "Total emails in this mailbox",
+      },
+      {
+        id: 2,
+        title: "Threats Detected",
+        value: totalThreats.toLocaleString(),
+        change: "Active",
+        type: "decrease",
+        icon: ShieldAlert,
+        description: "Security incidents found",
+      },
+      {
+        id: 3,
+        title: "Top Threat Type",
+        value: mailboxData.topThreatTypes[0]?.type || "None",
+        status: "Identified",
+        type: "healthy",
+        icon: TrendingUp,
+        description: "Most frequent threat vector",
+      },
+    ];
+  } else if (overviewData) {
+    stats = [
+      {
+        id: 1,
+        title: "Total Emails Scanned",
+        value: overviewData.totalEmailsScanned.toLocaleString(),
+        type: "healthy",
+        icon: Mail,
+        description: "Across all active mailboxes",
+      },
+      {
+        id: 2,
+        title: "Threats Blocked",
+        value: overviewData.totalThreatsBlocked.toLocaleString(),
+        change: `${((overviewData.totalThreatsBlocked / (overviewData.totalEmailsScanned || 1)) * 100).toFixed(1)}%`,
+        type: "increase",
+        icon: ShieldAlert,
+        description: "Detection rate ratio",
+      },
+      {
+        id: 3,
+        title: "Safety Score",
+        value: `${overviewData.safetyScore}%`,
+        status: overviewData.safetyScore > 80 ? "Stable" : "Critical",
+        type: overviewData.safetyScore > 80 ? "healthy" : "decrease",
+        icon: ShieldCheck,
+        description: "Overall system health",
+      },
+    ];
+  }
+
+  // Chart Data Mapping
+  let chartData: any = [];
+  if (mailboxId && mailboxData) {
+    chartData = mailboxData.threatsHistory.map((item) => ({
+      month: new Date(item.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      spam: item.count,
+      phishing: Math.floor(item.count * 0.4), // Mocking phishing split if not provided
+    }));
+  } else if (activityData) {
+    chartData = activityData.map((item: any) => ({
+      month: new Date(item.timestamp).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      spam: item.blocked || 0,
+      phishing: item.received || 0,
+    }));
+  }
+
+  const spamCount = mailboxId
+    ? (
+        mailboxData?.topThreatTypes.find((t) =>
+          t.type.toLowerCase().includes("spam"),
+        )?.value || 0
+      ).toLocaleString()
+    : overviewData?.malwareDetected.toLocaleString() || "0";
+
+  const phishingCount = mailboxId
+    ? (
+        mailboxData?.topThreatTypes.find((t) =>
+          t.type.toLowerCase().includes("phishing"),
+        )?.value || 0
+      ).toLocaleString()
+    : overviewData?.phishingDetected.toLocaleString() || "0";
+
+  // Notifications Mapping
+  const notifications: NotificationItem[] = (notificationsData?.data || [])
+    .slice(0, 3)
+    .map((n, idx) => ({
+      id: n.id,
+      title: n.title,
+      subtitle: n.message,
+      time: new Date(n.createdAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      severity:
+        n.type === "error" ? "HIGH" : n.type === "warning" ? "MEDIUM" : "INFO",
+      type:
+        n.type === "error"
+          ? "error"
+          : n.type === "warning"
+            ? "warning"
+            : "info",
+      icon:
+        n.type === "error"
+          ? CircleX
+          : n.type === "warning"
+            ? AlertTriangle
+            : Info,
+    }));
 
   const severityConfig: Record<
     string,

@@ -1,13 +1,10 @@
 "use client";
-
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-
 import { getOAuthLoginUrl } from "@/APIs/features/auth";
 import { SocialAuthButton } from "./SocialAuthButton";
 
 const SocialAuthWrapper = () => {
-
   const router = useRouter();
 
   useEffect(() => {
@@ -15,7 +12,10 @@ const SocialAuthWrapper = () => {
       // In a real app, verify the origin here if needed
       if (event.data?.type === "OAUTH_SUCCESS" && event.data?.token) {
         import("js-cookie").then((Cookies) => {
-          Cookies.default.set("token", event.data.token, { path: "/", expires: 1 });
+          Cookies.default.set("token", event.data.token, {
+            path: "/",
+            expires: 1,
+          });
           router.push("/mailboxes");
         });
       }
@@ -27,17 +27,17 @@ const SocialAuthWrapper = () => {
 
   const handleOAuthClick = (provider: "google" | "outlook") => {
     const url = getOAuthLoginUrl(provider);
-    
+
     // Open a popup window centered on the screen
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
-    
+
     window.open(
       url,
       "OAuthLogin",
-      `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
+      `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
     );
   };
 
@@ -55,7 +55,6 @@ const SocialAuthWrapper = () => {
           title="Google"
           iconSrc="/icons/google.svg"
           onClick={() => handleOAuthClick("google")}
-          // isLoading={oauthLoginMutation.isPending}
         />
       </div>
     </div>

@@ -1,4 +1,3 @@
-import React from "react";
 import { Text } from "./Text";
 import { CircleAlert } from "lucide-react";
 import { errorVariants } from "./Input";
@@ -20,8 +19,8 @@ const Error = ({ error }: { error: string | undefined }) => {
           }}
           className="flex items-center gap-2 text-error mt-1"
         >
-          <CircleAlert className="w-4 h-4" />
-          <Text as={"span"} font={"medium"} size={"sm"} color={"error"}>
+          <CircleAlert className="w-4 h-4 text-error-500" />
+          <Text as={"span"} font={"medium"} size={"sm"} color={"error-500"}>
             {error}
           </Text>
         </motion.div>

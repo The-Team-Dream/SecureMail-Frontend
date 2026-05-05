@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Check, Plus } from "lucide-react";
+import { Bell, Check, ChevronRight, Plus } from "lucide-react";
 import Logo from "./Logo";
 import { Text } from "./Text";
 import { Button } from "@/components/ui/button";
@@ -143,7 +143,16 @@ export const Navbar = () => {
             <div>
               <Accordion type="single" collapsible defaultValue="accounts">
                 <AccordionItem value="accounts" className="border-none">
-                  <AccordionTrigger className="cursor-pointer bg-background rounded-tl-lg rounded-tr-lg p-4 mb-1">
+                  <AccordionTrigger
+                    className="cursor-pointer bg-background rounded-tl-lg rounded-tr-lg p-4 mb-1"
+                    icon={
+                      mailboxes.length === 0 ? (
+                        <ChevronRight className="size-4 text-primary" />
+                      ) : undefined
+                    }
+                    rotateIcon={mailboxes.length !== 0}
+                    disabled={mailboxes.length === 0}
+                  >
                     <Text font="semiBold" size="sm" color="primary-950">
                       Switch Account
                     </Text>

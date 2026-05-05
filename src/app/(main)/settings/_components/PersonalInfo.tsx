@@ -24,9 +24,11 @@ import { useGetAuthMe } from "@/APIs/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { getInitials } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PersonalInfoSkeleton } from "@/_components/skeleton/PersonalInfoSkeleton";
 
 const PersonalInfo = () => {
-  const { data: user } = useGetAuthMe();
+  const { data: user, isLoading } = useGetAuthMe();
   const { updateProfile, isUpdating } = useSettingsOperations();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -142,193 +144,202 @@ const PersonalInfo = () => {
           </Text>
         </AccordionTrigger>
         <AccordionContent>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="border border-primary-100 py-4 px-6 md:py-6 md:px-8 rounded-lg">
-              {/* Header Section */}
-              <div className="flex justify-between items-start mb-10">
-                <div className="flex items-center gap-2 md:gap-4">
-                  <UserRound className="shrink-0 w-8 h-8 text-primary" />
-                  <div>
-                    <Text size={"lg"} color={"primary-950"} font="medium">
-                      Profile
-                    </Text>
-                    <Text
-                      color={"primary-600"}
-                      className="text-[10px] md:text-sm"
-                    >
-                      Update your name and profile photo
-                    </Text>
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={isUpdating}
-                  className={`gap-2 transition-all ${
-                    isEditing
-                      ? "bg-error-500 text-white border-error-200 hover:bg-error-700 group"
-                      : "bg-transparent border-primary-100"
-                  }`}
-                  onClick={isEditing ? handleCancel : () => setIsEditing(true)}
-                >
-                  {isEditing ? (
-                    <>
-                      <X className="w-4 h-4 text-white" />
-                      <Text
-                        as={"span"}
-                        font={"medium"}
-                        className="text-white hidden sm:inline"
-                      >
-                        Cancel Editing
+          {isLoading ? (
+            <PersonalInfoSkeleton />
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="border border-primary-100 py-4 px-6 md:py-6 md:px-8 rounded-lg">
+                {/* Header Section */}
+                <div className="flex justify-between items-start mb-10">
+                  <div className="flex items-center gap-2 md:gap-4">
+                    <UserRound className="shrink-0 w-8 h-8 text-primary" />
+                    <div>
+                      <Text size={"lg"} color={"primary-950"} font="medium">
+                        Profile
                       </Text>
-                    </>
-                  ) : (
-                    <>
-                      <Pencil className="w-4 h-4 text-primary-800" />
                       <Text
-                        as={"span"}
-                        color={"primary-800"}
-                        font={"medium"}
-                        className="hidden sm:inline"
+                        color={"primary-600"}
+                        className="text-[10px] md:text-sm"
                       >
-                        Edit
+                        Update your name and profile photo
                       </Text>
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* Profile Picture */}
-              <div className="mt-4 flex flex-col gap-4 md:flex-row items-start md:items-center justify-between max-w-md">
-                <Text size={"sm"} color={"primary-500"}>
-                  Profile Picture
-                </Text>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-
-                <div className="flex items-center gap-6">
-                  <Avatar
-                    className={`w-16 h-16 ${isDeletingImg ? "opacity-40" : ""}`}
-                  >
-                    <AvatarImage src={profileImage} className="object-cover" />
-                    <AvatarFallback className="bg-primary-100 text-primary-800">
-                      {getInitials(currentValues.username || "")}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="flex gap-4">
-                    <button
-                      type="button"
-                      disabled={!isEditing || isUpdating || isDeletingImg}
-                      onClick={handleUpdateClick}
-                      className="text-info-600 text-sm hover:underline font-medium disabled:text-primary-400 disabled:cursor-not-allowed"
-                    >
-                      Update
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={!isEditing || isUpdating || isDeletingImg}
-                      onClick={handleDeleteImage}
-                      className="flex items-center gap-1 text-sm text-error-500 hover:underline font-medium disabled:text-primary-400 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      {isDeletingImg ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <>
-                          Delete{" "}
-                          <Icons.Delete className="w-4 h-4 text-error-500" />
-                        </>
-                      )}
-                    </button>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Info Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
-                {/* Full Name */}
-                <div className="flex flex-col gap-1">
-                  <Text size={"sm"} color={"primary-500"}>
-                    Full Name
-                  </Text>
-                  {isEditing ? (
-                    <Input
-                      {...register("username", {
-                        onChange: () => {
-                          if (errors.username) {
-                            clearErrors("username");
-                          }
-                        },
-                      })}
-                      placeholder="Your Name"
-                      error={errors.username?.message}
-                      disabled={isUpdating}
-                    />
-                  ) : (
-                    <Text size={"sm"} color={"primary-950"} font={"medium"}>
-                      {currentValues.username}
-                    </Text>
-                  )}
-                </div>
-
-                {/* Email */}
-                <div className="flex flex-col gap-1">
-                  <Text size={"sm"} color={"primary-500"}>
-                    Email address
-                  </Text>
-                  {isEditing ? (
-                    <Input
-                      {...register("email", {
-                        onChange: () => {
-                          if (errors.email) {
-                            clearErrors("email");
-                          }
-                        },
-                      })}
-                      placeholder="email@example.com"
-                      error={errors.email?.message}
-                      disabled={isUpdating}
-                    />
-                  ) : (
-                    <Text size={"sm"} color={"primary-950"} font={"medium"}>
-                      {currentValues.email}
-                    </Text>
-                  )}
-                </div>
-              </div>
-
-              {isEditing && (
-                <div className="mt-8 flex justify-end">
                   <Button
-                    type="submit"
-                    size={"sm"}
-                    disabled={isUpdating || (!isDirty && !selectedFile)}
-                    className="w-max gap-2 px-6"
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isUpdating}
+                    className={`gap-2 transition-all ${
+                      isEditing
+                        ? "bg-error-500 text-white border-error-200 hover:bg-error-700 group"
+                        : "bg-transparent border-primary-100"
+                    }`}
+                    onClick={
+                      isEditing ? handleCancel : () => setIsEditing(true)
+                    }
                   >
-                    {isUpdating ? (
+                    {isEditing ? (
                       <>
-                        <Spinner />
-                        Saving...
+                        <X className="w-4 h-4 text-white" />
+                        <Text
+                          as={"span"}
+                          font={"medium"}
+                          className="text-white hidden sm:inline"
+                        >
+                          Cancel Editing
+                        </Text>
                       </>
                     ) : (
                       <>
-                        <Save className="w-4 h-4" />
-                        Save Changes
+                        <Pencil className="w-4 h-4 text-primary-800" />
+                        <Text
+                          as={"span"}
+                          color={"primary-800"}
+                          font={"medium"}
+                          className="hidden sm:inline"
+                        >
+                          Edit
+                        </Text>
                       </>
                     )}
                   </Button>
                 </div>
-              )}
-            </div>
-          </form>
+
+                {/* Profile Picture */}
+                <div className="mt-4 flex flex-col gap-4 md:flex-row items-start md:items-center justify-between max-w-md">
+                  <Text size={"sm"} color={"primary-500"}>
+                    Profile Picture
+                  </Text>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+
+                  <div className="flex items-center gap-6">
+                    <Avatar
+                      className={`w-16 h-16 ${isDeletingImg ? "opacity-40" : ""}`}
+                    >
+                      <AvatarImage
+                        src={profileImage}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-primary-100 text-primary-800">
+                        {getInitials(currentValues.username || "")}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex gap-4">
+                      <button
+                        type="button"
+                        disabled={!isEditing || isUpdating || isDeletingImg}
+                        onClick={handleUpdateClick}
+                        className="text-info-600 text-sm hover:underline font-medium disabled:text-primary-400 disabled:cursor-not-allowed"
+                      >
+                        Update
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={!isEditing || isUpdating || isDeletingImg}
+                        onClick={handleDeleteImage}
+                        className="flex items-center gap-1 text-sm text-error-500 hover:underline font-medium disabled:text-primary-400 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        {isDeletingImg ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <>
+                            Delete{" "}
+                            <Icons.Delete className="w-4 h-4 text-error-500" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+                  {/* Full Name */}
+                  <div className="flex flex-col gap-1">
+                    <Text size={"sm"} color={"primary-500"}>
+                      Full Name
+                    </Text>
+                    {isEditing ? (
+                      <Input
+                        {...register("username", {
+                          onChange: () => {
+                            if (errors.username) {
+                              clearErrors("username");
+                            }
+                          },
+                        })}
+                        placeholder="Your Name"
+                        error={errors.username?.message}
+                        disabled={isUpdating}
+                      />
+                    ) : (
+                      <Text size={"sm"} color={"primary-950"} font={"medium"}>
+                        {currentValues.username}
+                      </Text>
+                    )}
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex flex-col gap-1">
+                    <Text size={"sm"} color={"primary-500"}>
+                      Email address
+                    </Text>
+                    {isEditing ? (
+                      <Input
+                        {...register("email", {
+                          onChange: () => {
+                            if (errors.email) {
+                              clearErrors("email");
+                            }
+                          },
+                        })}
+                        placeholder="email@example.com"
+                        error={errors.email?.message}
+                        disabled={isUpdating}
+                      />
+                    ) : (
+                      <Text size={"sm"} color={"primary-950"} font={"medium"}>
+                        {currentValues.email}
+                      </Text>
+                    )}
+                  </div>
+                </div>
+
+                {isEditing && (
+                  <div className="mt-8 flex justify-end">
+                    <Button
+                      type="submit"
+                      size={"sm"}
+                      disabled={isUpdating || (!isDirty && !selectedFile)}
+                      className="w-max gap-2 px-6"
+                    >
+                      {isUpdating ? (
+                        <>
+                          <Spinner />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          Save Changes
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </form>
+          )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>

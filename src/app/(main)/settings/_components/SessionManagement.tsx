@@ -9,19 +9,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Laptop, Smartphone } from "lucide-react";
 import { useSessions } from "@/APIs/hooks/useSessions";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import dayjs from "dayjs";
+import { StateMessage } from "@/_components/shared/StateMessage";
+
+const SessionSkeleton = () => (
+  <div className="flex flex-col gap-3 w-full mt-6">
+    {[1, 2, 3].map((i) => (
+      <div
+        key={i}
+        className="flex items-center justify-between p-4 bg-primary-50 rounded-sm animate-pulse"
+      >
+        <div className="flex items-center gap-4 w-full">
+          <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 rounded-full shrink-0 bg-primary-100" />
+          <div className="flex flex-col gap-2 w-full max-w-[200px]">
+            <Skeleton className="h-4 w-3/4 bg-primary-100" />
+            <Skeleton className="h-3 w-1/2 bg-primary-100" />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const SessionManagement = () => {
   const { sessions, isLoading, revokeSession, revokeOthers } = useSessions();
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Spinner />
-      </div>
-    );
-  }
   return (
     <Accordion type="single" collapsible defaultValue="item-1">
       <AccordionItem value="item-1">
@@ -47,17 +60,21 @@ const SessionManagement = () => {
             {/* Device List */}
             <div className="flex flex-col gap-3 w-full mt-6">
               {isLoading ? (
-                <div className="flex justify-center py-8">
-                  <Spinner />
-                </div>
+                <SessionSkeleton />
               ) : !Array.isArray(sessions) ? (
-                <div className="flex justify-center py-8 text-error-500">
-                  <Text>Error: Invalid data format received from server.</Text>
-                </div>
+                <StateMessage
+                  variant="error"
+                  title="Session retrieval failed"
+                  description="Unable to retrieve sessions. Please try again later."
+                  className="h-auto py-10"
+                />
               ) : sessions.length === 0 ? (
-                <div className="flex justify-center py-8 text-primary-500">
-                  <Text>No active sessions found.</Text>
-                </div>
+                <StateMessage
+                  variant="empty"
+                  title="No active sessions found"
+                  description="You are currently logged in on this device only."
+                  className="h-auto py-10"
+                />
               ) : (
                 sessions.map((device) => {
                   const isCurrent = device.isCurrent;
