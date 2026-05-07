@@ -6,14 +6,13 @@ import { ConnectedAccounts } from "./_components/ConnectedAccounts";
 import { AddAccountWizard } from "./_components/AddAccountWizard";
 import { EmptyMailbox } from "./_components/EmptyMailbox";
 import { useMailboxes } from "@/APIs/hooks/useMailboxes";
-import { Spinner } from "@/components/ui/spinner";
+import { ConnectedAccountsSkeleton } from "@/_components/skeleton/ConnectedAccountsSkeleton";
 
 export default function Mailboxes() {
   const searchParams = useSearchParams();
   const { data: mailboxes, isLoading } = useMailboxes();
   const [view, setView] = useState<"list" | "add">("list");
 
-  // If the URL has a ?step= param, go straight to the wizard
   useEffect(() => {
     const step = searchParams.get("step");
     if (step) {
@@ -21,13 +20,8 @@ export default function Mailboxes() {
     }
   }, [searchParams]);
 
-  // While loading show a spinner so we don't flash the EmptyMailbox view
   if (isLoading) {
-    return (
-      <div className="flex h-[calc(100vh-80px)] items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <ConnectedAccountsSkeleton />;
   }
 
   const hasAccounts = (mailboxes?.length ?? 0) > 0;
@@ -40,12 +34,7 @@ export default function Mailboxes() {
       {view === "list" && hasAccounts && (
         <ConnectedAccounts onAddAccount={() => setView("add")} />
       )}
-      {view === "add" && (
-        <AddAccountWizard
-          onCancel={() => setView("list")}
-          // onSuccess is now API-driven — wizard handles success internally
-        />
-      )}
+      {view === "add" && <AddAccountWizard onCancel={() => setView("list")} />}
     </>
   );
 }

@@ -23,30 +23,30 @@ export const mailboxApi = {
     return [];
   },
 
-  getMailboxById: async (id: string): Promise<Mailbox> => {
+  getMailboxById: async (id: string | number): Promise<Mailbox> => {
     const res = await axiosInstance.get<Mailbox>(`/mailboxes/${id}`);
     return res.data;
   },
 
-  getMailboxReports: async (id: string): Promise<Mailbox> => {
+  getMailboxReports: async (id: string | number): Promise<Mailbox> => {
     const res = await axiosInstance.get<Mailbox>(`/mailboxes/${id}/reports`);
     return res.data;
   },
 
   updateMailbox: async (
-    id: string,
+    id: string | number,
     data: Partial<Mailbox>,
   ): Promise<Mailbox> => {
     const res = await axiosInstance.patch<Mailbox>(`/mailboxes/${id}`, data);
     return res.data;
   },
 
-  deleteMailbox: async (id: string): Promise<Mailbox> => {
+  deleteMailbox: async (id: string | number): Promise<Mailbox> => {
     const res = await axiosInstance.delete<Mailbox>(`/mailboxes/${id}`);
     return res.data;
   },
 
-  syncMailbox: async (id: string): Promise<Mailbox> => {
+  syncMailbox: async (id: string | number): Promise<Mailbox> => {
     const res = await axiosInstance.post<Mailbox>(`/mailboxes/${id}/sync`);
     return res.data;
   },

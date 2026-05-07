@@ -66,6 +66,7 @@ export const useSettingsOperations = () => {
     mutationFn: settingsApi.updateProfile,
     onMutate: async (formData) => {
       await queryClient.cancelQueries({ queryKey: ["user-settings"] });
+      await queryClient.cancelQueries({ queryKey: ["mailboxes"] });
       const previousSettings = queryClient.getQueryData(["user-settings"]);
 
       const newUsername = formData.get("username") as string;
@@ -155,6 +156,7 @@ export const useSettingsOperations = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["user-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
     },
   });
 

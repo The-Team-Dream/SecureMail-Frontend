@@ -10,6 +10,7 @@ import { Mailbox } from "@/APIs/types/Mailbox";
 import { ConnectedAccountsSkeleton } from "@/_components/skeleton/ConnectedAccountsSkeleton";
 import { Icons } from "@/constants/icons";
 import { StateMessage } from "@/_components/shared/StateMessage";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ConnectedAccountsProps {
   onAddAccount: () => void;
@@ -70,7 +71,7 @@ const itemVariants = {
 };
 
 export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
-  const { data: mailboxes, isLoading, isError, refetch } = useMailboxes();
+  const { data: mailboxes, isError, refetch } = useMailboxes();
   const { syncMailbox } = useMailboxOperations();
 
   if (isError)
@@ -97,10 +98,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
             Connected Accounts
           </Text>
           <Text color={"primary-400"}>
-            {isLoading 
-              ? "Loading your connected accounts..." 
-              : `You have Total ${mailboxes?.length || 0} connected accounts`
-            }
+            You have Total {mailboxes?.length || 0} connected accounts
           </Text>
         </div>
         <Button
@@ -119,30 +117,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
           animate="visible"
           className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full"
         >
-          {isLoading ? (
-            Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="bg-background border border-primary-100/60 rounded-lg py-6 px-8 flex flex-col gap-8 animate-pulse">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="w-[46px] h-[46px] rounded-full bg-primary-50" />
-                    <div className="flex flex-col gap-2 flex-1">
-                      <div className="h-4 w-3/4 bg-primary-100 rounded" />
-                      <div className="h-3 w-1/4 bg-primary-50 rounded" />
-                    </div>
-                  </div>
-                  <div className="h-4 w-20 bg-primary-50 rounded" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="h-12 w-20 bg-primary-50 rounded" />
-                  <div className="w-px h-10 bg-primary-100" />
-                  <div className="h-12 w-20 bg-primary-50 rounded" />
-                  <div className="w-px h-10 bg-primary-100" />
-                  <div className="h-12 w-20 bg-primary-50 rounded" />
-                </div>
-              </div>
-            ))
-          ) : (
-            mailboxes?.map((acc) => {
+          {mailboxes?.map((acc) => {
             const statusStyles = getStatusStyles(acc.status);
             return (
               <motion.div
@@ -168,7 +143,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                             font="semiBold"
                             className="tracking-tight truncate w-full block"
                           >
-                            {acc.displayName || acc.email}
+                            {acc.displayName}
                           </Text>
                         </div>
                         <Text
@@ -176,8 +151,10 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                           color="primary-400"
                           className="truncate"
                         >
-                          {acc.email}{" "}
-                          <span className="capitalize">{acc.provider}</span>
+                          {acc.emailAddress}{" "}
+                          <span className="capitalize font-semibold text-primary-500">
+                            • {acc.provider.toLowerCase()}
+                          </span>
                         </Text>
                       </div>
                     </div>
@@ -192,13 +169,13 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col items-center flex-1">
                       <Text size="2xl" color={"info-700"} font="medium">
-                        {(acc.totalEmails ?? 0).toLocaleString()}
+                        {acc._count?.emails}
                       </Text>
                       <Text size="xs" color={"primary-500"} className="mt-1">
                         Total Emails
                       </Text>
                     </div>
-                    ...
+                    <div className="w-px h-10 bg-primary-100/60 shrink-0"></div>
                     <div className="flex flex-col items-center flex-1">
                       <Text size="2xl" color={"error-600"} font="semiBold">
                         {(acc.threatsCount ?? 0).toLocaleString()}
@@ -210,7 +187,9 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                     <div className="w-px h-10 bg-primary-100/60 shrink-0" />
                     <div className="flex flex-col items-center flex-1">
                       <Text size="xl" font="semiBold" color={"primary-800"}>
-                        {acc.lastSync || "Just now"}
+                        {acc.lastSyncedAt
+                          ? new Date(acc.lastSyncedAt).toLocaleDateString()
+                          : acc.lastSync || "Just now"}
                       </Text>
                       <Text size="xs" className="mt-1">
                         Last sync
@@ -223,27 +202,29 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                       disabled={acc.status === "syncing"}
                       variant="outline"
                       className="flex-1 rounded-lg border-primary text-sm gap-2"
-                      asChild
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        syncMailbox(acc.id);
+                      }}
                     >
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          syncMailbox(acc.id);
-                        }}
-                      >
-                        Sync{" "}
-                        <Icons.Refresh className="w-4 h-4 text-primary stroke-2" />
-                      </div>
+                      {acc.status === "syncing" ? (
+                        <>
+                          Syncing in progress{" "}
+                          <Spinner className="w-4 h-4 text-primary" />
+                        </>
+                      ) : (
+                        <>
+                          Sync{" "}
+                          <Icons.Refresh className="w-4 h-4 text-primary stroke-2" />
+                        </>
+                      )}
                     </Button>
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })
-          )}
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </Container>

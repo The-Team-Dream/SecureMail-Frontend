@@ -41,8 +41,15 @@ export function StepProvider({
             label="Mailbox Name"
             required
             placeholder="Mailbox Name"
-            defaultValue={formData.mailboxName}
-            {...(register ? register("mailboxName") : {})}
+            {...(register
+              ? register("mailboxName", {
+                  onChange: () => {
+                    if (errors?.mailboxName) {
+                      clearErrors?.("mailboxName");
+                    }
+                  },
+                })
+              : {})}
             error={errors?.mailboxName?.message}
           />
           <Input
@@ -50,8 +57,15 @@ export function StepProvider({
             required
             type="email"
             placeholder="Email"
-            defaultValue={formData.mailboxEmail}
-            {...(register ? register("mailboxEmail") : {})}
+            {...(register
+              ? register("mailboxEmail", {
+                  onChange: () => {
+                    if (errors?.mailboxEmail) {
+                      clearErrors?.("mailboxEmail");
+                    }
+                  },
+                })
+              : {})}
             error={errors?.mailboxEmail?.message}
           />
         </div>

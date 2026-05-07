@@ -1,6 +1,6 @@
-import {  useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { mailboxApi } from "../features/mailboxes"
-import toast from 'react-hot-toast';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { mailboxApi } from "../features/mailboxes";
+import toast from "react-hot-toast";
 
 export const useMailboxes = () => {
   return useQuery({
@@ -9,7 +9,7 @@ export const useMailboxes = () => {
   });
 };
 
-export const useMailboxById = (id: string) => {
+export const useMailboxById = (id: string | number) => {
   return useQuery({
     queryKey: ["mailboxes", id],
     queryFn: () => mailboxApi.getMailboxById(id),
@@ -17,9 +17,9 @@ export const useMailboxById = (id: string) => {
   });
 };
 
-export const useMailboxReports = (id: string) => {
+export const useMailboxReports = (id: string | number) => {
   return useQuery({
-    queryKey: ['mailboxes', 'reports', id],
+    queryKey: ["mailboxes", "reports", id],
     queryFn: () => mailboxApi.getMailboxReports(id),
     enabled: !!id,
   });
@@ -28,11 +28,12 @@ export const useMailboxReports = (id: string) => {
 // --- Mutations ---
 export const useMailboxOperations = () => {
   const queryClient = useQueryClient();
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['mailboxes'] });
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
 
   const deleteMutation = useMutation({
     mutationFn: mailboxApi.deleteMailbox,
-    onMutate: async (id: string) => {
+    onMutate: async (id: string | number) => {
       await queryClient.cancelQueries({ queryKey: ["mailboxes"] });
       const previousMailboxes = queryClient.getQueryData<any[]>(["mailboxes"]);
 
@@ -58,7 +59,7 @@ export const useMailboxOperations = () => {
 
   const syncMutation = useMutation({
     mutationFn: mailboxApi.syncMailbox,
-    onMutate: async (id: string) => {
+    onMutate: async (id: string | number) => {
       await queryClient.cancelQueries({ queryKey: ["mailboxes"] });
       const previousMailboxes = queryClient.getQueryData<any[]>(["mailboxes"]);
 
@@ -88,10 +89,10 @@ export const useMailboxOperations = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string | number; data: any }) =>
       mailboxApi.updateMailbox(id, data),
     onSuccess: () => {
-      toast.success("Settings updated");
+      toast.success("Name Updated Successfully");
       invalidate();
     },
     onError: (error: any) => {
@@ -100,8 +101,13 @@ export const useMailboxOperations = () => {
   });
 
   const connectGmailMutation = useMutation({
-    mutationFn: ({ code, redirectUri }: { code: string; redirectUri: string }) =>
-      mailboxApi.connectGmail(code, redirectUri),
+    mutationFn: ({
+      code,
+      redirectUri,
+    }: {
+      code: string;
+      redirectUri: string;
+    }) => mailboxApi.connectGmail(code, redirectUri),
     onSuccess: () => {
       toast.success("Gmail connected successfully");
       invalidate();
@@ -112,8 +118,13 @@ export const useMailboxOperations = () => {
   });
 
   const connectOutlookMutation = useMutation({
-    mutationFn: ({ code, redirectUri }: { code: string; redirectUri: string }) =>
-      mailboxApi.connectOutlook(code, redirectUri),
+    mutationFn: ({
+      code,
+      redirectUri,
+    }: {
+      code: string;
+      redirectUri: string;
+    }) => mailboxApi.connectOutlook(code, redirectUri),
     onSuccess: () => {
       toast.success("Outlook connected successfully");
       invalidate();

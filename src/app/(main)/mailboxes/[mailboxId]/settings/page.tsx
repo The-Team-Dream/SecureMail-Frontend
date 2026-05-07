@@ -51,7 +51,7 @@ const MailboxSettings = () => {
     if (mailbox) {
       reset({
         mailboxName: mailbox.displayName || "",
-        emailForwarding: false, // API might not have this, default to false or map if available
+        emailForwarding: false,
         pushNotifications: mailbox.pushNotificationsEnabled,
       });
     }
@@ -69,8 +69,11 @@ const MailboxSettings = () => {
 
   const handleDelete = () => {
     if (confirm("Are you sure you want to delete this mailbox?")) {
-      deleteMailbox(mailboxId);
-      router.push("/mailboxes");
+      deleteMailbox(mailboxId, {
+        onSuccess: () => {
+          router.push("/mailboxes");
+        },
+      });
     }
   };
 
@@ -84,19 +87,31 @@ const MailboxSettings = () => {
 
   return (
     <Container>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 pb-20">
+      <form
+        key={mailboxId}
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-10 pb-20"
+      >
         {/* General Section */}
         <section>
           <Text as="h1" font="medium" size="2xl" className="mb-4">
             General
           </Text>
-          <div className="border-b border-primary-100 pb-10">
+          <div className="border-b border-primary-100 pb-10 space-y-6">
+            <div className="flex flex-col gap-1">
+              <Text size="sm" color="primary-500">
+                Email Address
+              </Text>
+              <Text font="medium" size="lg" color="primary-950">
+                {mailbox?.emailAddress}
+              </Text>
+            </div>
             <Input
               label="Mailbox Name"
               {...register("mailboxName", {
                 onChange: () => clearErrors("mailboxName"),
               })}
-              placeholder="Mailbox Name"
+              placeholder={"Mailbox Name"}
               type="text"
               className="w-full md:w-[400px]"
               error={errors.mailboxName?.message}
@@ -184,8 +199,15 @@ const MailboxSettings = () => {
               disabled={isDeleting}
               className="w-full md:w-auto h-10 px-6 gap-2 rounded-lg border-2 border-error-600 text-error-600 bg-background hover:bg-error-50"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
-              <Icons.Delete className="h-4 w-4 text-error-600" />
+              {isDeleting ? (
+                <>
+                  <Spinner className="w-4 h-4" /> Deleting...
+                </>
+              ) : (
+                <>
+                  Delete <Icons.Delete className="h-4 w-4 text-error-600" />
+                </>
+              )}
             </Button>
           </div>
         </section>
@@ -196,9 +218,15 @@ const MailboxSettings = () => {
             size={"lg"}
             type="submit"
             disabled={isUpdating}
-            className="w-full md:w-[180px] rounded-lg"
+            className="w-full md:w-[180px] rounded-lg gap-2"
           >
-            {isUpdating ? "Updating..." : "Save & Update"}
+            {isUpdating ? (
+              <>
+                <Spinner className="w-4 h-4" /> Updating...
+              </>
+            ) : (
+              "Save & Update"
+            )}
           </Button>
         </div>
       </form>
