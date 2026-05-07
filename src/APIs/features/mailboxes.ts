@@ -1,6 +1,10 @@
 import axiosInstance from "@/lib/axios";
 import { IMAPConfig, Mailbox, Mailboxes } from "../types/Mailbox";
 
+const unwrap = <T>(res: { data: any }): T => {
+  return res.data?.data ?? res.data;
+};
+
 export const mailboxApi = {
   getMailboxes: async (): Promise<Mailbox[]> => {
     const res = await axiosInstance.get<Mailboxes>("/mailboxes");
@@ -24,31 +28,26 @@ export const mailboxApi = {
   },
 
   getMailboxById: async (id: string | number): Promise<Mailbox> => {
-    const res = await axiosInstance.get<Mailbox>(`/mailboxes/${id}`);
-    return res.data;
+    return unwrap(await axiosInstance.get(`/mailboxes/${id}`));
   },
 
   getMailboxReports: async (id: string | number): Promise<Mailbox> => {
-    const res = await axiosInstance.get<Mailbox>(`/mailboxes/${id}/reports`);
-    return res.data;
+    return unwrap(await axiosInstance.get(`/mailboxes/${id}/reports`));
   },
 
   updateMailbox: async (
     id: string | number,
     data: Partial<Mailbox>,
   ): Promise<Mailbox> => {
-    const res = await axiosInstance.patch<Mailbox>(`/mailboxes/${id}`, data);
-    return res.data;
+    return unwrap(await axiosInstance.patch(`/mailboxes/${id}`, data));
   },
 
   deleteMailbox: async (id: string | number): Promise<Mailbox> => {
-    const res = await axiosInstance.delete<Mailbox>(`/mailboxes/${id}`);
-    return res.data;
+    return unwrap(await axiosInstance.delete(`/mailboxes/${id}`));
   },
 
   syncMailbox: async (id: string | number): Promise<Mailbox> => {
-    const res = await axiosInstance.post<Mailbox>(`/mailboxes/${id}/sync`);
-    return res.data;
+    return unwrap(await axiosInstance.post(`/mailboxes/${id}/sync`));
   },
 
   connectImap: async (raw: IMAPConfig): Promise<Mailbox> => {
@@ -73,8 +72,8 @@ export const mailboxApi = {
       ...(smtpPort && !isNaN(smtpPort) && { smtpPort }),
     };
 
-    const res = await axiosInstance.post<Mailbox>("/mailboxes/imap", payload);
-    return res.data;
+    const res = await axiosInstance.post("/mailboxes/imap", payload);
+    return unwrap(res);
   },
 
   getGmailAuthUrl: async (redirectUri: string): Promise<{ url: string }> => {
@@ -96,11 +95,11 @@ export const mailboxApi = {
   },
 
   connectGmail: async (code: string, redirectUri: string): Promise<Mailbox> => {
-    const res = await axiosInstance.post<Mailbox>("/mailboxes/gmail", {
+    const res = await axiosInstance.post("/mailboxes/gmail", {
       code,
       redirectUri,
     });
-    return res.data;
+    return unwrap(res);
   },
 
   getOutlookAuthUrl: async (redirectUri: string): Promise<{ url: string }> => {
@@ -124,10 +123,10 @@ export const mailboxApi = {
     code: string,
     redirectUri: string,
   ): Promise<Mailbox> => {
-    const res = await axiosInstance.post<Mailbox>("/mailboxes/outlook", {
+    const res = await axiosInstance.post("/mailboxes/outlook", {
       code,
       redirectUri,
     });
-    return res.data;
+    return unwrap(res);
   },
 };

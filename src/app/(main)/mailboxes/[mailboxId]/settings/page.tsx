@@ -17,8 +17,9 @@ import {
   useMailboxById,
   useMailboxOperations,
 } from "@/APIs/hooks/useMailboxes";
-import { useEffect } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { ConfirmationModal } from "@/_components/shared/ConfirmationModal";
+import { useState, useEffect } from "react";
 
 const MailboxSettings = () => {
   const params = useParams();
@@ -28,6 +29,8 @@ const MailboxSettings = () => {
   const { data: mailbox, isLoading } = useMailboxById(mailboxId);
   const { updateMailbox, isUpdating, deleteMailbox, isDeleting } =
     useMailboxOperations();
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const {
     handleSubmit,
@@ -68,13 +71,12 @@ const MailboxSettings = () => {
   };
 
   const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this mailbox?")) {
-      deleteMailbox(mailboxId, {
-        onSuccess: () => {
-          router.push("/mailboxes");
-        },
-      });
-    }
+    deleteMailbox(mailboxId, {
+      onSuccess: () => {
+        setIsDeleteModalOpen(false);
+        router.push("/mailboxes");
+      },
+    });
   };
 
   if (isLoading) {
@@ -195,7 +197,7 @@ const MailboxSettings = () => {
 
             <Button
               type="button"
-              onClick={handleDelete}
+              onClick={() => setIsDeleteModalOpen(true)}
               disabled={isDeleting}
               className="w-full md:w-auto h-10 px-6 gap-2 rounded-lg border-2 border-error-600 text-error-600 bg-background hover:bg-error-50"
             >
@@ -211,6 +213,18 @@ const MailboxSettings = () => {
             </Button>
           </div>
         </section>
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onOpenChange={setIsDeleteModalOpen}
+          onConfirm={handleDelete}
+          isLoading={isDeleting}
+          variant="danger"
+          title="Delete Mailbox"
+          description="Are you sure you want to delete this mailbox? This action cannot be undone and you will lose all associated data."
+          confirmText="Delete Mailbox"
+        />
 
         {/* Footer Action */}
         <div className="flex justify-end pt-4">

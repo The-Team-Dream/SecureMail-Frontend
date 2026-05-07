@@ -44,9 +44,9 @@ const getStatusStyles = (status: Mailbox["status"]) => {
       };
     default:
       return {
-        color: "text-primary-400",
-        icon: <Loader className="w-4 h-4 animate-spin" />,
-        label: "Unknown",
+        color: "text-secondary-800",
+        icon: <Wifi className="w-4 h-4" />,
+        label: "Connected",
       };
   }
 };

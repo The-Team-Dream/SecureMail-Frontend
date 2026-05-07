@@ -91,9 +91,12 @@ export const useMailboxOperations = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string | number; data: any }) =>
       mailboxApi.updateMailbox(id, data),
-    onSuccess: () => {
-      toast.success("Name Updated Successfully");
-      invalidate();
+    onSuccess: (updatedMailbox, variables) => {
+      toast.success("Settings Updated Successfully");
+      // Update the specific mailbox cache
+      queryClient.setQueryData(["mailboxes", variables.id], updatedMailbox);
+      // Invalidate the list of mailboxes
+      queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
     },
     onError: (error: any) => {
       toast.error(error?.message || "Failed to update settings");
