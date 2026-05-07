@@ -1,7 +1,7 @@
 "use client";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
-import { Trash2, ArrowRight, LogOut } from "lucide-react";
+import { Trash2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/APIs/hooks/useAuth";
 import Cookies from "js-cookie";
@@ -11,6 +11,7 @@ import PersonalInfo from "./_components/PersonalInfo";
 import Security from "./_components/Security";
 import Preference from "./_components/Preference";
 import SessionManagement from "./_components/SessionManagement";
+import { Spinner } from "@/components/ui/spinner";
 
 const Settings = () => {
   const router = useRouter();
@@ -59,13 +60,13 @@ const Settings = () => {
         </Button>
       </div>
       <Button
-        className="w-fit px-6 py-2  mt-4 bg-error-500 hover:bg-error-600 "
+        className="w-fit px-6 py-2 mt-4 bg-error-500 hover:bg-error-600 gap-2"
         disabled={isPending}
         onClick={() => mutate()}
         size={"sm"}
       >
-        <LogOut className="w-4 h-4" />
-        Log out
+        {isPending ? <Spinner /> : <LogOut className="w-4 h-4" />}
+        {isPending ? "Logging out..." : "Log out"}
       </Button>
     </Container>
   );

@@ -8,8 +8,10 @@ import {
 
 export const settingsApi = {
   getSettings: async (): Promise<UserSettings> => {
-    const res = await axiosInstance.get<UserSettings>("/user-settings");
-    return res.data;
+    const res = await axiosInstance.get<{ data?: UserSettings } & UserSettings>(
+      "/user-settings",
+    );
+    return res.data?.data ?? res.data;
   },
 
   updateProfile: async (formData: FormData): Promise<ProfileUpdateResponse> => {
@@ -37,6 +39,14 @@ export const settingsApi = {
     const res = await axiosInstance.patch<UserSettings>(
       "/user-settings/theme",
       { themeMode },
+    );
+    return res.data;
+  },
+
+  updateNotifications: async (notifications: boolean): Promise<UserSettings> => {
+    const res = await axiosInstance.patch<UserSettings>(
+      "/user-settings/notifications",
+      { notificationsEnabled: notifications },
     );
     return res.data;
   },

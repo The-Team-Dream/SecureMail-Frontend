@@ -291,8 +291,8 @@ const Contact = () => {
                       Message Sent!
                     </Text>
                     <Text color="primary-400" className="mb-8">
-                      We've received your request. One of our agents will reach
-                      out to you within 24 hours.
+                      We&apos;ve received your request. One of our agents will
+                      reach out to you within 24 hours.
                     </Text>
                     <Button
                       onClick={() => setIsSubmitted(false)}

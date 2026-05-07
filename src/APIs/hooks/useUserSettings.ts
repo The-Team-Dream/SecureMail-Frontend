@@ -1,5 +1,12 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { settingsApi } from "../features/userSettings";
+
+export const useGetUserSettings = () => {
+  return useQuery({
+    queryKey: ["user-settings"],
+    queryFn: settingsApi.getSettings,
+  });
+};
 
 export const useSettingsOperations = () => {
   const queryClient = useQueryClient();
@@ -27,6 +34,33 @@ export const useSettingsOperations = () => {
       queryClient.invalidateQueries({ queryKey: ["user-settings"] });
     },
   });
+
+  const notificationsMutation = useMutation({
+    mutationFn: settingsApi.updateNotifications,
+    onMutate: async (newStatus) => {
+      await queryClient.cancelQueries({ queryKey: ["user-settings"] });
+      const previousSettings = queryClient.getQueryData(["user-settings"]);
+
+      queryClient.setQueryData(["user-settings"], (old: any) => {
+        if (!old) return old;
+        // If the API returns { data: { ... } }, use old.data.
+        // If it returns { ... } directly, use old.
+        const target = old.data || old;
+        const updatedData = { ...target, notificationsEnabled: newStatus };
+
+        return old.data ? { ...old, data: updatedData } : updatedData;
+      });
+
+      return { previousSettings };
+    },
+    onError: (err, newStatus, context) => {
+      queryClient.setQueryData(["user-settings"], context?.previousSettings);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-settings"] });
+    },
+  });
+
   // Profile Mutation
   const profileMutation = useMutation({
     mutationFn: settingsApi.updateProfile,
@@ -35,10 +69,10 @@ export const useSettingsOperations = () => {
       const previousSettings = queryClient.getQueryData(["user-settings"]);
 
       const newUsername = formData.get("username") as string;
-      const avatarFile = formData.get("avatar") as File;
+      const avatarFile = formData.get("avatar");
 
       const tempAvatarUrl =
-        avatarFile instanceof Blob || avatarFile instanceof File
+        avatarFile && typeof avatarFile !== "string"
           ? URL.createObjectURL(avatarFile)
           : null;
 
@@ -132,7 +166,11 @@ export const useSettingsOperations = () => {
   return {
     updateTheme: themeMutation.mutate,
     updateProfile: profileMutation.mutate,
-    isUpdating: profileMutation.isPending || themeMutation.isPending,
+    updateNotifications: notificationsMutation.mutate,
+    isUpdating:
+      profileMutation.isPending ||
+      themeMutation.isPending ||
+      notificationsMutation.isPending,
     changePassword: passwordMutation.mutate,
     isChangingPassword: passwordMutation.isPending,
   };

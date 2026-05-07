@@ -13,8 +13,6 @@ import {
   verifyOtp,
   resendOtp,
   logout,
-  getOAuthLoginUrl,
-  validateOAuthToken,
   getAuthMe,
 } from "../features/auth";
 import {

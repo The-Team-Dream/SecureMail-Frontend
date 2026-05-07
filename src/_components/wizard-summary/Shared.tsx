@@ -79,6 +79,7 @@ export function EditButton({
 }) {
   return isEditing ? (
     <Button
+      type="button"
       variant="default"
       onClick={onCancel}
       className="w-[140px] shrink-0 bg-error-600 hover:bg-error-700 text-white h-10 gap-2 px-3 rounded-[6px] text-sm font-semibold shadow-none"
@@ -87,6 +88,7 @@ export function EditButton({
     </Button>
   ) : (
     <Button
+      type="button"
       variant="outline"
       onClick={onEdit}
       className="w-[84px] shrink-0 h-10 gap-2 px-3 rounded-[6px] text-primary-700 border-primary-200 hover:bg-primary-50 text-sm font-semibold shadow-none"

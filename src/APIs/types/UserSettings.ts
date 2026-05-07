@@ -5,7 +5,7 @@ export interface UserSettings {
   email: string;
   avatarUrl: string | null;
   themeMode: ThemeMode;
-  notifications: boolean;
+  notificationsEnabled: boolean;
   isTwoFactorEnabled: boolean;
 }
 

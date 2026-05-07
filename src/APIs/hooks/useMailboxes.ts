@@ -4,8 +4,16 @@ import toast from 'react-hot-toast';
 
 export const useMailboxes = () => {
   return useQuery({
-    queryKey: ['mailboxes'],
+    queryKey: ["mailboxes"],
     queryFn: mailboxApi.getMailboxes,
+  });
+};
+
+export const useMailboxById = (id: string) => {
+  return useQuery({
+    queryKey: ["mailboxes", id],
+    queryFn: () => mailboxApi.getMailboxById(id),
+    enabled: !!id,
   });
 };
 
@@ -79,10 +87,64 @@ export const useMailboxOperations = () => {
     },
   });
 
-  return { 
-    deleteMailbox: deleteMutation.mutate, 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      mailboxApi.updateMailbox(id, data),
+    onSuccess: () => {
+      toast.success("Settings updated");
+      invalidate();
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to update settings");
+    },
+  });
+
+  const connectGmailMutation = useMutation({
+    mutationFn: ({ code, redirectUri }: { code: string; redirectUri: string }) =>
+      mailboxApi.connectGmail(code, redirectUri),
+    onSuccess: () => {
+      toast.success("Gmail connected successfully");
+      invalidate();
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to connect Gmail");
+    },
+  });
+
+  const connectOutlookMutation = useMutation({
+    mutationFn: ({ code, redirectUri }: { code: string; redirectUri: string }) =>
+      mailboxApi.connectOutlook(code, redirectUri),
+    onSuccess: () => {
+      toast.success("Outlook connected successfully");
+      invalidate();
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to connect Outlook");
+    },
+  });
+
+  const connectImapMutation = useMutation({
+    mutationFn: mailboxApi.connectImap,
+    onSuccess: () => {
+      toast.success("IMAP mailbox connected successfully!");
+      invalidate();
+    },
+    // onError intentionally omitted — useAddAccountWizard catches and displays
+    // the backend error message to avoid duplicate toast notifications.
+  });
+
+  return {
+    deleteMailbox: deleteMutation.mutate,
     isDeleting: deleteMutation.isPending,
     syncMailbox: syncMutation.mutate,
-    isSyncing: syncMutation.isPending
+    isSyncing: syncMutation.isPending,
+    updateMailbox: updateMutation.mutate,
+    isUpdating: updateMutation.isPending,
+    connectGmail: connectGmailMutation.mutateAsync,
+    isConnectingGmail: connectGmailMutation.isPending,
+    connectOutlook: connectOutlookMutation.mutateAsync,
+    isConnectingOutlook: connectOutlookMutation.isPending,
+    connectImap: connectImapMutation.mutateAsync,
+    isConnectingImap: connectImapMutation.isPending,
   };
 };

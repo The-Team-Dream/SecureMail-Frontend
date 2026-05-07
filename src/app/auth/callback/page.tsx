@@ -13,24 +13,26 @@ export default function OAuthSuccess() {
 
   useEffect(() => {
     const token = searchParams.get("token");
-    if (token) {
-      if (window.opener) {
-        // If opened as a popup, send the token to the parent window
+    const code = searchParams.get("code");
+
+    if (window.opener) {
+      if (token) {
         window.opener.postMessage({ type: "OAUTH_SUCCESS", token }, "*");
         window.close();
-      } else {
-        // If opened in the same window, handle redirect normally
-        Cookies.set("token", token, { path: "/", expires: 1 });
-        toast.success("Logged in successfully");
-        router.push("/mailboxes");
-      }
-    } else {
-      if (window.opener) {
+      } else if (code) {
+        window.opener.postMessage({ type: "OAUTH_CODE_RECEIVED", code }, "*");
         window.close();
       } else {
-        toast.error("Authentication failed. No token received.");
-        router.push("/sign-in");
+        window.close();
       }
+    } else if (token) {
+      // If opened in the same window, handle redirect normally
+      Cookies.set("token", token, { path: "/", expires: 1 });
+      toast.success("Logged in successfully");
+      router.push("/mailboxes");
+    } else if (!window.opener) {
+      toast.error("Authentication failed. No token or code received.");
+      router.push("/sign-in");
     }
   }, [searchParams, router]);
 

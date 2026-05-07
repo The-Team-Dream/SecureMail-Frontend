@@ -46,8 +46,30 @@ export const useNotificationOperations = () => {
     }
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: notificationsApi.deleteNotification,
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ["notifications"] });
+      const previousNotifications = queryClient.getQueryData<any>(["notifications"]);
+
+      queryClient.setQueryData(["notifications"], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: old.data.filter((n: any) => n.id !== id),
+        };
+      });
+
+      return { previousNotifications };
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
   return {
     readNotification: readMutation.mutate,
     readAll: readAllMutation.mutate,
+    deleteNotification: deleteMutation.mutate,
   };
 };

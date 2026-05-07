@@ -10,11 +10,9 @@ import toast from "react-hot-toast";
 import { emailSchema, type EmailFormValues } from "@/schemas/SendEmail";
 import { type EmojiClickData } from "emoji-picker-react";
 
-// ─── Mock connected accounts ───────────────────────────────────────────────
-export const MOCK_ACCOUNTS = [
-  { id: "1", email: "m.tarek@4horizons.com.sa" },
-  { id: "2", email: "personal@gmail.com" },
-];
+import { useMailboxes } from "@/APIs/hooks/useMailboxes";
+import type { Mailbox } from "@/APIs/types/Mailbox";
+
 
 export const useComposeEmail = () => {
   const {
@@ -24,11 +22,31 @@ export const useComposeEmail = () => {
     composeData,
   } = useMailStore();
 
+  const { data: mailboxes = [] } = useMailboxes();
+  
+  // ── Form ──────────────────────────────────────────────────────────────
+  const form = useForm<EmailFormValues>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: {
+      from: "",
+      to: "",
+      subject: "",
+      cc: "",
+      bcc: "",
+      bodyText: "",
+    },
+  });
+
+  const formFrom = form.watch("from");
   const params = useParams();
-  const mailboxId = (params?.mailboxId as string) ?? "mock-mailbox-1";
+
+  // Find the selected mailbox based on the "from" email
+  const selectedMailbox = mailboxes.find((m) => m.email === formFrom) || mailboxes[0];
+  const mailboxIdToUse =
+    selectedMailbox?.id ?? (params?.mailboxId as string);
 
   const { sendMutation, replyMutation, forwardMutation } =
-    useEmailActions(mailboxId);
+    useEmailActions(mailboxIdToUse ?? "");
 
   // ── Attachments state ──────────────────────────────────────────────────
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -42,24 +60,13 @@ export const useComposeEmail = () => {
   const [showCc, setShowCc] = useState(false);
   const [showBcc, setShowBcc] = useState(false);
 
-  // ── Form ──────────────────────────────────────────────────────────────
-  const form = useForm<EmailFormValues>({
-    resolver: zodResolver(emailSchema),
-    defaultValues: {
-      from: MOCK_ACCOUNTS[0]?.email ?? "",
-      to: "",
-      subject: "",
-      cc: "",
-      bcc: "",
-      bodyText: "",
-    },
-  });
+  // ── Attachments state ──────────────────────────────────────────────────
 
   // Reset form when opened / mode changes
   useEffect(() => {
     if (isOpen) {
       form.reset({
-        from: MOCK_ACCOUNTS[0]?.email ?? "",
+        from: formFrom || mailboxes[0]?.email || "",
         to: composeData?.to ?? "",
         subject:
           composeMode === "reply"
@@ -79,7 +86,7 @@ export const useComposeEmail = () => {
       setShowCc(false);
       setShowBcc(false);
     }
-  }, [isOpen, composeMode, composeData, form]);
+  }, [isOpen, composeMode, composeData, form, mailboxes, formFrom]);
 
   // Close emoji picker on outside click
   useEffect(() => {
@@ -121,13 +128,31 @@ export const useComposeEmail = () => {
     setShowEmoji(false);
   };
 
+  const sanitizeEmails = (emailsStr: string | undefined | null) => {
+    if (!emailsStr) return "";
+    return emailsStr
+      .split(",")
+      .map((e) => e.trim())
+      .filter(Boolean)
+      .join(",");
+  };
+
   const onSubmit = (data: EmailFormValues) => {
     const fd = new FormData();
-    fd.append("to", data.to);
-    fd.append("subject", data.subject);
-    if (data.cc) fd.append("cc", data.cc);
-    if (data.bcc) fd.append("bcc", data.bcc);
-    if (data.bodyText) fd.append("bodyText", data.bodyText);
+
+    // Sanitize inputs
+    const sanitizedTo = sanitizeEmails(data.to);
+    const sanitizedSubject = data.subject?.trim() || "";
+    const sanitizedCc = sanitizeEmails(data.cc);
+    const sanitizedBcc = sanitizeEmails(data.bcc);
+    const sanitizedBodyText = data.bodyText?.trim() || "";
+
+    fd.append("to", sanitizedTo);
+    fd.append("subject", sanitizedSubject);
+    if (sanitizedCc) fd.append("cc", sanitizedCc);
+    if (sanitizedBcc) fd.append("bcc", sanitizedBcc);
+    if (sanitizedBodyText) fd.append("bodyText", sanitizedBodyText);
+
     attachments.forEach((f) => fd.append("attachments", f));
 
     if (composeMode === "reply" && composeData?.emailId) {
@@ -143,10 +168,9 @@ export const useComposeEmail = () => {
     } else {
       sendMutation.mutate(fd, {
         onSuccess: () => setOpen(false),
-        // Mock fallback: if backend not available, still succeed
-        onError: () => {
-          toast.success("Email queued for sending!");
-          setOpen(false);
+        onError: (err: any) => {
+          const message = err?.response?.data?.message || err?.message || "Failed to send email";
+          toast.error(message);
         },
       });
     }
@@ -178,5 +202,6 @@ export const useComposeEmail = () => {
     insertEmoji,
     onSubmit,
     isPending,
+    mailboxes,
   };
 };

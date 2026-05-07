@@ -60,24 +60,26 @@ export const resetPassword = async (
   );
   return res.data;
 };
-export const logout = async (): Promise<{
-  message: string;
-}> => {
-  const res = await axiosInstance.post("/auth/logout");
-  return res.data;
-};
+
 export const getAuthMe = async () => {
   const res = await axiosInstance.get("/user/profile");
   return res.data?.data;
 };
 
-export const getOAuthLoginUrl = (provider: OAuthProvider): string => {
+export const getOAuthLoginUrl = (
+  provider: OAuthProvider,
+  redirectUrl?: string,
+): string => {
   const providerEndpointMap: Record<OAuthProvider, string> = {
     google: "/auth/google/login",
     outlook: "/auth/outlook/login",
   };
 
-  return `${baseURL}${providerEndpointMap[provider]}`;
+  const base = `${baseURL}${providerEndpointMap[provider]}`;
+  if (redirectUrl) {
+    return `${base}?redirectUrl=${encodeURIComponent(redirectUrl)}`;
+  }
+  return base;
 };
 
 export const validateOAuthToken = async (token: string) => {
@@ -86,5 +88,11 @@ export const validateOAuthToken = async (token: string) => {
       Authorization: `Bearer ${token}`,
     },
   });
+  return res.data;
+};
+export const logout = async (): Promise<{
+  message: string;
+}> => {
+  const res = await axiosInstance.post("/auth/logout");
   return res.data;
 };

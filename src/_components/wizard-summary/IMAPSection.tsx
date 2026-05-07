@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Input } from "@/_components/shared/Input";
 import { Button } from "@/components/ui/button";
-import { Settings, Save, Loader2 } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import { WizardFormData } from "@/schemas/CustomAccount";
 import {
   SectionBlock,
@@ -117,6 +117,7 @@ export function IMAPSection({
           </div>
           <div className="flex justify-end">
             <Button
+              type="button"
               size={"sm"}
               className="w-fit"
               onClick={handleSave}

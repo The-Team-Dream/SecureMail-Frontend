@@ -51,19 +51,48 @@ export const mailboxApi = {
     return res.data;
   },
 
-  connectImap: async (data: IMAPConfig): Promise<Mailbox> => {
-    const res = await axiosInstance.post<Mailbox>("/mailboxes/imap", data);
+  connectImap: async (raw: IMAPConfig): Promise<Mailbox> => {
+    // ── Sanitize & validate before sending ──────────────────────────────────
+    const port = Number(raw.port);
+    const smtpPort = raw.smtpPort !== undefined ? Number(raw.smtpPort) : undefined;
+
+    if (!raw.host?.trim()) throw new Error("IMAP host is required.");
+    if (isNaN(port) || port < 1 || port > 65535) throw new Error("IMAP port must be between 1–65535.");
+    if (!raw.email?.trim()) throw new Error("Email is required.");
+    if (!raw.password?.trim()) throw new Error("Password is required.");
+    if (!raw.displayName?.trim()) throw new Error("Display name is required.");
+
+    const payload: IMAPConfig = {
+      host: raw.host.trim(),
+      port,
+      email: raw.email.trim(),
+      password: raw.password,
+      secure: Boolean(raw.secure),
+      displayName: raw.displayName.trim(),
+      ...(raw.smtpHost?.trim() && { smtpHost: raw.smtpHost.trim() }),
+      ...(smtpPort && !isNaN(smtpPort) && { smtpPort }),
+    };
+
+    const res = await axiosInstance.post<Mailbox>("/mailboxes/imap", payload);
     return res.data;
   },
 
   getGmailAuthUrl: async (redirectUri: string): Promise<{ url: string }> => {
-    const res = await axiosInstance.get<{ url: string }>(
+    const res = await axiosInstance.get<any>(
       `/mailboxes/gmail/auth-url`,
-      {
-        params: { redirectUri },
-      },
+      { params: { redirectUri } },
     );
-    return res.data;
+    const body = res.data;
+    // The logs show the URL is in res.data.data.url
+    const url = typeof body === "string" 
+      ? body 
+      : (body?.data?.url || body?.url || body?.authUrl || body?.redirectUrl);
+    
+    if (!url || typeof url !== "string") {
+      console.error("Gmail Auth URL Error. Response body:", body);
+      throw new Error("Invalid auth URL returned from Gmail endpoint.");
+    }
+    return { url };
   },
 
   connectGmail: async (code: string, redirectUri: string): Promise<Mailbox> => {
@@ -75,13 +104,20 @@ export const mailboxApi = {
   },
 
   getOutlookAuthUrl: async (redirectUri: string): Promise<{ url: string }> => {
-    const res = await axiosInstance.get<{ url: string }>(
+    const res = await axiosInstance.get<any>(
       `/mailboxes/outlook/auth-url`,
-      {
-        params: { redirectUri },
-      },
+      { params: { redirectUri } },
     );
-    return res.data;
+    const body = res.data;
+    const url = typeof body === "string" 
+      ? body 
+      : (body?.data?.url || body?.url || body?.authUrl || body?.redirectUrl);
+
+    if (!url || typeof url !== "string") {
+      console.error("Outlook Auth URL Error. Response body:", body);
+      throw new Error("Invalid auth URL returned from Outlook endpoint.");
+    }
+    return { url };
   },
 
   connectOutlook: async (

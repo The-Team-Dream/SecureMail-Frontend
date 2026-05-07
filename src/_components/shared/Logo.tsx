@@ -1,6 +1,6 @@
 import Image from "next/image";
+import logo from "../../../public/icons/logo.png";
 import { Text } from "./Text";
-import { cn } from "@/lib/utils";
 import { ComponentProps } from "react";
 import Link from "next/link";
 /**
@@ -37,7 +37,7 @@ const Logo = ({
   return (
     <Link href={"/"} className={`flex items-center gap-2 ${className}`}>
       <Image
-        src={"/icons/logo.png"}
+        src={logo}
         alt="Logo"
         width={width}
         height={height}

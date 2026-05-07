@@ -12,7 +12,6 @@ import { Icons } from "@/constants/icons";
 import { StateMessage } from "@/_components/shared/StateMessage";
 
 interface ConnectedAccountsProps {
-  accounts: Mailbox[];
   onAddAccount: () => void;
 }
 
@@ -70,27 +69,21 @@ const itemVariants = {
   },
 };
 
-export function ConnectedAccounts({
-  accounts,
-  onAddAccount,
-}: ConnectedAccountsProps) {
+export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
   const { data: mailboxes, isLoading, isError, refetch } = useMailboxes();
   const { syncMailbox } = useMailboxOperations();
 
-  // if (isLoading) {
-  //   return <ConnectedAccountsSkeleton />;
-  // }
+  if (isError)
+    return (
+      <StateMessage
+        variant="error"
+        title="Failed to load mailboxes"
+        description="Failed to load mailboxes"
+        onRetry={() => refetch()}
+        className="h-screen"
+      />
+    );
 
-  // if (isError)
-  //   return (
-  //     <StateMessage
-  //       variant="error"
-  //       title="Failed to load mailboxes"
-  //       description="Failed to load mailboxes"
-  //       onRetry={() => refetch()}
-  //       className="h-screen"
-  //     />
-  //   );
   return (
     <Container>
       <motion.div
@@ -104,7 +97,10 @@ export function ConnectedAccounts({
             Connected Accounts
           </Text>
           <Text color={"primary-400"}>
-            You have Total {accounts.length} connected accounts
+            {isLoading 
+              ? "Loading your connected accounts..." 
+              : `You have Total ${mailboxes?.length || 0} connected accounts`
+            }
           </Text>
         </div>
         <Button
@@ -123,7 +119,30 @@ export function ConnectedAccounts({
           animate="visible"
           className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full"
         >
-          {accounts.map((acc) => {
+          {isLoading ? (
+            Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="bg-background border border-primary-100/60 rounded-lg py-6 px-8 flex flex-col gap-8 animate-pulse">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-[46px] h-[46px] rounded-full bg-primary-50" />
+                    <div className="flex flex-col gap-2 flex-1">
+                      <div className="h-4 w-3/4 bg-primary-100 rounded" />
+                      <div className="h-3 w-1/4 bg-primary-50 rounded" />
+                    </div>
+                  </div>
+                  <div className="h-4 w-20 bg-primary-50 rounded" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-20 bg-primary-50 rounded" />
+                  <div className="w-px h-10 bg-primary-100" />
+                  <div className="h-12 w-20 bg-primary-50 rounded" />
+                  <div className="w-px h-10 bg-primary-100" />
+                  <div className="h-12 w-20 bg-primary-50 rounded" />
+                </div>
+              </div>
+            ))
+          ) : (
+            mailboxes?.map((acc) => {
             const statusStyles = getStatusStyles(acc.status);
             return (
               <motion.div
@@ -149,10 +168,17 @@ export function ConnectedAccounts({
                             font="semiBold"
                             className="tracking-tight truncate w-full block"
                           >
-                            {acc.email}
+                            {acc.displayName || acc.email}
                           </Text>
                         </div>
-                        <Text size="xs">{acc.provider}</Text>
+                        <Text
+                          size="xs"
+                          color="primary-400"
+                          className="truncate"
+                        >
+                          {acc.email}{" "}
+                          <span className="capitalize">{acc.provider}</span>
+                        </Text>
                       </div>
                     </div>
                     <div
@@ -166,28 +192,25 @@ export function ConnectedAccounts({
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col items-center flex-1">
                       <Text size="2xl" color={"info-700"} font="medium">
-                        {acc.totalEmails.toLocaleString()}
+                        {(acc.totalEmails ?? 0).toLocaleString()}
                       </Text>
                       <Text size="xs" color={"primary-500"} className="mt-1">
                         Total Emails
                       </Text>
                     </div>
-
-                    <div className="w-px h-12 bg-primary-200" />
-
+                    ...
                     <div className="flex flex-col items-center flex-1">
                       <Text size="2xl" color={"error-600"} font="semiBold">
-                        {acc.threatsCount.toLocaleString()}
+                        {(acc.threatsCount ?? 0).toLocaleString()}
                       </Text>
                       <Text size="xs" color={"primary-500"} className="mt-1">
                         Threats
                       </Text>
                     </div>
-                    <div className="w-px h-12 bg-primary-200" />
-
+                    <div className="w-px h-10 bg-primary-100/60 shrink-0" />
                     <div className="flex flex-col items-center flex-1">
                       <Text size="xl" font="semiBold" color={"primary-800"}>
-                        {acc.lastSync}
+                        {acc.lastSync || "Just now"}
                       </Text>
                       <Text size="xs" className="mt-1">
                         Last sync
@@ -215,11 +238,12 @@ export function ConnectedAccounts({
                         <Icons.Refresh className="w-4 h-4 text-primary stroke-2" />
                       </div>
                     </Button>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })
+          )}
         </motion.div>
       </div>
     </Container>

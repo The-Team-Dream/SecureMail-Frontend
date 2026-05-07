@@ -1,9 +1,7 @@
 "use client";
-
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, ChevronRight } from "lucide-react";
-
+import { ArrowRight, ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
 import { WizardFormData } from "../../../../schemas/CustomAccount";
 import { WizardProgress } from "./AddAccountSteps/WizardProgress";
 import { StepProvider } from "./AddAccountSteps/StepProvider";
@@ -36,8 +34,13 @@ export function AddAccountWizard({
     handlePrev,
     handleCancel,
     handleChange,
+    handleImapSubmit,
     handleSuccessCancel,
     handleResetWizard,
+    isOAuthLoading,
+    isImapLoading,
+    isOAuthProvider,
+    nextButtonLabel,
   } = useAddAccountWizard({ onCancel, onSuccess });
 
   if (step === 6) {
@@ -48,6 +51,8 @@ export function AddAccountWizard({
       />
     );
   }
+
+  const isLoading = isOAuthLoading || isImapLoading;
 
   return (
     <div className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-card relative">
@@ -69,6 +74,7 @@ export function AddAccountWizard({
       <div className="flex flex-col flex-1 w-full mx-auto px-10 max-w-8xl pt-6">
         <WizardProgress step={step} steps={steps} />
         <hr className="h-px bg-primary-100 w-full absolute left-0 top-32" />
+
         <div
           className={`flex flex-col mb-8 w-full mx-auto flex-1 mt-8 ${step === 5 ? "max-w-[900px]" : "max-w-[560px]"}`}
         >
@@ -81,6 +87,8 @@ export function AddAccountWizard({
               register={register}
               clearErrors={clearErrors}
               errors={errors}
+              onOAuthConnect={handleNext}
+              isOAuthLoading={isOAuthLoading}
             />
           )}
           {step === 2 && (
@@ -109,25 +117,38 @@ export function AddAccountWizard({
             />
           )}
           {step === 5 && (
-            <StepSummary formData={formData} handleChange={handleChange} />
+            <StepSummary 
+              formData={formData} 
+              handleChange={handleChange} 
+              onPrev={handlePrev} 
+              handleImapSubmit={handleImapSubmit}
+              isPending={isImapLoading}
+            />
           )}
         </div>
 
+        {/* Navigation buttons */}
         <div className="flex justify-between items-center w-full py-6 pb-8 relative z-20">
           <Button
+            type="button"
             variant="outline"
             onClick={handlePrev}
-            disabled={step === 1}
+            disabled={step === 1 || isLoading}
             className={`w-[110px] h-[46px] border-primary-200 text-primary-800 font-semibold shadow-sm ${step === 1 ? "opacity-0 pointer-events-none" : ""}`}
           >
             <ArrowLeft className="w-4 h-4" /> Previous
           </Button>
 
           <Button
-            onClick={handleNext}
-            className="w-[110px] h-[46px] font-semibold"
+            type={step === 5 ? "submit" : "button"}
+            form={step === 5 ? "summary-form" : undefined}
+            onClick={step === 5 ? undefined : handleNext}
+            disabled={isLoading}
+            className="min-w-[130px] h-[46px] font-semibold gap-2"
           >
-            {step === 5 ? "Save" : "Next"} <ArrowRight className="w-4 h-4" />
+            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {nextButtonLabel}
+            {!isLoading && <ArrowRight className="w-4 h-4" />}
           </Button>
         </div>
       </div>

@@ -16,7 +16,7 @@ export interface IMAPConfig {
   host: string;
   port: number;
   email: string;
-  password?: string;
+  password: string;
   secure: boolean;
   displayName: string;
   smtpHost?: string;

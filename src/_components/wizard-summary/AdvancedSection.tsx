@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Rocket, Save, Loader2, ChevronDown, ChevronRight } from "lucide-react";
+import { Save, Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { WizardFormData } from "@/schemas/CustomAccount";
 import { SectionBlock, ViewField, AdvancedDraft } from "./Shared";
 import { Icons } from "@/constants/icons";
@@ -96,6 +96,7 @@ export function AdvancedSection({
           </div>
           <div className="flex justify-end">
             <Button
+              type="button"
               size={"sm"}
               className="w-fit"
               onClick={handleSave}

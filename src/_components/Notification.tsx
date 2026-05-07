@@ -15,58 +15,47 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { MOCK_NOTIFICATIONS } from "@/app/(main)/notifications/MOCKDATA";
-import { Notification } from "@/APIs/types/Notification";
 import { usePathname } from "next/navigation";
 import { StateMessage } from "./shared/StateMessage";
 import { NotificationCard } from "./NotificationCard";
 import { Bell } from "lucide-react";
+import {
+  useNotifications,
+  useUnreadCount,
+  useNotificationOperations,
+} from "@/APIs/hooks/useNotifications";
 
 export const NotificationDropdown = () => {
   const pathname = usePathname();
-  const [notifications, setNotifications] = useState<Notification[]>(
-    MOCK_NOTIFICATIONS.data,
-  );
+  const { data: notificationsData, isLoading: notificationsLoading } =
+    useNotifications(1);
+  const { data: unreadData } = useUnreadCount();
+  const { readNotification, readAll, deleteNotification } = useNotificationOperations();
+
+  const notifications = Array.isArray(notificationsData?.data)
+    ? notificationsData.data
+    : Array.isArray(notificationsData)
+      ? notificationsData
+      : [];
+  const unreadCount = unreadData?.count || 0;
+
+  const handleToggleReadStatus = (id: number, currentStatus: boolean) => {
+    if (!currentStatus) {
+      readNotification(String(id));
+    }
+  };
 
   const [activeTab, setActiveTab] = useState("all");
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 500);
   };
-
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  const handleDelete = (id: number) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-    toast.success("Notification deleted");
-  };
-
-  const handleToggleReadStatus = (id: number, currentStatus: boolean) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: !currentStatus } : n)),
-    );
-    toast.success(
-      currentStatus
-        ? "Notification marked as unread"
-        : "Notification marked as read",
-    );
-  };
-
-  const allRead =
-    notifications.length > 0 && notifications.every((n) => n.isRead);
 
   const handleToggleAllRead = () => {
-    const newStatus = !allRead;
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: newStatus })));
-    toast.success(
-      newStatus
-        ? "All notifications marked as read"
-        : "All notifications marked as unread",
-    );
+    readAll();
   };
+
+  const isLoading = notificationsLoading;
 
   return (
     <DropdownMenu>
@@ -108,7 +97,7 @@ export const NotificationDropdown = () => {
                 handleToggleAllRead();
               }}
             >
-              {allRead ? "Mark all as unread" : "Mark all as read"}
+              Mark all as read
             </button>
           </div>
 
@@ -170,7 +159,9 @@ export const NotificationDropdown = () => {
                           <NotificationCard
                             key={notification.id}
                             notification={notification}
-                            onDelete={handleDelete}
+                            onDelete={() =>
+                              deleteNotification(String(notification.id))
+                            }
                             onToggleRead={handleToggleReadStatus}
                             variant="dropdown"
                           />

@@ -115,6 +115,7 @@ export function SMTPSection({
           </div>
           <div className="flex justify-end">
             <Button
+              type="button"
               size={"sm"}
               className="w-fit"
               onClick={handleSave}

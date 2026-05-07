@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getOAuthLoginUrl } from "@/APIs/features/auth";
 import { SocialAuthButton } from "./SocialAuthButton";
-
+import googleIcon from "../../../public/icons/google.svg";
 const SocialAuthWrapper = () => {
   const router = useRouter();
 
@@ -26,7 +26,8 @@ const SocialAuthWrapper = () => {
   }, [router]);
 
   const handleOAuthClick = (provider: "google" | "outlook") => {
-    const url = getOAuthLoginUrl(provider);
+    const callbackUrl = `${window.location.origin}/auth/callback`;
+    const url = getOAuthLoginUrl(provider, callbackUrl);
 
     // Open a popup window centered on the screen
     const width = 500;
@@ -53,7 +54,7 @@ const SocialAuthWrapper = () => {
         <SocialAuthButton
           provider="google"
           title="Google"
-          iconSrc="/icons/google.svg"
+          iconSrc={googleIcon}
           onClick={() => handleOAuthClick("google")}
         />
       </div>

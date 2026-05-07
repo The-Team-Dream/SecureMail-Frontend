@@ -1,5 +1,6 @@
 "use client";
 import { AnalyticsChart } from "./AnalyticsChart";
+import { AnalyticsStats } from "./AnalyticsStats";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { AnalyticsSkeleton } from "@/_components/skeleton/AnalyticsSkeleton";
@@ -8,12 +9,16 @@ import {
   useMailboxStats,
   useActivityStats,
 } from "@/APIs/hooks/useAnalytics";
-import { useNotifications } from "@/APIs/hooks/useNotifications";
-import { Badge } from "@/components/ui/badge";
+import {
+  useNotifications,
+  useNotificationOperations,
+} from "@/APIs/hooks/useNotifications";
+import { useMailboxReports } from "@/APIs/hooks/useMailboxes";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { StatItem, NotificationItem } from "@/types/analytics";
+import { Button } from "@/components/ui/button";
 import {
   Mail,
   ShieldCheck,
@@ -23,9 +28,12 @@ import {
   CircleX,
   AlertTriangle,
   Info,
+  Star,
+  Trash2,
 } from "lucide-react";
 
 import { useGetAuthMe } from "@/APIs/hooks/useAuth";
+import { ActivityData } from "@/APIs/types/Analytics";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -53,92 +61,58 @@ interface AnalyticsClientProps {
 const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
   const { data: user } = useGetAuthMe();
 
-  // Mock Data mimicking Backend structure
-  const MOCK_OVERVIEW_DATA = {
-    totalMailboxes: 8,
-    totalEmailsScanned: 24582,
-    totalThreatsBlocked: 1482,
-    phishingDetected: 642,
-    malwareDetected: 840,
-    safetyScore: 98,
+  const {
+    data: overviewData,
+    isLoading: isOverviewLoading,
+    isError: isOverviewError,
+    refetch: refetchOverview,
+  } = useAnalyticsOverview();
+  console.log("overviewData", overviewData);
+
+  const {
+    data: mailboxData,
+    isLoading: isMailboxLoading,
+    isError: isMailboxError,
+    refetch: refetchMailbox,
+  } = useMailboxStats(mailboxId || "");
+
+  const { data: activityData, isLoading: isActivityLoading } =
+    useActivityStats("weekly");
+  console.log("activityData", activityData);
+  const { data: notificationsData, isLoading: isNotificationsLoading } =
+    useNotifications();
+
+  const { data: reportsData, isLoading: isReportsLoading } = useMailboxReports(
+    mailboxId || "",
+  );
+
+  const isLoading = mailboxId
+    ? isMailboxLoading ||
+      isActivityLoading ||
+      isNotificationsLoading ||
+      isReportsLoading
+    : isOverviewLoading || isActivityLoading || isNotificationsLoading;
+
+  const isError = mailboxId ? isMailboxError : isOverviewError;
+
+  const refetch = () => {
+    if (mailboxId) {
+      refetchMailbox();
+    } else {
+      refetchOverview();
+    }
   };
 
-  const MOCK_MAILBOX_DATA = {
-    mailboxId: mailboxId || "mock-id",
-    emailCount: 1240,
-    threatsHistory: Array.from({ length: 7 }, (_, i) => ({
-      date: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toISOString(),
-      count: Math.floor(Math.random() * 20) + 5,
-    })),
-    topThreatTypes: [
-      { type: "Spam Detection", value: 85 },
-      { type: "Phishing Attempts", value: 42 },
-      { type: "Malware Blocks", value: 12 },
-    ],
-  };
+  const { deleteNotification } = useNotificationOperations();
 
-  const MOCK_ACTIVITY_DATA = Array.from({ length: 8 }, (_, i) => ({
-    timestamp: new Date(
-      Date.now() - (7 - i) * 24 * 60 * 60 * 1000,
-    ).toISOString(),
-    sent: Math.floor(Math.random() * 100) + 50,
-    received: Math.floor(Math.random() * 200) + 100,
-    blocked: Math.floor(Math.random() * 30) + 5,
-  }));
-
-  const MOCK_NOTIFICATIONS_DATA = {
-    data: [
-      {
-        id: 1,
-        title: "Unauthorized Access Attempt",
-        message: "IP: 192.168.1.254 • Location: Unknown",
-        type: "error" as const,
-        category: "threats" as const,
-        isRead: false,
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 2,
-        title: "SSL Certificate Renewed",
-        message: "Domain: secure.mail-service.io",
-        type: "info" as const,
-        category: "system" as const,
-        isRead: true,
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-      },
-      {
-        id: 3,
-        title: "Policy Update Detected",
-        message: "Filter: Restricted Attachments",
-        type: "warning" as const,
-        category: "updates" as const,
-        isRead: false,
-        createdAt: new Date(Date.now() - 7200000).toISOString(),
-      },
-    ],
-    total: 3,
-    page: 1,
-    totalPages: 1,
-  };
-
-  // Uncomment hooks when ready to link
-  /*
-  const { data: overviewData, isLoading: isOverviewLoading, isError: isOverviewError, refetch: refetchOverview } = useAnalyticsOverview();
-  const { data: mailboxData, isLoading: isMailboxLoading, isError: isMailboxError, refetch: refetchMailbox } = useMailboxStats(mailboxId || "");
-  const { data: activityData, isLoading: isActivityLoading } = useActivityStats('weekly');
-  const { data: notificationsData, isLoading: isNotificationsLoading } = useNotifications(1);
-  */
-
-  // Using Mock Data instead of API hooks
-  const overviewData = MOCK_OVERVIEW_DATA;
-  const mailboxData = mailboxId ? MOCK_MAILBOX_DATA : null;
-  const activityData = MOCK_ACTIVITY_DATA;
-  const notificationsData = MOCK_NOTIFICATIONS_DATA;
-
-  const isLoading = false; // Set to true to test skeletons
-  const isError = false;
-  const refetch = () => console.log("Refetching...");
-
+  // Handle nested "data" property from API responses
+  const finalOverviewData = (overviewData as any)?.data || overviewData;
+  const finalMailboxData = (mailboxData as any)?.data || mailboxData;
+  const finalActivityData = Array.isArray((activityData as any)?.data)
+    ? (activityData as any).data
+    : Array.isArray(activityData)
+      ? activityData
+      : [];
   if (isLoading) return <AnalyticsSkeleton />;
 
   if (isError)
@@ -154,16 +128,17 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
 
   // Stats Mapping Logic
   let stats: StatItem[] = [];
-  if (mailboxId && mailboxData) {
-    const totalThreats = mailboxData.topThreatTypes.reduce(
-      (acc, curr) => acc + curr.value,
-      0,
-    );
+  if (mailboxId && finalMailboxData) {
+    const totalThreats =
+      finalMailboxData.topThreatTypes?.reduce(
+        (acc: number, curr: any) => acc + curr.value,
+        0,
+      ) ?? 0;
     stats = [
       {
         id: 1,
         title: "Mailbox Emails",
-        value: mailboxData.emailCount.toLocaleString(),
+        value: "2",
         type: "healthy",
         icon: Mail,
         description: "Total emails in this mailbox",
@@ -180,19 +155,19 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
       {
         id: 3,
         title: "Top Threat Type",
-        value: mailboxData.topThreatTypes[0]?.type || "None",
+        value: finalMailboxData.topThreatTypes?.[0]?.type ?? "None",
         status: "Identified",
         type: "healthy",
         icon: TrendingUp,
         description: "Most frequent threat vector",
       },
     ];
-  } else if (overviewData) {
+  } else if (finalOverviewData) {
     stats = [
       {
         id: 1,
         title: "Total Emails Scanned",
-        value: overviewData.totalEmailsScanned.toLocaleString(),
+        value: (finalOverviewData.totalEmails ?? 0).toLocaleString(),
         type: "healthy",
         icon: Mail,
         description: "Across all active mailboxes",
@@ -200,28 +175,35 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
       {
         id: 2,
         title: "Threats Blocked",
-        value: overviewData.totalThreatsBlocked.toLocaleString(),
-        change: `${((overviewData.totalThreatsBlocked / (overviewData.totalEmailsScanned || 1)) * 100).toFixed(1)}%`,
+        value: (
+          (finalOverviewData.totalPhishingDetected ?? 0) +
+          (finalOverviewData.totalSpamDetected ?? 0)
+        ).toLocaleString() || "0",
+        change: `${((((finalOverviewData.totalPhishingDetected ?? 0) + (finalOverviewData.totalSpamDetected ?? 4)) / (finalOverviewData.totalEmails || 1)) * 100).toFixed(1)}%`,
         type: "increase",
         icon: ShieldAlert,
         description: "Detection rate ratio",
       },
       {
         id: 3,
-        title: "Safety Score",
-        value: `${overviewData.safetyScore}%`,
-        status: overviewData.safetyScore > 80 ? "Stable" : "Critical",
-        type: overviewData.safetyScore > 80 ? "healthy" : "decrease",
+        title: "Connected Mailboxes",
+        value: (finalOverviewData.totalMailboxesConnected ?? 0).toString(),
+        status:
+          finalOverviewData.totalMailboxesConnected > 0 ? "Active" : "None",
+        type:
+          finalOverviewData.totalMailboxesConnected > 0
+            ? "healthy"
+            : "decrease",
         icon: ShieldCheck,
-        description: "Overall system health",
+        description: "Total mailboxes being monitored",
       },
     ];
   }
 
   // Chart Data Mapping
-  let chartData: any = [];
-  if (mailboxId && mailboxData) {
-    chartData = mailboxData.threatsHistory.map((item) => ({
+  let chartData: ActivityData[] = [];
+  if (mailboxId && finalMailboxData) {
+    chartData = (finalMailboxData.threatsHistory || []).map((item: any) => ({
       month: new Date(item.date).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -229,59 +211,102 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
       spam: item.count,
       phishing: Math.floor(item.count * 0.4), // Mocking phishing split if not provided
     }));
-  } else if (activityData) {
-    chartData = activityData.map((item: any) => ({
+  } else if (finalActivityData) {
+    chartData = finalActivityData.map((item: any) => ({
       month: new Date(item.timestamp).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       }),
-      spam: item.blocked || 0,
-      phishing: item.received || 0,
+      spam: item.blocked,
+      phishing: item.received,
     }));
   }
 
+  const finalChartData =
+    chartData && chartData.length > 0
+      ? chartData
+      : Array.from({ length: 7 }, (_, i) => ({
+          month: new Date(
+            Date.now() - (6 - i) * 24 * 60 * 60 * 1000,
+          ).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          }),
+          spam: 0,
+          phishing: 0,
+        }));
+
   const spamCount = mailboxId
     ? (
-        mailboxData?.topThreatTypes.find((t) =>
+        finalMailboxData?.topThreatTypes?.find((t: any) =>
           t.type.toLowerCase().includes("spam"),
-        )?.value || 0
+        )?.value ?? 0
       ).toLocaleString()
-    : overviewData?.malwareDetected.toLocaleString() || "0";
+    : finalOverviewData?.totalSpamDetected;
 
   const phishingCount = mailboxId
-    ? (
-        mailboxData?.topThreatTypes.find((t) =>
-          t.type.toLowerCase().includes("phishing"),
-        )?.value || 0
-      ).toLocaleString()
-    : overviewData?.phishingDetected.toLocaleString() || "0";
+    ? finalMailboxData?.topThreatTypes?.find((t: any) =>
+        t.type.toLowerCase().includes("phishing"),
+      )?.value
+    : finalOverviewData?.totalPhishingDetected;
 
-  // Notifications Mapping
-  const notifications: NotificationItem[] = (notificationsData?.data || [])
-    .slice(0, 3)
-    .map((n, idx) => ({
-      id: n.id,
-      title: n.title,
-      subtitle: n.message,
-      time: new Date(n.createdAt).toLocaleTimeString([], {
+  // Notifications & Reports Mapping
+  const rawNotifications = Array.isArray(notificationsData?.data)
+    ? notificationsData.data
+    : Array.isArray(notificationsData)
+      ? notificationsData
+      : [];
+
+  const rawReports = Array.isArray((reportsData as any)?.reports)
+    ? (reportsData as any).reports
+    : Array.isArray(reportsData)
+      ? reportsData
+      : [];
+
+  const notifications: NotificationItem[] = [
+    ...rawReports.map((r: any) => ({
+      id: r.id,
+      title: r.subject || "Flagged Email",
+      subtitle: `From: ${r.sender} - Type: ${r.threatType}`,
+      time: new Date(r.date || Date.now()).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
-      severity:
-        n.type === "error" ? "HIGH" : n.type === "warning" ? "MEDIUM" : "INFO",
-      type:
-        n.type === "error"
-          ? "error"
-          : n.type === "warning"
-            ? "warning"
-            : "info",
+      severity: r.threatType?.toLowerCase() === "phishing" ? "HIGH" : "MEDIUM",
+      type: r.threatType?.toLowerCase() === "phishing" ? "error" : "warning",
       icon:
-        n.type === "error"
-          ? CircleX
-          : n.type === "warning"
-            ? AlertTriangle
-            : Info,
-    }));
+        r.threatType?.toLowerCase() === "phishing" ? CircleX : AlertTriangle,
+    })),
+    ...rawNotifications
+      .map((n: any) => ({
+        id: n.id,
+        title: n.title,
+        subtitle: n.message,
+        time: new Date(n.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        severity:
+          n.type === "error"
+            ? "HIGH"
+            : n.type === "warning"
+              ? "MEDIUM"
+              : "INFO",
+        type:
+          n.type === "error"
+            ? "error"
+            : n.type === "warning"
+              ? "warning"
+              : "info",
+        icon:
+          n.type === "error"
+            ? CircleX
+            : n.type === "warning"
+              ? AlertTriangle
+              : Info,
+      }))
+      .slice(0, 10),
+  ];
 
   const severityConfig: Record<
     string,
@@ -304,25 +329,6 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
     },
   };
 
-  const statsConfig: Record<
-    string,
-    { badge: string; color: string; bar?: string }
-  > = {
-    increase: {
-      badge: "bg-secondary-200 text-secondary-800",
-      color: "text-secondary-800",
-    },
-    decrease: {
-      badge: "bg-error-50 text-error-600",
-      color: "text-error-600",
-    },
-    healthy: {
-      badge: "",
-      color: "text-secondary-700",
-      bar: "bg-secondary-700",
-    },
-  };
-
   return (
     <Container>
       {/* Title */}
@@ -336,68 +342,10 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
         </Text>
       </motion.div>
 
-      {/* Stats */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mt-6 md:mt-8"
-      >
-        {stats.map((state: StatItem) => {
-          const style = statsConfig[state.type];
-          const Icon = state.icon;
-          return (
-            <motion.div
-              variants={itemVariants}
-              key={state.id}
-              whileHover={{ y: -5 }}
-              className="flex flex-col gap-4 rounded-xl bg-ghostBlue p-4 transition-shadow hover:shadow-md"
-            >
-              <Text color="primary-500" size={"sm"} className="tracking-wide">
-                {state.title}
-              </Text>
-
-              <Text size={"3xl"} font={"bold"} color={`primary-950`}>
-                {state.value}
-              </Text>
-
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3">
-                  {state.change && (
-                    <Badge
-                      className={cn(
-                        "text-sm font-medium   px-4 rounded-full flex items-center gap-1",
-                        style.badge,
-                      )}
-                    >
-                      {Icon && <Icon size={14} strokeWidth={3} />}
-                      {state.change}
-                    </Badge>
-                  )}
-                  {state.status && (
-                    <Text font="medium" className={style.color}>
-                      {state.status}
-                    </Text>
-                  )}
-                  <Text size="xs" color="primary-400">
-                    {state.description}
-                  </Text>
-                </div>
-                {state.type === "healthy" && (
-                  <div className="w-full h-1.5 bg-primary-100 rounded-full overflow-hidden mt-1">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 1, delay: 0.5 }}
-                      className={cn("h-full rounded-full", style.bar)}
-                    />
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </motion.div>
+      <AnalyticsStats
+        overview={finalOverviewData}
+        isLoading={mailboxId ? isMailboxLoading : isOverviewLoading}
+      />
 
       {/* Container */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 md:mt-8">
@@ -408,11 +356,15 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="min-w-0"
         >
-          <AnalyticsChart
-            data={chartData}
-            spamCount={spamCount}
-            phishingCount={phishingCount}
-          />
+          {isActivityLoading || (mailboxId && isMailboxLoading) ? (
+            <div className="h-[450px] w-full bg-ghostBlue animate-pulse rounded-xl" />
+          ) : (
+            <AnalyticsChart
+              data={finalChartData}
+              spamCount={spamCount?.toLocaleString() || "0"}
+              phishingCount={phishingCount?.toLocaleString() || "0"}
+            />
+          )}
         </motion.div>
         {/* Events */}
         <motion.div
@@ -429,58 +381,111 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-4 h-full"
           >
-            {notifications.map((notification: NotificationItem) => {
-              const style = severityConfig[notification.type];
-              const Icon = notification.icon;
-              return (
-                <motion.div
-                  variants={itemVariants}
-                  key={notification.id}
-                  whileHover={{ x: 5 }}
-                  className="bg-ghostBlue rounded-lg p-6 transition-all duration-300 border border-transparent hover:border-primary-100"
+            {isNotificationsLoading || (mailboxId && isReportsLoading) ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-ghostBlue rounded-lg p-6 flex items-start gap-4 animate-pulse"
                 >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={cn(
-                        "p-2 rounded-lg flex items-center justify-center shrink-0",
-                        style.iconBg,
-                      )}
-                    >
-                      <Icon size={20} strokeWidth={2.5} />
+                  <div className="h-10 w-10 bg-primary-100 rounded-lg shrink-0" />
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex items-center justify-between">
+                      <div className="h-5 w-1/2 bg-primary-200 rounded" />
+                      <div className="h-4 w-16 bg-primary-100 rounded" />
                     </div>
-                    <div className="flex flex-col gap-2 w-full">
-                      <div className="flex items-center justify-between">
-                        <Text as={"h1"} size={"sm"} color={"primary-950"}>
-                          {notification.title}
+                    <div className="h-4 w-3/4 bg-primary-50 rounded" />
+                    <div className="h-3 w-20 bg-primary-100 rounded" />
+                  </div>
+                </div>
+              ))
+            ) : notifications.length === 0 ? (
+              <div className="h-full flex items-center justify-center py-10">
+                <StateMessage
+                  variant="empty"
+                  title="No Security Events"
+                  description="Your workspace is currently safe. No threats detected."
+                />
+              </div>
+            ) : (
+              notifications.map((notification: NotificationItem) => {
+                const style = severityConfig[notification.type];
+                const Icon = notification.icon;
+                return (
+                  <motion.div
+                    variants={itemVariants}
+                    key={notification.id}
+                    whileHover={{ x: 5 }}
+                    className="bg-ghostBlue rounded-lg p-6 transition-all duration-300 border border-transparent hover:border-primary-100"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={cn(
+                          "p-2 rounded-lg flex items-center justify-center shrink-0",
+                          style.iconBg,
+                        )}
+                      >
+                        <Icon size={20} strokeWidth={2.5} />
+                      </div>
+                      <div className="flex flex-col gap-2 w-full">
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <Text as={"h1"} size={"sm"} color={"primary-950"}>
+                              {notification.title}
+                            </Text>
+                            <div className="flex items-center gap-1 mt-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-primary-400 hover:text-secondary-500 hover:bg-secondary-50"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Toggle Star Logic
+                                }}
+                              >
+                                <Star className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-primary-400 hover:text-error-500 hover:bg-error-50"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteNotification(String(notification.id));
+                                }}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                          <Text
+                            font="bold"
+                            size="xs"
+                            className={cn(
+                              "uppercase tracking-wider",
+                              style.textColor,
+                            )}
+                          >
+                            {notification.severity}
+                          </Text>
+                        </div>
+                        <Text as={"p"} size={"sm"} color={"primary-500"}>
+                          {notification.subtitle}
                         </Text>
                         <Text
-                          font="bold"
-                          size="xs"
-                          className={cn(
-                            "uppercase tracking-wider",
-                            style.textColor,
-                          )}
+                          as={"span"}
+                          color={"primary-500"}
+                          className="text-[10px]"
                         >
-                          {notification.severity}
+                          {notification.time}
                         </Text>
                       </div>
-                      <Text as={"p"} size={"sm"} color={"primary-500"}>
-                        {notification.subtitle}
-                      </Text>
-                      <Text
-                        as={"span"}
-                        color={"primary-500"}
-                        className="text-[10px]"
-                      >
-                        {notification.time}
-                      </Text>
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                  </motion.div>
+                );
+              })
+            )}
           </motion.div>
         </motion.div>
       </div>

@@ -1,6 +1,6 @@
 
 import axiosInstance from "@/lib/axios";
-import { ActivityPeriod, AnalyticsOverview, MailboxStats } from "../types/Analytics";
+import { ActivityData, ActivityPeriod, AnalyticsOverview, MailboxStats } from "../types/Analytics";
 
 export const analyticsApi = {
   getOverview: async (): Promise<AnalyticsOverview> => {
@@ -13,8 +13,8 @@ export const analyticsApi = {
     return res.data;
   },
 
-  getActivity: async (period: ActivityPeriod = 'daily'):Promise<any> => {
-    const res = await axiosInstance.get('/analytics/activity', { params: { period } });
+  getActivity: async (period: ActivityPeriod = 'daily'): Promise<ActivityData[]> => {
+    const res = await axiosInstance.get<ActivityData[]>('/analytics/activity', { params: { period } });
     return res.data;
   },
 };

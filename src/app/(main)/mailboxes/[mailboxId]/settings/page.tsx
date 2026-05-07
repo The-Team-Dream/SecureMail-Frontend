@@ -12,28 +12,75 @@ import {
   mailBoxSettingsSchema,
   IMailboxSettings,
 } from "@/schemas/mailboxSettings";
+import { useParams, useRouter } from "next/navigation";
+import {
+  useMailboxById,
+  useMailboxOperations,
+} from "@/APIs/hooks/useMailboxes";
+import { useEffect } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 const MailboxSettings = () => {
+  const params = useParams();
+  const router = useRouter();
+  const mailboxId = params.mailboxId as string;
+
+  const { data: mailbox, isLoading } = useMailboxById(mailboxId);
+  const { updateMailbox, isUpdating, deleteMailbox, isDeleting } =
+    useMailboxOperations();
+
   const {
     handleSubmit,
     register,
     control,
     formState: { errors },
     clearErrors,
+    reset,
   } = useForm<IMailboxSettings>({
     mode: "onBlur",
     reValidateMode: "onChange",
     resolver: zodResolver(mailBoxSettingsSchema),
     defaultValues: {
-      mailboxName: "Mohamed",
-      emailForwarding: true,
+      mailboxName: "",
+      emailForwarding: false,
       pushNotifications: true,
     },
   });
 
+  useEffect(() => {
+    if (mailbox) {
+      reset({
+        mailboxName: mailbox.displayName || "",
+        emailForwarding: false, // API might not have this, default to false or map if available
+        pushNotifications: mailbox.pushNotificationsEnabled,
+      });
+    }
+  }, [mailbox, reset]);
+
   const onSubmit = (data: IMailboxSettings) => {
-    console.log("Form data:", data);
+    updateMailbox({
+      id: mailboxId,
+      data: {
+        displayName: data.mailboxName,
+        pushNotificationsEnabled: data.pushNotifications,
+      },
+    });
   };
+
+  const handleDelete = () => {
+    if (confirm("Are you sure you want to delete this mailbox?")) {
+      deleteMailbox(mailboxId);
+      router.push("/mailboxes");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[400px]">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <Container>
@@ -133,9 +180,11 @@ const MailboxSettings = () => {
 
             <Button
               type="button"
+              onClick={handleDelete}
+              disabled={isDeleting}
               className="w-full md:w-auto h-10 px-6 gap-2 rounded-lg border-2 border-error-600 text-error-600 bg-background hover:bg-error-50"
             >
-              Delete
+              {isDeleting ? "Deleting..." : "Delete"}
               <Icons.Delete className="h-4 w-4 text-error-600" />
             </Button>
           </div>
@@ -146,9 +195,10 @@ const MailboxSettings = () => {
           <Button
             size={"lg"}
             type="submit"
+            disabled={isUpdating}
             className="w-full md:w-[180px] rounded-lg"
           >
-            Save & Update
+            {isUpdating ? "Updating..." : "Save & Update"}
           </Button>
         </div>
       </form>

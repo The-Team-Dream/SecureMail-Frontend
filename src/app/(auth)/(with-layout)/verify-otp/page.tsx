@@ -14,7 +14,6 @@ import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
-import { AxiosError } from "axios";
 
 function VerifyOtpContent() {
   const [otp, setOtp] = useState("");
@@ -24,7 +23,6 @@ function VerifyOtpContent() {
   const router = useRouter();
   const { mutate, isPending } = useVerifyOtp({
     onSuccess: (res) => {
-      console.log(res.data);
       toast.success(res.data.message);
       router.push("/sign-in");
     },
@@ -46,9 +44,10 @@ function VerifyOtpContent() {
     setOtp(otpNumbers);
   };
 
-  const handleVerify = () => {
-    if (otp.length === 6) {
-      mutate({ email, otp });
+  const handleVerify = (otpValue?: string) => {
+    const finalOtp = otpValue || otp;
+    if (finalOtp.length === 6) {
+      mutate({ email, otp: finalOtp });
     } else {
       toast.error("Otp must be 6 digits");
     }
@@ -78,7 +77,8 @@ function VerifyOtpContent() {
 
             <Text color={"primary-500"} font={"medium"}>
               Enter OTP sent to your email address{" "}
-              <span className="font-semibold">{email}</span> to login to the portal
+              <span className="font-semibold">{email}</span> to login to the
+              portal
             </Text>
           </div>
 
@@ -87,8 +87,10 @@ function VerifyOtpContent() {
             <InputOTP
               maxLength={6}
               onChange={handleOtpChange}
+              onComplete={handleVerify}
               value={otp}
               inputMode="numeric"
+              disabled={isPending}
             >
               <InputOTPGroup className="flex items-center justify-between max-w-95 mx-auto w-full">
                 {[0, 1, 2, 3, 4, 5].map((index) => (
@@ -121,8 +123,8 @@ function VerifyOtpContent() {
           </p>
 
           <Button
-            onClick={handleVerify}
-            disabled={isPending}
+            onClick={() => handleVerify()}
+            disabled={isPending || otp.length !== 6}
             className="group w-full"
             size={"lg"}
           >

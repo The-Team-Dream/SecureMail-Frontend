@@ -6,6 +6,8 @@ import { WizardStepProps } from "../../../../../schemas/CustomAccount";
 interface StepProviderProps extends WizardStepProps {
   provider: string;
   setProvider: (provider: string) => void;
+  onOAuthConnect?: (provider: "Gmail" | "Outlook") => void;
+  isOAuthLoading?: boolean;
 }
 
 export function StepProvider({
@@ -16,6 +18,8 @@ export function StepProvider({
   register,
   errors,
   clearErrors,
+  onOAuthConnect,
+  isOAuthLoading,
 }: StepProviderProps) {
   return (
     <div className="w-full flex flex-col items-center">
@@ -37,11 +41,8 @@ export function StepProvider({
             label="Mailbox Name"
             required
             placeholder="Mailbox Name"
-            {...(register
-              ? register("mailboxName", {
-                  onChange: () => clearErrors?.("mailboxName"),
-                })
-              : {})}
+            defaultValue={formData.mailboxName}
+            {...(register ? register("mailboxName") : {})}
             error={errors?.mailboxName?.message}
           />
           <Input
@@ -49,11 +50,8 @@ export function StepProvider({
             required
             type="email"
             placeholder="Email"
-            {...(register
-              ? register("mailboxEmail", {
-                  onChange: () => clearErrors?.("mailboxEmail"),
-                })
-              : {})}
+            defaultValue={formData.mailboxEmail}
+            {...(register ? register("mailboxEmail") : {})}
             error={errors?.mailboxEmail?.message}
           />
         </div>
@@ -63,7 +61,7 @@ export function StepProvider({
             Provider Type{" "}
             <span className="text-error-500 font-semibold">*</span>
           </label>
-          <div className="flex items-center justify-between max-w-sm  mt-3">
+          <div className="flex items-center justify-between max-w-sm mt-3">
             {[
               { id: "Gmail", label: "Gmail" },
               { id: "Outlook", label: "Outlook" },

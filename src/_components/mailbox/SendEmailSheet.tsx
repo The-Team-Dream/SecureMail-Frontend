@@ -26,7 +26,7 @@ import { useTheme } from "next-themes";
 import { Text } from "../shared/Text";
 import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
-import { useComposeEmail, MOCK_ACCOUNTS } from "@/hooks/useComposeEmail";
+import { useComposeEmail } from "@/hooks/useComposeEmail";
 
 // ─── Component ─────────────────────────────────────────────────────────────
 export const ComposeEmailSheet = () => {
@@ -52,6 +52,7 @@ export const ComposeEmailSheet = () => {
     insertEmoji,
     onSubmit,
     isPending,
+    mailboxes,
   } = useComposeEmail();
 
   const titleMap = {
@@ -97,7 +98,7 @@ export const ComposeEmailSheet = () => {
                         <SelectValue placeholder="Select sender" />
                       </SelectTrigger>
                       <SelectContent>
-                        {MOCK_ACCOUNTS.map((acc) => (
+                        {mailboxes.map((acc) => (
                           <SelectItem key={acc.id} value={acc.email}>
                             {acc.email}
                           </SelectItem>

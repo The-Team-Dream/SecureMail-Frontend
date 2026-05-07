@@ -1,10 +1,9 @@
 export interface AnalyticsOverview {
-  totalMailboxes: number;
-  totalEmailsScanned: number;
-  totalThreatsBlocked: number;
-  phishingDetected: number;
-  malwareDetected: number;
-  safetyScore: number;
+  totalEmails: number;
+  totalMailboxesConnected: number;
+  totalPhishingDetected: number;
+  totalSpamDetected: number;
+  totalStorageUsed: number;
 }
 
 export interface MailboxStats {

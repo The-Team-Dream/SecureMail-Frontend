@@ -6,6 +6,7 @@ import "swiper/css";
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { Text } from "../shared/Text";
+import authImg from "../../../public/images/auth.jpg";
 
 const slides = [
   {
@@ -29,7 +30,7 @@ export const AuthSlides = () => {
   return (
     <div className="relative w-full h-full">
       <Image
-        src={"/images/auth.jpg"}
+        src={authImg}
         alt="Auth Image"
         fill
         priority
