@@ -138,7 +138,7 @@ const TermsPage = () => {
               />
               I agree to the terms and conditions
             </label>
-            {error && <Error error={error} />}
+            <Error error={error} />
           </div>
           <Button
             onClick={handleAgree}

@@ -16,7 +16,6 @@ import { MailboxSection } from "@/_components/wizard-summary/MailboxSection";
 import { IMAPSection } from "@/_components/wizard-summary/IMAPSection";
 import { SMTPSection } from "@/_components/wizard-summary/SMTPSection";
 import { AdvancedSection } from "@/_components/wizard-summary/AdvancedSection";
-import { useMailboxOperations } from "@/APIs/hooks/useMailboxes";
 
 interface StepSummaryProps extends WizardStepProps {
   handleImapSubmit?: () => Promise<void>;
@@ -31,7 +30,6 @@ export function StepSummary({
 }: StepSummaryProps) {
   const [showImapPassword, setShowImapPassword] = useState(false);
   const [showSmtpPassword, setShowSmtpPassword] = useState(false);
-  const router = useRouter();
 
   const { handleSubmit, setValue, watch } = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
@@ -75,7 +73,10 @@ export function StepSummary({
       </Text>
 
       <div className="w-full max-w-[900px] flex flex-col mx-auto bg-card mb-8">
-        <MailboxSection formData={localFormData} handleChange={localHandleChange} />
+        <MailboxSection
+          formData={localFormData}
+          handleChange={localHandleChange}
+        />
 
         <IMAPSection
           formData={localFormData}
@@ -91,7 +92,10 @@ export function StepSummary({
           onTogglePassword={() => setShowSmtpPassword((p) => !p)}
         />
 
-        <AdvancedSection formData={localFormData} handleChange={localHandleChange} />
+        <AdvancedSection
+          formData={localFormData}
+          handleChange={localHandleChange}
+        />
       </div>
     </form>
   );

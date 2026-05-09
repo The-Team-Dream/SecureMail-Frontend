@@ -8,6 +8,7 @@ const Error = ({ error }: { error: string | undefined }) => {
     <AnimatePresence>
       {error && (
         <motion.div
+          key="error-message"
           variants={errorVariants}
           initial="initial"
           animate="animate"

@@ -27,6 +27,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
 import type { Folder } from "@/types/mail";
 import { useMailStore } from "@/stores/useMailStore";
+import { useEmails } from "@/APIs/hooks/useEmails";
 
 const dashboardNavItems = [
   { name: "Mailboxes", icon: Mail, href: "/mailboxes" },
@@ -65,6 +66,11 @@ export const MobileSidebar = () => {
 
   const isMailPage = !!params.mailboxId;
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
+
+  // Fetch inbox emails for unread count
+  const { data: inboxData } = useEmails(params.mailboxId as string, "inbox", 1);
+  const unreadInboxCount =
+    inboxData?.data?.filter((e: any) => !e.isRead).length || 0;
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -203,6 +209,11 @@ export const MobileSidebar = () => {
                               >
                                 {item.name}
                               </Text>
+                              {item.folder === "inbox" && unreadInboxCount > 0 && (
+                                <span className="bg-primary-800 text-background text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                                  {unreadInboxCount}
+                                </span>
+                              )}
                             </div>
 
                             <ChevronRight

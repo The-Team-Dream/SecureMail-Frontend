@@ -9,6 +9,7 @@ import { Icons } from "@/constants/icons";
 import { mailboxApi } from "@/APIs/features/mailboxes";
 import { useMailboxOperations } from "@/APIs/hooks/useMailboxes";
 import toast from "react-hot-toast";
+import { MailboxProvider } from "@/APIs/types/Mailbox";
 
 interface UseAddAccountWizardProps {
   onCancel: () => void;
@@ -24,7 +25,7 @@ export function useAddAccountWizard({
   const searchParams = useSearchParams();
 
   const [step, setStep] = useState(1);
-  const [provider, setProvider] = useState("Custom IMAP");
+  const [provider, setProvider] = useState<MailboxProvider>("IMAP");
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isImapLoading, setIsImapLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -49,7 +50,7 @@ export function useAddAccountWizard({
     shouldUnregister: false,
     defaultValues: {
       mailboxName: "",
-      mailboxEmail: "",
+      emailAddress: "",
       imapHost: "",
       imapPort: "",
       imapSecurity: "SSL/TLS",
@@ -99,7 +100,9 @@ export function useAddAccountWizard({
       }
 
       const { code } = event.data;
-      const origin = window.location.origin.includes("localhost") ? "http://localhost:3001" : window.location.origin;
+      const origin = window.location.origin.includes("localhost")
+        ? "http://localhost:3001"
+        : window.location.origin;
       const redirectUri = `${origin}/auth/google/callback`;
       const oauthProvider = provider.toLowerCase();
 
@@ -110,14 +113,13 @@ export function useAddAccountWizard({
         } else if (oauthProvider === "outlook") {
           await connectOutlook({ code, redirectUri });
         }
-        
+
         // On Success
         clearPersistence();
         reset();
         router.push("/mailboxes");
       } catch (error: any) {
         console.error("OAuth Connection Failed:", error);
-        // Error toast is already handled by the mutation hook
       } finally {
         setIsOAuthLoading(false);
       }
@@ -129,16 +131,20 @@ export function useAddAccountWizard({
 
   // Form State Persistence (IMAP only)
   useEffect(() => {
+    const stepParam = searchParams.get("step");
     const storedData = sessionStorage.getItem(STORAGE_KEYS.DATA);
-    if (storedData) {
+
+    if (stepParam && storedData) {
       try {
         reset(JSON.parse(storedData));
       } catch (e) {
         console.error("Failed to load persisted form data", e);
       }
+    } else if (!stepParam) {
+      sessionStorage.removeItem(STORAGE_KEYS.DATA);
     }
     setIsLoaded(true);
-  }, [reset]);
+  }, [reset, searchParams]);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -146,7 +152,7 @@ export function useAddAccountWizard({
   }, [formData, isLoaded]);
 
   const clearPersistence = () => {
-    localStorage.removeItem(STORAGE_KEYS.DATA);
+    sessionStorage.removeItem(STORAGE_KEYS.DATA);
     const params = new URLSearchParams(searchParams.toString());
     params.delete("step");
     router.replace(pathname);
@@ -162,14 +168,16 @@ export function useAddAccountWizard({
   };
 
   // ─── OAuth Popup Trigger ──────────────────────────────────────────────────
-  const handleOAuthRedirect = async (oauthProvider: "Gmail" | "Outlook") => {
+  const handleOAuthRedirect = async (oauthProvider: "GMAIL" | "OUTLOOK") => {
     setIsOAuthLoading(true);
     try {
-      const origin = window.location.origin.includes("localhost") ? "http://localhost:3001" : window.location.origin;
+      const origin = window.location.origin.includes("localhost")
+        ? "http://localhost:3001"
+        : window.location.origin;
       const redirectUri = `${origin}/auth/google/callback`;
       let url: string;
 
-      if (oauthProvider === "Gmail") {
+      if (oauthProvider === "GMAIL") {
         const result = await mailboxApi.getGmailAuthUrl(redirectUri);
         url = result.url;
       } else {
@@ -190,7 +198,7 @@ export function useAddAccountWizard({
       window.open(
         url,
         "ConnectMailbox",
-        `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
+        `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
       );
     } catch (error: any) {
       const message =
@@ -206,7 +214,7 @@ export function useAddAccountWizard({
   // ─── Step Validation ────────────────────────────────────────────────────────
   const validateStep = async (): Promise<boolean> => {
     let fieldsToValidate: (keyof WizardFormData)[] = [];
-    if (step === 1) fieldsToValidate = ["mailboxName", "mailboxEmail"];
+    if (step === 1) fieldsToValidate = ["mailboxName", "emailAddress"];
     if (step === 2)
       fieldsToValidate = [
         "imapHost",
@@ -238,7 +246,7 @@ export function useAddAccountWizard({
       toast.error("Display name is required.");
       return;
     }
-    if (!formData.mailboxEmail?.trim()) {
+    if (!formData.emailAddress?.trim()) {
       toast.error("Email address is required.");
       return;
     }
@@ -251,7 +259,12 @@ export function useAddAccountWizard({
       return;
     }
     const portNum = Number(formData.imapPort);
-    if (!formData.imapPort || isNaN(portNum) || portNum < 1 || portNum > 65535) {
+    if (
+      !formData.imapPort ||
+      isNaN(portNum) ||
+      portNum < 1 ||
+      portNum > 65535
+    ) {
       toast.error("IMAP port must be a number between 1 and 65535.");
       return;
     }
@@ -267,7 +280,7 @@ export function useAddAccountWizard({
       await connectImap({
         host: formData.imapHost.trim(),
         port: portNum,
-        email: formData.mailboxEmail.trim(),
+        email: formData.emailAddress.trim(),
         password: formData.imapPassword,
         secure: isSecure,
         displayName: formData.mailboxName.trim(),
@@ -295,8 +308,8 @@ export function useAddAccountWizard({
   // ─── Next Handler ───────────────────────────────────────────────────────────
   const handleNext = async () => {
     // OAuth providers skip all form steps — instant redirect
-    if (step === 1 && (provider === "Gmail" || provider === "Outlook")) {
-      await handleOAuthRedirect(provider as "Gmail" | "Outlook");
+    if (step === 1 && (provider === "GMAIL" || provider === "OUTLOOK")) {
+      await handleOAuthRedirect(provider as "GMAIL" | "OUTLOOK");
       return;
     }
 
@@ -304,7 +317,7 @@ export function useAddAccountWizard({
     if (!isValid) return;
 
     // Final IMAP step
-    if (step === 5 && provider === "Custom IMAP") {
+    if (step === 5 && provider === "IMAP") {
       await handleImapSubmit();
       return;
     }
@@ -328,7 +341,7 @@ export function useAddAccountWizard({
     clearPersistence();
     updateStepUrl(1);
     reset();
-    setProvider("Custom IMAP");
+    setProvider("IMAP");
   };
 
   const steps = [
@@ -339,7 +352,7 @@ export function useAddAccountWizard({
     { id: 5, icon: Icons.Report },
   ];
 
-  const isOAuthProvider = provider === "Gmail" || provider === "Outlook";
+  const isOAuthProvider = provider === "GMAIL" || provider === "OUTLOOK";
   const isLastStep = step === 5;
   const nextButtonLabel = isOAuthLoading
     ? "Redirecting..."

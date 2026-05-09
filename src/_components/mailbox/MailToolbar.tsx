@@ -12,6 +12,15 @@ import { useMailStore } from "@/stores/useMailStore";
 import { cn } from "@/lib/utils";
 import { Text } from "../shared/Text";
 import toast from "react-hot-toast";
+import { useParams } from "next/navigation";
+import {
+  useEmails,
+  useSearchEmails,
+  useEmailActions,
+} from "@/APIs/hooks/useEmails";
+import type { EmailFolder } from "@/APIs/types/Email";
+import type { Email } from "@/types/mail";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface MailToolbarProps {
   showCheckbox?: boolean;
@@ -22,57 +31,68 @@ export const MailToolbar = ({
   showCheckbox = true,
   showRefresh = true,
 }: MailToolbarProps) => {
+  const params = useParams();
+  const mailboxId = params.mailboxId as string;
+  const queryClient = useQueryClient();
+
   const currentPage = useMailStore((s) => s.currentPage);
   const selectedIds = useMailStore((s) => s.selectedIds);
-
-  const storeEmails = useMailStore((s) => s.emails);
-  const storeFolder = useMailStore((s) => s.activeFolder);
-  const storeClassification = useMailStore((s) => s.activeClassification);
+  const storeFolder = useMailStore((s) => s.activeFolder) as EmailFolder;
   const storeSearch = useMailStore((s) => s.searchQuery);
 
   const setCurrentPage = useMailStore((s) => s.setCurrentPage);
-  const selectAllOnPage = useMailStore((s) => s.selectAllOnPage);
   const deselectAll = useMailStore((s) => s.deselectAll);
+  const toggleSelectEmail = useMailStore((s) => s.toggleSelectEmail);
 
-  const archiveSelected = useMailStore((s) => s.archiveSelected);
-  const deleteSelected = useMailStore((s) => s.deleteSelected);
-  const toggleSelectedRead = useMailStore((s) => s.toggleSelectedRead);
+  const { data: emailsData, isFetching } = useEmails(
+    mailboxId,
+    storeFolder,
+    currentPage,
+  );
+  const { data: searchData, isFetching: isSearchingFetching } = useSearchEmails(
+    mailboxId,
+    storeSearch,
+    currentPage,
+  );
+  const { deleteMutation, readMutation, reclassifyMutation } =
+    useEmailActions(mailboxId);
 
-  const ITEMS_PER_PAGE = 18;
+  const isRefreshing = isFetching || isSearchingFetching;
 
-  let filtered = storeEmails;
+  const isSearching = storeSearch.trim().length > 0;
+  const currentData = (isSearching ? searchData : emailsData) as any;
+  const pagedEmails = Array.isArray(currentData)
+    ? currentData
+    : currentData?.data || [];
+  const meta = currentData?.meta;
 
-  if (storeFolder === "starred") {
-    filtered = filtered.filter((e) => e.isStarred && e.folder !== "trash");
-  } else {
-    filtered = filtered.filter((e) => e.folder === storeFolder);
-  }
-  if (storeFolder === "inbox") {
-    filtered = filtered.filter((e) => e.classification === storeClassification);
-  }
-
-  if (storeSearch.trim()) {
-    const q = storeSearch.toLowerCase();
-    filtered = filtered.filter(
-      (e) =>
-        e.subject.toLowerCase().includes(q) ||
-        e.sender.toLowerCase().includes(q),
-    );
-  }
-
-  const total = filtered.length;
-  const totalPages = Math.ceil(total / ITEMS_PER_PAGE) || 1;
-  const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
-  const pagedEmails = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
-  const pagedIds = pagedEmails.map((e) => e.id);
-
-  const start = total === 0 ? 0 : startIdx + 1;
-  const end = total === 0 ? 0 : Math.min(currentPage * ITEMS_PER_PAGE, total);
+  const total = meta?.total || 0;
+  const totalPages = meta?.totalPages || 1;
+  const limit = meta?.limit || 20;
+  const start = total === 0 ? 0 : (currentPage - 1) * limit + 1;
+  const end = total === 0 ? 0 : Math.min(currentPage * limit, total);
+  const pagedIds = pagedEmails.map((e: Email) => String(e.id));
 
   const isAllSelected =
-    pagedIds.length > 0 && pagedIds.every((id) => selectedIds.includes(id));
+    pagedIds.length > 0 &&
+    pagedIds.every((id: string) => selectedIds.includes(id));
   const isSomeSelected =
-    pagedIds.some((id) => selectedIds.includes(id)) && !isAllSelected;
+    pagedIds.some((id: string) => selectedIds.includes(id)) && !isAllSelected;
+
+  const selectAllOnPage = () => {
+    const allSelected =
+      pagedIds.length > 0 &&
+      pagedIds.every((id: string) => selectedIds.includes(id));
+    if (allSelected) {
+      useMailStore.setState((s) => ({
+        selectedIds: s.selectedIds.filter((id) => !pagedIds.includes(id)),
+      }));
+    } else {
+      useMailStore.setState((s) => ({
+        selectedIds: [...new Set([...s.selectedIds, ...pagedIds])],
+      }));
+    }
+  };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
@@ -86,9 +106,60 @@ export const MailToolbar = ({
     }
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     deselectAll();
+    await queryClient.resetQueries({ queryKey: ["emails", mailboxId] });
     toast.success("Emails refreshed successfully");
+  };
+
+  const handleBulkArchive = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      await Promise.all(
+        selectedIds.map((id) =>
+          reclassifyMutation.mutateAsync({ id, folder: "trash" }),
+        ),
+      ); // using trash as fallback since archive endpoint is missing
+      deselectAll();
+      toast.success("Selected emails archived");
+    } catch (e) {
+      toast.error("Some emails failed to archive");
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      await Promise.all(
+        selectedIds.map((id) => deleteMutation.mutateAsync(id)),
+      );
+      deselectAll();
+      toast.success("Selected emails deleted");
+    } catch (e) {
+      toast.error("Some emails failed to delete");
+    }
+  };
+
+  const handleBulkToggleRead = async () => {
+    if (selectedIds.length === 0) return;
+    // We don't know the read state of each email easily here without looking them up,
+    // so we'll just mark them all as read for simplicity, or we could look up the first one
+    const firstSelected = pagedEmails.find(
+      (e: Email) => e.id === selectedIds[0],
+    );
+    const newReadState = firstSelected ? !firstSelected.isRead : true;
+
+    try {
+      await Promise.all(
+        selectedIds.map((id) =>
+          readMutation.mutateAsync({ id, read: newReadState }),
+        ),
+      );
+      deselectAll();
+      toast.success("Selected emails read status updated");
+    } catch (e) {
+      toast.error("Some emails failed to update read status");
+    }
   };
 
   return (
@@ -123,10 +194,16 @@ export const MailToolbar = ({
         {showRefresh && (
           <button
             onClick={handleRefresh}
-            className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer ml-1"
-            aria-label="Refresh emails"
+            disabled={isRefreshing}
+            className="p-1.5 sm:p-2 rounded-lg text-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-50"
+            title="Refresh"
           >
-            <RefreshCw className="w-4 h-4 text-primary-900" />
+            <RefreshCw
+              className={cn(
+                "w-4 h-4 sm:w-5 sm:h-5",
+                isRefreshing && "animate-spin",
+              )}
+            />
           </button>
         )}
 
@@ -134,10 +211,7 @@ export const MailToolbar = ({
         {selectedIds.length > 0 && (
           <div className="flex items-center gap-1 ml-2 pl-2 border-l border-primary-200">
             <button
-              onClick={() => {
-                archiveSelected();
-                toast.success("Selected emails archived");
-              }}
+              onClick={handleBulkArchive}
               className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer"
               aria-label="Archive selected"
               title="Archive selected"
@@ -145,10 +219,7 @@ export const MailToolbar = ({
               <Archive className="w-4 h-4" />
             </button>
             <button
-              onClick={() => {
-                deleteSelected();
-                toast.success("Selected emails deleted");
-              }}
+              onClick={handleBulkDelete}
               className="p-1.5 text-primary-900 hover:text-error-500 hover:bg-error-50 rounded-full transition-colors cursor-pointer"
               aria-label="Delete selected"
               title="Delete selected"
@@ -156,10 +227,7 @@ export const MailToolbar = ({
               <Trash2 className="w-4 h-4" />
             </button>
             <button
-              onClick={() => {
-                toggleSelectedRead();
-                toast.success("Selected emails toggled read status");
-              }}
+              onClick={handleBulkToggleRead}
               className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer"
               aria-label="Mark selected as read/unread"
               title="Mark selected as read/unread"
@@ -172,7 +240,7 @@ export const MailToolbar = ({
 
       {/* ══════ Pagination ══════ */}
       <div className="flex items-center gap-1 sm:gap-2">
-        <Text className=" text-primary select-none">
+        <Text className="text-primary select-none text-xs sm:text-sm">
           {total === 0 ? "0" : `${start}-${end}`} of {total}
         </Text>
 

@@ -13,6 +13,7 @@ const BackEndError = ({ error }: BackEndErrorProps) => {
     <AnimatePresence>
       {error && (
         <motion.div
+          key="backend-error"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}

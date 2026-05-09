@@ -4,15 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMailStore } from "@/stores/useMailStore";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEmailActions } from "@/APIs/hooks/useEmails";
 import toast from "react-hot-toast";
 import { emailSchema, type EmailFormValues } from "@/schemas/SendEmail";
 import { type EmojiClickData } from "emoji-picker-react";
 
 import { useMailboxes } from "@/APIs/hooks/useMailboxes";
-import type { Mailbox } from "@/APIs/types/Mailbox";
-
+import { useServerErrors } from "@/utils/form-utils";
 
 export const useComposeEmail = () => {
   const {
@@ -21,32 +20,45 @@ export const useComposeEmail = () => {
     composeMode,
     composeData,
   } = useMailStore();
+  const router = useRouter();
 
   const { data: mailboxes = [] } = useMailboxes();
-  
+
   // ── Form ──────────────────────────────────────────────────────────────
   const form = useForm<EmailFormValues>({
+    mode: "onBlur",
+    reValidateMode: "onChange",
     resolver: zodResolver(emailSchema),
     defaultValues: {
+      mode: composeMode,
       from: "",
       to: "",
       subject: "",
       cc: "",
       bcc: "",
       bodyText: "",
-    },
+      bodyHtml: "",
+    } as any,
   });
+
+  const { handleServerErrors } = useServerErrors<EmailFormValues>(
+    form.setError,
+  );
 
   const formFrom = form.watch("from");
   const params = useParams();
 
-  // Find the selected mailbox based on the "from" email
-  const selectedMailbox = mailboxes.find((m) => m.email === formFrom) || mailboxes[0];
+  // Find the selected mailbox based on the "from" ID
+  const selectedMailbox =
+    mailboxes.find((m) => m.id.toString() === formFrom) ||
+    mailboxes.find((m) => m.id.toString() === params?.mailboxId) ||
+    mailboxes[0];
   const mailboxIdToUse =
-    selectedMailbox?.id ?? (params?.mailboxId as string);
+    selectedMailbox?.id?.toString() || (params?.mailboxId as string);
 
-  const { sendMutation, replyMutation, forwardMutation } =
-    useEmailActions(mailboxIdToUse ?? "");
+  const { sendMutation, replyMutation, forwardMutation } = useEmailActions(
+    mailboxIdToUse ?? "",
+  );
 
   // ── Attachments state ──────────────────────────────────────────────────
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -65,28 +77,31 @@ export const useComposeEmail = () => {
   // Reset form when opened / mode changes
   useEffect(() => {
     if (isOpen) {
+      // Determine the initial mailbox ID
+      const initialMailboxId =
+        mailboxes
+          .find((m) => m.id.toString() === params?.mailboxId)
+          ?.id?.toString() ||
+        mailboxes[0]?.id?.toString() ||
+        "";
+
       form.reset({
-        from: formFrom || mailboxes[0]?.email || "",
+        mode: composeMode,
+        from: initialMailboxId,
         to: composeData?.to ?? "",
-        subject:
-          composeMode === "reply"
-            ? `Re: ${composeData?.subject ?? ""}`
-            : composeMode === "forward"
-              ? `Fwd: ${composeData?.subject ?? ""}`
-              : "",
+        subject: "",
         cc: "",
         bcc: "",
-        bodyText:
-          composeMode !== "new"
-            ? `\n\n--- Original Message ---\n${composeData?.body ?? ""}`
-            : "",
-      });
+        bodyText: "",
+        bodyHtml: (composeData as any)?.bodyHtml ?? "",
+      } as any);
       setAttachments([]);
       setShowEmoji(false);
       setShowCc(false);
       setShowBcc(false);
     }
-  }, [isOpen, composeMode, composeData, form, mailboxes, formFrom]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, composeMode, composeData, mailboxes]);
 
   // Close emoji picker on outside click
   useEffect(() => {
@@ -147,31 +162,45 @@ export const useComposeEmail = () => {
     const sanitizedBcc = sanitizeEmails(data.bcc);
     const sanitizedBodyText = data.bodyText?.trim() || "";
 
-    fd.append("to", sanitizedTo);
-    fd.append("subject", sanitizedSubject);
-    if (sanitizedCc) fd.append("cc", sanitizedCc);
-    if (sanitizedBcc) fd.append("bcc", sanitizedBcc);
-    if (sanitizedBodyText) fd.append("bodyText", sanitizedBodyText);
-
     attachments.forEach((f) => fd.append("attachments", f));
+    const onSuccess = () => {
+      setOpen(false);
+      // Redirect to sent folder to see the sent email
+      router.push(`/mailboxes/${mailboxIdToUse}/sent`);
+    };
 
     if (composeMode === "reply" && composeData?.emailId) {
+      if (sanitizedBodyText) fd.append("content", sanitizedBodyText);
+      if (data.bodyHtml) fd.append("bodyHtml", data.bodyHtml);
       replyMutation.mutate(
         { id: composeData.emailId, formData: fd },
-        { onSuccess: () => setOpen(false) },
+        {
+          onSuccess,
+          onError: (err: any) => handleServerErrors(err, ["bodyText"]),
+        },
       );
     } else if (composeMode === "forward" && composeData?.emailId) {
+      fd.append("to", sanitizedTo);
+      if (sanitizedBodyText) fd.append("message", sanitizedBodyText);
+      if (data.bodyHtml) fd.append("bodyHtml", data.bodyHtml);
       forwardMutation.mutate(
         { id: composeData.emailId, formData: fd },
-        { onSuccess: () => setOpen(false) },
+        {
+          onSuccess,
+          onError: (err: any) => handleServerErrors(err, ["to", "bodyText"]),
+        },
       );
     } else {
+      fd.append("to", sanitizedTo);
+      fd.append("subject", sanitizedSubject);
+      if (sanitizedCc) fd.append("cc", sanitizedCc);
+      if (sanitizedBcc) fd.append("bcc", sanitizedBcc);
+      if (sanitizedBodyText) fd.append("bodyText", sanitizedBodyText);
+
       sendMutation.mutate(fd, {
-        onSuccess: () => setOpen(false),
-        onError: (err: any) => {
-          const message = err?.response?.data?.message || err?.message || "Failed to send email";
-          toast.error(message);
-        },
+        onSuccess,
+        onError: (err: any) =>
+          handleServerErrors(err, ["to", "subject", "cc", "bcc", "bodyText"]),
       });
     }
   };

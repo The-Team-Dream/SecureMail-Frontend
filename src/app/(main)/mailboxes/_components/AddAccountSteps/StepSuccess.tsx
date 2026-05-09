@@ -137,7 +137,7 @@ export function StepSuccess({ onCancel, resetWizard }: StepSuccessProps) {
         </div>
 
         {/* Add New Account Button */}
-        <Button size={"lg"} className="rounded-xl mb-6" onClick={resetWizard}>
+        <Button size={"lg"} className="mb-6 px-8" onClick={resetWizard}>
           Add New Account
         </Button>
 

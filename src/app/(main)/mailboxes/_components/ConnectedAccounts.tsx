@@ -7,48 +7,30 @@ import { Loader, Wifi, WifiOff } from "lucide-react";
 import Container from "@/_components/shared/Container";
 import { useMailboxes, useMailboxOperations } from "@/APIs/hooks/useMailboxes";
 import { Mailbox } from "@/APIs/types/Mailbox";
-import { ConnectedAccountsSkeleton } from "@/_components/skeleton/ConnectedAccountsSkeleton";
 import { Icons } from "@/constants/icons";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { Spinner } from "@/components/ui/spinner";
+import { ProgressBar } from "@/_components/shared/ProgressBar";
+import notFoundImg from "../../../../../public/images/not-found.png";
+
 
 interface ConnectedAccountsProps {
   onAddAccount: () => void;
 }
 
-const getStatusStyles = (status: Mailbox["status"]) => {
-  switch (status) {
-    case "connected":
-      return {
-        color: "text-secondary-800",
-        icon: <Wifi className="w-4 h-4" />,
-        label: "Connected",
-      };
-    case "disconnected":
-      return {
-        color: "text-error-500",
-        icon: <WifiOff className="w-4 h-4" />,
-        label: "Disconnected",
-      };
-    case "syncing":
-      return {
-        color: "text-primary-400",
-        icon: <Loader className="w-4 h-4 text-primary-400 animate-spin" />,
-        label: "Syncing",
-      };
-    case "error":
-      return {
-        color: "text-error-600",
-        icon: <Icons.Delete className="w-4 h-4" />,
-        label: "Error",
-      };
-    default:
-      return {
-        color: "text-secondary-800",
-        icon: <Wifi className="w-4 h-4" />,
-        label: "Connected",
-      };
+const getStatusStyles = (isActive: boolean) => {
+  if (isActive) {
+    return {
+      color: "text-secondary-800",
+      icon: <Wifi className="w-4 h-4" />,
+      label: "Connected",
+    };
   }
+  return {
+    color: "text-error-500",
+    icon: <WifiOff className="w-4 h-4" />,
+    label: "Disconnected",
+  };
 };
 
 const containerVariants = {
@@ -72,15 +54,17 @@ const itemVariants = {
 
 export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
   const { data: mailboxes, isError, refetch } = useMailboxes();
-  const { syncMailbox } = useMailboxOperations();
+  const { syncMailbox, isSyncing } = useMailboxOperations();
 
   if (isError)
     return (
       <StateMessage
         variant="error"
-        title="Failed to load mailboxes"
-        description="Failed to load mailboxes"
+        image={notFoundImg}
+        title="Unable to Load Accounts"
+        description="We're having trouble retrieving your connected mailboxes. This could be due to a temporary server issue or network connectivity."
         onRetry={() => refetch()}
+        actionText="Try Again"
         className="h-screen"
       />
     );
@@ -117,8 +101,8 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
           animate="visible"
           className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full"
         >
-          {mailboxes?.map((acc) => {
-            const statusStyles = getStatusStyles(acc.status);
+          {mailboxes?.map((acc: Mailbox) => {
+            const statusStyles = getStatusStyles(acc.isActive);
             return (
               <motion.div
                 key={acc.id}
@@ -137,25 +121,10 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                         <Icons.Mail className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                        <div className="truncate w-full">
-                          <Text
-                            size="sm"
-                            font="semiBold"
-                            className="tracking-tight truncate w-full block"
-                          >
-                            {acc.displayName}
-                          </Text>
-                        </div>
-                        <Text
-                          size="xs"
-                          color="primary-400"
-                          className="truncate"
-                        >
-                          {acc.emailAddress}{" "}
-                          <span className="capitalize font-semibold text-primary-500">
-                            • {acc.provider.toLowerCase()}
-                          </span>
+                        <Text size="sm" font={"medium"}>
+                          {acc.emailAddress}
                         </Text>
+                        <Text size="xs">{acc.provider}</Text>
                       </div>
                     </div>
                     <div
@@ -178,7 +147,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                     <div className="w-px h-10 bg-primary-100/60 shrink-0"></div>
                     <div className="flex flex-col items-center flex-1">
                       <Text size="2xl" color={"error-600"} font="semiBold">
-                        {(acc.threatsCount ?? 0).toLocaleString()}
+                        {acc.threatsCount ?? 0}
                       </Text>
                       <Text size="xs" color={"primary-500"} className="mt-1">
                         Threats
@@ -189,7 +158,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                       <Text size="xl" font="semiBold" color={"primary-800"}>
                         {acc.lastSyncedAt
                           ? new Date(acc.lastSyncedAt).toLocaleDateString()
-                          : acc.lastSync || "Just now"}
+                          : "Just now"}
                       </Text>
                       <Text size="xs" className="mt-1">
                         Last sync
@@ -197,28 +166,41 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="flex flex-col gap-3">
                     <Button
-                      disabled={acc.status === "syncing"}
+                      disabled={isSyncing === acc.id.toString()}
                       variant="outline"
-                      className="flex-1 rounded-lg border-primary text-sm gap-2"
+                      className="relative flex-1 rounded-lg border-primary text-sm gap-2 overflow-hidden"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         syncMailbox(acc.id);
                       }}
                     >
-                      {acc.status === "syncing" ? (
-                        <>
-                          Syncing in progress{" "}
-                          <Spinner className="w-4 h-4 text-primary" />
-                        </>
-                      ) : (
-                        <>
-                          Sync{" "}
-                          <Icons.Refresh className="w-4 h-4 text-primary stroke-2" />
-                        </>
+                      {/* Progress Background Overlay */}
+                      {isSyncing === acc.id.toString() && (
+                        <div className="absolute inset-0 z-0 flex items-center">
+                          <ProgressBar
+                            isLoading={isSyncing === acc.id.toString()}
+                            className="bg-transparent rounded-none"
+                            barClassName="bg-primary-400/60"
+                          />
+                        </div>
                       )}
+
+                      <div className="relative z-10 flex items-center justify-center gap-2 w-full">
+                        {isSyncing === acc.id.toString() ? (
+                          <>
+                            Syncing...{" "}
+                            <Spinner className="w-4 h-4 text-primary" />
+                          </>
+                        ) : (
+                          <>
+                            Sync{" "}
+                            <Icons.Refresh className="w-4 h-4 text-primary stroke-2" />
+                          </>
+                        )}
+                      </div>
                     </Button>
                   </div>
                 </Link>

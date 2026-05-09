@@ -172,7 +172,7 @@ export type MailConfigDraft = {
 
 export type MailboxDraft = {
   mailboxName: string;
-  mailboxEmail: string;
+  emailAddress: string;
 };
 
 export type AdvancedDraft = {

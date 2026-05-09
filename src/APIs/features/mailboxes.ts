@@ -1,8 +1,9 @@
 import axiosInstance from "@/lib/axios";
 import { IMAPConfig, Mailbox, Mailboxes } from "../types/Mailbox";
 
-const unwrap = <T>(res: { data: any }): T => {
-  return res.data?.data ?? res.data;
+const unwrap = <T>(res: { data: unknown }): T => {
+  const body = res.data as { data?: T };
+  return (body?.data ?? res.data) as T;
 };
 
 export const mailboxApi = {
@@ -12,41 +13,40 @@ export const mailboxApi = {
 
     if (Array.isArray(data)) return data;
 
-    if (Array.isArray(data?.data)) return data.data;
-
-    if (
-      data?.data &&
-      !Array.isArray(data.data) &&
-      Array.isArray(data.data.mailboxes)
-    ) {
-      return data.data.mailboxes;
+    if ("data" in data) {
+      if (Array.isArray(data.data)) return data.data;
+      if (data.data && "mailboxes" in data.data && Array.isArray(data.data.mailboxes)) {
+        return data.data.mailboxes;
+      }
     }
 
-    if (Array.isArray(data?.mailboxes)) return data.mailboxes;
+    if ("mailboxes" in data && Array.isArray(data.mailboxes)) {
+      return data.mailboxes;
+    }
 
     return [];
   },
 
-  getMailboxById: async (id: string | number): Promise<Mailbox> => {
+  getMailboxById: async (id: number): Promise<Mailbox> => {
     return unwrap(await axiosInstance.get(`/mailboxes/${id}`));
   },
 
-  getMailboxReports: async (id: string | number): Promise<Mailbox> => {
+  getMailboxReports: async (id: number): Promise<Mailbox> => {
     return unwrap(await axiosInstance.get(`/mailboxes/${id}/reports`));
   },
 
   updateMailbox: async (
-    id: string | number,
+    id: number,
     data: Partial<Mailbox>,
   ): Promise<Mailbox> => {
     return unwrap(await axiosInstance.patch(`/mailboxes/${id}`, data));
   },
 
-  deleteMailbox: async (id: string | number): Promise<Mailbox> => {
+  deleteMailbox: async (id: number): Promise<Mailbox> => {
     return unwrap(await axiosInstance.delete(`/mailboxes/${id}`));
   },
 
-  syncMailbox: async (id: string | number): Promise<Mailbox> => {
+  syncMailbox: async (id: number): Promise<Mailbox> => {
     return unwrap(await axiosInstance.post(`/mailboxes/${id}/sync`));
   },
 
@@ -77,15 +77,12 @@ export const mailboxApi = {
   },
 
   getGmailAuthUrl: async (redirectUri: string): Promise<{ url: string }> => {
-    const res = await axiosInstance.get<any>(
+    const res = await axiosInstance.get<{ data?: { url: string }; url?: string; authUrl?: string; redirectUrl?: string }>(
       `/mailboxes/gmail/auth-url`,
       { params: { redirectUri } },
     );
     const body = res.data;
-    // The logs show the URL is in res.data.data.url
-    const url = typeof body === "string" 
-      ? body 
-      : (body?.data?.url || body?.url || body?.authUrl || body?.redirectUrl);
+    const url = body?.data?.url || body?.url || body?.authUrl || body?.redirectUrl;
     
     if (!url || typeof url !== "string") {
       console.error("Gmail Auth URL Error. Response body:", body);
@@ -103,14 +100,12 @@ export const mailboxApi = {
   },
 
   getOutlookAuthUrl: async (redirectUri: string): Promise<{ url: string }> => {
-    const res = await axiosInstance.get<any>(
+    const res = await axiosInstance.get<{ data?: { url: string }; url?: string; authUrl?: string; redirectUrl?: string }>(
       `/mailboxes/outlook/auth-url`,
       { params: { redirectUri } },
     );
     const body = res.data;
-    const url = typeof body === "string" 
-      ? body 
-      : (body?.data?.url || body?.url || body?.authUrl || body?.redirectUrl);
+    const url = body?.data?.url || body?.url || body?.authUrl || body?.redirectUrl;
 
     if (!url || typeof url !== "string") {
       console.error("Outlook Auth URL Error. Response body:", body);

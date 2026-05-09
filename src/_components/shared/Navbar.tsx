@@ -24,11 +24,12 @@ import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
 import Link from "next/link";
 import { NotificationDropdown } from "../Notification";
 import { Icons } from "@/constants/icons";
-import { getInitials, getImageUrl } from "@/lib/utils";
+import { getInitials, getImageUrl, cn } from "@/lib/utils";
 import { useGetAuthMe } from "@/APIs/hooks/useAuth";
 import { useMailboxes } from "@/APIs/hooks/useMailboxes";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
+import { ActionButton } from "./ActionButton";
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -41,10 +42,14 @@ export const Navbar = () => {
 
   const isMailPage =
     pathname.split("/").length >= 3 && pathname.startsWith("/mailboxes");
-  const [selectedMailboxId, setSelectedMailboxId] = useState<string | number | null>(null);
+  const [selectedMailboxId, setSelectedMailboxId] = useState<
+    string | number | null
+  >(null);
 
   const activeAccount =
-    mailboxes.find((m) => m.id === (mailboxId || selectedMailboxId)) || mailboxes[0] || null;
+    mailboxes.find((m) => m.id === (mailboxId || selectedMailboxId)) ||
+    mailboxes[0] ||
+    null;
 
   const sortedMailboxes = [...mailboxes].sort((a, b) => {
     if (a.id === activeAccount?.id) return -1;
@@ -57,11 +62,7 @@ export const Navbar = () => {
     activeAccount?.displayName ?? userData?.username ?? "User";
   const [isSwitching, setIsSwitching] = useState(false);
 
-  const displayEmail =
-    activeAccount?.email ??
-    activeAccount?.emailAddress ??
-    userData?.email ??
-    "";
+  const displayEmail = activeAccount?.emailAddress ?? userData?.email ?? "";
   const displayAvatar = userData?.avatar ?? null;
   const initials = getInitials(displayName);
 
@@ -97,15 +98,24 @@ export const Navbar = () => {
         <Link
           href={mailboxId ? `/mailboxes/${mailboxId}/settings` : "/settings"}
         >
-          <Button
-            size="icon-sm"
-            variant="ghost"
-            className={`${pathname.includes("/settings") ? "bg-primary-200 text-primary" : "text-primary-600"} relative`}
-          >
-            <Icons.Settings
-              className={`${pathname.includes("/settings") ? "text-primary" : "text-primary-600"}  `}
-            />
-          </Button>
+          <ActionButton
+            icon={
+              <Icons.Settings
+                className={cn(
+                  pathname.includes("/settings")
+                    ? "text-primary"
+                    : "text-primary-600",
+                )}
+              />
+            }
+            label="Settings"
+            onClick={() => {}}
+            className={cn(
+              pathname.includes("/settings")
+                ? "bg-primary-200 text-primary"
+                : "text-primary-600",
+            )}
+          />
         </Link>
 
         <DropdownMenu>
@@ -199,12 +209,12 @@ export const Navbar = () => {
                                       : "bg-primary-100 border-primary-500"
                                   }`}
                                 >
-                                  {mailbox.avatar ||
+                                  {((mailbox as any).avatar ||
                                   (mailbox.userId == userData?.id &&
-                                    userData?.avatar) ? (
+                                    userData?.avatar)) ? (
                                     <Image
                                       src={getImageUrl(
-                                        mailbox.avatar || userData?.avatar,
+                                        (mailbox as any).avatar || userData?.avatar,
                                       )}
                                       alt="avatar"
                                       width={40}
@@ -223,7 +233,6 @@ export const Navbar = () => {
                                     >
                                       {getInitials(
                                         mailbox.displayName ||
-                                          mailbox.email ||
                                           mailbox.emailAddress ||
                                           "",
                                       )}
@@ -239,7 +248,7 @@ export const Navbar = () => {
                                     color={"primary-500"}
                                     className="text-[10px] md:text-sm"
                                   >
-                                    {mailbox.email || mailbox.emailAddress}
+                                    {mailbox.emailAddress}
                                   </Text>
                                 </div>
                               </div>

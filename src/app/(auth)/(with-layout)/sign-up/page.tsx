@@ -77,7 +77,7 @@ export default function Signup() {
             placeholder="Full Name"
             leftIcon={<User />}
             {...register("username", {
-              onChange: () => clearErrors("username"),
+              onChange: () => clearErrors(["username", "root" as any]),
             })}
             error={errors.username?.message}
           />
@@ -86,13 +86,13 @@ export default function Signup() {
             placeholder="Email Address"
             leftIcon={<Mail />}
             {...register("email", {
-              onChange: () => clearErrors("email"),
+              onChange: () => clearErrors(["email", "root" as any]),
             })}
             error={errors.email?.message}
           />
           <Input
             {...register("password", {
-              onChange: () => clearErrors("password"),
+              onChange: () => clearErrors(["password", "root" as any]),
             })}
             type="password"
             placeholder="Password"
@@ -101,7 +101,7 @@ export default function Signup() {
           />
           <Input
             {...register("confirmPassword", {
-              onChange: () => clearErrors("confirmPassword"),
+              onChange: () => clearErrors(["confirmPassword", "root" as any]),
             })}
             type="password"
             placeholder="Confirm Password"
@@ -115,7 +115,7 @@ export default function Signup() {
                 type="checkbox"
                 id="terms"
                 {...register("acceptTerms", {
-                  onChange: () => clearErrors("acceptTerms"),
+                  onChange: () => clearErrors(["acceptTerms", "root" as any]),
                 })}
                 className="w-4 h-4 accent-[#87BE00] focus:bg-green-500 hover:bg-green-500"
               />
@@ -135,11 +135,11 @@ export default function Signup() {
             <Error error={errors?.acceptTerms?.message} />
           </div>
 
-          {errors.root && (
-            <BackEndError
-              error={String(errors.root.message || "An error occurred")}
-            />
-          )}
+          <BackEndError
+            error={
+              errors.root?.message ? String(errors.root.message) : undefined
+            }
+          />
           <Button size={"lg"} type="submit" disabled={signupMutation.isPending} className="w-full">
             {signupMutation.isPending ? (
               <>

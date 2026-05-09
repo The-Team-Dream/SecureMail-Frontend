@@ -20,6 +20,9 @@ const containerVariants = {
   },
 };
 
+import notFoundImg from "../../../../public/images/not-found.png";
+
+
 export default function Reports() {
   const {
     data: reports,
@@ -32,18 +35,23 @@ export default function Reports() {
     isLoading: userIsLoading,
     isError: userIsError,
   } = useGetAuthMe();
-  // if (userIsLoading || reportsLoading) return <ReportsSkeleton />;
 
-  // if (userIsError || reportsIsError) {
-  //   return (
-  //     <StateMessage
-  //       variant="error"
-  //       title="Reports Unavailable"
-  //       description="We couldn't retrieve your security reports. Please check your connection and try again."
-  //       onRetry={reportsRefetch}
-  //     />
-  //   );
-  // }
+  if (userIsLoading || reportsLoading) return <ReportsSkeleton />;
+
+  if (userIsError || reportsIsError) {
+    return (
+      <Container >
+        <StateMessage
+          variant="error"
+          image={notFoundImg}
+          title="Security Insights Unavailable"
+          description="We're currently unable to load your security reports. Please check your network connection or try syncing your mailboxes again."
+          onRetry={reportsRefetch}
+          actionText="Try Again"
+        />
+      </Container>
+    );
+  }
 
   return (
     <Container>

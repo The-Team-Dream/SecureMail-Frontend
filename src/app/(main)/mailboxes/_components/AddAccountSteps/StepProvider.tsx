@@ -5,8 +5,8 @@ import { WizardStepProps } from "../../../../../schemas/CustomAccount";
 
 interface StepProviderProps extends WizardStepProps {
   provider: string;
-  setProvider: (provider: string) => void;
-  onOAuthConnect?: (provider: "Gmail" | "Outlook") => void;
+  setProvider: (provider: any) => void;
+  onOAuthConnect?: (provider: "GMAIL" | "OUTLOOK") => void;
   isOAuthLoading?: boolean;
 }
 
@@ -58,15 +58,15 @@ export function StepProvider({
             type="email"
             placeholder="Email"
             {...(register
-              ? register("mailboxEmail", {
+              ? register("emailAddress", {
                   onChange: () => {
-                    if (errors?.mailboxEmail) {
-                      clearErrors?.("mailboxEmail");
+                    if (errors?.emailAddress) {
+                      clearErrors?.("emailAddress");
                     }
                   },
                 })
               : {})}
-            error={errors?.mailboxEmail?.message}
+            error={errors?.emailAddress?.message}
           />
         </div>
 
@@ -77,9 +77,9 @@ export function StepProvider({
           </label>
           <div className="flex items-center justify-between max-w-sm mt-3">
             {[
-              { id: "Gmail", label: "Gmail" },
-              { id: "Outlook", label: "Outlook" },
-              { id: "Custom IMAP", label: "Custom IMAP" },
+              { id: "GMAIL", label: "Gmail" },
+              { id: "OUTLOOK", label: "Outlook" },
+              { id: "IMAP", label: "Custom IMAP" },
             ].map((opt) => (
               <button
                 key={opt.id}

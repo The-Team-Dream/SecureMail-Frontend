@@ -11,20 +11,20 @@ import useTimer from "@/hooks/useTimer";
 import Logo from "@/_components/shared/Logo";
 import { useResendOtp, useVerifyOtp } from "@/APIs/hooks/useAuth";
 import toast from "react-hot-toast";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
+import SuccessOverlay from "@/_components/shared/SuccessOverlay";
 
 function VerifyOtpContent() {
   const [otp, setOtp] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
   const { timeLeft, resend, resetTimer, formattedTime } = useTimer(30);
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
-  const router = useRouter();
   const { mutate, isPending } = useVerifyOtp({
-    onSuccess: (res) => {
-      toast.success(res.data.message);
-      router.push("/sign-in");
+    onSuccess: () => {
+      setIsSuccess(true);
     },
     onError: (error: any) => {
       toast.error(error?.response?.data.message || "Error");
@@ -98,9 +98,7 @@ function VerifyOtpContent() {
                     key={index}
                     index={index}
                     data-testid="otp-slot"
-                    className={`h-14 w-12 rounded-md text-3xl text-[#333] font-medium border transition-colors ${
-                      otp[index] ? "border-primary-400" : "border-primary-100"
-                    }`}
+                    className={`h-14 w-12 rounded-md text-3xl text-[#333] font-medium border transition-colors border-primary-400`}
                   />
                 ))}
               </InputOTPGroup>
@@ -124,7 +122,7 @@ function VerifyOtpContent() {
 
           <Button
             onClick={() => handleVerify()}
-            disabled={isPending || otp.length !== 6}
+            disabled={isPending}
             className="group w-full"
             size={"lg"}
           >
@@ -136,6 +134,7 @@ function VerifyOtpContent() {
           </Button>
         </div>
       </div>
+      <SuccessOverlay isSuccess={isSuccess} />
     </div>
   );
 }

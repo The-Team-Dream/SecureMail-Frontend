@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
 import { useMailStore } from "@/stores/useMailStore";
 import type { Folder } from "@/types/mail";
+import { useEmails } from "@/APIs/hooks/useEmails";
 
 const dashboardNavItems = [
   { name: "Mailboxes", icon: Icons.Inbox, href: "/mailboxes" },
@@ -49,6 +50,11 @@ export const Sidebar = () => {
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
 
   const isMailPage = !!params.mailboxId;
+
+  // Fetch inbox emails for unread count
+  const { data: inboxData } = useEmails(params.mailboxId as string, "inbox", 1);
+  const unreadInboxCount =
+    inboxData?.data?.filter((e: any) => !e.isRead).length || 0;
 
   return (
     <aside
@@ -139,13 +145,20 @@ export const Sidebar = () => {
                       className="w-[22px] h-[22px] min-w-[22px]"
                     />
                     {!isCollapsed && (
-                      <Text
-                        as={"span"}
-                        font={isActive ? "medium" : "default"}
-                        color={isActive ? "primary-950" : "primary-600"}
-                      >
-                        {item.name}
-                      </Text>
+                      <div className="flex items-center gap-2">
+                        <Text
+                          as={"span"}
+                          font={isActive ? "medium" : "default"}
+                          color={isActive ? "primary-950" : "primary-600"}
+                        >
+                          {item.name}
+                        </Text>
+                        {item.folder === "inbox" && unreadInboxCount > 0 && (
+                          <span className="bg-primary-800 text-background text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                            {unreadInboxCount}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
 

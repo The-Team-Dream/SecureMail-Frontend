@@ -10,7 +10,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <Sidebar />
         <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
       </div>
-      {/* Global compose sheet — always mounted so it can slide in from any page */}
       <ComposeEmailSheet />
     </div>
   );

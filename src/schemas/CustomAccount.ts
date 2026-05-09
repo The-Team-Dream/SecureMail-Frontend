@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const stepProviderSchema = z.object({
   mailboxName: z.string().min(1, "Mailbox Name is required"),
-  mailboxEmail: z.string().email().min(1, "Mailbox Email is required"),
+  emailAddress: z.string().email().min(1, "Mailbox Email is required"),
 });
 // Step 1
 export const stepIMAPSchema = z.object({
@@ -64,4 +64,5 @@ export interface WizardStepProps {
   register?: UseFormRegister<WizardFormData>;
   errors?: FieldErrors<WizardFormData>;
   clearErrors?: UseFormClearErrors<WizardFormData>;
+  onPrev?: () => void;
 }

@@ -1,406 +1,177 @@
 "use client";
 
-import React, { useState, use } from "react";
+import { useState, use, useMemo } from "react";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import {
-  Download,
-  Calendar,
-  Shield,
-  AlertTriangle,
-  ShieldAlert,
-  CheckCircle,
-} from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search } from "lucide-react";
 import { Icons } from "@/constants/icons";
-
-const MOCK_SECURITY_STATS = {
-  totalEmailsScanned: 15420,
-  malwareDetected: 142,
-  phishingAttempts: 384,
-  secureEmails: 14894,
-  threatHistory: [
-    { date: "May 01", threats: 12 },
-    { date: "May 02", threats: 15 },
-    { date: "May 03", threats: 8 },
-    { date: "May 04", threats: 24 },
-    { date: "May 05", threats: 18 },
-    { date: "May 06", threats: 32 },
-    { date: "May 07", threats: 14 },
-  ],
-  topThreatSources: [
-    { name: "Malware", value: 142 },
-    { name: "Phishing", value: 384 },
-  ],
-  recentThreats: [
-    {
-      id: 1,
-      date: "2026-05-04",
-      sender: "admin@paypa1.com",
-      type: "Phishing",
-      status: "Blocked",
-    },
-    {
-      id: 2,
-      date: "2026-05-03",
-      sender: "invoice@amazon-support.co",
-      type: "Malware",
-      status: "Blocked",
-    },
-    {
-      id: 3,
-      date: "2026-05-02",
-      sender: "security@apple-id-verify.com",
-      type: "Phishing",
-      status: "Blocked",
-    },
-    {
-      id: 4,
-      date: "2026-05-01",
-      sender: "hr@company-update.net",
-      type: "Malware",
-      status: "Blocked",
-    },
-    {
-      id: 5,
-      date: "2026-04-30",
-      sender: "support@netflix-billing.com",
-      type: "Phishing",
-      status: "Blocked",
-    },
-  ],
-};
-
-const COLORS = ["#ef4444", "#f59e0b"]; // error and warning colors
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { type: "spring" as const, stiffness: 100 },
-  },
-};
-
-interface SecurityReportsPageProps {
-  params: Promise<{
-    mailboxId: string;
-  }>;
-}
+import { useMailboxReports } from "@/APIs/hooks/useMailboxes";
+import { StateMessage } from "@/_components/shared/StateMessage";
+import { Input } from "@/_components/shared/Input";
+import { SecurityReport } from "@/APIs/types/Reports";
+import SecurityReportSkeleton from "@/_components/skeleton/SecuritReportsSkeleton";
+import { StatCard } from "./_components/StatCard";
+import { ReportCard } from "./_components/ReportCard";
+import { containerVariants, itemVariants } from "./_components/variants";
+import notFoundImg from "../../../../../../public/images/not-found.png";
 
 export default function SecurityReportsPage({
   params,
-}: SecurityReportsPageProps) {
+}: {
+  params: Promise<{ mailboxId: string }>;
+}) {
   const { mailboxId } = use(params);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const { data, isLoading, isError, refetch } = useMailboxReports(mailboxId);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const handleDownload = () => {
-    setIsDownloading(true);
-    setTimeout(() => {
-      setIsDownloading(false);
-    }, 1500);
-  };
+  const reports: SecurityReport[] = useMemo(() => {
+    return (data as any)?.data?.data || (data as any)?.data || [];
+  }, [data]);
 
-  const successRate = (
-    (MOCK_SECURITY_STATS.secureEmails /
-      MOCK_SECURITY_STATS.totalEmailsScanned) *
-    100
-  ).toFixed(1);
+  const filteredReports = useMemo(() => {
+    return reports.filter(
+      (report) =>
+        report.subject
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase().trim()) ||
+        report.from.toLowerCase().includes(searchTerm.toLowerCase().trim()),
+    );
+  }, [reports, searchTerm]);
+
+  const stats = useMemo(
+    () => ({
+      total: reports.length,
+      phishing: reports.filter((r) => r.classification === "phishing").length,
+      spam: reports.filter((r) => r.classification === "spam").length,
+      malware: reports.filter((r) => r.classification === "malware").length,
+    }),
+    [reports],
+  );
+
+  if (isLoading) return <SecurityReportSkeleton />;
+
+  if (isError) {
+    return (
+      <Container>
+        <StateMessage
+          variant="error"
+          image={notFoundImg}
+          title="Security Reports Offline"
+          description="We're having trouble fetching the security report data for this mailbox. Please ensure the account is active and try again."
+          onRetry={refetch}
+          actionText="Try Again"
+        />
+      </Container>
+    );
+  }
 
   return (
     <Container>
-      {/* Header */}
+      {/* ── Header ────────────────────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+        variants={itemVariants}
+        initial="hidden"
+        animate="visible"
+        className="mb-8"
       >
-        <div className="">
-          <Text as="h1" size="2xl" font="semiBold">
-            Security Report
-          </Text>
-          <Text color="primary-500" className="mt-1">
-            Overview of threat detection and email security for the last 30
-            days.
-          </Text>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
-            <Calendar className="w-4 h-4" />
-            Last 30 Days
-          </Button>
-          <Button
-            onClick={handleDownload}
-            disabled={isDownloading}
-            className="gap-2"
-          >
-            <Download className="w-4 h-4" />
-            {isDownloading ? "Generating..." : "Download PDF Report"}
-          </Button>
-        </div>
+        <Text as="h1" size="2xl" font="bold">
+          Security Reports
+        </Text>
       </motion.div>
 
-      {/* Stat Cards */}
+      {/* ── Stats Grid ────────────────────────────────────────────── */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
       >
-        <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-          <Card className="bg-ghostBlue h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-primary">
-                Emails Scanned
-              </CardTitle>
-              <Icons.Spam className="w-4 h-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <Text size="3xl" font="bold">
-                {MOCK_SECURITY_STATS.totalEmailsScanned.toLocaleString()}
-              </Text>
-            </CardContent>
-          </Card>
+        <motion.div variants={itemVariants} className="h-full">
+          <StatCard
+            title="Total"
+            value={stats.total}
+            description="Overall security logs"
+            icon={Icons.Reports}
+            type="neutral"
+          />
         </motion.div>
-
-        <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-          <Card className="bg-error-50 h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-error">
-                Malware Detected
-              </CardTitle>
-              <AlertTriangle className="w-4 h-4 text-error" />
-            </CardHeader>
-            <CardContent>
-              <Text size="3xl" font="bold" className="text-error">
-                {MOCK_SECURITY_STATS.malwareDetected.toLocaleString()}
-              </Text>
-            </CardContent>
-          </Card>
+        <motion.div variants={itemVariants} className="h-full">
+          <StatCard
+            title="Phishing"
+            value={stats.phishing}
+            description="Identity theft attempts"
+            icon={Icons.Phishing}
+            type="warning"
+          />
         </motion.div>
-
-        <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-          <Card className="bg-warning-50 h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-warning">
-                Phishing Attempts
-              </CardTitle>
-              <ShieldAlert className="w-4 h-4 text-warning" />
-            </CardHeader>
-            <CardContent>
-              <Text size="3xl" font="bold" className="text-warning-600">
-                {MOCK_SECURITY_STATS.phishingAttempts.toLocaleString()}
-              </Text>
-            </CardContent>
-          </Card>
+        <motion.div variants={itemVariants} className="h-full">
+          <StatCard
+            title="Spam"
+            value={stats.spam}
+            description="Junk & unwanted mail"
+            icon={Icons.Spam}
+            type="info"
+          />
         </motion.div>
-
-        <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-          <Card className="bg-success-50/50 border-success-100 h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-success-600">
-                Success Rate
-              </CardTitle>
-              <CheckCircle className="w-4 h-4 text-success-600" />
-            </CardHeader>
-            <CardContent>
-              <Text size="3xl" font="bold" className="text-success-600">
-                {successRate}%
-              </Text>
-            </CardContent>
-          </Card>
+        <motion.div variants={itemVariants} className="h-full">
+          <StatCard
+            title="Malware"
+            value={stats.malware}
+            description="Malicious software detected"
+            icon={Icons.Malware}
+            type="error"
+          />
         </motion.div>
       </motion.div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Threat Trend Chart */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="lg:col-span-2"
-        >
-          <Card className="border-primary-100 shadow-sm h-full">
-            <CardHeader>
-              <CardTitle className="text-primary-950">Threat Trend</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={MOCK_SECURITY_STATS.threatHistory}
-                    margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#e5e7eb"
-                    />
-                    <XAxis
-                      dataKey="date"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "#6b7280", fontSize: 12 }}
-                      dy={10}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "#6b7280", fontSize: 12 }}
-                    />
-                    <RechartsTooltip
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "none",
-                        boxShadow:
-                          "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="threats"
-                      stroke="var(--error-500)"
-                      strokeWidth={3}
-                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
-                      activeDot={{ r: 6, strokeWidth: 0 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Distribution Chart */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <Card className="border-primary-100 shadow-sm h-full">
-            <CardHeader>
-              <CardTitle className="text-primary-950">
-                Threat Distribution
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex justify-center items-center h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={MOCK_SECURITY_STATS.topThreatSources}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {MOCK_SECURITY_STATS.topThreatSources.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "none",
-                      boxShadow:
-                        "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </motion.div>
+      {/* ── Search Bar ────────────────────────────────────────────── */}
+      <div className="relative mb-6">
+        <Input
+          placeholder="Search reports..."
+          leftIcon={<Search className="text-primary-600 w-5 h-5" />}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
-      {/* Recent Threats Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
-        <Card className="border-primary-100 shadow-sm overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-primary-950">Recent Threats</CardTitle>
-          </CardHeader>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-primary-50 text-primary-600 font-medium">
-                <tr>
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Sender</th>
-                  <th className="px-6 py-4">Threat Type</th>
-                  <th className="px-6 py-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-primary-100">
-                {MOCK_SECURITY_STATS.recentThreats.map((threat) => (
-                  <tr
-                    key={threat.id}
-                    className="hover:bg-primary-50/50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <Text size="sm">{threat.date}</Text>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Text size="sm" font="medium">
-                        {threat.sender}
-                      </Text>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          threat.type === "Phishing"
-                            ? "bg-warning-100 text-warning-700"
-                            : "bg-error-100 text-error-700"
-                        }`}
-                      >
-                        {threat.type}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1.5 text-success-600 font-medium text-sm">
-                        <CheckCircle className="w-4 h-4" />
-                        {threat.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </motion.div>
+      {/* ── Reports List ───────────────────────────────────────────── */}
+      <div className="space-y-3">
+        {filteredReports.length === 0 ? (
+          <StateMessage
+            image={notFoundImg}
+            title="No Threats Found"
+            description="Your mailbox is currently safe. No security threats have been detected in the processed emails."
+          />
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col gap-3"
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredReports.map((report) => (
+                <motion.div
+                  key={report.id}
+                  layout
+                  variants={itemVariants}
+                  exit="exit"
+                >
+                  <ReportCard
+                    report={report}
+                    isExpanded={expandedId === report.id}
+                    onToggle={() =>
+                      setExpandedId(expandedId === report.id ? null : report.id)
+                    }
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </div>
     </Container>
   );
 }

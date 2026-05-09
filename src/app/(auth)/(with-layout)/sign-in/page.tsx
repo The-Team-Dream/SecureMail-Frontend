@@ -71,7 +71,7 @@ function SigninContent() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Input
             {...register("email", {
-              onChange: () => clearErrors("email"),
+              onChange: () => clearErrors(["email", "root" as any]),
             })}
             type="email"
             placeholder="Email Address"
@@ -80,7 +80,7 @@ function SigninContent() {
           />
           <Input
             {...register("password", {
-              onChange: () => clearErrors("password"),
+              onChange: () => clearErrors(["password", "root" as any]),
             })}
             type="password"
             placeholder="Password"
@@ -93,11 +93,11 @@ function SigninContent() {
           >
             Forgot Password?
           </Link>
-          {errors.root && (
-            <BackEndError
-              error={String(errors.root.message || "An error occurred")}
-            />
-          )}
+          <BackEndError
+            error={
+              errors.root?.message ? String(errors.root.message) : undefined
+            }
+          />
           <Button
             size={"lg"}
             type="submit"

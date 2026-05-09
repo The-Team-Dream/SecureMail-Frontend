@@ -22,6 +22,7 @@ export interface ForgetPasswordData {
 }
 export interface ResetPasswordData {
   newPassword: string;
+  confirmPassword: string;
   resetPasswordToken: string;
 }
 

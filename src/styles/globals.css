@@ -116,7 +116,7 @@
     --primary-400: #9f9f9f;
     --primary-500: #8a8a8a;
     --primary-600: #747474;
-    --primary-700: #8a8a8a;
+    --primary-700: #5f5f5f;
     --primary-800: #494949;
     --primary-900: #343434;
     --primary-950: #000;
@@ -131,7 +131,7 @@
     --secondary-600: #a5e900;
     --secondary-700: #87be00;
     --secondary-800: #689300;
-    --secondary-900: #4a6800;
+    --secondary-900: #689300;
     --secondary-950: #1a2600;
 
     /* Warning */

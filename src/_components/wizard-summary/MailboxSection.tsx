@@ -19,20 +19,20 @@ export function MailboxSection({
   const [isSaving, setIsSaving] = useState(false);
   const [draft, setDraft] = useState<MailboxDraft>({
     mailboxName: "",
-    mailboxEmail: "",
+    emailAddress: "",
   });
 
   const handleEdit = () => {
     setDraft({
       mailboxName: formData.mailboxName || "",
-      mailboxEmail: formData.mailboxEmail || "",
+      emailAddress: formData.emailAddress || "",
     });
     setIsEditing(true);
   };
 
   const handleCancel = () => {
     handleChange("mailboxName", draft.mailboxName);
-    handleChange("mailboxEmail", draft.mailboxEmail);
+    handleChange("emailAddress", draft.emailAddress);
     setIsEditing(false);
   };
 
@@ -69,11 +69,11 @@ export function MailboxSection({
             <div className="col-span-1">
               <Input
                 label="Email Address"
-                value={formData.mailboxEmail || ""}
+                value={formData.emailAddress || ""}
                 className="w-full"
                 placeholder="you@example.com"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChange("mailboxEmail", e.target.value)
+                  handleChange("emailAddress", e.target.value)
                 }
               />
             </div>
@@ -104,7 +104,7 @@ export function MailboxSection({
           />
           <ViewField
             label="Email Address"
-            value={formData.mailboxEmail}
+            value={formData.emailAddress}
             fallback="—"
           />
         </div>

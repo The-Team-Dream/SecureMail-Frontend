@@ -4,8 +4,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "../shared/Input";
 import { useMailStore } from "@/stores/useMailStore";
 import { Text } from "../shared/Text";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useParams } from "next/navigation";
 import { Icons } from "@/constants/icons";
+import { useSearchEmails } from "@/APIs/hooks/useEmails";
 
 interface SearchAutocompleteProps {
   inputClassName?: string;
@@ -14,14 +15,19 @@ interface SearchAutocompleteProps {
 export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   inputClassName,
 }) => {
-  const searchQuery = useMailStore((s) => s.searchQuery);
+  const [inputValue, setInputValue] = useState("");
   const setSearchQuery = useMailStore((s) => s.setSearchQuery);
-  const getFilteredEmails = useMailStore((s) => s.getFilteredEmails);
+  
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams();
+  const mailboxId = params.mailboxId as string;
 
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const { data } = useSearchEmails(mailboxId, inputValue, 1);
+  const suggestions = (data?.data || []).slice(0, 5);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -41,38 +47,41 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   const handleSelectSuggestion = (emailId: string) => {
     setIsOpen(false);
-    setSearchQuery(""); // clear the search
+    setInputValue("");
+    setSearchQuery(""); // Clear global search just in case
     const segments = pathname.split("/").filter(Boolean);
     // ensure we build a base path to the mailbox folder/id
     const basePath = `/${segments[0]}/${segments[1]}/${segments[2]}`;
     router.push(`${basePath}/${emailId}`);
   };
 
-  const suggestions = getFilteredEmails().slice(0, 5);
-
   return (
-    <div className="relative w-full" ref={wrapperRef}>
+    <form className="relative w-full" ref={wrapperRef as any} onSubmit={(e) => {
+      e.preventDefault();
+      // If user presses enter, we could optionally trigger a global search, 
+      // but the user asked NOT to update the maillist.
+    }}>
       <Input
         className={inputClassName}
         type="search"
         leftIcon={<Icons.Mail className="w-5 h-5 text-primary-500" />}
         placeholder="Search Email..."
-        value={searchQuery}
+        value={inputValue}
         onChange={(e) => {
-          setSearchQuery(e.target.value);
+          setInputValue(e.target.value);
           setIsOpen(true);
         }}
         onFocus={() => {
-          if (searchQuery.trim().length > 0) {
+          if (inputValue.trim().length > 0) {
             setIsOpen(true);
           }
         }}
       />
 
-      {isOpen && searchQuery.trim().length > 0 && suggestions.length > 0 && (
+      {isOpen && inputValue.trim().length > 0 && suggestions.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-primary-100 rounded-xl shadow-lg z-50 overflow-hidden">
           <ul className="flex flex-col">
-            {suggestions.map((email) => (
+            {suggestions.map((email: any) => (
               <li
                 key={email.id}
                 onMouseDown={(e) => {
@@ -89,13 +98,13 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                   {email.subject}
                 </Text>
                 <Text size="xs" color="primary-500" className="truncate">
-                  {email.sender}
+                  {email.fromName || email.fromAddr || "Unknown"}
                 </Text>
               </li>
             ))}
           </ul>
         </div>
       )}
-    </div>
+    </form>
   );
 };

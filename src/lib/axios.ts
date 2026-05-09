@@ -11,8 +11,6 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    // If sending FormData, let the browser set Content-Type with the correct
-    // multipart boundary. Deleting the header here overrides the global default.
     if (config.data instanceof FormData) {
       delete config.headers["Content-Type"];
     }

@@ -18,9 +18,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Paperclip, Smile, Link as LinkIcon, Image as ImageIcon, Trash2, X } from "lucide-react";
+import {
+  Paperclip,
+  Smile,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Trash2,
+  X,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import BackEndError from "@/_components/shared/BackEndError";
+import Error from "@/_components/shared/Error";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import { Text } from "../shared/Text";
@@ -31,7 +40,7 @@ import { useComposeEmail } from "@/hooks/useComposeEmail";
 // ─── Component ─────────────────────────────────────────────────────────────
 export const ComposeEmailSheet = () => {
   const { resolvedTheme } = useTheme();
-  
+
   const {
     isOpen,
     setOpen,
@@ -56,7 +65,7 @@ export const ComposeEmailSheet = () => {
   } = useComposeEmail();
 
   const titleMap = {
-    new: "New Email",
+    new: "Send Email",
     reply: "Reply",
     forward: "Forward Email",
   };
@@ -74,142 +83,197 @@ export const ComposeEmailSheet = () => {
           </SheetTitle>
         </SheetHeader>
         <hr className="border-primary-100 mx-6" />
-        
+
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col flex-1 overflow-hidden"
         >
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {/* From */}
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-primary-700 shrink-0">
-                From <span className="text-error-500">*</span>
-              </label>
-              <div className="flex-1 w-full">
-                <Controller
-                  name="from"
-                  control={form.control}
-                  render={({ field }) => (
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full border-primary-100 rounded-xl">
-                        <SelectValue placeholder="Select sender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {mailboxes.map((acc) => (
-                          <SelectItem key={acc.id} value={acc.email}>
-                            {acc.email}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {form.formState.errors.from && (
-                  <Text color="error-500" size="sm">
-                    {form.formState.errors.from.message}
-                  </Text>
-                )}
-              </div>
-            </div>
-
-            {/* To */}
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-primary-700 shrink-0">
-                To <span className="text-error-500">*</span>
-              </label>
-              <div className="flex-1">
-                <div className="flex items-center gap-1">
-                  <div className="flex-1 w-full">
-                    <Input
-                      {...form.register("to")}
-                      className="w-full"
-                      placeholder="recipient@example.com"
-                      error={form.formState.errors.to?.message}
-                    />
+            {/* To (Hide in Reply) */}
+            {composeMode !== "reply" && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-primary-700 shrink-0">
+                  To <span className="text-error-500">*</span>
+                </label>
+                <div className="flex-1">
+                  <div className="flex items-center gap-1">
+                    <div className="flex-1 w-full">
+                      <Input
+                        {...form.register("to", {
+                          onChange: () =>
+                            form.clearErrors(["to", "root" as any]),
+                        })}
+                        className="w-full"
+                        placeholder="recipient@example.com"
+                        disabled={isPending}
+                        error={
+                          form.formState.errors.to?.type !== "server"
+                            ? form.formState.errors.to?.message
+                            : undefined
+                        }
+                      />
+                    </div>
+                    {composeMode === "new" && (
+                      <div className="flex items-center gap-1 ml-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowCc((v) => !v)}
+                          className="text-xs text-primary-500 hover:text-primary-800 font-medium px-1.5 py-0.5 rounded hover:bg-primary-50 transition-colors"
+                        >
+                          CC
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowBcc((v) => !v)}
+                          className="text-xs text-primary-500 hover:text-primary-800 font-medium px-1.5 py-0.5 rounded hover:bg-primary-50 transition-colors"
+                        >
+                          BCC
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1 ml-1">
-                    <button
-                      type="button"
-                      onClick={() => setShowCc((v) => !v)}
-                      className="text-xs text-primary-500 hover:text-primary-800 font-medium px-1.5 py-0.5 rounded hover:bg-primary-50 transition-colors"
-                    >
-                      CC
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowBcc((v) => !v)}
-                      className="text-xs text-primary-500 hover:text-primary-800 font-medium px-1.5 py-0.5 rounded hover:bg-primary-50 transition-colors"
-                    >
-                      BCC
-                    </button>
-                  </div>
+                  <BackEndError
+                    error={
+                      form.formState.errors.to?.type === "server"
+                        ? String(form.formState.errors.to.message)
+                        : undefined
+                    }
+                  />
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* CC */}
-            {showCc && (
+            {/* CC (New Only) */}
+            {composeMode === "new" && showCc && (
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-primary-700">
                   CC
                 </label>
                 <div className="flex-1">
                   <Input
-                    {...form.register("cc")}
+                    {...form.register("cc", {
+                      onChange: () =>
+                        form.clearErrors(["cc", "root" as any]),
+                    })}
                     className="w-full border-primary-200"
                     placeholder="cc@example.com, ..."
+                    disabled={isPending}
+                  />
+                  <BackEndError
+                    error={
+                      form.formState.errors.cc?.type === "server"
+                        ? String(form.formState.errors.cc.message)
+                        : undefined
+                    }
                   />
                 </div>
               </div>
             )}
 
-            {/* BCC */}
-            {showBcc && (
+            {/* BCC (New Only) */}
+            {composeMode === "new" && showBcc && (
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-primary-700">
                   BCC
                 </label>
                 <div className="flex-1">
                   <Input
-                    {...form.register("bcc")}
+                    {...form.register("bcc", {
+                      onChange: () =>
+                        form.clearErrors(["bcc", "root" as any]),
+                    })}
                     className="w-full border-primary-200"
                     placeholder="bcc@example.com, ..."
+                    disabled={isPending}
+                  />
+                  <BackEndError
+                    error={
+                      form.formState.errors.bcc?.type === "server"
+                        ? String(form.formState.errors.bcc.message)
+                        : undefined
+                    }
                   />
                 </div>
               </div>
             )}
 
-            {/* Subject */}
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-primary-700 shrink-0">
-                Subject <span className="text-error-500">*</span>
-              </label>
-              <div className="flex-1">
-                <Input
-                  {...form.register("subject")}
-                  placeholder="Email subject..."
-                  error={form.formState.errors.subject?.message}
-                />
+            {/* Subject (New Only) */}
+            {composeMode === "new" && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-primary-700 shrink-0">
+                  Subject <span className="text-error-500">*</span>
+                </label>
+                <div className="flex-1">
+                  <Input
+                    {...form.register("subject", {
+                      onChange: () =>
+                        form.clearErrors(["subject", "root" as any]),
+                    })}
+                    placeholder="Email subject..."
+                    disabled={isPending}
+                    error={
+                      form.formState.errors.subject?.type !== "server"
+                        ? form.formState.errors.subject?.message
+                        : undefined
+                    }
+                  />
+                  <BackEndError
+                    error={
+                      form.formState.errors.subject?.type === "server"
+                        ? String(form.formState.errors.subject.message)
+                        : undefined
+                    }
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Body */}
             <div className="flex flex-col gap-2 pt-1">
               <label className="text-sm font-medium text-primary-700 shrink-0">
-                Your Message <span className="text-error-500">*</span>
+                {composeMode === "reply"
+                  ? "Your Reply"
+                  : composeMode === "forward"
+                    ? "Message (Optional)"
+                    : "Your Message"}{" "}
+                <span className="text-error-500">*</span>
               </label>
               <Controller
                 name="bodyText"
                 control={form.control}
                 render={({ field }) => (
-                  <Textarea
-                    {...field}
-                    placeholder="Type your message here..."
-                    className=""
-                  />
+                  <div className="flex flex-col gap-1">
+                    <Textarea
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        form.clearErrors(["bodyText", "root" as any]);
+                      }}
+                      placeholder={
+                        composeMode === "reply"
+                          ? "Type your reply..."
+                          : composeMode === "forward"
+                            ? "Add a message to this forward..."
+                            : "Type your message here..."
+                      }
+                      disabled={isPending}
+                      className=""
+                    />
+                    <Error
+                      error={
+                        form.formState.errors.bodyText?.type !== "server"
+                          ? form.formState.errors.bodyText?.message
+                          : undefined
+                      }
+                    />
+                    <BackEndError
+                      error={
+                        form.formState.errors.bodyText?.type === "server"
+                          ? String(form.formState.errors.bodyText.message)
+                          : undefined
+                      }
+                    />
+                  </div>
                 )}
               />
             </div>
@@ -240,6 +304,16 @@ export const ComposeEmailSheet = () => {
                 ))}
               </div>
             )}
+          </div>
+
+          <div className="px-4">
+            <BackEndError
+              error={
+                form.formState.errors.root?.message
+                  ? String(form.formState.errors.root.message)
+                  : undefined
+              }
+            />
           </div>
 
           {/* ── Footer ──────────────────────────────────────────────── */}
@@ -373,17 +447,7 @@ export const ComposeEmailSheet = () => {
               )}
             </div>
 
-            {/* Discard */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setOpen(false)}
-              className="text-primary-400 hover:text-error-500 hover:bg-error-50 rounded-full"
-              title="Discard draft"
-            >
-              <Trash2 className="w-5 h-5" />
-            </Button>
+            {/* Discard button removed as per user request */}
           </div>
         </form>
       </SheetContent>

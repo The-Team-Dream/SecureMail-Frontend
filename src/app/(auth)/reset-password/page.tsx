@@ -65,6 +65,7 @@ function ResetPasswordContent() {
     }
     mutate({
       newPassword: data.newPassword,
+      confirmPassword: data.confirmPassword,
       resetPasswordToken: token,
     });
   };
@@ -93,7 +94,7 @@ function ResetPasswordContent() {
                 <div className="flex flex-col gap-4">
                   <Input
                     {...register("newPassword", {
-                      onChange: () => clearErrors("newPassword"),
+                      onChange: () => clearErrors(["newPassword", "root" as any]),
                     })}
                     type="password"
                     placeholder="New Password"
@@ -102,7 +103,7 @@ function ResetPasswordContent() {
                   />
                   <Input
                     {...register("confirmPassword", {
-                      onChange: () => clearErrors("confirmPassword"),
+                      onChange: () => clearErrors(["confirmPassword", "root" as any]),
                     })}
                     type="password"
                     placeholder="Confirm Password"
@@ -110,11 +111,11 @@ function ResetPasswordContent() {
                     error={errors?.confirmPassword?.message}
                   />
                 </div>
-                {errors.root && (
-                  <BackEndError
-                    error={String(errors.root.message || "An error occurred")}
-                  />
-                )}
+                <BackEndError
+                  error={
+                    errors.root?.message ? String(errors.root.message) : undefined
+                  }
+                />
                 <Button size={"lg"} type="submit" disabled={isPending} className="w-full">
                   {isPending ? (
                     <>

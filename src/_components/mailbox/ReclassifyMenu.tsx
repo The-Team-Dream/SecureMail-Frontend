@@ -8,35 +8,32 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  ChevronUp,
-  Inbox,
-  AlertCircle,
-  ShieldAlert,
-  Bug,
-  ChevronRight,
-  MailWarning,
-} from "lucide-react";
-import { useMailStore } from "@/stores/useMailStore";
-import { Folder } from "@/types/mail";
+import { ChevronUp, ChevronRight } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Icons } from "@/constants/icons";
 import { Text } from "../shared/Text";
+import { useEmailActions } from "@/APIs/hooks/useEmails";
+import type { EmailFolder } from "@/APIs/types/Email";
 
 interface ReclassifyMenuProps {
   emailId: string;
 }
 
 export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
-  const reclassifyEmail = useMailStore((s) => s.reclassifyEmail);
-  const setActiveFolder = useMailStore((s) => s.setActiveFolder);
   const router = useRouter();
   const { mailboxId } = useParams();
+  const { reclassifyMutation, reportMutation } = useEmailActions(
+    mailboxId as string,
+  );
 
-  const handleReclassify = (folder: Folder) => {
-    reclassifyEmail(emailId, folder);
-    setActiveFolder(folder);
+  const handleReclassify = async (folder: EmailFolder) => {
+    await reclassifyMutation.mutateAsync({ id: emailId, folder });
     router.push(`/mailboxes/${mailboxId}/${folder}`);
+  };
+
+  const handleReport = async (type: "spam" | "phishing" | "malware") => {
+    await reportMutation.mutateAsync({ id: emailId, type });
+    router.push(`/mailboxes/${mailboxId}/${type}`);
   };
 
   return (
@@ -69,7 +66,7 @@ export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
           <ChevronRight className="w-4 h-4 text-primary-400 group-hover:text-primary transition-colors" />
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => handleReclassify("spam")}
+          onClick={() => handleReport("spam")}
           className="flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background "
         >
           <Icons.Spam className="w-5 h-5 group-hover:text-primary" />
@@ -85,7 +82,7 @@ export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
 
         <DropdownMenuSeparator className="my-2 bg-primary-100/50" />
         <DropdownMenuItem
-          onClick={() => handleReclassify("phishing")}
+          onClick={() => handleReport("phishing")}
           className="flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background "
         >
           <Icons.Phishing className="w-5 h-5 group-hover:text-primary" />
@@ -99,7 +96,7 @@ export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
           <ChevronRight className="w-4 h-4 text-primary-400 group-hover:text-primary transition-colors" />
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => handleReclassify("malware")}
+          onClick={() => handleReport("malware")}
           className="flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background "
         >
           <Icons.Malware className="w-5 h-5 group-hover:text-primary" />

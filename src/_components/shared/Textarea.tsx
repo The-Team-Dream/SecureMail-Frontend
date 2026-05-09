@@ -41,7 +41,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             )}
           />
         </div>
-        {error && <Error error={error} />}
+        <Error error={error} />
       </div>
     );
   },

@@ -1,21 +1,39 @@
 "use client";
-
 import { useState, useCallback } from "react";
-import { Inbox } from "lucide-react";
 import { MailRow } from "./MailRow";
 import { useMailStore } from "@/stores/useMailStore";
-import { Text } from "../shared/Text";
+import { useParams } from "next/navigation";
+import { useEmails, useSearchEmails } from "@/APIs/hooks/useEmails";
+import type { Email, EmailFolder } from "@/APIs/types/Email";
+import { MailListSkeleton } from "../skeleton/MailListSkeleton";
+import { StateMessage } from "../shared/StateMessage";
+import notFoundImg from "../../../public/images/not-found.png";
 
 export const MailList = () => {
-  const emails = useMailStore((s) => s.emails);
-  const activeFolder = useMailStore((s) => s.activeFolder);
-  const activeClassification = useMailStore((s) => s.activeClassification);
+  const params = useParams();
+  const mailboxId = params.mailboxId as string;
+  const activeFolder = useMailStore((s) => s.activeFolder) as EmailFolder;
   const currentPage = useMailStore((s) => s.currentPage);
   const searchQuery = useMailStore((s) => s.searchQuery);
 
-  const getPagedEmails = useMailStore((s) => s.getPagedEmails);
-  const reorderEmails = useMailStore((s) => s.reorderEmails);
-  const pagedEmails = getPagedEmails();
+  const { data: emailsData, isLoading: isLoadingEmails } = useEmails(
+    mailboxId,
+    activeFolder,
+    currentPage,
+  );
+  const { data: searchData, isLoading: isLoadingSearch } = useSearchEmails(
+    mailboxId,
+    searchQuery,
+    currentPage,
+  );
+
+  const isSearching = searchQuery.trim().length > 0;
+  const currentData = isSearching ? searchData : emailsData;
+  const isLoading = isSearching ? isLoadingSearch : isLoadingEmails;
+  const pagedEmails = Array.isArray(currentData)
+    ? currentData
+    : currentData?.data || [];
+
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const handleDragStart = useCallback((index: number) => {
     setDragIndex(index);
@@ -24,37 +42,47 @@ export const MailList = () => {
   const handleDragOver = useCallback(
     (overIndex: number) => {
       if (dragIndex === null || dragIndex === overIndex) return;
-      reorderEmails(dragIndex, overIndex);
       setDragIndex(overIndex);
     },
-    [dragIndex, reorderEmails],
+    [dragIndex],
   );
 
   const handleDragEnd = useCallback(() => {
     setDragIndex(null);
   }, []);
 
+  if (isLoading) {
+    return <MailListSkeleton />;
+  }
+
   if (pagedEmails.length === 0) {
+    const emptyTitle = isSearching ? "No Results Found" : "No Emails Found";
+    const emptyDescription = isSearching
+      ? `No results found for "${searchQuery}". Please try adjusting your keywords.`
+      : activeFolder === "trash"
+        ? "Your trash is currently empty."
+        : activeFolder === "starred"
+          ? "You haven't starred any emails yet."
+          : `No emails found in your ${activeFolder}.`;
+
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <Inbox className="w-16 h-16 mb-4 text-primary" />
-        <Text size={"lg"} font={"medium"}>
-          No emails found
-        </Text>
-        <Text size={"sm"} className="mt-2 text-center">
-          {activeFolder === "trash"
-            ? "Your trash is empty"
-            : activeFolder === "starred"
-              ? "No starred emails yet"
-              : "No emails in this folder"}
-        </Text>
+      <div className="flex flex-col items-center justify-center h-full">
+        <StateMessage
+          image={notFoundImg}
+          title={emptyTitle}
+          description={emptyDescription}
+          className="h-full"
+        />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      {pagedEmails.map((email, index) => (
+    <div
+      className="flex-1 overflow-y-auto overflow-x-hidden pb-4"
+      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+    >
+      {pagedEmails.map((email: Email, index: number) => (
         <MailRow
           key={email.id}
           email={email}

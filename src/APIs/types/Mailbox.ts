@@ -1,23 +1,30 @@
 export type MailboxProvider = "GMAIL" | "OUTLOOK" | "IMAP";
 
+export interface Folder {
+  id: number;
+  mailBoxId: number;
+  name: string;
+  type: "INBOX" | "SPAM" | "TRASH" | "SENT" | "DRAFTS" | string;
+  remoteId: string;
+  createdAt: string;
+}
+
 export interface Mailbox {
-  id: string | number;
-  userId: number | string;
-  email: string;
-  emailAddress?: string;
+  id: number;
+  userId: number;
+  emailAddress: string;
   displayName: string;
-  provider: string;
-  status?: "connected" | "disconnected" | "syncing" | "error";
+  provider: MailboxProvider;
   isActive: boolean;
-  totalEmails?: number;
-  threatsCount?: number;
-  lastSync?: string;
-  lastSyncedAt?: string;
   pushNotificationsEnabled: boolean;
-  avatar?: string | null;
-  _count?: {
+  lastSyncedAt: string;
+  createdAt: string;
+  hasCredentials?: boolean;
+  folders: Folder[];
+  threatsCount: number;
+  message?: string;
+  _count: {
     emails: number;
-    threats?: number;
   };
 }
 
@@ -34,7 +41,5 @@ export interface IMAPConfig {
 
 export type Mailboxes =
   | Mailbox[]
-  | {
-      data?: Mailbox[] | { mailboxes?: Mailbox[] };
-      mailboxes?: Mailbox[];
-    };
+  | { data: Mailbox[] | { mailboxes: Mailbox[] } }
+  | { mailboxes: Mailbox[] };

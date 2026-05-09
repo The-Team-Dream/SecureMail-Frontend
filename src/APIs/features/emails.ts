@@ -1,6 +1,10 @@
 import axiosInstance from "@/lib/axios";
 import type { EmailDetails, EmailsResponse, EmailFolder } from "../types/Email";
 
+const unwrap = <T>(res: { data: any }): T => {
+  return res.data?.data ?? res.data;
+};
+
 export const emailsApi = {
   // Get Emails List (Inbox, Sent, Spam, Phishing, Starred, Malware, Trash)
   getEmails: async (
@@ -15,7 +19,7 @@ export const emailsApi = {
         params: { page, limit },
       },
     );
-    return res.data;
+    return unwrap(res);
   },
 
   // Search Emails
@@ -31,7 +35,7 @@ export const emailsApi = {
         params: { q, page, limit },
       },
     );
-    return res.data;
+    return unwrap(res);
   },
 
   // Get Email Details
@@ -42,7 +46,7 @@ export const emailsApi = {
     const res = await axiosInstance.get<EmailDetails>(
       `/mailboxes/${mailboxId}/emails/${emailId}`,
     );
-    return res.data;
+    return unwrap(res);
   },
 
   // Delete Email
@@ -50,7 +54,7 @@ export const emailsApi = {
     const res = await axiosInstance.delete(
       `/mailboxes/${mailboxId}/emails/${emailId}`,
     );
-    return res.data;
+    return unwrap(res);
   },
   // Mark as Read
   markAsRead: async (
@@ -62,7 +66,20 @@ export const emailsApi = {
       `/mailboxes/${mailboxId}/emails/${emailId}/read`,
       { read },
     );
-    return res.data;
+    return unwrap(res);
+  },
+
+  // Star Email
+  starEmail: async (
+    mailboxId: string,
+    emailId: string,
+    starred: boolean,
+  ): Promise<void> => {
+    const res = await axiosInstance.put(
+      `/mailboxes/${mailboxId}/emails/${emailId}/star`,
+      { starred },
+    );
+    return unwrap(res);
   },
 
   // Report Email
@@ -75,7 +92,7 @@ export const emailsApi = {
       `/mailboxes/${mailboxId}/emails/${emailId}/report`,
       { type },
     );
-    return res.data;
+    return unwrap(res);
   },
   // Reclassify Email
   reclassify: async (
@@ -87,7 +104,7 @@ export const emailsApi = {
       `/mailboxes/${mailboxId}/emails/${emailId}/reclassify`,
       { folder },
     );
-    return res.data;
+    return unwrap(res);
   },
 
   // Sending (Multipart Form Data)
@@ -102,7 +119,7 @@ export const emailsApi = {
         headers: { "Content-Type": "multipart/form-data" },
       },
     );
-    return res.data;
+    return unwrap(res);
   },
 
   // Reply & Forward
@@ -118,7 +135,7 @@ export const emailsApi = {
         headers: { "Content-Type": "multipart/form-data" },
       },
     );
-    return res.data;
+    return unwrap(res);
   },
 
   forwardEmail: async (
@@ -133,7 +150,7 @@ export const emailsApi = {
         headers: { "Content-Type": "multipart/form-data" },
       },
     );
-    return res.data;
+    return unwrap(res);
   },
 
   // Download Attachment

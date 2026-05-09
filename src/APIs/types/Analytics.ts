@@ -4,6 +4,8 @@ export interface AnalyticsOverview {
   totalPhishingDetected: number;
   totalSpamDetected: number;
   totalStorageUsed: number;
+  totalEmailsSent: number;
+  totalEmailsReceived: number;
 }
 
 export interface MailboxStats {
@@ -20,10 +22,11 @@ export interface MailboxStats {
 }
 
 export interface ActivityData {
-  timestamp: string;
+  date: string;
   sent: number;
   received: number;
-  blocked: number;
+  spam: number;
+  phishing: number;
 }
 
 export type ActivityPeriod = "daily" | "weekly" | "monthly";

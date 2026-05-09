@@ -16,15 +16,47 @@ export const useEmails = (
   });
 };
 
+export const useSearchEmails = (mailboxId: string, q: string, page: number) => {
+  return useQuery({
+    queryKey: ["emails", "search", mailboxId, q, page],
+    queryFn: () => emailsApi.searchEmails(mailboxId, q, page),
+    staleTime: 5 * 60 * 1000,
+    enabled: !!mailboxId && !!q,
+  });
+};
+
 export const useEmailDetails = (mailboxId: string, emailId: string) => {
   return useQuery({
     queryKey: ["email", emailId],
     queryFn: () => emailsApi.getEmailDetails(mailboxId, emailId),
+    staleTime: 5 * 60 * 1000,
     enabled: !!emailId,
   });
 };
 
-export const useEmailActions = (mailboxId: string) => {
+export const useUnreadEmailsCount = (
+  mailboxId: string,
+  folder: EmailFolder = "inbox",
+) => {
+  const queryClient = useQueryClient();
+  // Get all cached pages for this folder
+  const queries = queryClient.getQueriesData<any>({
+    queryKey: ["emails", mailboxId, folder],
+  });
+
+  let count = 0;
+  queries.forEach(([_, data]) => {
+    if (data && data.data && Array.isArray(data.data)) {
+      count += data.data.filter((e: any) => !e.isRead).length;
+    }
+  });
+  return count;
+};
+
+export const useEmailActions = (
+  mailboxId: string,
+  currentFolder?: EmailFolder,
+) => {
   const queryClient = useQueryClient();
 
   const readMutation = useMutation({
@@ -45,7 +77,7 @@ export const useEmailActions = (mailboxId: string) => {
           return {
             ...old,
             data: old.data.map((email: any) =>
-              email.id === id ? { ...email, read } : email,
+              String(email.id) === String(id) ? { ...email, isRead: read } : email,
             ),
           };
         },
@@ -54,12 +86,14 @@ export const useEmailActions = (mailboxId: string) => {
       // Also update detail view if open
       const previousDetail = queryClient.getQueryData(["email", id]);
       queryClient.setQueryData(["email", id], (old: any) =>
-        old ? { ...old, read } : old,
+        old ? { ...old, isRead: read } : old,
       );
+
+      toast.success(read ? "Email marked as read" : "Email marked as unread");
 
       return { previousQueries, previousDetail };
     },
-    onError: (_err, { id }, context) => {
+    onError: (err: any, { id }, context) => {
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
@@ -68,6 +102,9 @@ export const useEmailActions = (mailboxId: string) => {
       if (context?.previousDetail) {
         queryClient.setQueryData(["email", id], context.previousDetail);
       }
+      toast.error(
+        err.response?.data?.message || "Failed to update read status",
+      );
     },
     onSettled: (_data, _err, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
@@ -116,31 +153,67 @@ export const useEmailActions = (mailboxId: string) => {
 
   // Delete Email
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => emailsApi.deleteEmail(mailboxId, id),
+    mutationFn: (id: string) => {
+      if (currentFolder === "trash") {
+        return emailsApi.deleteEmail(mailboxId, id);
+      }
+      return emailsApi.reclassify(mailboxId, id, "trash");
+    },
     onMutate: async (id) => {
+      console.log("Starting delete mutation for email ID:", id);
       await queryClient.cancelQueries({ queryKey: ["emails", mailboxId] });
       const previousQueries = queryClient.getQueriesData<any>({
         queryKey: ["emails", mailboxId],
       });
 
-      // Optimistically remove from current list
-      queryClient.setQueriesData<any>(
-        { queryKey: ["emails", mailboxId] },
-        (old: any) => {
-          if (!old) return old;
-          return {
+      const queries = queryClient.getQueriesData<any>({
+        queryKey: ["emails", mailboxId],
+      });
+
+      queries.forEach(([queryKey, old]) => {
+        if (!old) return;
+        const folder = queryKey[2];
+
+        if (folder === "trash") {
+          // Find the email in previous queries to add it to trash
+          const emailToTrash = previousQueries
+            .map(([_, data]) =>
+              data?.data?.find((e: any) => String(e.id) === String(id)),
+            )
+            .find(Boolean);
+
+          if (emailToTrash) {
+            queryClient.setQueryData(queryKey, {
+              ...old,
+              data: [
+                emailToTrash,
+                ...old.data.filter((e: any) => String(e.id) !== String(id)),
+              ],
+            });
+          }
+        } else {
+          // Remove from other folders
+          queryClient.setQueryData(queryKey, {
             ...old,
-            data: old.data.filter((email: any) => email.id !== id),
-          };
-        },
-      );
+            data: old.data.filter(
+              (email: any) => String(email.id) !== String(id),
+            ),
+          });
+        }
+      });
 
       return { previousQueries };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Delete mutation successful:", data);
       toast.success("Email deleted successfully");
     },
-    onError: (_err, _id, context) => {
+    onError: (err: any, id, context) => {
+      console.error("Delete mutation failed for ID:", id, "Error:", err);
+      const errorMessage =
+        err.response?.data?.message || err.message || "Failed to delete email";
+      toast.error(errorMessage);
+
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
@@ -160,7 +233,8 @@ export const useEmailActions = (mailboxId: string) => {
       queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
       toast.success("Email sent successfully");
     },
-    onError: () => toast.error("Failed to send email"),
+    onError: (err: any) =>
+      toast.error(err.response?.data?.message || "Failed to send email"),
   });
 
   const replyMutation = useMutation({
@@ -170,7 +244,8 @@ export const useEmailActions = (mailboxId: string) => {
       queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
       toast.success("Reply sent successfully");
     },
-    onError: () => toast.error("Failed to send reply"),
+    onError: (err: any) =>
+      toast.error(err.response?.data?.message || "Failed to send reply"),
   });
 
   const forwardMutation = useMutation({
@@ -180,7 +255,84 @@ export const useEmailActions = (mailboxId: string) => {
       queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
       toast.success("Email forwarded successfully");
     },
-    onError: () => toast.error("Failed to forward email"),
+    onError: (err: any) =>
+      toast.error(err.response?.data?.message || "Failed to forward email"),
+  });
+
+  const starMutation = useMutation({
+    mutationFn: ({ id, starred }: { id: string; starred: boolean }) =>
+      emailsApi.starEmail(mailboxId, id, starred),
+    onMutate: async ({ id, starred }) => {
+      await queryClient.cancelQueries({ queryKey: ["emails", mailboxId] });
+      const previousQueries = queryClient.getQueriesData<any>({
+        queryKey: ["emails", mailboxId],
+      });
+
+      queryClient.setQueriesData<any>(
+        { queryKey: ["emails", mailboxId] },
+        (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: old.data.map((email: any) =>
+              String(email.id) === String(id) ? { ...email, isFlagged: starred } : email,
+            ),
+          };
+        },
+      );
+
+      return { previousQueries };
+    },
+    onError: (err: any, _variables, context) => {
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      toast.error(err.response?.data?.message || "Failed to star email");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
+    },
+  });
+
+  const reportMutation = useMutation({
+    mutationFn: ({ id, type }: { id: string; type: "spam" | "phishing" }) =>
+      emailsApi.reportEmail(mailboxId, id, type),
+    onMutate: async ({ id }) => {
+      await queryClient.cancelQueries({ queryKey: ["emails", mailboxId] });
+      const previousQueries = queryClient.getQueriesData<any>({
+        queryKey: ["emails", mailboxId],
+      });
+
+      // Remove from current view optimistically
+      queryClient.setQueriesData<any>(
+        { queryKey: ["emails", mailboxId] },
+        (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: old.data.filter((email: any) => email.id !== id),
+          };
+        },
+      );
+
+      return { previousQueries };
+    },
+    onSuccess: (_, { type }) => {
+      toast.success(`Email reported as ${type}`);
+    },
+    onError: (err: any, _variables, context) => {
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      toast.error(err.response?.data?.message || "Failed to report email");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
+    },
   });
 
   return {
@@ -190,5 +342,7 @@ export const useEmailActions = (mailboxId: string) => {
     sendMutation,
     replyMutation,
     forwardMutation,
+    starMutation,
+    reportMutation,
   };
 };

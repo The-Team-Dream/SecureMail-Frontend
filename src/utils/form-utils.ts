@@ -5,24 +5,40 @@ export const useServerErrors = <T extends FieldValues>(
   setError: UseFormSetError<T>,
 ) => {
   const handleServerErrors = (err: any, formFields: (keyof T)[]) => {
-    const backendErrors = err?.response?.data?.errors;
-    const message = err?.response?.data?.message;
+    const responseData = err?.response?.data;
+    const errors = responseData?.errors || responseData?.message;
 
-    if (backendErrors && Array.isArray(backendErrors)) {
-      backendErrors.forEach((error: string) => {
-        const lowerError = error.toLowerCase();
-        const targetField = formFields.find((field) =>
+    let errorHandled = false;
+
+    if (errors) {
+      const errorList = Array.isArray(errors) ? errors : [errors];
+
+      const sortedFields = [...formFields].sort(
+        (a, b) => String(b).length - String(a).length,
+      );
+
+      errorList.forEach((error: string) => {
+        const lowerError = String(error).toLowerCase();
+        const targetField = sortedFields.find((field) =>
           lowerError.includes(String(field).toLowerCase()),
         );
 
         if (targetField) {
           setError(targetField as Path<T>, { type: "server", message: error });
+          errorHandled = true;
         }
       });
-    }
 
-    if (message) {
-      setError("root" as Path<T>, { type: "server", message: message });
+      // If it's a single message that wasn't matched to a field, put it in root
+      if (!errorHandled && typeof errors === "string") {
+        setError("root" as Path<T>, { type: "server", message: errors });
+      } else if (!errorHandled && Array.isArray(errors) && errors.length > 0) {
+        // If it's an array but none matched, put the first one in root or join them
+        setError("root" as Path<T>, {
+          type: "server",
+          message: errors[0],
+        });
+      }
     }
   };
 

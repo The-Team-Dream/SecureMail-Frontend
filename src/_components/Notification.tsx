@@ -19,29 +19,44 @@ import { usePathname } from "next/navigation";
 import { StateMessage } from "./shared/StateMessage";
 import { NotificationCard } from "./NotificationCard";
 import { Bell } from "lucide-react";
+import { ActionButton } from "./shared/ActionButton";
 import {
   useNotifications,
   useUnreadCount,
   useNotificationOperations,
 } from "@/APIs/hooks/useNotifications";
 
+
+
+
+
+import notFoundImg from "../../public/images/not-found.png";
+
 export const NotificationDropdown = () => {
   const pathname = usePathname();
   const { data: notificationsData, isLoading: notificationsLoading } =
     useNotifications(1);
   const { data: unreadData } = useUnreadCount();
-  const { readNotification, readAll, deleteNotification } = useNotificationOperations();
+  const { readNotification, readAll, deleteNotification } =
+    useNotificationOperations();
 
-  const notifications = Array.isArray(notificationsData?.data)
-    ? notificationsData.data
-    : Array.isArray(notificationsData)
-      ? notificationsData
-      : [];
+  const notifications = Array.isArray(notificationsData?.data?.data)
+    ? notificationsData.data.data
+    : Array.isArray(notificationsData?.data)
+      ? notificationsData.data
+      : Array.isArray(notificationsData)
+        ? notificationsData
+        : [];
+  
   const unreadCount = unreadData?.count || 0;
 
   const handleToggleReadStatus = (id: number, currentStatus: boolean) => {
     if (!currentStatus) {
-      readNotification(String(id));
+      readNotification(String(id), {
+        onSuccess: () => toast.success("Marked as read"),
+      });
+    } else {
+      toast("Notification already read");
     }
   };
 
@@ -58,23 +73,25 @@ export const NotificationDropdown = () => {
   const isLoading = notificationsLoading;
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          className={cn(
-            "relative text-primary-600 data-[state=open]:bg-primary-200 data-[state=open]:text-primary hover:bg-primary-50",
-            pathname.includes("/notification") && "bg-primary-200 text-primary",
-          )}
-        >
+        <div className="inline-block relative">
+          <ActionButton
+            icon={<Bell className="w-5 h-5" />}
+            label="Notifications"
+            onClick={() => {}}
+            className={cn(
+              "text-primary-600",
+              pathname.includes("/notification") &&
+                "bg-primary-200 text-primary",
+            )}
+          />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-4 min-w-4 px-1 flex items-center justify-center text-[10px] rounded-full bg-error-600 border-none">
+            <Badge className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 flex items-center justify-center text-[10px] rounded-full bg-error-600 border-none pointer-events-none z-10">
               {unreadCount}
             </Badge>
           )}
-          <Bell className="w-5 h-5" />
-        </Button>
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
@@ -89,6 +106,11 @@ export const NotificationDropdown = () => {
           <div className="flex items-center justify-between p-4 border-b">
             <Text font="bold" size="lg">
               Notifications
+              {unreadCount > 0 && (
+                <span className="ml-2 text-xs font-normal text-primary-600">
+                  ({unreadCount} unread)
+                </span>
+              )}
             </Text>
             <button
               className="text-xs text-primary-600 hover:text-primary hover:underline cursor-pointer"
@@ -140,21 +162,35 @@ export const NotificationDropdown = () => {
               transition={{ duration: 0.2 }}
             >
               <TabsContent value={activeTab} className="m-0 mt-2">
-                <ScrollArea className="h-[400px]">
+                <ScrollArea className="h-[400px] w-full overflow-x-hidden">
                   {isLoading ? (
                     <div className="flex flex-col p-4 space-y-4">
                       {Array.from({ length: 4 }).map((_, i) => (
                         <NotificationCardSkeleton key={i} />
                       ))}
                     </div>
-                  ) : notifications.filter((n) =>
-                      activeTab === "all" ? true : n.category === activeTab,
-                    ).length > 0 ? (
+                  ) : notifications.filter((n) => {
+                      if (activeTab === "all") return true;
+                      const category =
+                        n.type === "NEW_EMAIL_RECEIVED"
+                          ? n.metadata?.verdict === "SPAM"
+                            ? "threats"
+                            : "updates"
+                          : "system";
+                      return category === activeTab;
+                    }).length > 0 ? (
                     <div className="flex flex-col">
                       {notifications
-                        .filter((n) =>
-                          activeTab === "all" ? true : n.category === activeTab,
-                        )
+                        .filter((n) => {
+                          if (activeTab === "all") return true;
+                          const category =
+                            n.type === "NEW_EMAIL_RECEIVED"
+                              ? n.metadata?.verdict === "SPAM"
+                                ? "threats"
+                                : "updates"
+                              : "system";
+                          return category === activeTab;
+                        })
                         .map((notification) => (
                           <NotificationCard
                             key={notification.id}
@@ -163,15 +199,15 @@ export const NotificationDropdown = () => {
                               deleteNotification(String(notification.id))
                             }
                             onToggleRead={handleToggleReadStatus}
-                            variant="dropdown"
                           />
                         ))}
                     </div>
                   ) : (
                     <div className="h-[400px] flex items-center justify-center">
                       <StateMessage
-                        variant="empty"
-                        title={`No ${activeTab === "all" ? "" : activeTab} notifications found`}
+                        image={notFoundImg}
+                        imageClassName="w-[180px] h-[180px] mb-4"
+                        title={`No ${activeTab === "all" ? "" : activeTab} notifications`}
                         description="You're all caught up!"
                       />
                     </div>

@@ -1,22 +1,16 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import {
-  Info,
-  AlertTriangle,
-  XCircle,
-  CheckCircle2,
-  CheckCheck,
-} from "lucide-react";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { Mail, MailOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/constants/icons";
 import { Text } from "./shared/Text";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Notification } from "@/APIs/types/Notification";
+import Image from "next/image";
+import logo from "../../public/icons/logo.png";
+import { getInitials } from "@/lib/utils";
 
 interface NotificationCardProps {
   notification: Notification;
@@ -25,103 +19,112 @@ interface NotificationCardProps {
   variant?: "dropdown" | "page";
 }
 
-const NotificationIcon = ({ type }: { type: string }) => {
-  const iconClass = "w-5 h-5";
-  switch (type) {
-    case "error":
-      return <XCircle className={`${iconClass} text-error-500`} />;
-    case "warning":
-      return <AlertTriangle className={`${iconClass} text-warning-500`} />;
-    case "success":
-      return <CheckCircle2 className={`${iconClass} text-secondary-700`} />;
-    default:
-      return <Info className={`${iconClass} text-info-500`} />;
+const NotificationAvatar = ({
+  notification,
+}: {
+  notification: Notification;
+}) => {
+  const size = "w-10 h-10";
+  const imgSize = 22;
+
+  if (notification.type !== "NEW_EMAIL_RECEIVED") {
+    return (
+      <div
+        className={cn(
+          size,
+          "rounded-full bg-background flex items-center justify-center overflow-hidden border border-primary-100 shadow-sm",
+        )}
+      >
+        <Image src={logo} alt="System" width={imgSize} height={imgSize} />
+      </div>
+    );
   }
+
+  const senderName =
+    notification.metadata?.fromAddr?.split("<")[0]?.replace(/"/g, "").trim() ||
+    "System";
+  const initials = getInitials(senderName);
+
+  return (
+    <div
+      className={cn(
+        size,
+        "rounded-full bg-secondary-50 flex items-center justify-center border border-secondary-200 shadow-sm",
+      )}
+    >
+      <Text
+        font="bold"
+        size="xs"
+        color={"secondary-700"}
+        className="text-secondary-700 uppercase"
+      >
+        {initials}
+      </Text>
+    </div>
+  );
 };
 
 export const NotificationCard = ({
   notification,
   onDelete,
   onToggleRead,
-  variant = "dropdown",
 }: NotificationCardProps) => {
   const isUnread = !notification.isRead;
-  const isPage = variant === "page";
 
   const content = (
-    <div className={cn("flex items-start", isPage ? "gap-2" : "gap-3")}>
-      <div className={cn(isPage ? "p-1" : "pt-0.5")}>
-        <NotificationIcon type={notification.type} />
+    <div className={cn("flex items-start gap-3")}>
+      <div className="shrink-0">
+        <NotificationAvatar notification={notification} />
       </div>
 
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Text
-              font="semiBold"
-              size={isPage ? "lg" : "sm"}
-              color={isPage ? "secondary-950" : "default"}
-            >
+            <Text font="semiBold" size="sm" color="default">
               {notification.title}
             </Text>
-            {isPage && isUnread && (
-              <Badge
-                variant="secondary"
-                className="h-5 px-1.5 text-[10px] uppercase bg-primary text-background"
-              >
-                New
-              </Badge>
-            )}
           </div>
           <div
             className={cn(
-              "relative flex items-center justify-end",
-              isPage ? "min-w-[80px]" : "min-w-[70px]",
+              "relative flex items-center justify-end min-w-[70px]",
             )}
           >
             <div
               className={cn(
-                "absolute inset-0 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10",
-                !isPage && "gap-0.5",
+                "absolute inset-0 flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10",
               )}
             >
               <Button
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  isPage ? "h-7 w-7" : "h-6 w-6",
-                  "text-primary hover:text-primary hover:bg-primary/10",
+                  "h-7 w-7",
+                  "text-primary hover:bg-primary-50 rounded-full",
                 )}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+                onClick={() => {
                   onToggleRead(notification.id, notification.isRead);
                 }}
               >
                 {notification.isRead ? (
-                  <Icons.Mail className={isPage ? "h-4 w-4" : "h-3.5 w-3.5"} />
+                  <Mail className="h-3.5 w-3.5 text-primary-600" />
                 ) : (
-                  <CheckCheck className={isPage ? "h-4 w-4" : "h-3.5 w-3.5"} />
+                  <MailOpen className="h-3.5 w-3.5 text-primary-600" />
                 )}
               </Button>
+
               <Button
                 variant="ghost"
-                size={isPage ? "icon" : "icon-sm"}
+                size="icon"
                 className={cn(
-                  isPage ? "h-7 w-7" : "h-6 w-6",
-                  "text-error-500 hover:text-error-600",
-                  isPage && "hover:bg-error-50",
+                  "h-7 w-7",
+                  "text-error-500 hover:bg-error-50 rounded-full",
                 )}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onDelete(notification.id);
-                }}
+                onClick={() => onDelete(notification.id)}
               >
                 <Icons.Delete
                   className={cn(
-                    isPage ? "h-4 w-4" : "h-3.5 w-3.5",
-                    "text-error-500 hover:scale-105 transition-transform",
+                    "h-3.5 w-3.5",
+                    "hover:scale-110 transition-transform",
                   )}
                 />
               </Button>
@@ -136,67 +139,72 @@ export const NotificationCard = ({
           </div>
         </div>
 
-        <Text
-          size={isPage ? "sm" : "xs"}
-          color={isPage ? "secondary-700" : "primary-500"}
-          className={cn(
-            "leading-relaxed",
-            isPage ? "max-w-[90%]" : "line-clamp-2 pr-2",
+        <div className="flex flex-col gap-1">
+          <Text
+            size="xs"
+            color="primary-500"
+            className="leading-relaxed line-clamp-2 pr-2"
+          >
+            {notification.message}
+          </Text>
+
+          {notification.metadata && (
+            <div className="flex flex-wrap gap-2 mt-1">
+              {notification.metadata.fromAddr && (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] py-0 h-4 border-primary-100 bg-primary-50"
+                >
+                  From: {notification.metadata.fromAddr}
+                </Badge>
+              )}
+              {notification.metadata.verdict && (
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "text-[10px] py-0 h-4 uppercase",
+                    notification.metadata.verdict === "SPAM"
+                      ? "border-error-200 bg-error-50 text-error-600"
+                      : "border-primary-100 bg-primary-50",
+                  )}
+                >
+                  {notification.metadata.verdict}
+                </Badge>
+              )}
+              {notification.metadata.ipAddress && (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] py-0 h-4 border-primary-100 bg-primary-50"
+                >
+                  IP: {notification.metadata.ipAddress}
+                </Badge>
+              )}
+              {notification.metadata.deviceOs && (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] py-0 h-4 border-primary-100 bg-primary-50"
+                >
+                  {notification.metadata.deviceOs} /{" "}
+                  {notification.metadata.deviceBrowser}
+                </Badge>
+              )}
+            </div>
           )}
-        >
-          {notification.message}
-        </Text>
+        </div>
       </div>
     </div>
   );
 
-  if (isPage) {
-    const MotionCard = motion.create(Card);
-    return (
-      <MotionCard
-        initial={{ boxShadow: "none" }}
-        whileHover={{
-          boxShadow:
-            "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px",
-        }}
-        transition={{ duration: 0.2 }}
-        className={cn(
-          "group relative mb-4 overflow-hidden",
-          isUnread ? "bg-primary-50" : "bg-transparent",
-          notification.type === "error" && "border-l-error-500",
-        )}
-      >
-        <CardContent className="p-0">
-          {notification.link ? (
-            <Link
-              href={notification.link}
-              className="block p-5 focus:outline-none"
-            >
-              {content}
-            </Link>
-          ) : (
-            <div className="p-5">{content}</div>
-          )}
-        </CardContent>
-      </MotionCard>
-    );
-  }
-
   return (
     <div
       className={cn(
-        "group relative p-4 border-b last:border-0 transition-colors hover:bg-primary-50/50 cursor-pointer",
+        "group relative p-4 border-b last:border-0 transition-colors hover:bg-primary-50/50",
         isUnread ? "bg-primary-50" : "bg-transparent",
-        notification.type === "error" && "border-l-4 border-l-error-500",
+        notification.metadata?.verdict === "SPAM" &&
+          "border-l-4 border-l-error-500",
       )}
     >
-      {notification.link ? (
-        <Link href={notification.link} className="block focus:outline-none">
-          {content}
-        </Link>
-      ) : (
-        <div>{content}</div>
-      )}
+      <div>{content}</div>
     </div>
   );
 };

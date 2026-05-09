@@ -1,31 +1,45 @@
-export type EmailFolder = 'inbox' | 'sent' | 'spam' | 'phishing' | 'starred' | 'malware' | 'trash';
+export type EmailFolder =
+  | "inbox"
+  | "sent"
+  | "spam"
+  | "phishing"
+  | "starred"
+  | "malware"
+  | "trash";
 
-export type SecurityVerdict = 'clean' | 'suspicious' | 'malicious' | 'unknown';
+export type SecurityVerdict = "clean" | "suspicious" | "malicious" | "unknown";
 
-export type ActivityPeriod = 'daily' | 'weekly' | 'monthly';
+export type ActivityPeriod = "daily" | "weekly" | "monthly";
 
 export interface Email {
-  id: string;
-  sender: {
-    name: string;
-    email: string;
-  };
+  id: string | number;
+  mailBoxId: number;
   subject: string;
-  snippet: string;
-  date: string;
-  read: boolean;
-  hasAttachments: boolean;
-  securityVerdict: SecurityVerdict;
-  folder: EmailFolder;
+  fromAddr: string;
+  fromName: string;
+  toAddr: string[];
+  isRead: boolean;
+  isFlagged: boolean;
+  isSpam: boolean;
+  isPhishing: boolean;
+  receivedAt: string;
+  spamScore: number;
+  phishingScore: number;
+  malwareVerdict: string | null;
+  malwareScore: number | null;
+  malwareSeverity: string | null;
+  securityVerdict?: SecurityVerdict;
+  folder?: EmailFolder;
+  hasAttachments?: boolean;
 }
 
 export interface EmailsResponse {
   data: Email[];
   meta: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
+    total: number;
+    page: number;
     limit: number;
+    totalPages: number;
   };
 }
 export interface Attachment {
@@ -46,7 +60,7 @@ export interface EmailDetails extends Email {
     isPhishing: boolean;
     isMalware: boolean;
     threatDetails: string[];
-    aiAnalysis: string; 
+    aiAnalysis: string;
   };
 }
 export interface SendEmailPayload {
@@ -56,7 +70,7 @@ export interface SendEmailPayload {
   bcc?: string;
   bodyText?: string;
   bodyHtml?: string;
-  attachments?: File[]; 
+  attachments?: File[];
 }
 
 export interface ReplyEmailPayload {

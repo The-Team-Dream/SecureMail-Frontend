@@ -64,28 +64,33 @@ export default function ForgotPassword() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <Input
                 {...register("email", {
-                  onChange: () => clearErrors("email"),
+                  onChange: () => clearErrors(["email", "root" as any]),
                 })}
                 type="email"
                 placeholder="Email Address"
                 leftIcon={<Mail />}
                 error={errors?.email?.message}
               />
-              {errors.root && (
-                <BackEndError
-                  error={String(errors.root.message || "An error occurred")}
-                />
-              )}
-              <Button size={"lg"} type="submit" disabled={isPending} className="w-full">
+              <BackEndError
+                error={
+                  errors.root?.message ? String(errors.root.message) : undefined
+                }
+              />
+              <Button
+                size={"lg"}
+                type="submit"
+                disabled={isPending}
+                className="w-full"
+              >
                 {isPending ? (
                   <>
                     <Spinner />
-                    <Text className="text-white" font={"medium"}>
+                    <Text className="text-background" font={"medium"}>
                       Sending...
                     </Text>
                   </>
                 ) : (
-                  <Text className="text-white" font={"medium"}>
+                  <Text className="text-background" font={"medium"}>
                     Send
                   </Text>
                 )}

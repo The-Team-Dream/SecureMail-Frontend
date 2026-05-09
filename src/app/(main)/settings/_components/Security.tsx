@@ -140,7 +140,7 @@ const Security = () => {
                       type="password"
                       disabled={isChangingPassword}
                       {...register("currentPassword", {
-                        onChange: () => clearErrors("currentPassword"),
+                        onChange: () => clearErrors(["currentPassword", "root" as any]),
                       })}
                       placeholder="••••••••"
                       error={errors.currentPassword?.message}
@@ -152,7 +152,7 @@ const Security = () => {
                       type="password"
                       disabled={isChangingPassword}
                       {...register("newPassword", {
-                        onChange: () => clearErrors("newPassword"),
+                        onChange: () => clearErrors(["newPassword", "root" as any]),
                       })}
                       placeholder="••••••••"
                       error={errors.newPassword?.message}
@@ -164,7 +164,7 @@ const Security = () => {
                       type="password"
                       disabled={isChangingPassword}
                       {...register("confirmPassword", {
-                        onChange: () => clearErrors("confirmPassword"),
+                        onChange: () => clearErrors(["confirmPassword", "root" as any]),
                       })}
                       placeholder="••••••••"
                       error={errors.confirmPassword?.message}
@@ -173,13 +173,15 @@ const Security = () => {
                 </div>
               )}
 
-              {errors.root && (
                 <div className="mt-4">
                   <BackEndError
-                    error={String(errors.root.message || "An error occurred")}
+                    error={
+                      errors.root?.message
+                        ? String(errors.root.message)
+                        : undefined
+                    }
                   />
                 </div>
-              )}
 
               {isEditing && (
                 <div className="mt-8 flex justify-end">

@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import type { Classification } from "@/types/mail";
 import { useMailStore } from "@/stores/useMailStore";
 import { MailList } from "./MailList";
+import { useUnreadEmailsCount } from "@/APIs/hooks/useEmails";
+import { useParams } from "next/navigation";
 
 const tabs: {
   id: Classification;
@@ -21,9 +23,12 @@ export const MailTabs = () => {
   const setActiveClassification = useMailStore(
     (s) => s.setActiveClassification,
   );
-  const getUnreadCount = useMailStore((s) => s.getUnreadCount);
+  
+  const params = useParams();
+  const mailboxId = params.mailboxId as string;
+  const unreadInboxCount = useUnreadEmailsCount(mailboxId, "inbox");
+  
   const activeFolder = useMailStore((s) => s.activeFolder);
-  const _emails = useMailStore((s) => s.emails);
 
   if (activeFolder !== "inbox") return null;
 
@@ -31,7 +36,9 @@ export const MailTabs = () => {
     <div className="grid grid-cols-1 md:grid-cols-3 md:mb-6">
       {tabs.map((tab) => {
         const isActive = activeClassification === tab.id;
-        const unreadCount = getUnreadCount(tab.id);
+        // Currently API doesn't distinguish between classifications like promotions/social, 
+        // so we'll show the total inbox unread count for primary and 0 for others to be safe.
+        const unreadCount = tab.id === "primary" ? unreadInboxCount : 0;
 
         return (
           <React.Fragment key={tab.id}>
@@ -51,19 +58,7 @@ export const MailTabs = () => {
               />
               <span className="text-base">{tab.label}</span>
 
-              {unreadCount > 0 && (
-                <span
-                  className={cn(
-                    "text-xs py-1.5 px-6 rounded-full font-medium ml-auto md:ml-0",
-                    tab.id === "promotions"
-                      ? "bg-warning-600 text-warning-100"
-                      : "bg-secondary-100 text-secondary-800",
-                    tab.id === "social" && "bg-secondary-700 text-background",
-                  )}
-                >
-                  {unreadCount} New
-                </span>
-              )}
+
             </button>
 
             {isActive && (

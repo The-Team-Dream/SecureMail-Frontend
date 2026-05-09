@@ -1,16 +1,17 @@
 "use client";
 
 import React from "react";
-import { Star, FileText, Trash2, MailOpen, Archive } from "lucide-react";
+import { Star, FileText, MailOpen, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Email } from "@/types/mail";
+import type { Email, EmailFolder } from "@/APIs/types/Email";
 import { useMailStore } from "@/stores/useMailStore";
 import { Text } from "../shared/Text";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useParams } from "next/navigation";
+import { useEmailActions } from "@/APIs/hooks/useEmails";
 
-import { RISK_STYLE_MAP, RiskLevel } from "@/constants/security";
+import { RISK_STYLE_MAP } from "@/constants/security";
+import { Icons } from "@/constants/icons";
 
 interface MailRowProps {
   email: Email;
@@ -28,14 +29,25 @@ export const MailRow = ({
   onDragEnd,
 }: MailRowProps) => {
   const toggleSelectEmail = useMailStore((s) => s.toggleSelectEmail);
-  const toggleStarEmail = useMailStore((s) => s.toggleStarEmail);
-  const deleteEmail = useMailStore((s) => s.deleteEmail);
-  const archiveEmail = useMailStore((s) => s.archiveEmail);
-  const toggleReadEmail = useMailStore((s) => s.toggleReadEmail);
   const selectedIds = useMailStore((s) => s.selectedIds);
-  const isSelected = selectedIds.includes(email.id);
+  const isSelected = selectedIds.includes(String(email.id));
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams();
+  const mailboxId = params.mailboxId as string;
+  const activeFolder = useMailStore((s) => s.activeFolder);
+  const { deleteMutation, readMutation, starMutation } = useEmailActions(
+    mailboxId,
+    activeFolder as EmailFolder,
+  );
+
+  const riskLevel = email.malwareVerdict
+    ? "High"
+    : email.isPhishing
+      ? "High"
+      : email.isSpam
+        ? "Medium"
+        : "Low";
 
   return (
     <div
@@ -46,18 +58,17 @@ export const MailRow = ({
         onDragOver(index);
       }}
       onDragEnd={onDragEnd}
-      onClick={() => router.push(`${pathname}/${email.id}`)}
+      onClick={() => router.push(`${pathname}/${String(email.id)}`)}
       className={cn(
-        "group flex items-start sm:items-center gap-2 sm:gap-3 px-2 sm:px-4 py-3 sm:py-4 border-b-2 border-primary-50",
-        "cursor-pointer transition-colors duration-150",
-        isSelected && "bg-primary-50",
+        "group flex items-center gap-4 p-4 border-b border-primary-50 hover:bg-primary-50 transition-colors cursor-pointer relative z-0 hover:z-10",
+        !email.isRead ? "bg-background" : "bg-transparent",
       )}
     >
       <div className="flex items-center pt-0.5 sm:pt-0 gap-1 sm:gap-2 shrink-0">
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={() => toggleSelectEmail(email.id)}
+          onChange={() => toggleSelectEmail(String(email.id))}
           className="w-4 h-4 rounded border-[1.5px] border-primary-400 text-secondary-600 focus:ring-secondary-600 cursor-pointer accent-secondary-600 shrink-0"
           onClick={(e) => e.stopPropagation()}
         />
@@ -65,17 +76,20 @@ export const MailRow = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            toggleStarEmail(email.id);
+            starMutation.mutate({
+              id: String(email.id),
+              starred: !email.isFlagged,
+            });
           }}
           className="p-0.5 rounded-full transition-colors shrink-0 cursor-pointer sm:mr-2"
-          aria-label={email.isStarred ? "Unstar email" : "Star email"}
+          aria-label={email.isFlagged ? "Unstar email" : "Star email"}
         >
           <Star
             className={cn(
               "w-4 h-4 sm:w-5 sm:h-5 transition-colors",
-              email.isStarred
+              email.isFlagged || email.folder === "starred"
                 ? "fill-warning-400 text-warning-400"
-                : "text-primary-400",
+                : "text-primary-400 hover:text-warning-400",
             )}
           />
         </button>
@@ -87,9 +101,16 @@ export const MailRow = ({
             font={!email.isRead ? "semiBold" : "normal"}
             color={"primary-800"}
             size={"xs"}
-            className={"truncate sm:w-28 shrink-0 sm:text-sm"}
+            className={"truncate sm:w-28 md:w-80 shrink-0 sm:text-sm"}
           >
-            {email.sender}
+            {activeFolder === "sent"
+              ? `To: ${email.toAddr && email.toAddr.length > 0 ? email.toAddr.map((addr) => addr.split("@")[0]).join(", ") : "Unknown Recipient"}`
+              : `${email.fromName || (email.fromAddr ? email.fromAddr.split("@")[0] : "Unknown Sender")}`}
+            {!email.isRead && (
+              <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-primary-800 text-background rounded uppercase tracking-wider animate-pulse">
+                New
+              </span>
+            )}
           </Text>
 
           {/* Date on Mobile */}
@@ -99,41 +120,45 @@ export const MailRow = ({
               !email.isRead ? "font-bold" : "font-normal",
             )}
           >
-            {email.date}
+            {new Date(email.receivedAt).toLocaleDateString()}
           </span>
         </div>
 
         {/* Title + Attachment */}
         <div className="flex-1 min-w-0 max-w-[650px] flex flex-col items-start gap-1 sm:gap-2">
-          <span
-            className={cn(
-              "truncate w-full text-xs sm:text-sm text-primary-800",
-              !email.isRead ? "font-semibold" : "font-normal",
-            )}
-          >
-            {email.subject}
-          </span>
-
-          {/* Risk Level Indicator */}
-          {email.riskLevel && (
-            <div
+          <div className="flex items-center gap-2 w-full truncate">
+            <span
               className={cn(
-                "flex items-center gap-1.5",
-                RISK_STYLE_MAP[email.riskLevel as RiskLevel],
+                "truncate text-xs sm:text-sm text-primary-800",
+                !email.isRead ? "font-semibold" : "font-normal",
               )}
             >
-              <div className="w-1 h-1 rounded-full bg-current" />
-              <span className="text-xs font-medium leading-none">
-                {email.riskLevel}
-              </span>
-            </div>
-          )}
+              {email.subject}
+            </span>
+          </div>
+
+          {/* Risk Level Indicator */}
+          {email.isPhishing &&
+            riskLevel &&
+            RISK_STYLE_MAP[riskLevel as keyof typeof RISK_STYLE_MAP] && (
+              <div
+                className={cn(
+                  "flex items-center gap-1.5",
+                  RISK_STYLE_MAP[riskLevel as keyof typeof RISK_STYLE_MAP],
+                )}
+              >
+                <div className="w-1 h-1 rounded-full bg-current" />
+                <span className="text-xs font-medium leading-none">
+                  {riskLevel}
+                </span>
+              </div>
+            )}
 
           {/* === (Attachment) === */}
-          {email.hasAttachment && email.attachmentName && (
+          {email.hasAttachments && (
             <span className="inline-flex items-center gap-1 sm:gap-2 px-2 py-0.5 border border-primary-200 rounded-3xl text-[10px] sm:text-sm text-primary-500 shrink-0 mt-1 sm:mt-0">
               <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-error-500" />
-              {email.attachmentName}
+              Attachment
             </span>
           )}
         </div>
@@ -146,7 +171,7 @@ export const MailRow = ({
             !email.isRead ? "font-bold" : "font-normal",
           )}
         >
-          {email.date}
+          {new Date(email.receivedAt).toLocaleDateString()}
         </span>
 
         {/* Actions on Desktop */}
@@ -154,29 +179,22 @@ export const MailRow = ({
           <Button
             size={"icon-sm"}
             variant={"ghost"}
+            className={cn(
+              activeFolder === "trash" && "cursor-not-allowed opacity-50",
+            )}
             onClick={(e) => {
               e.stopPropagation();
-              archiveEmail(email.id);
-              toast.success("email has been archived");
+              if (activeFolder !== "trash") {
+                deleteMutation.mutate(String(email.id));
+              }
             }}
-            aria-label="Archive email"
-            title="Archive"
-          >
-            <Archive className="w-4 h-4 text-primary-800" />
-          </Button>
-
-          <Button
-            size={"icon-sm"}
-            variant={"ghost"}
-            onClick={(e) => {
-              e.stopPropagation();
-              deleteEmail(email.id);
-              toast.success("email has been deleted");
-            }}
+            disabled={activeFolder === "trash"}
             aria-label="Delete email"
-            title="Delete"
+            title={
+              activeFolder === "trash" ? "Cannot delete from trash" : "Delete"
+            }
           >
-            <Trash2 className="w-4 h-4 text-primary-800 hover:text-error-500 transition-colors" />
+            <Icons.Delete className="w-6 h-6 text-primary-800 hover:text-error-500 transition-colors" />
           </Button>
 
           <Button
@@ -184,17 +202,19 @@ export const MailRow = ({
             variant={"ghost"}
             onClick={(e) => {
               e.stopPropagation();
-              toggleReadEmail(email.id);
-              toast.success(
-                email.isRead
-                  ? "email has been marked as unread"
-                  : "email has been marked as read",
-              );
+              readMutation.mutate({
+                id: String(email.id),
+                read: !email.isRead,
+              });
             }}
             aria-label={email.isRead ? "Mark as unread" : "Mark as read"}
             title={email.isRead ? "Mark as unread" : "Mark as read"}
           >
-            <MailOpen className="w-4 h-4 text-primary-800" />
+            {email.isRead ? (
+              <Mail className="w-4 h-4 text-primary-800" />
+            ) : (
+              <MailOpen className="w-4 h-4 text-primary-800" />
+            )}
           </Button>
         </div>
       </div>

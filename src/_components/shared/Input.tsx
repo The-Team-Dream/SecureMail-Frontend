@@ -46,10 +46,6 @@ export const errorVariants = {
   exit: { y: -10, opacity: 0 },
 };
 
-/**
- * ⚠️ IMPORTANT: forwardRef is required here so that React Hook Form's
- * register() can attach its ref to the underlying <input> element.
- */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     { label, leftIcon, type = "text", required, error, className, ...props },
@@ -107,7 +103,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             </button>
           )}
         </div>
-        {error && <Error error={error} />}
+        <Error error={error} />
       </div>
     );
   },
