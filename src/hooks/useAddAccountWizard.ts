@@ -97,6 +97,12 @@ export function useAddAccountWizard({
   // ─── OAuth Popup Listener ──────────────────────────────────────────────────
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
+      console.log(
+        "OAuth Message Received:",
+        event.data,
+        "Origin:",
+        event.origin,
+      );
       if (
         event.origin !== window.location.origin ||
         event.data?.type !== "OAUTH_CODE_RECEIVED" ||
@@ -123,9 +129,17 @@ export function useAddAccountWizard({
         // On Success
         clearPersistence();
         reset();
-        router.push("/mailboxes");
+        updateStepUrl(6);
       } catch (error: any) {
-        console.error("OAuth Connection Failed:", error);
+        console.error(
+          "OAuth Connection Failed Details:",
+          error?.response?.data?.message,
+        );
+        toast.error(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to finalize account connection.",
+        );
       } finally {
         setIsOAuthLoading(false);
       }

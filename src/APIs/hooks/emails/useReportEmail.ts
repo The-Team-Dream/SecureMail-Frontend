@@ -6,7 +6,7 @@ export const useReportEmail = (mailboxId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, type }: { id: string; type: "spam" | "phishing" }) =>
+    mutationFn: ({ id, type }: { id: string; type: "spam" | "phishing" | "malware" }) =>
       emailsApi.reportEmail(mailboxId, id, type),
     onMutate: async ({ id }) => {
       await queryClient.cancelQueries({ queryKey: ["emails", mailboxId] });

@@ -26,7 +26,7 @@ const SocialAuthWrapper = () => {
   }, [router]);
 
   const handleOAuthClick = (provider: "google" | "outlook") => {
-    const callbackUrl = `${window.location.origin}/auth/callback`;
+    const callbackUrl = `${window.location.origin}/auth/google/callback`;
     const url = getOAuthLoginUrl(provider, callbackUrl);
 
     // Open a popup window centered on the screen

@@ -10,7 +10,7 @@ import { useMailboxReports } from "@/APIs/hooks/mailboxes";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { Input } from "@/_components/shared/Input";
 import { SecurityReport } from "@/APIs/types/Reports";
-import SecurityReportSkeleton from "@/_components/skeleton/SecuritReportsSkeleton";
+import { ReportsSkeleton } from "@/_components/skeleton/ReportsSkeleton";
 import { StatCard } from "./_components/StatCard";
 import { ReportCard } from "./_components/ReportCard";
 import { containerVariants, itemVariants } from "./_components/variants";
@@ -50,7 +50,7 @@ export default function SecurityReportsPage({
     [reports],
   );
 
-  if (isLoading) return <SecurityReportSkeleton />;
+  if (isLoading) return <ReportsSkeleton />;
 
   if (isError) {
     return (
