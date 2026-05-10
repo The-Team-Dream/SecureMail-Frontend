@@ -98,7 +98,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
     <div className="flex flex-col h-full bg-background p-4 sm:p-8 duration-300">
       <div className="mb-6 flex items-center gap-4">
         <Text size="2xl" font="semiBold">
-          {email.subject}
+          {email.subject}.
         </Text>
       </div>
 
