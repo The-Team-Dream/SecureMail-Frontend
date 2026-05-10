@@ -10,14 +10,16 @@ import {
 } from "lucide-react";
 import { useMailStore } from "@/stores/useMailStore";
 import { cn } from "@/lib/utils";
-import { Text } from "../shared/Text";
-import toast from "react-hot-toast";
+import { Text } from "@/_components/shared/Text";
+import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import {
   useEmails,
   useSearchEmails,
-  useEmailActions,
-} from "@/APIs/hooks/useEmails";
+  useDeleteEmail,
+  useReadEmail,
+  useReclassifyEmail,
+} from "@/APIs/hooks/emails";
 import type { EmailFolder } from "@/APIs/types/Email";
 import type { Email } from "@/types/mail";
 import { useQueryClient } from "@tanstack/react-query";
@@ -54,8 +56,9 @@ export const MailToolbar = ({
     storeSearch,
     currentPage,
   );
-  const { deleteMutation, readMutation, reclassifyMutation } =
-    useEmailActions(mailboxId);
+  const deleteMutation = useDeleteEmail(mailboxId);
+  const readMutation = useReadEmail(mailboxId);
+  const reclassifyMutation = useReclassifyEmail(mailboxId);
 
   const isRefreshing = isFetching || isSearchingFetching;
 

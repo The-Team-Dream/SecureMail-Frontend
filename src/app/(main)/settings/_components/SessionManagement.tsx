@@ -8,7 +8,11 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Laptop, Smartphone } from "lucide-react";
-import { useSessions } from "@/APIs/hooks/useSessions";
+import {
+  useSessions,
+  useRevokeSession,
+  useRevokeOtherSessions,
+} from "@/APIs/hooks/sessions";
 import { Skeleton } from "@/components/ui/skeleton";
 import dayjs from "dayjs";
 import { StateMessage } from "@/_components/shared/StateMessage";
@@ -33,7 +37,9 @@ const SessionSkeleton = () => (
 );
 
 const SessionManagement = () => {
-  const { sessions, isLoading, revokeSession, revokeOthers } = useSessions();
+  const { data: sessions = [], isLoading } = useSessions();
+  const { mutate: revokeSession } = useRevokeSession();
+  const { mutate: revokeOthers } = useRevokeOtherSessions();
 
   return (
     <Accordion type="single" collapsible defaultValue="item-1">

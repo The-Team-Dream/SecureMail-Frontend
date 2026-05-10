@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { Icons } from "@/constants/icons";
-import { useSettingsOperations } from "@/APIs/hooks/useUserSettings";
+import { useUpdateTheme } from "@/APIs/hooks/userSettings";
+import { useGetUserSettings } from "@/APIs/hooks/userSettings";
 
 type ThemeTogglerProps = {
   isCollapsed?: boolean;
@@ -14,7 +15,8 @@ type ThemeTogglerProps = {
 const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { updateTheme } = useSettingsOperations();
+  const { mutate: updateTheme } = useUpdateTheme();
+  const { data: settings } = useGetUserSettings();
 
   useEffect(() => {
     setMounted(true);

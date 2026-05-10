@@ -1,5 +1,5 @@
 "use client";
-import { useNotifications } from "@/APIs/hooks/useNotifications";
+import { useNotifications } from "@/APIs/hooks/notifications";
 import { Text } from "@/_components/shared/Text";
 import { formatDistanceToNow } from "date-fns";
 import { Info } from "lucide-react";
@@ -10,7 +10,7 @@ import { Notification } from "@/APIs/types/Notification";
 import { Icons } from "@/constants/icons";
 
 import { RecentSecurityEventsSkeleton } from "../skeleton/RecentSecurityEventsSkeleton";
-import { StateMessage } from "../shared/StateMessage";
+import { StateMessage } from "@/_components/shared/StateMessage";
 
 const getSeverity = (notification: Notification) => {
   if (notification.type === "NEW_LOGIN_DETECTED") return "HIGH";

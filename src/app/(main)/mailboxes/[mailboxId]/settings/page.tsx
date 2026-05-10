@@ -15,8 +15,9 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import {
   useMailboxById,
-  useMailboxOperations,
-} from "@/APIs/hooks/useMailboxes";
+  useUpdateMailbox,
+  useDeleteMailbox,
+} from "@/APIs/hooks/mailboxes";
 import { Spinner } from "@/components/ui/spinner";
 import { ConfirmationModal } from "@/_components/shared/ConfirmationModal";
 import { useState, useEffect } from "react";
@@ -27,8 +28,8 @@ const MailboxSettings = () => {
   const mailboxId = params.mailboxId as string;
 
   const { data: mailbox, isLoading } = useMailboxById(mailboxId);
-  const { updateMailbox, isUpdating, deleteMailbox, isDeleting } =
-    useMailboxOperations();
+  const { mutate: updateMailbox, isPending: isUpdating } = useUpdateMailbox();
+  const { mutate: deleteMailbox, isPending: isDeleting } = useDeleteMailbox();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 

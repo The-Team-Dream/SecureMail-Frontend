@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import type { Classification } from "@/types/mail";
 import { useMailStore } from "@/stores/useMailStore";
 import { MailList } from "./MailList";
-import { useUnreadEmailsCount } from "@/APIs/hooks/useEmails";
+import { useUnreadEmailsCount } from "@/APIs/hooks/emails";
 import { useParams } from "next/navigation";
 
 const tabs: {

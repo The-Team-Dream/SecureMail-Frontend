@@ -1,6 +1,6 @@
 import Image from "next/image";
 import logo from "../../../public/icons/logo.png";
-import { Text } from "./Text";
+import { Text } from "@/_components/shared/Text";
 import { ComponentProps } from "react";
 import Link from "next/link";
 /**

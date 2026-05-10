@@ -21,13 +21,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
-import { Text } from "./Text";
+import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
 import type { Folder } from "@/types/mail";
 import { useMailStore } from "@/stores/useMailStore";
-import { useEmails } from "@/APIs/hooks/useEmails";
+import { useEmails } from "@/APIs/hooks/emails";
 
 const dashboardNavItems = [
   { name: "Mailboxes", icon: Mail, href: "/mailboxes" },

@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LockIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import Logo from "@/_components/shared/Logo";
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";

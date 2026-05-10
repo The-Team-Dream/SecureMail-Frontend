@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 import { CircleAlert, Eye, EyeOff } from "lucide-react";
 import { forwardRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Text } from "./Text";
-import Error from "./Error";
+import { Text } from "@/_components/shared/Text";
+import Error from "@/_components/shared/Error";
 /**
  * 📦 Input Component
  *

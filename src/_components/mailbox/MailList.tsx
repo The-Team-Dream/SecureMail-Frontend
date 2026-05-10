@@ -3,10 +3,10 @@ import { useState, useCallback } from "react";
 import { MailRow } from "./MailRow";
 import { useMailStore } from "@/stores/useMailStore";
 import { useParams } from "next/navigation";
-import { useEmails, useSearchEmails } from "@/APIs/hooks/useEmails";
+import { useEmails, useSearchEmails } from "@/APIs/hooks/emails";
 import type { Email, EmailFolder } from "@/APIs/types/Email";
 import { MailListSkeleton } from "../skeleton/MailListSkeleton";
-import { StateMessage } from "../shared/StateMessage";
+import { StateMessage } from "@/_components/shared/StateMessage";
 import notFoundImg from "../../../public/images/not-found.png";
 
 export const MailList = () => {

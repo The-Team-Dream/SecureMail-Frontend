@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Bell, Check, ChevronRight, Plus } from "lucide-react";
 import Logo from "./Logo";
-import { Text } from "./Text";
+import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,7 +26,7 @@ import { NotificationDropdown } from "../Notification";
 import { Icons } from "@/constants/icons";
 import { getInitials, getImageUrl, cn } from "@/lib/utils";
 import { useGetAuthMe } from "@/APIs/hooks/useAuth";
-import { useMailboxes } from "@/APIs/hooks/useMailboxes";
+import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
 import { ActionButton } from "./ActionButton";

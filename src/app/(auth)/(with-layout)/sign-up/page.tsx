@@ -10,7 +10,7 @@ import { errorVariants, Input } from "@/_components/shared/Input";
 import Logo from "@/_components/shared/Logo";
 import { ISignUp, signupSchema } from "@/schemas/auth/signup";
 import { AnimatePresence, motion } from "framer-motion";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Text } from "@/_components/shared/Text";
 import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
 import { Spinner } from "@/components/ui/spinner";

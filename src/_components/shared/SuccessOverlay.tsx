@@ -10,7 +10,7 @@ import {
   DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Text } from "./Text";
+import { Text } from "@/_components/shared/Text";
 
 interface SuccessOverlayProps {
   isSuccess: boolean;

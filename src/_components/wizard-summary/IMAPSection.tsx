@@ -11,7 +11,7 @@ import {
   PasswordField,
   SecuritySelect,
   MailConfigDraft,
-} from "./Shared";
+} from "@/_components/wizard-summary/Shared";
 import { Icons } from "@/constants/icons";
 
 export function IMAPSection({

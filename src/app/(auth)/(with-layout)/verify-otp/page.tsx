@@ -10,7 +10,7 @@ import { MoveRight } from "lucide-react";
 import useTimer from "@/hooks/useTimer";
 import Logo from "@/_components/shared/Logo";
 import { useResendOtp, useVerifyOtp } from "@/APIs/hooks/useAuth";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";

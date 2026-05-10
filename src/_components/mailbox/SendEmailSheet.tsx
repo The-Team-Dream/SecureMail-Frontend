@@ -26,13 +26,13 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import BackEndError from "@/_components/shared/BackEndError";
 import Error from "@/_components/shared/Error";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
-import { Text } from "../shared/Text";
+import { Text } from "@/_components/shared/Text";
 import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { useComposeEmail } from "@/hooks/useComposeEmail";

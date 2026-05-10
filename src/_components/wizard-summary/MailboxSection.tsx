@@ -5,7 +5,7 @@ import { Input } from "@/_components/shared/Input";
 import { Button } from "@/components/ui/button";
 import { Mail, Save, Loader2 } from "lucide-react";
 import { WizardFormData } from "@/schemas/CustomAccount";
-import { SectionBlock, ViewField, MailboxDraft } from "./Shared";
+import { SectionBlock, ViewField, MailboxDraft } from "@/_components/wizard-summary/Shared";
 import { Icons } from "@/constants/icons";
 
 export function MailboxSection({

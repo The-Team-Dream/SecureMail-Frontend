@@ -8,7 +8,7 @@ import {
   useAnalyticsOverview,
   useMailboxStats,
   useActivityStats,
-} from "@/APIs/hooks/useAnalytics";
+} from "@/APIs/hooks/analytics";
 import { RecentSecurityEvents } from "./RecentSecurityEvents";
 import { motion } from "framer-motion";
 import { StateMessage } from "@/_components/shared/StateMessage";

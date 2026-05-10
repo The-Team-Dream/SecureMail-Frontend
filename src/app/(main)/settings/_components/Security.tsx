@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { KeyRound, Pencil, X, Save } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Text } from "@/_components/shared/Text";
 import { Input } from "@/_components/shared/Input";
 import { Button } from "@/components/ui/button";
@@ -15,13 +15,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ISecurity, securitySchema } from "@/schemas/settings/security";
-import { useSettingsOperations } from "@/APIs/hooks/useUserSettings";
+import { useChangePassword } from "@/APIs/hooks/userSettings";
 import { useServerErrors } from "@/utils/form-utils";
 import BackEndError from "@/_components/shared/BackEndError";
 
 const Security = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const { changePassword, isChangingPassword } = useSettingsOperations();
+  const { mutate: changePassword, isPending: isChangingPassword } = useChangePassword();
 
   const {
     handleSubmit,
@@ -42,8 +42,8 @@ const Security = () => {
     changePassword(
       { currentPassword: data.currentPassword, newPassword: data.newPassword },
       {
-        onSuccess: (res) => {
-          toast.success(res?.data?.message || "Password changed successfully");
+        onSuccess: () => {
+          toast.success("Changed password successfully");
           setIsEditing(false);
           reset();
         },

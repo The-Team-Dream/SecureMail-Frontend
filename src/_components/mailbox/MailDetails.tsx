@@ -9,12 +9,12 @@ import {
   Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Text } from "../shared/Text";
+import { Text } from "@/_components/shared/Text";
 import { useRouter, useParams } from "next/navigation";
 import { ReclassifyMenu } from "./ReclassifyMenu";
-import { ActionButton } from "../shared/ActionButton";
+import { ActionButton } from "@/_components/shared/ActionButton";
 import { cn, getInitials } from "@/lib/utils";
-import { useEmailDetails, useEmailActions } from "@/APIs/hooks/useEmails";
+import { useEmailDetails, useReportEmail, useReadEmail } from "@/APIs/hooks/emails";
 import { emailsApi } from "@/APIs/features/emails";
 import { RISK_STYLE_MAP, RiskLevel } from "@/constants/security";
 import { useMailStore } from "@/stores/useMailStore";
@@ -27,10 +27,11 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
   const mailboxId = params.mailboxId as string;
 
   const { data: email, isLoading, error } = useEmailDetails(mailboxId, emailId);
-  const { reportMutation, readMutation } = useEmailActions(mailboxId);
+  const reportMutation = useReportEmail(mailboxId);
+  const readMutation = useReadEmail(mailboxId);
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
   const activeFolder = useMailStore((s) => s.activeFolder);
-
+  
   if (isLoading) {
     return <MailDetailsSkeleton />;
   }

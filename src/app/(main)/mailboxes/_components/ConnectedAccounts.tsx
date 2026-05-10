@@ -1,18 +1,17 @@
-import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
-import { Loader, Wifi, WifiOff } from "lucide-react";
+import { Wifi, WifiOff } from "lucide-react";
 import Container from "@/_components/shared/Container";
-import { useMailboxes, useMailboxOperations } from "@/APIs/hooks/useMailboxes";
+import { useMailboxes, useSyncMailbox } from "@/APIs/hooks/mailboxes";
+import { useMailboxStats } from "@/APIs/hooks/analytics";
 import { Mailbox } from "@/APIs/types/Mailbox";
 import { Icons } from "@/constants/icons";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { Spinner } from "@/components/ui/spinner";
 import { ProgressBar } from "@/_components/shared/ProgressBar";
 import notFoundImg from "../../../../../public/images/not-found.png";
-
 
 interface ConnectedAccountsProps {
   onAddAccount: () => void;
@@ -52,9 +51,33 @@ const itemVariants = {
   },
 };
 
+const MailboxStatsDisplay = ({ mailboxId }: { mailboxId: number | string }) => {
+  const { data, isError } = useMailboxStats(mailboxId.toString());
+
+  if (isError || !data) {
+    return (
+      <Text size="2xl" color={"error-600"} font="semiBold">
+        0
+      </Text>
+    );
+  }
+
+  const threatsCount = (data.phishingEmails || 0) + (data.spamEmails || 0);
+
+  return (
+    <Text size="2xl" color={"error-600"} font="semiBold">
+      {threatsCount}
+    </Text>
+  );
+};
+
 export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
   const { data: mailboxes, isError, refetch } = useMailboxes();
-  const { syncMailbox, isSyncing } = useMailboxOperations();
+  const syncMutation = useSyncMailbox();
+  const syncMailbox = syncMutation.mutate;
+  const isSyncing = syncMutation.isPending
+    ? syncMutation.variables?.toString()
+    : null;
 
   if (isError)
     return (
@@ -146,9 +169,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                     </div>
                     <div className="w-px h-10 bg-primary-100/60 shrink-0"></div>
                     <div className="flex flex-col items-center flex-1">
-                      <Text size="2xl" color={"error-600"} font="semiBold">
-                        {acc.threatsCount ?? 0}
-                      </Text>
+                      <MailboxStatsDisplay mailboxId={acc.id} />
                       <Text size="xs" color={"primary-500"} className="mt-1">
                         Threats
                       </Text>

@@ -5,13 +5,13 @@ import { Icons } from "@/constants/icons";
 import { Menu, PencilLine, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
-import { Text } from "./Text";
+import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
 import { useMailStore } from "@/stores/useMailStore";
 import type { Folder } from "@/types/mail";
-import { useEmails } from "@/APIs/hooks/useEmails";
+import { useEmails } from "@/APIs/hooks/emails";
 
 const dashboardNavItems = [
   { name: "Mailboxes", icon: Icons.Inbox, href: "/mailboxes" },

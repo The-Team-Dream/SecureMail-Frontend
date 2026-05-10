@@ -5,7 +5,7 @@ import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Text } from "../shared/Text";
+import { Text } from "@/_components/shared/Text";
 import authImg from "../../../public/images/auth.jpg";
 
 const slides = [

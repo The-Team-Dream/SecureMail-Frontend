@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Input } from "../shared/Input";
+import { Input } from "@/_components/shared/Input";
 import { useMailStore } from "@/stores/useMailStore";
-import { Text } from "../shared/Text";
+import { Text } from "@/_components/shared/Text";
 import { useRouter, usePathname, useParams } from "next/navigation";
 import { Icons } from "@/constants/icons";
-import { useSearchEmails } from "@/APIs/hooks/useEmails";
+import { useSearchEmails } from "@/APIs/hooks/emails";
 
 interface SearchAutocompleteProps {
   inputClassName?: string;

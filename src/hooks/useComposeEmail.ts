@@ -5,12 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMailStore } from "@/stores/useMailStore";
 import { useParams, useRouter } from "next/navigation";
-import { useEmailActions } from "@/APIs/hooks/useEmails";
-import toast from "react-hot-toast";
+import { useSendEmail, useReplyEmail, useForwardEmail } from "@/APIs/hooks/emails";
+import { toast } from "sonner";
 import { emailSchema, type EmailFormValues } from "@/schemas/SendEmail";
 import { type EmojiClickData } from "emoji-picker-react";
 
-import { useMailboxes } from "@/APIs/hooks/useMailboxes";
+import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useServerErrors } from "@/utils/form-utils";
 
 export const useComposeEmail = () => {
@@ -56,9 +56,9 @@ export const useComposeEmail = () => {
   const mailboxIdToUse =
     selectedMailbox?.id?.toString() || (params?.mailboxId as string);
 
-  const { sendMutation, replyMutation, forwardMutation } = useEmailActions(
-    mailboxIdToUse ?? "",
-  );
+  const sendMutation = useSendEmail(mailboxIdToUse ?? "");
+  const replyMutation = useReplyEmail(mailboxIdToUse ?? "");
+  const forwardMutation = useForwardEmail(mailboxIdToUse ?? "");
 
   // ── Attachments state ──────────────────────────────────────────────────
   const [attachments, setAttachments] = useState<File[]>([]);

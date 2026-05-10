@@ -1,6 +1,6 @@
-import { Text } from "./Text";
+import { Text } from "@/_components/shared/Text";
 import { CircleAlert } from "lucide-react";
-import { errorVariants } from "./Input";
+import { errorVariants } from "@/_components/shared/Input";
 import { AnimatePresence, motion } from "framer-motion";
 
 const Error = ({ error }: { error: string | undefined }) => {

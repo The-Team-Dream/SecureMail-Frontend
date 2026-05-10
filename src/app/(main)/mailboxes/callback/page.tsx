@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/_components/shared/Text";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { mailboxApi } from "@/APIs/features/mailboxes";
 import { useQueryClient } from "@tanstack/react-query";
 

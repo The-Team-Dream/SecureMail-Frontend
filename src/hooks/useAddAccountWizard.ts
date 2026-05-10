@@ -7,8 +7,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { WizardFormData, wizardSchema } from "../schemas/CustomAccount";
 import { Icons } from "@/constants/icons";
 import { mailboxApi } from "@/APIs/features/mailboxes";
-import { useMailboxOperations } from "@/APIs/hooks/useMailboxes";
-import toast from "react-hot-toast";
+import {
+  useConnectImap,
+  useConnectGmail,
+  useConnectOutlook,
+} from "@/APIs/hooks/mailboxes";
+import { toast } from "sonner";
 import { MailboxProvider } from "@/APIs/types/Mailbox";
 
 interface UseAddAccountWizardProps {
@@ -30,7 +34,9 @@ export function useAddAccountWizard({
   const [isImapLoading, setIsImapLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const { connectImap, connectGmail, connectOutlook } = useMailboxOperations();
+  const { mutateAsync: connectImap } = useConnectImap();
+  const { mutateAsync: connectGmail } = useConnectGmail();
+  const { mutateAsync: connectOutlook } = useConnectOutlook();
 
   const STORAGE_KEYS = {
     DATA: "securemail_wizard_data",

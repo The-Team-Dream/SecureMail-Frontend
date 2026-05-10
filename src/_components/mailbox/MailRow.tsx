@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { Star, FileText, MailOpen, Mail } from "lucide-react";
+import { FileText, MailOpen, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Email, EmailFolder } from "@/APIs/types/Email";
 import { useMailStore } from "@/stores/useMailStore";
-import { Text } from "../shared/Text";
+import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname, useParams } from "next/navigation";
-import { useEmailActions } from "@/APIs/hooks/useEmails";
+import { useReadEmail, useStarEmail, useDeleteEmailWithUndo } from "@/APIs/hooks/emails";
 
 import { RISK_STYLE_MAP } from "@/constants/security";
 import { Icons } from "@/constants/icons";
@@ -36,7 +36,10 @@ export const MailRow = ({
   const params = useParams();
   const mailboxId = params.mailboxId as string;
   const activeFolder = useMailStore((s) => s.activeFolder);
-  const { deleteMutation, readMutation, starMutation } = useEmailActions(
+  
+  const readMutation = useReadEmail(mailboxId);
+  const starMutation = useStarEmail(mailboxId);
+  const deleteWithUndo = useDeleteEmailWithUndo(
     mailboxId,
     activeFolder as EmailFolder,
   );
@@ -84,86 +87,72 @@ export const MailRow = ({
           className="p-0.5 rounded-full transition-colors shrink-0 cursor-pointer sm:mr-2"
           aria-label={email.isFlagged ? "Unstar email" : "Star email"}
         >
-          <Star
+          <Icons.Star
+            active={email.isFlagged || email.folder === "starred"}
             className={cn(
               "w-4 h-4 sm:w-5 sm:h-5 transition-colors",
               email.isFlagged || email.folder === "starred"
-                ? "fill-warning-400 text-warning-400"
+                ? "text-warning-500"
                 : "text-primary-400 hover:text-warning-400",
             )}
           />
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center min-w-0 gap-1 sm:gap-4 w-full">
-        <div className="flex justify-between items-center w-full sm:w-auto">
-          <Text
-            font={!email.isRead ? "semiBold" : "normal"}
-            color={"primary-800"}
-            size={"xs"}
-            className={"truncate sm:w-28 md:w-80 shrink-0 sm:text-sm"}
-          >
-            {activeFolder === "sent"
-              ? `To: ${email.toAddr && email.toAddr.length > 0 ? email.toAddr.map((addr) => addr.split("@")[0]).join(", ") : "Unknown Recipient"}`
-              : `${email.fromName || (email.fromAddr ? email.fromAddr.split("@")[0] : "Unknown Sender")}`}
-            {!email.isRead && (
-              <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-primary-800 text-background rounded uppercase tracking-wider animate-pulse">
-                New
-              </span>
-            )}
-          </Text>
-
-          {/* Date on Mobile */}
-          <span
-            className={cn(
-              "text-[10px] sm:hidden shrink-0 text-primary-800",
-              !email.isRead ? "font-bold" : "font-normal",
-            )}
-          >
-            {new Date(email.receivedAt).toLocaleDateString()}
-          </span>
-        </div>
-
-        {/* Title + Attachment */}
-        <div className="flex-1 min-w-0 max-w-[650px] flex flex-col items-start gap-1 sm:gap-2">
-          <div className="flex items-center gap-2 w-full truncate">
-            <span
-              className={cn(
-                "truncate text-xs sm:text-sm text-primary-800",
-                !email.isRead ? "font-semibold" : "font-normal",
+      <div className="flex-1 flex items-center gap-4 min-w-0">
+        <div className="flex min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-0.5">
+            <Text
+              font={!email.isRead ? "bold" : "medium"}
+              className={"truncate sm:w-28 md:w-52 shrink-0 sm:text-sm"}
+            >
+              {activeFolder === "sent"
+                ? `To: ${email.toAddr && email.toAddr.length > 0 ? email.toAddr.map((addr) => addr.split("@")[0]).join(", ") : "Unknown Recipient"}`
+                : `${email.fromName || (email.fromAddr ? email.fromAddr.split("@")[0] : "Unknown Sender")}`}
+              {!email.isRead && (
+                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-primary-800 text-background rounded uppercase tracking-wider animate-pulse">
+                  New
+                </span>
               )}
+            </Text>
+            {email.hasAttachments && (
+              <FileText className="w-3.5 h-3.5 text-primary-400 shrink-0" />
+            )}
+          </div>
+          <div className="flex flex-col gap-1">
+            <Text
+              size="sm"
+              font={!email.isRead ? "semiBold" : "normal"}
+              color={!email.isRead ? "primary-900" : "primary-500"}
+              className="truncate"
             >
               {email.subject}
-            </span>
-          </div>
+            </Text>
 
-          {/* Risk Level Indicator */}
-          {email.isPhishing &&
-            riskLevel &&
-            RISK_STYLE_MAP[riskLevel as keyof typeof RISK_STYLE_MAP] && (
-              <div
-                className={cn(
-                  "flex items-center gap-1.5",
-                  RISK_STYLE_MAP[riskLevel as keyof typeof RISK_STYLE_MAP],
-                )}
-              >
-                <div className="w-1 h-1 rounded-full bg-current" />
-                <span className="text-xs font-medium leading-none">
+            {/* Phishing Specific Style */}
+            {activeFolder === "phishing" && (
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={cn(
+                    "w-1 h-1 rounded-full bg-current",
+                    RISK_STYLE_MAP[riskLevel as keyof typeof RISK_STYLE_MAP] ||
+                      "text-error-500",
+                  )}
+                />
+                <Text
+                  size="xs"
+                  className={cn(
+                    "font-medium",
+                    RISK_STYLE_MAP[riskLevel as keyof typeof RISK_STYLE_MAP] ||
+                      "text-error-500",
+                  )}
+                >
                   {riskLevel}
-                </span>
+                </Text>
               </div>
             )}
-
-          {/* === (Attachment) === */}
-          {email.hasAttachments && (
-            <span className="inline-flex items-center gap-1 sm:gap-2 px-2 py-0.5 border border-primary-200 rounded-3xl text-[10px] sm:text-sm text-primary-500 shrink-0 mt-1 sm:mt-0">
-              <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-error-500" />
-              Attachment
-            </span>
-          )}
+          </div>
         </div>
-
-        {/* Date on Desktop */}
         <span
           className={cn(
             "text-xs shrink-0 ml-auto pl-2 hidden sm:block",
@@ -184,9 +173,7 @@ export const MailRow = ({
             )}
             onClick={(e) => {
               e.stopPropagation();
-              if (activeFolder !== "trash") {
-                deleteMutation.mutate(String(email.id));
-              }
+              deleteWithUndo(String(email.id));
             }}
             disabled={activeFolder === "trash"}
             aria-label="Delete email"

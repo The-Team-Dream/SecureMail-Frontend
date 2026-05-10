@@ -6,7 +6,7 @@ import { Text } from "@/_components/shared/Text";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
 import { Icons } from "@/constants/icons";
-import { useMailboxReports } from "@/APIs/hooks/useMailboxes";
+import { useMailboxReports } from "@/APIs/hooks/mailboxes";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { Input } from "@/_components/shared/Input";
 import { SecurityReport } from "@/APIs/types/Reports";

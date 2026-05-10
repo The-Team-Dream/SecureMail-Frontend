@@ -18,18 +18,17 @@ import {
   personalInfoSchema,
 } from "@/schemas/settings/personalInfo";
 import { Spinner } from "@/components/ui/spinner";
-import { useSettingsOperations } from "@/APIs/hooks/useUserSettings";
+import { useUpdateProfile } from "@/APIs/hooks/userSettings";
 import { Icons } from "@/constants/icons";
 import { useGetAuthMe } from "@/APIs/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { getInitials } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PersonalInfoSkeleton } from "@/_components/skeleton/PersonalInfoSkeleton";
 
 const PersonalInfo = () => {
   const { data: user, isLoading } = useGetAuthMe();
-  const { updateProfile, isUpdating } = useSettingsOperations();
+  const { mutate: updateProfile, isPending: isUpdating } = useUpdateProfile();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeletingImg, setIsDeletingImg] = useState(false);
@@ -305,7 +304,7 @@ const PersonalInfo = () => {
                         })}
                         placeholder="email@example.com"
                         error={errors.email?.message}
-                        disabled={isUpdating}
+                        disabled={true}
                       />
                     ) : (
                       <Text size={"sm"} color={"primary-950"} font={"medium"}>
@@ -320,7 +319,12 @@ const PersonalInfo = () => {
                     <Button
                       type="submit"
                       size={"sm"}
-                      disabled={isUpdating || (!isDirty && !selectedFile)}
+                      disabled={
+                        isUpdating ||
+                        (!isDirty &&
+                          !selectedFile &&
+                          profileImage === user?.user?.avatar)
+                      }
                       className="w-max gap-2 px-6"
                     >
                       {isUpdating ? (

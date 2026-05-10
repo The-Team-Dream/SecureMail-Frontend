@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ConnectedAccounts } from "./_components/ConnectedAccounts";
 import { AddAccountWizard } from "./_components/AddAccountWizard";
 import { EmptyMailbox } from "./_components/EmptyMailbox";
-import { useMailboxes } from "@/APIs/hooks/useMailboxes";
+import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { ConnectedAccountsSkeleton } from "@/_components/skeleton/ConnectedAccountsSkeleton";
 
 export default function Mailboxes() {

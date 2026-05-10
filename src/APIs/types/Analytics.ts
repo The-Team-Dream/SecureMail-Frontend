@@ -9,17 +9,15 @@ export interface AnalyticsOverview {
 }
 
 export interface MailboxStats {
-  mailboxId: string;
-  emailCount: number;
-  threatsHistory: {
-    date: string;
-    count: number;
-  }[];
-  topThreatTypes: {
-    type: string;
-    value: number;
-  }[];
+  totalEmails: number;
+  unreadEmails: number;
+  sentEmails: number;
+  spamEmails: number;
+  phishingEmails: number;
+  storageUsed: number;
+  lastSyncTime: string;
 }
+
 
 export interface ActivityData {
   date: string;

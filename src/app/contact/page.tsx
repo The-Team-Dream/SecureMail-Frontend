@@ -20,7 +20,7 @@ import { Text } from "@/_components/shared/Text";
 import PublicNavbar from "@/_components/shared/PublicNavbar";
 import { Input } from "@/_components/shared/Input";
 import { Textarea } from "@/_components/shared/Textarea";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useForm } from "react-hook-form";

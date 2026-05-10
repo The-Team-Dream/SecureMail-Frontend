@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { CircleAlert } from "lucide-react";
 import { forwardRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Text } from "./Text";
+import { Text } from "@/_components/shared/Text";
 import Error from "./Error";
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {

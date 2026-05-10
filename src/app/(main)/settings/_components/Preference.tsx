@@ -12,15 +12,28 @@ import { Bell, ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import {
   useGetUserSettings,
-  useSettingsOperations,
-} from "@/APIs/hooks/useUserSettings";
-import toast from "react-hot-toast";
+  useUpdateNotifications,
+} from "@/APIs/hooks/userSettings";
+import { toast } from "sonner";
+import { useEffect, useState } from "react";
 
 const Preference = () => {
   const { data: settings, isLoading } = useGetUserSettings();
-  const { updateNotifications, isUpdating } = useSettingsOperations();
+  const { mutate: updateNotifications, isPending: isUpdating } =
+    useUpdateNotifications();
+
+  const [localEnabled, setLocalEnabled] = useState<boolean | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    if (settings !== undefined) {
+      setLocalEnabled(Boolean(settings?.notificationsEnabled));
+    }
+  }, [settings]);
 
   const handleToggle = (checked: boolean) => {
+    setLocalEnabled(checked);
     updateNotifications(checked, {
       onSuccess: () => {
         toast.success(
@@ -28,6 +41,7 @@ const Preference = () => {
         );
       },
       onError: () => {
+        setLocalEnabled(!checked);
         toast.error("Failed to update notification settings.");
       },
     });
@@ -68,10 +82,9 @@ const Preference = () => {
                   <Loader2 className="w-4 h-4 text-primary animate-spin" />
                 )}
                 <Switch
-                  checked={Boolean(
-                    (settings as any)?.data?.notificationsEnabled ??
-                    settings?.notificationsEnabled,
-                  )}
+                  checked={
+                    localEnabled ?? Boolean(settings?.notificationsEnabled)
+                  }
                   onCheckedChange={handleToggle}
                   disabled={isLoading || isUpdating}
                 />

@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronRight } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Icons } from "@/constants/icons";
-import { Text } from "../shared/Text";
-import { useEmailActions } from "@/APIs/hooks/useEmails";
+import { Text } from "@/_components/shared/Text";
+import { useReclassifyEmail, useReportEmail } from "@/APIs/hooks/emails";
 import type { EmailFolder } from "@/APIs/types/Email";
 
 interface ReclassifyMenuProps {
@@ -22,9 +22,8 @@ interface ReclassifyMenuProps {
 export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
   const router = useRouter();
   const { mailboxId } = useParams();
-  const { reclassifyMutation, reportMutation } = useEmailActions(
-    mailboxId as string,
-  );
+  const reclassifyMutation = useReclassifyEmail(mailboxId as string);
+  const reportMutation = useReportEmail(mailboxId as string);
 
   const handleReclassify = async (folder: EmailFolder) => {
     await reclassifyMutation.mutateAsync({ id: emailId, folder });

@@ -11,7 +11,7 @@ import { Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { SubmitHandler, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
 import { useServerErrors } from "@/utils/form-utils";

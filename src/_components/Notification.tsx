@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Text } from "./shared/Text";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,10 @@ import { ActionButton } from "./shared/ActionButton";
 import {
   useNotifications,
   useUnreadCount,
-  useNotificationOperations,
-} from "@/APIs/hooks/useNotifications";
+  useReadNotification,
+  useReadAllNotifications,
+  useDeleteNotification
+} from "@/APIs/hooks/notifications";
 
 
 
@@ -37,8 +39,9 @@ export const NotificationDropdown = () => {
   const { data: notificationsData, isLoading: notificationsLoading } =
     useNotifications(1);
   const { data: unreadData } = useUnreadCount();
-  const { readNotification, readAll, deleteNotification } =
-    useNotificationOperations();
+  const { mutate: readNotification } = useReadNotification();
+  const { mutate: readAll } = useReadAllNotifications();
+  const { mutate: deleteNotification } = useDeleteNotification();
 
   const notifications = Array.isArray(notificationsData?.data?.data)
     ? notificationsData.data.data
@@ -52,9 +55,7 @@ export const NotificationDropdown = () => {
 
   const handleToggleReadStatus = (id: number, currentStatus: boolean) => {
     if (!currentStatus) {
-      readNotification(String(id), {
-        onSuccess: () => toast.success("Marked as read"),
-      });
+      readNotification(String(id));
     } else {
       toast("Notification already read");
     }

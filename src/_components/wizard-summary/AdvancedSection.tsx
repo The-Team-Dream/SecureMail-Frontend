@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Save, Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { WizardFormData } from "@/schemas/CustomAccount";
-import { SectionBlock, ViewField, AdvancedDraft } from "./Shared";
+import { SectionBlock, ViewField, AdvancedDraft } from "@/_components/wizard-summary/Shared";
 import { Icons } from "@/constants/icons";
 
 export function AdvancedSection({

@@ -22,6 +22,8 @@ export interface Mailbox {
   hasCredentials?: boolean;
   folders: Folder[];
   threatsCount: number;
+  phishingDetected?: number;
+  spamDetected?: number;
   message?: string;
   _count: {
     emails: number;

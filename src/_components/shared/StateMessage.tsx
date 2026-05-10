@@ -1,6 +1,6 @@
 import { LucideIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Text } from "./Text";
+import { Text } from "@/_components/shared/Text";
 import { Icons } from "@/constants/icons";
 import { cn } from "@/lib/utils";
 import Image, { StaticImageData } from "next/image";

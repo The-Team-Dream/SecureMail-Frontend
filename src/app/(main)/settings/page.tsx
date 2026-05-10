@@ -5,7 +5,7 @@ import { Trash2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/APIs/hooks/useAuth";
 import Cookies from "js-cookie";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import PersonalInfo from "./_components/PersonalInfo";
 import Security from "./_components/Security";
@@ -16,13 +16,13 @@ import { Spinner } from "@/components/ui/spinner";
 const Settings = () => {
   const router = useRouter();
   const { mutate, isPending } = useLogout({
-    onSuccess: (res) => {
-      toast.success(res.data.message || "Logout successfully");
+    onSuccess: () => {
+      toast.success("Logout successfully");
       Cookies.remove("token");
       router.replace("/sign-in");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data.message || "Logout failed");
+      toast.error(error?.response?.data?.message || "Logout failed");
     },
   });
   return (
@@ -52,11 +52,11 @@ const Settings = () => {
           <Text
             color={"error-500"}
             size={"sm"}
-            className="group-hover:text-white"
+            className="group-hover:text-background"
           >
             Clear
           </Text>{" "}
-          <Trash2 className="w-4 h-4 text-error-500 group-hover:text-white" />
+          <Trash2 className="w-4 h-4 text-error-500 group-hover:text-background" />
         </Button>
       </div>
       <Button
