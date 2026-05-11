@@ -9,13 +9,21 @@ let socket: Socket | null = null;
  * Creates a new connection if one doesn't exist or was disconnected.
  */
 export const getSocket = (): Socket => {
-  if (socket?.connected) return socket;
+  if (socket) {
+    if (!socket.connected) {
+      // Update token just in case it changed
+      const token = Cookies.get("token");
+      socket.auth = { token };
+      socket.connect();
+    }
+    return socket;
+  }
 
   const token = Cookies.get("token");
 
   socket = io(baseURL, {
     auth: { token },
-    transports: ["websocket", "polling"],
+    transports: ["polling", "websocket"],
     autoConnect: true,
     reconnection: true,
     reconnectionAttempts: Infinity,

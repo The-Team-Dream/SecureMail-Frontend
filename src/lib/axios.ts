@@ -1,6 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-export const baseURL = "http://localhost:3000";
+export const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 const axiosInstance = axios.create({
   baseURL: baseURL,
   withCredentials: true,
