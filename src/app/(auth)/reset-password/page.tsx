@@ -1,7 +1,7 @@
 "use client";
 import { Input } from "@/_components/shared/Input";
 import { Suspense } from "react";
-import { useResetPassword } from "@/APIs/hooks/useAuth";
+import { useResetPassword } from "@/APIs/hooks/auth";
 import { Button } from "@/components/ui/button";
 import {
   IResetPasswordSchema,

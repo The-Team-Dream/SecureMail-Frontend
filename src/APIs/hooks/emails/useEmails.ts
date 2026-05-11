@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { emailsApi } from "../../features/emails";
 import type { EmailFolder } from "../../types/Email";
 
@@ -12,5 +12,6 @@ export const useEmails = (
     queryFn: () => emailsApi.getEmails(mailboxId, folder, page),
     staleTime: 5 * 60 * 1000,
     enabled: !!mailboxId && !!folder,
+    placeholderData: keepPreviousData,
   });
 };

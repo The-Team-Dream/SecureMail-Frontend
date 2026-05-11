@@ -1,5 +1,6 @@
 "use client";
 import Container from "@/_components/shared/Container";
+import { FancySpinner } from "@/_components/shared/FancySpinner";
 import { Input } from "@/_components/shared/Input";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Icons } from "@/constants/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CircleAlert, Bell } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
+import { motion } from "framer-motion";
 import {
   mailBoxSettingsSchema,
   IMailboxSettings,
@@ -81,16 +83,20 @@ const MailboxSettings = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[400px]">
-        <Spinner />
-      </div>
-    );
+    return <FancySpinner text="Loading Settings..." />;
   }
 
   return (
     <Container>
-      <form
+      <motion.form
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.5,
+          type: "spring",
+          stiffness: 400,
+          damping: 20,
+        }}
         key={mailboxId}
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-10 pb-20"
@@ -244,7 +250,7 @@ const MailboxSettings = () => {
             )}
           </Button>
         </div>
-      </form>
+      </motion.form>
     </Container>
   );
 };

@@ -13,7 +13,7 @@ import { RecentSecurityEvents } from "./RecentSecurityEvents";
 import { motion } from "framer-motion";
 import { StateMessage } from "@/_components/shared/StateMessage";
 
-import { useGetAuthMe } from "@/APIs/hooks/useAuth";
+import { useGetAuthMe } from "@/APIs/hooks/auth";
 import { ActivityData } from "@/APIs/types/Analytics";
 import notFoundImg from "../../../public/images/not-found.png";
 

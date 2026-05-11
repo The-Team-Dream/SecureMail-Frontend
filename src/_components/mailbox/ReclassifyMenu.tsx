@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { ChevronUp, ChevronRight } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Icons } from "@/constants/icons";
@@ -38,10 +39,24 @@ export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="lg" className="w-fit h-[40px] md:h-[55px] rounded-lg">
-          <span className="text-xs md:text-base font-normal">Reclassify</span>
-          <span className="hidden md:block text-primary-500">|</span>
-          <ChevronUp className="w-4 h-4 md:w-5 md:h-5" />
+        <Button 
+          disabled={reclassifyMutation.isPending} 
+          size="lg" 
+          className="w-fit h-[40px] md:h-[55px] rounded-lg"
+        >
+          {reclassifyMutation.isPending ? (
+            <>
+              <span className="text-xs md:text-base font-normal">Reclassifying...</span>
+              <span className="hidden md:block text-primary-500">|</span>
+              <Spinner className="w-4 h-4 md:w-5 md:h-5" />
+            </>
+          ) : (
+            <>
+              <span className="text-xs md:text-base font-normal">Reclassify</span>
+              <span className="hidden md:block text-primary-500">|</span>
+              <ChevronUp className="w-4 h-4 md:w-5 md:h-5" />
+            </>
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -65,7 +80,23 @@ export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
           <ChevronRight className="w-4 h-4 text-primary-400 group-hover:text-primary transition-colors" />
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => handleReport("spam")}
+          onClick={() => handleReclassify("sent")}
+          className="flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background "
+        >
+          <Icons.Sent className="w-5 h-5 group-hover:text-primary" />
+          <Text
+            as={"span"}
+            font={"medium"}
+            className="text-primary-400 group-hover:text-primary flex-1 text-sm"
+          >
+            Sent
+          </Text>
+          <ChevronRight className="w-4 h-4 text-primary-400 group-hover:text-primary transition-colors" />
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator className="my-2 bg-primary-100/50" />
+        <DropdownMenuItem
+          onClick={() => handleReclassify("spam")}
           className="flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background "
         >
           <Icons.Spam className="w-5 h-5 group-hover:text-primary" />
@@ -78,33 +109,17 @@ export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
           </Text>
           <ChevronRight className="w-4 h-4 text-primary-400 group-hover:text-primary transition-colors" />
         </DropdownMenuItem>
-
-        <DropdownMenuSeparator className="my-2 bg-primary-100/50" />
         <DropdownMenuItem
-          onClick={() => handleReport("phishing")}
+          onClick={() => handleReclassify("trash")}
           className="flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background "
         >
-          <Icons.Phishing className="w-5 h-5 group-hover:text-primary" />
+          <Icons.Delete className="w-5 h-5 group-hover:text-primary" />
           <Text
             as={"span"}
             font={"medium"}
             className="text-primary-400 group-hover:text-primary flex-1 text-sm"
           >
-            Phishing
-          </Text>
-          <ChevronRight className="w-4 h-4 text-primary-400 group-hover:text-primary transition-colors" />
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleReport("malware")}
-          className="flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background "
-        >
-          <Icons.Malware className="w-5 h-5 group-hover:text-primary" />
-          <Text
-            as={"span"}
-            font={"medium"}
-            className="text-primary-400 group-hover:text-primary flex-1 text-sm"
-          >
-            Malware
+            Trash
           </Text>
           <ChevronRight className="w-4 h-4 text-primary-400 group-hover:text-primary transition-colors" />
         </DropdownMenuItem>

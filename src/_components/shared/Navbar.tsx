@@ -25,7 +25,7 @@ import Link from "next/link";
 import { NotificationDropdown } from "../Notification";
 import { Icons } from "@/constants/icons";
 import { getInitials, getImageUrl, cn } from "@/lib/utils";
-import { useGetAuthMe } from "@/APIs/hooks/useAuth";
+import { useGetAuthMe } from "@/APIs/hooks/auth";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
@@ -63,7 +63,7 @@ export const Navbar = () => {
   const [isSwitching, setIsSwitching] = useState(false);
 
   const displayEmail = activeAccount?.emailAddress ?? userData?.email ?? "";
-  const displayAvatar = userData?.avatar ?? null;
+  const displayAvatar = (activeAccount as any)?.avatar ?? null;
   const initials = getInitials(displayName);
 
   const handleSwitchAccount = async (id: string | number) => {
@@ -177,7 +177,7 @@ export const Navbar = () => {
                 <Accordion type="single" collapsible defaultValue="accounts">
                   <AccordionItem value="accounts" className="border-none">
                     <AccordionTrigger
-                      className="cursor-pointer bg-background rounded-tl-lg rounded-tr-lg p-4 mb-1"
+                      className="cursor-pointer bg-background rounded-tl-lg rounded-tr-lg p-4 mb-1 group"
                       icon={
                         mailboxes.length === 0 ? (
                           <ChevronRight className="size-4 text-primary" />
@@ -186,9 +186,56 @@ export const Navbar = () => {
                       rotateIcon={mailboxes.length !== 0}
                       disabled={mailboxes.length === 0}
                     >
-                      <Text font="semiBold" size="sm" color="primary-950">
-                        Switch Account
-                      </Text>
+                      <div className="flex items-center justify-between w-full -mr-2">
+                        <Text font="semiBold" size="sm" color="primary-950">
+                          Switch Account
+                        </Text>
+                        <div className="flex items-center -space-x-1.5 opacity-100 group-data-[state=open]:opacity-0 group-data-[state=open]:invisible transition-all duration-200">
+                          {sortedMailboxes.slice(0, 3).map((mailbox, i) => (
+                            <div
+                              key={mailbox.id}
+                              className="w-6 h-6 rounded-full border-2 border-background bg-primary-100 flex items-center justify-center overflow-hidden"
+                              style={{ zIndex: 10 - i }}
+                            >
+                              {(mailbox as any).avatar ? (
+                                <Image
+                                  src={getImageUrl((mailbox as any).avatar)}
+                                  alt="avatar"
+                                  width={24}
+                                  height={24}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <Text
+                                  font="bold"
+                                  className="text-[8px]"
+                                  color="primary-500"
+                                >
+                                  {getInitials(
+                                    mailbox.displayName ||
+                                      mailbox.emailAddress ||
+                                      "",
+                                  )}
+                                </Text>
+                              )}
+                            </div>
+                          ))}
+                          {sortedMailboxes.length > 3 && (
+                            <div
+                              className="w-6 h-6 rounded-full border-2 border-background bg-primary-50 flex items-center justify-center overflow-hidden"
+                              style={{ zIndex: 0 }}
+                            >
+                              <Text
+                                font="bold"
+                                className="text-[8px]"
+                                color="primary-500"
+                              >
+                                +{sortedMailboxes.length - 3}
+                              </Text>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </AccordionTrigger>
 
                     <AccordionContent className="w-full p-0">
@@ -209,13 +256,9 @@ export const Navbar = () => {
                                       : "bg-primary-100 border-primary-500"
                                   }`}
                                 >
-                                  {((mailbox as any).avatar ||
-                                  (mailbox.userId == userData?.id &&
-                                    userData?.avatar)) ? (
+                                  {(mailbox as any).avatar ? (
                                     <Image
-                                      src={getImageUrl(
-                                        (mailbox as any).avatar || userData?.avatar,
-                                      )}
+                                      src={getImageUrl((mailbox as any).avatar)}
                                       alt="avatar"
                                       width={40}
                                       height={40}
@@ -266,8 +309,11 @@ export const Navbar = () => {
                 </Accordion>
               )}
 
-              <DropdownMenuItem className="p-4 flex items-center gap-3 cursor-pointer bg-background hover:bg-primary-50 transition-colors outline-none rounded-bl-lg rounded-br-lg">
-                <Link href={"/mailboxes"} className="flex items-center gap-2">
+              <DropdownMenuItem asChild>
+                <Link
+                  href={"/mailboxes?step=1"}
+                  className="py-4 flex items-center gap-3 w-full cursor-pointer bg-background hover:bg-primary-50 transition-colors outline-none rounded-bl-lg rounded-br-lg"
+                >
                   <Plus className="size-5 text-primary" />
                   <Text font="medium" size="sm">
                     Add New Account

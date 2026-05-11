@@ -7,7 +7,7 @@ export const MailListSkeleton = () => {
       {Array.from({ length: 12 }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-3 px-4 py-4 border-b-2 border-primary-50 animate-pulse bg-white/50 dark:bg-primary-950/20"
+          className="flex items-center gap-3 px-4 py-4 border-b-2 border-primary-50 animate-pulse bg-ghostBlue"
         >
           {/* Checkbox + Star */}
           <div className="flex items-center gap-2 shrink-0">

@@ -24,7 +24,7 @@ export const ReportsSkeleton = () => {
         {/* List Items Skeleton */}
         <div className="flex flex-col gap-4 mt-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex flex-col md:flex-row md:items-center justify-between bg-white border border-primary-100 p-5 gap-4">
+            <div key={i} className="flex flex-col md:flex-row md:items-center justify-between bg-ghostBlue border border-primary-100 p-5 gap-4">
               <div className="flex flex-col gap-2 flex-1">
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-5 w-24" />

@@ -14,12 +14,19 @@ import { useRouter, useParams } from "next/navigation";
 import { ReclassifyMenu } from "./ReclassifyMenu";
 import { ActionButton } from "@/_components/shared/ActionButton";
 import { cn, getInitials } from "@/lib/utils";
-import { useEmailDetails, useReportEmail, useReadEmail } from "@/APIs/hooks/emails";
+import {
+  useEmailDetails,
+  useReportEmail,
+  useReadEmail,
+  useDeleteEmail,
+} from "@/APIs/hooks/emails";
 import { emailsApi } from "@/APIs/features/emails";
 import { RISK_STYLE_MAP, RiskLevel } from "@/constants/security";
 import { useMailStore } from "@/stores/useMailStore";
 import DOMPurify from "dompurify";
 import { MailDetailsSkeleton } from "../skeleton/MailDetailsSkeleton";
+import { StateMessage } from "../shared/StateMessage";
+import { Icons } from "@/constants/icons";
 
 export const MailDetails = ({ emailId }: { emailId: string }) => {
   const router = useRouter();
@@ -29,35 +36,38 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
   const { data: email, isLoading, error } = useEmailDetails(mailboxId, emailId);
   const reportMutation = useReportEmail(mailboxId);
   const readMutation = useReadEmail(mailboxId);
-  const setComposeOpen = useMailStore((s) => s.setComposeOpen);
   const activeFolder = useMailStore((s) => s.activeFolder);
-  
+  const deleteMutation = useDeleteEmail(mailboxId, activeFolder ?? undefined);
+  const setComposeOpen = useMailStore((s) => s.setComposeOpen);
+
   if (isLoading) {
     return <MailDetailsSkeleton />;
   }
 
   if (error || !email) {
+    console.log("📨 MailDetails: Showing error state (Data Missing)");
     return (
-      <div className="flex flex-col items-center justify-center h-full">
-        <Text color="error-500">Failed to load email details.</Text>
-        <Button
-          variant="outline"
-          className="mt-4"
-          onClick={() => router.back()}
-        >
-          Go Back
-        </Button>
-      </div>
+      <StateMessage
+        title="Error"
+        variant="error"
+        description="Failed to load email details."
+        image={"/images/not-found.png"}
+      />
     );
   }
 
-  const handleDownload = (attachmentId: string) => {
-    emailsApi.downloadAttachment(mailboxId, emailId, attachmentId);
+  const handleDownload = (attachmentId: string, filename: string) => {
+    emailsApi.downloadAttachment(mailboxId, emailId, attachmentId, filename);
   };
 
   const handleReportSpam = async () => {
     await reportMutation.mutateAsync({ id: emailId, type: "spam" });
     router.push(`/mailboxes/${mailboxId}/spam`);
+  };
+
+  const handleDelete = async () => {
+    await deleteMutation.mutateAsync(emailId);
+    router.push(`/mailboxes/${mailboxId}/${activeFolder ?? "inbox"}`);
   };
 
   const handleToggleRead = () => {
@@ -123,19 +133,25 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                 {email.fromName ||
                   (email.fromAddr ? email.fromAddr.split("@")[0] : "Unknown")}
               </Text>
-              <Text size="sm" color="primary-500">
-                {email.fromAddr}
+              <Text size="sm" color="primary-900">
+                &lt;{email.fromAddr}&gt;
               </Text>
             </div>
             <Text size="sm" color="primary-500">
               {activeFolder === "sent"
-                ? `to: ${email.toAddr && email.toAddr.length > 0 ? email.toAddr.join(", ") : "Unknown Recipient"}`
+                ? `to: ${email.toAddr && email.toAddr.length > 0 ? email.toAddr.map((addr: string) => addr.split("@")[0]).join(", ") : "Unknown Recipient"}`
                 : "to me"}{" "}
-              • {new Date(email.receivedAt).toLocaleString()}
+              •{" "}
+              <span className="text-primary-900">
+                {new Date(email.receivedAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
             </Text>
           </div>
         </div>
-
+        {/* Action Buttons  */}
         <div className="flex items-center gap-1.5">
           <ActionButton
             icon={<Reply className="size-4 text-primary" />}
@@ -160,6 +176,12 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
             className={email.isRead ? "text-primary-400" : ""}
           />
           <ActionButton
+            icon={<Icons.Delete className="size-4 text-primary" />}
+            label="Delete"
+            onClick={handleDelete}
+            variant="danger"
+          />
+          <ActionButton
             icon={<ShieldAlert className="size-4 text-primary" />}
             label="Spam"
             onClick={handleReportSpam}
@@ -181,32 +203,65 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
           )}
 
           {/* Attachments Section */}
-          {email.attachments && email.attachments.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-primary-100">
-              <Text font="semiBold" className="mb-4">
-                Attachments
-              </Text>
-              <div className="flex flex-wrap gap-3">
-                {email.attachments.map((att: any) => (
-                  <div
-                    key={att.id}
-                    className="flex items-center gap-2 border border-primary-200 p-2 rounded-lg bg-primary-50"
-                  >
-                    <Text size="sm" className="max-w-[150px] truncate">
-                      {att.filename}
-                    </Text>
-                    <Button
-                      size="icon-sm"
-                      variant="ghost"
-                      onClick={() => handleDownload(att.id)}
-                    >
-                      <Download className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {email.attachments &&
+            email.attachments.length > 0 &&
+            (() => {
+              const imageAtts = email.attachments.filter((att: any) => {
+                const isImage = att.contentType?.startsWith("image/");
+                const isExternal =
+                  att.url &&
+                  (att.url.startsWith("http://") ||
+                    att.url.startsWith("https://"));
+                return isImage && isExternal;
+              });
+              const fileAtts = email.attachments.filter((att: any) => {
+                const isImage = att.contentType?.startsWith("image/");
+                const isExternal =
+                  att.url &&
+                  (att.url.startsWith("http://") ||
+                    att.url.startsWith("https://"));
+                return !(isImage && isExternal);
+              });
+              return (
+                <div className="mt-6 space-y-4">
+                  {/* Inline images */}
+                  {imageAtts.map((att: any) => (
+                    <div key={att.id} className="rounded-xl overflow-hidden">
+                      <img
+                        src={att.url}
+                        alt={att.filename}
+                        className="max-w-full rounded-xl object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    </div>
+                  ))}
+                  {/* Non-image file chips */}
+                  {fileAtts.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {fileAtts.map((att: any) => (
+                        <div
+                          key={att.id}
+                          className="flex items-center gap-2 border border-primary-200 px-3 py-1.5 rounded-lg bg-primary-50"
+                        >
+                          <Text size="sm" className="max-w-[180px] truncate">
+                            {att.filename}
+                          </Text>
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => handleDownload(att.id, att.filename)}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
           {/* Security Report Section (Basic display) */}
           {email.securityReport && (

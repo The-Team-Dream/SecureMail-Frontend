@@ -12,6 +12,19 @@ interface SearchAutocompleteProps {
   inputClassName?: string;
 }
 
+/**
+ * Custom hook that debounces a value by the given delay.
+ * Prevents firing API calls on every keystroke.
+ */
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
+
 export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   inputClassName,
 }) => {
@@ -26,7 +39,10 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const { data } = useSearchEmails(mailboxId, inputValue, 1);
+  // Debounce the search query by 300ms to avoid firing on every keystroke
+  const debouncedQuery = useDebouncedValue(inputValue, 300);
+
+  const { data } = useSearchEmails(mailboxId, debouncedQuery, 1);
   const suggestions = (data?.data || []).slice(0, 5);
 
   // Close dropdown when clicking outside

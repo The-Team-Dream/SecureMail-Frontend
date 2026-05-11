@@ -1,6 +1,6 @@
 "use client";
 import Cookies from "js-cookie";
-import { useSignin } from "@/APIs/hooks/useAuth";
+import { useSignin } from "@/APIs/hooks/auth";
 import { Button } from "@/components/ui/button";
 import { LockIcon, Mail } from "lucide-react";
 import Link from "next/link";

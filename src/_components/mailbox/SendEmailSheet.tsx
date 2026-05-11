@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Controller } from "react-hook-form";
 import {
   Sheet,
@@ -30,16 +30,28 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import BackEndError from "@/_components/shared/BackEndError";
 import Error from "@/_components/shared/Error";
-import EmojiPicker, { Theme } from "emoji-picker-react";
+import dynamic from "next/dynamic";
+import { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import { Text } from "@/_components/shared/Text";
 import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { useComposeEmail } from "@/hooks/useComposeEmail";
 
+// Lazy-load EmojiPicker to avoid including ~270KB+ in the main bundle
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-[320px] h-[360px] flex items-center justify-center bg-background border border-primary-100 rounded-xl">
+      <Spinner />
+    </div>
+  ),
+});
+
 // ─── Component ─────────────────────────────────────────────────────────────
 export const ComposeEmailSheet = () => {
   const { resolvedTheme } = useTheme();
+  const [showLinkInput, setShowLinkInput] = useState(false);
 
   const {
     isOpen,
@@ -389,23 +401,40 @@ export const ComposeEmailSheet = () => {
                   )}
                 </div>
 
-                {/* Insert Link (UI only) */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  title="Insert link"
-                  className="text-primary-500 hover:text-primary-900"
-                  onClick={() => {
-                    const url = window.prompt("Enter URL:");
-                    if (url) {
-                      const current = form.getValues("bodyText") ?? "";
-                      form.setValue("bodyText", `${current} ${url}`);
-                    }
-                  }}
-                >
-                  <LinkIcon className="w-5 h-5" />
-                </Button>
+                <div className="relative">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Insert link"
+                    className="text-primary-500 hover:text-primary-900"
+                    onClick={() => setShowLinkInput((v) => !v)}
+                  >
+                    <LinkIcon className="w-5 h-5" />
+                  </Button>
+                  {showLinkInput && (
+                    <div className="absolute bottom-full mb-2 left-0 z-50 bg-background p-2 rounded-lg border border-primary-200 shadow-lg flex items-center gap-2">
+                      <Input
+                        placeholder="https://..."
+                        className="w-48 h-8 text-xs"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            const val = e.currentTarget.value;
+                            if (val) {
+                              const current = form.getValues("bodyText") ?? "";
+                              form.setValue("bodyText", `${current} ${val}`);
+                              setShowLinkInput(false);
+                            }
+                          } else if (e.key === "Escape") {
+                            setShowLinkInput(false);
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 {/* Insert Image (UI only) */}
                 <Button

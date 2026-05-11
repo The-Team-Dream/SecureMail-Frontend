@@ -1,4 +1,5 @@
 "use client";
+import { motion } from "framer-motion";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
@@ -55,7 +56,12 @@ export function AddAccountWizard({
   const isLoading = isOAuthLoading || isImapLoading;
 
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-card relative">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-card relative"
+    >
       <div className="flex items-center gap-2.5 px-10 py-3 w-full bg-ghostBlue border-b border-primary-100/80 z-10">
         <button
           onClick={handleCancel}
@@ -139,19 +145,21 @@ export function AddAccountWizard({
             <ArrowLeft className="w-4 h-4" /> Previous
           </Button>
 
-          <Button
-            type={step === 5 ? "submit" : "button"}
-            form={step === 5 ? "summary-form" : undefined}
-            onClick={step === 5 ? undefined : handleNext}
-            disabled={isLoading}
-            className="min-w-[130px] h-[46px] font-semibold gap-2"
-          >
-            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {nextButtonLabel}
-            {!isLoading && <ArrowRight className="w-4 h-4" />}
-          </Button>
+          {!(step === 1 && isOAuthProvider) && (
+            <Button
+              type={step === 5 ? "submit" : "button"}
+              form={step === 5 ? "summary-form" : undefined}
+              onClick={step === 5 ? undefined : () => handleNext()}
+              disabled={isLoading}
+              className="min-w-[130px] h-[46px] font-semibold gap-2"
+            >
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {nextButtonLabel}
+              {!isLoading && <ArrowRight className="w-4 h-4" />}
+            </Button>
+          )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

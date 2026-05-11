@@ -31,6 +31,7 @@ export interface Email {
   securityVerdict?: SecurityVerdict;
   folder?: EmailFolder;
   hasAttachments?: boolean;
+  attachments?: Attachment[];
 }
 
 export interface EmailsResponse {

@@ -195,7 +195,13 @@ export const useComposeEmail = () => {
       fd.append("subject", sanitizedSubject);
       if (sanitizedCc) fd.append("cc", sanitizedCc);
       if (sanitizedBcc) fd.append("bcc", sanitizedBcc);
-      if (sanitizedBodyText) fd.append("bodyText", sanitizedBodyText);
+      if (sanitizedBodyText) {
+        fd.append("bodyText", sanitizedBodyText);
+        if (!data.bodyHtml) {
+          fd.append("bodyHtml", `<p>${sanitizedBodyText.replace(/\n/g, "<br/>")}</p>`);
+        }
+      }
+      if (data.bodyHtml) fd.append("bodyHtml", data.bodyHtml);
 
       sendMutation.mutate(fd, {
         onSuccess,

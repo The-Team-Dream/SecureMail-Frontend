@@ -11,12 +11,17 @@ import { ConnectedAccountsSkeleton } from "@/_components/skeleton/ConnectedAccou
 export default function Mailboxes() {
   const searchParams = useSearchParams();
   const { data: mailboxes, isLoading } = useMailboxes();
-  const [view, setView] = useState<"list" | "add">("list");
+  
+  // Initialize view properly from URL if reloading
+  const initialStep = searchParams.get("step");
+  const [view, setView] = useState<"list" | "add">(initialStep ? "add" : "list");
 
   useEffect(() => {
     const step = searchParams.get("step");
     if (step) {
       setView("add");
+    } else {
+      setView("list");
     }
   }, [searchParams]);
 

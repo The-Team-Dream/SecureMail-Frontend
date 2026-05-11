@@ -1,5 +1,5 @@
-import { SettingsSkeleton } from "@/_components/skeleton/SettingsSkeleton";
+import { FancySpinner } from "@/_components/shared/FancySpinner";
 
 export default function SettingsLoading() {
-  return <SettingsSkeleton />;
+  return <FancySpinner text="Loading Settings..." />;
 }

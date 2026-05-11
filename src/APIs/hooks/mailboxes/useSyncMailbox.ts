@@ -59,28 +59,21 @@ export const useSyncMailbox = () => {
       if (context?.previousMailboxes) {
         queryClient.setQueryData(["mailboxes"], context.previousMailboxes);
       }
-      toast.error(error.response?.data?.message || error?.message || "Failed to sync mailbox");
+      toast.error(
+        error.response?.data?.message ||
+          error?.message ||
+          "Failed to sync mailbox",
+      );
     },
-    onSettled: async (_data, _error, variables, context: any) => {
+    // WebSocket events (mailbox-sync-complete / mailbox-sync-failed) handle
+    // real-time cache invalidation. We only do a single delayed invalidation
+    // here as a safety-net fallback.
+    onSettled: async (_data, _error, variables) => {
       if (!variables) return;
       const id = Number(variables);
-      const startTime = context?.startTime || new Date();
 
-      let attempts = 0;
-      const maxAttempts = 10;
-      let isSynced = false;
-
-      while (attempts < maxAttempts && !isSynced) {
-        attempts++;
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        try {
-          const mailbox = await mailboxApi.getMailboxById(id);
-          const lastSynced = new Date(mailbox.lastSyncedAt);
-          if (lastSynced >= startTime) {
-            isSynced = true;
-          }
-        } catch (e) {}
-      }
+      // Short delay to let the server start processing
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["mailboxes"] }),
@@ -91,4 +84,3 @@ export const useSyncMailbox = () => {
     },
   });
 };
-
