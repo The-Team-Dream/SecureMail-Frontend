@@ -1,5 +1,5 @@
 "use client";
-import { useSignup } from "@/APIs/hooks/useAuth";
+import { useSignup } from "@/APIs/hooks/auth";
 import { Button } from "@/components/ui/button";
 import { CircleAlert, LockIcon, Mail, User } from "lucide-react";
 import Link from "next/link";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Text } from "./shared/Text";
@@ -25,14 +25,11 @@ import {
   useUnreadCount,
   useReadNotification,
   useReadAllNotifications,
-  useDeleteNotification
+  useDeleteNotification,
 } from "@/APIs/hooks/notifications";
 
-
-
-
-
 import notFoundImg from "../../public/images/not-found.png";
+import { Notification } from "@/APIs/types/Notification";
 
 export const NotificationDropdown = () => {
   const pathname = usePathname();
@@ -50,7 +47,7 @@ export const NotificationDropdown = () => {
       : Array.isArray(notificationsData)
         ? notificationsData
         : [];
-  
+
   const unreadCount = unreadData?.count || 0;
 
   const handleToggleReadStatus = (id: number, currentStatus: boolean) => {
@@ -62,6 +59,20 @@ export const NotificationDropdown = () => {
   };
 
   const [activeTab, setActiveTab] = useState("all");
+
+  // Memoize filtered notifications to avoid recomputing on every render
+  const filteredNotifications = useMemo(() => {
+    if (activeTab === "all") return notifications;
+    return notifications.filter((n) => {
+      const category =
+        n.type === "NEW_EMAIL_RECEIVED"
+          ? n.metadata?.verdict === "SPAM"
+            ? "threats"
+            : "updates"
+          : "system";
+      return category === activeTab;
+    });
+  }, [notifications, activeTab]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -88,7 +99,7 @@ export const NotificationDropdown = () => {
             )}
           />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 flex items-center justify-center text-[10px] rounded-full bg-error-600 border-none pointer-events-none z-10">
+            <Badge className="absolute -top-0.5 right-0 w-4 h-4  flex items-center justify-center text-[8px] rounded-full bg-primary border-none pointer-events-none z-10">
               {unreadCount}
             </Badge>
           )}
@@ -96,7 +107,7 @@ export const NotificationDropdown = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-[380px] p-0 bg-background border-primary-100 rounded-xl shadow-lg overflow-hidden"
+        className="w-[440px] p-0 bg-background border-primary-100 rounded-xl shadow-lg overflow-hidden"
       >
         <Tabs
           defaultValue="all"
@@ -170,29 +181,10 @@ export const NotificationDropdown = () => {
                         <NotificationCardSkeleton key={i} />
                       ))}
                     </div>
-                  ) : notifications.filter((n) => {
-                      if (activeTab === "all") return true;
-                      const category =
-                        n.type === "NEW_EMAIL_RECEIVED"
-                          ? n.metadata?.verdict === "SPAM"
-                            ? "threats"
-                            : "updates"
-                          : "system";
-                      return category === activeTab;
-                    }).length > 0 ? (
+                  ) : filteredNotifications.length > 0 ? (
                     <div className="flex flex-col">
-                      {notifications
-                        .filter((n) => {
-                          if (activeTab === "all") return true;
-                          const category =
-                            n.type === "NEW_EMAIL_RECEIVED"
-                              ? n.metadata?.verdict === "SPAM"
-                                ? "threats"
-                                : "updates"
-                              : "system";
-                          return category === activeTab;
-                        })
-                        .map((notification) => (
+                      {filteredNotifications.map(
+                        (notification: Notification) => (
                           <NotificationCard
                             key={notification.id}
                             notification={notification}
@@ -201,7 +193,8 @@ export const NotificationDropdown = () => {
                             }
                             onToggleRead={handleToggleReadStatus}
                           />
-                        ))}
+                        ),
+                      )}
                     </div>
                   ) : (
                     <div className="h-[400px] flex items-center justify-center">

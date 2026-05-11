@@ -85,7 +85,12 @@ export function StepProvider({
                 key={opt.id}
                 type="button"
                 className="flex items-center gap-2.5 cursor-pointer group bg-transparent border-0 p-0 outline-none"
-                onClick={() => setProvider(opt.id)}
+                onClick={() => {
+                  setProvider(opt.id);
+                  if (opt.id !== "IMAP") {
+                    onOAuthConnect?.(opt.id as any);
+                  }
+                }}
               >
                 <div
                   className={`w-[20px] h-[20px] rounded-full flex items-center justify-center transition-all bg-card border-2 ${provider === opt.id ? "border-primary" : "border-primary-400 group-hover:border-primary"}`}

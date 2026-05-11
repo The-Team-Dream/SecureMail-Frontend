@@ -4,11 +4,10 @@ import { useEffect } from "react";
 import { useMailStore } from "@/stores/useMailStore";
 import { MailInbox } from "@/_components/mailbox/MailInbox";
 import { MalwareInbox } from "@/_components/mailbox/MalwareInbox";
-import type { Folder } from "@/types/mail";
-
+import type { EmailFolder } from "@/APIs/types/Email";
 
 // Folders that show the MailInbox component
-const mailFolders: Folder[] = [
+const mailFolders: EmailFolder[] = [
   "inbox",
   "sent",
   "starred",
@@ -19,9 +18,7 @@ const mailFolders: Folder[] = [
 ];
 
 // All valid sections (mail folders + security/analytics sections)
-const validSections: string[] = [
-  ...mailFolders,
-];
+const validSections: string[] = [...mailFolders];
 
 interface FolderClientProps {
   mailboxId: string;
@@ -38,8 +35,8 @@ export function FolderClient({ mailboxId, folder }: FolderClientProps) {
       return;
     }
     // Set active folder for mail folders
-    if (mailFolders.includes(folder as Folder)) {
-      setActiveFolder(folder as Folder);
+    if (mailFolders.includes(folder as EmailFolder)) {
+      setActiveFolder(folder as EmailFolder);
     }
   }, [folder, setActiveFolder, router]);
 
@@ -52,7 +49,7 @@ export function FolderClient({ mailboxId, folder }: FolderClientProps) {
     return <MalwareInbox />;
   }
 
-  if (mailFolders.includes(folder as Folder)) {
+  if (mailFolders.includes(folder as EmailFolder)) {
     return <MailInbox />;
   }
 

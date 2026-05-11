@@ -9,14 +9,14 @@ export const useReclassifyEmail = (mailboxId: string) => {
   return useMutation({
     mutationFn: ({ id, folder }: { id: string; folder: EmailFolder }) =>
       emailsApi.reclassify(mailboxId, id, folder),
-    onMutate: async ({ id }) => {
+    onMutate: async ({ id, folder }) => {
       await queryClient.cancelQueries({ queryKey: ["emails", mailboxId] });
       const previousQueries = queryClient.getQueriesData<any>({
         queryKey: ["emails", mailboxId],
       });
 
       queryClient.setQueriesData<any>(
-        { queryKey: ["emails", mailboxId] },
+        { queryKey: ["emails", mailboxId, folder] },
         (old: any) => {
           if (!old) return old;
           return {
@@ -29,7 +29,7 @@ export const useReclassifyEmail = (mailboxId: string) => {
       return { previousQueries };
     },
     onSuccess: () => {
-      toast.success("Email moved successfully");
+      toast.success("Email reclassified successfully");
     },
     onError: (_err, _variables, context) => {
       if (context?.previousQueries) {
@@ -43,4 +43,3 @@ export const useReclassifyEmail = (mailboxId: string) => {
     },
   });
 };
-

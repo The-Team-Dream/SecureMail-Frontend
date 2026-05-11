@@ -51,26 +51,6 @@ const itemVariants = {
   },
 };
 
-const MailboxStatsDisplay = ({ mailboxId }: { mailboxId: number | string }) => {
-  const { data, isError } = useMailboxStats(mailboxId.toString());
-
-  if (isError || !data) {
-    return (
-      <Text size="2xl" color={"error-600"} font="semiBold">
-        0
-      </Text>
-    );
-  }
-
-  const threatsCount = (data.phishingEmails || 0) + (data.spamEmails || 0);
-
-  return (
-    <Text size="2xl" color={"error-600"} font="semiBold">
-      {threatsCount}
-    </Text>
-  );
-};
-
 export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
   const { data: mailboxes, isError, refetch } = useMailboxes();
   const syncMutation = useSyncMailbox();
@@ -126,6 +106,10 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
         >
           {mailboxes?.map((acc: Mailbox) => {
             const statusStyles = getStatusStyles(acc.isActive);
+            const totalThreats =
+              (acc.spamScore ?? 0) +
+              (acc.phishingScore ?? 0) +
+              (acc.malwareScore ?? 0);
             return (
               <motion.div
                 key={acc.id}
@@ -169,7 +153,9 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                     </div>
                     <div className="w-px h-10 bg-primary-100/60 shrink-0"></div>
                     <div className="flex flex-col items-center flex-1">
-                      <MailboxStatsDisplay mailboxId={acc.id} />
+                      <Text size="2xl" color={"error-600"} font="semiBold">
+                        {totalThreats}
+                      </Text>
                       <Text size="xs" color={"primary-500"} className="mt-1">
                         Threats
                       </Text>

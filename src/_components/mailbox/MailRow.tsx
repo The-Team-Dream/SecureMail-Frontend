@@ -1,14 +1,18 @@
 "use client";
 
-import React from "react";
-import { FileText, MailOpen, Mail } from "lucide-react";
+import React, { useMemo } from "react";
+import { FileText, MailOpen, Mail, Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Email, EmailFolder } from "@/APIs/types/Email";
 import { useMailStore } from "@/stores/useMailStore";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname, useParams } from "next/navigation";
-import { useReadEmail, useStarEmail, useDeleteEmailWithUndo } from "@/APIs/hooks/emails";
+import {
+  useReadEmail,
+  useStarEmail,
+  useDeleteEmailWithUndo,
+} from "@/APIs/hooks/emails";
 
 import { RISK_STYLE_MAP } from "@/constants/security";
 import { Icons } from "@/constants/icons";
@@ -21,7 +25,7 @@ interface MailRowProps {
   onDragEnd: () => void;
 }
 
-export const MailRow = ({
+export const MailRow = React.memo(({
   email,
   index,
   onDragStart,
@@ -36,7 +40,7 @@ export const MailRow = ({
   const params = useParams();
   const mailboxId = params.mailboxId as string;
   const activeFolder = useMailStore((s) => s.activeFolder);
-  
+
   const readMutation = useReadEmail(mailboxId);
   const starMutation = useStarEmail(mailboxId);
   const deleteWithUndo = useDeleteEmailWithUndo(
@@ -51,6 +55,12 @@ export const MailRow = ({
       : email.isSpam
         ? "Medium"
         : "Low";
+
+  // Memoize formatted date to avoid creating Date objects on every render
+  const formattedDate = useMemo(
+    () => new Date(email.receivedAt).toLocaleDateString(),
+    [email.receivedAt],
+  );
 
   return (
     <div
@@ -110,7 +120,7 @@ export const MailRow = ({
                 ? `To: ${email.toAddr && email.toAddr.length > 0 ? email.toAddr.map((addr) => addr.split("@")[0]).join(", ") : "Unknown Recipient"}`
                 : `${email.fromName || (email.fromAddr ? email.fromAddr.split("@")[0] : "Unknown Sender")}`}
               {!email.isRead && (
-                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-primary-800 text-background rounded uppercase tracking-wider animate-pulse">
+                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-primary text-background rounded uppercase">
                   New
                 </span>
               )}
@@ -151,6 +161,46 @@ export const MailRow = ({
                 </Text>
               </div>
             )}
+
+            {/* Attachment Chips */}
+            {email.attachments && email.attachments.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {email.attachments.slice(0, 3).map((att) => {
+                  const isImage = att.contentType?.startsWith("image/");
+                  const isExternal =
+                    att.url &&
+                    (att.url.startsWith("http://") ||
+                      att.url.startsWith("https://"));
+                  return (
+                    <span
+                      key={att.id}
+                      className="inline-flex items-center gap-1.5 bg-primary-100 border border-primary-200 rounded-full px-2 py-0.5 text-[11px] text-primary-700 max-w-[140px]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {isImage && isExternal ? (
+                        <img
+                          src={att.url}
+                          alt=""
+                          className="w-4 h-4 rounded object-cover shrink-0"
+                          onError={(e) =>
+                            ((e.target as HTMLImageElement).style.display =
+                              "none")
+                          }
+                        />
+                      ) : (
+                        <Paperclip className="w-3 h-3 shrink-0 text-primary-500" />
+                      )}
+                      <span className="truncate">{att.filename}</span>
+                    </span>
+                  );
+                })}
+                {email.attachments.length > 3 && (
+                  <span className="inline-flex items-center bg-primary-100 border border-primary-200 rounded-full px-2 py-0.5 text-[11px] text-primary-500">
+                    +{email.attachments.length - 3} more
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <span
@@ -160,7 +210,7 @@ export const MailRow = ({
             !email.isRead ? "font-bold" : "font-normal",
           )}
         >
-          {new Date(email.receivedAt).toLocaleDateString()}
+          {formattedDate}
         </span>
 
         {/* Actions on Desktop */}
@@ -207,4 +257,6 @@ export const MailRow = ({
       </div>
     </div>
   );
-};
+});
+
+MailRow.displayName = "MailRow";

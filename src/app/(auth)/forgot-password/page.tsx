@@ -1,6 +1,6 @@
 "use client";
 import { Input } from "@/_components/shared/Input";
-import { useForgetPassword } from "@/APIs/hooks/useAuth";
+import { useForgetPassword } from "@/APIs/hooks/auth";
 import { Button } from "@/components/ui/button";
 import {
   forgotPasswordSchema,

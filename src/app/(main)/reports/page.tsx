@@ -8,7 +8,7 @@ import { ReportListItem } from "./ReportListItem";
 import { ReportsSkeleton } from "@/_components/skeleton/ReportsSkeleton";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
-import { useGetAuthMe } from "@/APIs/hooks/useAuth";
+import { useGetAuthMe } from "@/APIs/hooks/auth";
 
 const containerVariants = {
   hidden: { opacity: 0 },

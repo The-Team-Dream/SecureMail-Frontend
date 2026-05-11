@@ -31,8 +31,8 @@ const getEventIcon = (notification: Notification) => {
   if (notification.metadata?.verdict === "SPAM")
     return {
       icon: Icons.Spam,
-      color: "text-warning-50",
-      bg: "bg-warning-500",
+      color: "text-warning-500",
+      bg: "bg-warning-50",
     };
   return { icon: Info, color: "text-error-500", bg: "bg-error-50" };
 };

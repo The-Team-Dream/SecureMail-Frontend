@@ -3,7 +3,7 @@ import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { Trash2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLogout } from "@/APIs/hooks/useAuth";
+import { useLogout } from "@/APIs/hooks/auth";
 import Cookies from "js-cookie";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";

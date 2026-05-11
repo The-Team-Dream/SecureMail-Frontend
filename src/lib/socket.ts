@@ -1,0 +1,46 @@
+import { io, Socket } from "socket.io-client";
+import Cookies from "js-cookie";
+import { baseURL } from "./axios";
+
+let socket: Socket | null = null;
+
+/**
+ * Returns the singleton Socket.IO instance.
+ * Creates a new connection if one doesn't exist or was disconnected.
+ */
+export const getSocket = (): Socket => {
+  if (socket?.connected) return socket;
+
+  const token = Cookies.get("token");
+
+  socket = io(baseURL, {
+    auth: { token },
+    transports: ["websocket", "polling"],
+    autoConnect: true,
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 10000,
+    withCredentials: true,
+  });
+
+  return socket;
+};
+
+/**
+ * Disconnect and clean up the socket instance.
+ */
+export const disconnectSocket = (): void => {
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+    socket = null;
+  }
+};
+
+/**
+ * Check if the socket is currently connected.
+ */
+export const isSocketConnected = (): boolean => {
+  return socket?.connected ?? false;
+};

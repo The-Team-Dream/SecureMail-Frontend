@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
 import { useMailStore } from "@/stores/useMailStore";
-import type { Folder } from "@/types/mail";
-import { useEmails } from "@/APIs/hooks/emails";
+import type { EmailFolder } from "@/APIs/types/Email";
+import { useUnreadCount } from "@/APIs/hooks/notifications";
 
 const dashboardNavItems = [
   { name: "Mailboxes", icon: Icons.Inbox, href: "/mailboxes" },
@@ -23,7 +23,7 @@ const dashboardNavItems = [
 const mailboxNavItems: {
   name: string;
   icon: React.ElementType;
-  folder: Folder;
+  folder: EmailFolder;
 }[] = [
   { name: "Inbox", icon: Icons.Inbox, folder: "inbox" },
   { name: "Sent", icon: Icons.Sent, folder: "sent" },
@@ -38,7 +38,6 @@ const securityNavItems = [
     icon: Icons.Reports,
     href: "security-reports",
   },
-  { name: "Analytics", icon: Icons.Analytics, href: "analytics" },
   { name: "Phishing", icon: Icons.Phishing, href: "phishing" },
   { name: "Malware", icon: Icons.Malware, href: "malware" },
 ];
@@ -48,20 +47,15 @@ export const Sidebar = () => {
   const params = useParams();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
-
   const isMailPage = !!params.mailboxId;
-
-  // Fetch inbox emails for unread count
-  const { data: inboxData } = useEmails(params.mailboxId as string, "inbox", 1);
-  const unreadInboxCount =
-    inboxData?.data?.filter((e: any) => !e.isRead).length || 0;
+  const { data: unreadCount } = useUnreadCount();
 
   return (
     <aside
       className={cn(
         "sticky top-16 h-[calc(100vh-64px)] overflow-x-hidden bg-ghostBlue",
         "hidden md:flex flex-col border-r border-primary-100 py-2 px-2.5 transition-[width,padding] duration-200",
-        "h-full overflow-y-auto",
+        "h-full overflow-y-auto scrollbar-slim",
         isCollapsed ? "w-20" : "w-64",
       )}
     >
@@ -153,11 +147,12 @@ export const Sidebar = () => {
                         >
                           {item.name}
                         </Text>
-                        {item.folder === "inbox" && unreadInboxCount > 0 && (
-                          <span className="bg-primary-800 text-background text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                            {unreadInboxCount}
-                          </span>
-                        )}
+                        {item.folder === "inbox" &&
+                          (unreadCount?.count ?? 0) > 0 && (
+                              <span className="bg-primary text-background text-[10px] p-0.5 flex items-center justify-center rounded-full">
+                                {unreadCount?.count}
+                              </span>
+                          )}
                       </div>
                     )}
                   </div>

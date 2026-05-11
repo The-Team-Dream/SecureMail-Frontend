@@ -14,7 +14,7 @@ import {
   useRevokeOtherSessions,
 } from "@/APIs/hooks/sessions";
 import { Skeleton } from "@/components/ui/skeleton";
-import dayjs from "dayjs";
+import { format } from "date-fns";
 import { StateMessage } from "@/_components/shared/StateMessage";
 
 const SessionSkeleton = () => (
@@ -147,9 +147,7 @@ const SessionManagement = () => {
                             </span>{" "}
                             {isCurrent
                               ? "Active now"
-                              : dayjs(device.loginAt).format(
-                                  "DD MMM YYYY, HH:mm",
-                                )}
+                              : format(new Date(device.loginAt), "dd MMM yyyy, HH:mm")}
                           </Text>
                         </div>
                       </div>

@@ -326,10 +326,14 @@ export function useAddAccountWizard({
   };
 
   // ─── Next Handler ───────────────────────────────────────────────────────────
-  const handleNext = async () => {
+  const handleNext = async (explicitProvider?: "GMAIL" | "OUTLOOK") => {
+    const activeProvider = explicitProvider || provider;
     // OAuth providers skip all form steps — instant redirect
-    if (step === 1 && (provider === "GMAIL" || provider === "OUTLOOK")) {
-      await handleOAuthRedirect(provider as "GMAIL" | "OUTLOOK");
+    if (
+      step === 1 &&
+      (activeProvider === "GMAIL" || activeProvider === "OUTLOOK")
+    ) {
+      await handleOAuthRedirect(activeProvider as "GMAIL" | "OUTLOOK");
       return;
     }
 
