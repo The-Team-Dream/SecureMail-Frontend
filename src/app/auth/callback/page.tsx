@@ -15,24 +15,40 @@ export default function OAuthSuccess() {
     const token = searchParams.get("token");
     const code = searchParams.get("code");
 
-    if (window.opener) {
-      if (token) {
-        window.opener.postMessage({ type: "OAUTH_SUCCESS", token }, "*");
-        window.close();
-      } else if (code) {
-        window.opener.postMessage({ type: "OAUTH_CODE_RECEIVED", code }, "*");
-        window.close();
+    if (token) {
+      Cookies.set("token", token, { path: "/", expires: 1 });
+      
+      try {
+        const channel = new BroadcastChannel('oauth_channel');
+        channel.postMessage({ type: "OAUTH_SUCCESS", token });
+        channel.close();
+      } catch (e) {
+        console.error("BroadcastChannel failed", e);
+      }
+
+      if (window.opener) {
+        window.opener.postMessage({ type: "OAUTH_SUCCESS", token }, window.location.origin);
+      }
+
+      window.close();
+
+      setTimeout(() => {
+        toast.success("Logged in successfully");
+        router.push("/mailboxes");
+      }, 500);
+
+    } else if (code) {
+      if (window.opener) {
+        window.opener.postMessage({ type: "OAUTH_CODE_RECEIVED", code }, window.location.origin);
+      }
+      window.close();
+    } else {
+      if (!window.opener) {
+        toast.error("Authentication failed. No token or code received.");
+        router.push("/sign-in");
       } else {
         window.close();
       }
-    } else if (token) {
-      // If opened in the same window, handle redirect normally
-      Cookies.set("token", token, { path: "/", expires: 1 });
-      toast.success("Logged in successfully");
-      router.push("/mailboxes");
-    } else if (!window.opener) {
-      toast.error("Authentication failed. No token or code received.");
-      router.push("/sign-in");
     }
   }, [searchParams, router]);
 

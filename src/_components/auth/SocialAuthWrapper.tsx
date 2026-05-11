@@ -8,25 +8,39 @@ const SocialAuthWrapper = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // In a real app, verify the origin here if needed
-      if (event.data?.type === "OAUTH_SUCCESS" && event.data?.token) {
-        import("js-cookie").then((Cookies) => {
-          Cookies.default.set("token", event.data.token, {
-            path: "/",
-            expires: 1,
-          });
-          router.push("/mailboxes");
+    const handleSuccess = (token: string) => {
+      import("js-cookie").then((Cookies) => {
+        Cookies.default.set("token", token, {
+          path: "/",
+          expires: 1,
         });
+        router.push("/mailboxes");
+      });
+    };
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === "OAUTH_SUCCESS" && event.data?.token) {
+        handleSuccess(event.data.token);
+      }
+    };
+
+    const channel = new BroadcastChannel('oauth_channel');
+    channel.onmessage = (event) => {
+      if (event.data?.type === "OAUTH_SUCCESS" && event.data?.token) {
+        handleSuccess(event.data.token);
       }
     };
 
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      channel.close();
+    };
   }, [router]);
 
   const handleOAuthClick = (provider: "google" | "outlook") => {
-    const callbackUrl = `${window.location.origin}/auth/google/callback`;
+    const callbackUrl = `${window.location.origin}/auth/${provider}/callback`;
     const url = getOAuthLoginUrl(provider, callbackUrl);
 
     // Open a popup window centered on the screen

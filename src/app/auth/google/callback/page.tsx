@@ -19,11 +19,11 @@ export default function GoogleOAuthCallback() {
       sentRef.current = true;
       if (token) {
         console.log("Google Callback: Sending token to opener");
-        window.opener.postMessage({ type: "OAUTH_SUCCESS", token }, "*");
+        window.opener.postMessage({ type: "OAUTH_SUCCESS", token }, window.location.origin);
         window.close();
       } else if (code) {
         console.log("Google Callback: Sending code to opener");
-        window.opener.postMessage({ type: "OAUTH_CODE_RECEIVED", code }, "*");
+        window.opener.postMessage({ type: "OAUTH_CODE_RECEIVED", code }, window.location.origin);
         window.close();
       } else if (error) {
         console.error("Google Callback Error:", error);
