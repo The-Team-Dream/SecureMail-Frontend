@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
 import { Text } from "@/_components/shared/Text";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -23,61 +22,108 @@ export function StatCard({
 }: StatCardProps) {
   const styles = {
     neutral: {
+      bg: "bg-primary-50/50",
+      border: "border-primary-100/50",
       text: "text-primary-950",
-      icon: "text-primary-400",
+      iconBg: "bg-primary-100/80",
+      iconColor: "text-primary-600",
+      accent: "bg-primary-500",
     },
     warning: {
-      text: "text-warning-700",
-      icon: "text-warning-500",
+      bg: "bg-warning-50/50",
+      border: "border-warning-100/50",
+      text: "text-warning-800",
+      iconBg: "bg-warning-100/80",
+      iconColor: "text-warning-600",
+      accent: "bg-warning-500",
     },
     info: {
-      text: "text-secondary-700",
-      icon: "text-secondary-500",
+      bg: "bg-secondary-50/50",
+      border: "border-secondary-100/50",
+      text: "text-secondary-800",
+      iconBg: "bg-secondary-100/80",
+      iconColor: "text-secondary-600",
+      accent: "bg-secondary-500",
     },
     error: {
-      text: "text-error-700",
-      icon: "text-error-500",
+      bg: "bg-error-50/50",
+      border: "border-error-100/50",
+      text: "text-error-800",
+      iconBg: "bg-error-100/80",
+      iconColor: "text-error-600",
+      accent: "bg-error-500",
     },
   };
 
   const currentStyle = styles[type];
 
   return (
-    <motion.div whileHover={{ y: -5 }} className="h-full">
-      <Card
+    <motion.div
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className="h-full"
+    >
+      <div
         className={cn(
-          "relative overflow-hidden border rounded-2xl h-full bg-background group",
+          "relative overflow-hidden border rounded-3xl p-5 h-full transition-all duration-300 backdrop-blur-sm group",
+          currentStyle.bg,
+          currentStyle.border,
           currentStyle.text,
         )}
       >
-        {/* Background Icon */}
-        <div className="absolute -right-8 -bottom-8 opacity-10 group-hover:opacity-20 transition-all duration-500 pointer-events-none">
-          <Icon size={140} />
-        </div>
+        {/* Animated Background Pulse */}
+        <div className="absolute inset-0 bg-linear-to-br from-background to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-        <CardContent className="flex items-start gap-2 relative z-10">
-          <div className={cn("p-0", currentStyle.icon)}>
-            <Icon />
+        <div className="flex flex-col h-full relative z-10">
+          <div className="flex justify-between items-start mb-4">
+            <div
+              className={cn(
+                "p-2.5 rounded-2xl shadow-xs transition-transform duration-500 group-hover:scale-110",
+                currentStyle.iconBg,
+                currentStyle.iconColor,
+              )}
+            >
+              <Icon size={20} strokeWidth={2.5} />
+            </div>
+            
+            {/* Subtle Progress Dot */}
+            <div className="flex gap-1">
+               <div className={cn("w-1.5 h-1.5 rounded-full", currentStyle.accent)} />
+               <div className={cn("w-1.5 h-1.5 rounded-full opacity-20", currentStyle.accent)} />
+               <div className={cn("w-1.5 h-1.5 rounded-full opacity-20", currentStyle.accent)} />
+            </div>
           </div>
-          <div className="flex flex-col gap-2">
+
+          <div className="flex flex-col gap-1">
             <Text
               size="xs"
               font="bold"
-              className="uppercase tracking-widest block mb-0.5"
+              className="uppercase tracking-[0.15em] opacity-60 mb-0.5"
             >
               {title}
             </Text>
-            <Text size="2xl" font="bold" className="leading-tight">
-              {value}
-            </Text>
+            <div className="flex items-baseline gap-2">
+              <Text size="3xl" font="bold" className="tracking-tight">
+                {value}
+              </Text>
+            </div>
             {description && (
-              <Text size="xs" font="medium" color="primary-400">
+              <Text
+                size="xs"
+                font="medium"
+                className="opacity-50 mt-1.5 leading-relaxed"
+              >
                 {description}
               </Text>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Decorative Corner Element */}
+        <div className={cn(
+          "absolute -right-6 -bottom-6 w-24 h-24 rounded-full opacity-[0.03] group-hover:opacity-[0.07] transition-all duration-700 blur-2xl",
+          currentStyle.accent
+        )} />
+      </div>
     </motion.div>
   );
 }

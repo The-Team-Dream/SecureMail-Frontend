@@ -120,7 +120,7 @@ export const ComposeEmailSheet = () => {
                         disabled={isPending}
                         error={
                           form.formState.errors.to?.type !== "server"
-                            ? form.formState.errors.to?.message
+                            ? (form.formState.errors.to?.message as string)
                             : undefined
                         }
                       />
@@ -225,7 +225,7 @@ export const ComposeEmailSheet = () => {
                     disabled={isPending}
                     error={
                       form.formState.errors.subject?.type !== "server"
-                        ? form.formState.errors.subject?.message
+                        ? (form.formState.errors.subject?.message as string)
                         : undefined
                     }
                   />
@@ -248,7 +248,9 @@ export const ComposeEmailSheet = () => {
                   : composeMode === "forward"
                     ? "Message (Optional)"
                     : "Your Message"}{" "}
-                <span className="text-error-500">*</span>
+                {composeMode !== "forward" && (
+                  <span className="text-error-500">*</span>
+                )}
               </label>
               <Controller
                 name="bodyText"
@@ -269,14 +271,12 @@ export const ComposeEmailSheet = () => {
                             : "Type your message here..."
                       }
                       disabled={isPending}
-                      className=""
-                    />
-                    <Error
                       error={
                         form.formState.errors.bodyText?.type !== "server"
-                          ? form.formState.errors.bodyText?.message
+                          ? (form.formState.errors.bodyText?.message as string)
                           : undefined
                       }
+                      className=""
                     />
                     <BackEndError
                       error={

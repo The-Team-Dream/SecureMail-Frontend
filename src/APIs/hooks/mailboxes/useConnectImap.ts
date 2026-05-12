@@ -7,10 +7,14 @@ export const useConnectImap = () => {
 
   return useMutation({
     mutationFn: mailboxApi.connectImap,
-    onSuccess: () => {
+    onSuccess: (newMailbox) => {
       toast.success("IMAP mailbox connected successfully!");
+      // Optimistically update the mailboxes list
+      queryClient.setQueryData(["mailboxes"], (old: any) => {
+        const mailboxes = Array.isArray(old) ? old : [];
+        return [...mailboxes, newMailbox];
+      });
       queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
     },
   });
 };
-

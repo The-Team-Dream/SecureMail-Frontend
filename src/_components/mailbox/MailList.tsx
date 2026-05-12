@@ -53,7 +53,7 @@ export const MailList = () => {
     const promo = !social && isPromotionEmail(email);
     if (activeClassification === "social") return social;
     if (activeClassification === "promotions") return promo;
-    return !social && !promo; // primary
+    return !social && !promo;
   });
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);

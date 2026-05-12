@@ -12,20 +12,23 @@ export const emailSchema = z.discriminatedUnion("mode", [
   // New Mode
   baseSchema.extend({
     mode: z.literal("new"),
-    to: z.string().email("Valid email is required"),
+    to: z.string().min(1, "Recipient email is required"),
     subject: z.string().min(1, "Subject is required"),
+    bodyText: z.string().min(1, "Message content is required"),
   }),
   // Reply Mode
   baseSchema.extend({
     mode: z.literal("reply"),
     to: z.string().optional(),
     subject: z.string().optional(),
+    bodyText: z.string().min(1, "Reply content is required"),
   }),
   // Forward Mode
   baseSchema.extend({
     mode: z.literal("forward"),
-    to: z.string().email("Recipient email is required"),
+    to: z.string().min(1, "Recipient email is required"),
     subject: z.string().optional(),
+    bodyText: z.string().optional(),
   }),
 ]);
 

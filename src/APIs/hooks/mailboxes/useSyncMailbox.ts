@@ -28,12 +28,6 @@ export const useSyncMailbox = () => {
       const mailboxId = data?.id?.toString() || variables?.toString();
       if (!mailboxId) return;
 
-      if (data?.message) {
-        toast.success(data.message);
-      } else {
-        toast.success("Mailbox synchronization started");
-      }
-
       queryClient.setQueryData(["mailboxes"], (old: any) => {
         if (Array.isArray(old)) {
           return old.map((m) =>

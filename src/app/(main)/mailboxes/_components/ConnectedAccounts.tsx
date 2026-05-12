@@ -2,7 +2,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
-import { Wifi, WifiOff } from "lucide-react";
+import { Plus, Wifi, WifiOff } from "lucide-react";
 import Container from "@/_components/shared/Container";
 import { useMailboxes, useSyncMailbox } from "@/APIs/hooks/mailboxes";
 import { useMailboxStats } from "@/APIs/hooks/analytics";
@@ -32,25 +32,6 @@ const getStatusStyles = (isActive: boolean) => {
   };
 };
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { type: "spring" as const, stiffness: 100 },
-  },
-};
-
 export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
   const { data: mailboxes, isError, refetch } = useMailboxes();
   const syncMutation = useSyncMailbox();
@@ -77,7 +58,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.3 }}
         className="flex justify-between items-center mb-8 w-full mt-2"
       >
         <div className="flex flex-col gap-1">
@@ -89,18 +70,14 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
           </Text>
         </div>
         <Button size={"lg"} onClick={onAddAccount}>
-          Add New Account +
+          <Plus className="w-4 h-4" />
+          <span className="hidden md:block">Add New Account</span>
         </Button>
       </motion.div>
 
       <div className="bg-ghostBlue rounded-lg p-2 lg:py-6 lg:px-4  w-full">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full"
-        >
-          {mailboxes?.map((acc: Mailbox) => {
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
+          {mailboxes?.map((acc: Mailbox, index: number) => {
             const statusStyles = getStatusStyles(acc.isActive);
             const totalThreats =
               (acc.spamScore ?? 0) +
@@ -109,7 +86,13 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
             return (
               <motion.div
                 key={acc.id}
-                variants={itemVariants}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.15,
+                  delay: index * 0.02,
+                  ease: "easeOut",
+                }}
                 whileHover={{ y: -5 }}
                 className="group"
               >
@@ -134,7 +117,9 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                       className={`flex items-center gap-1.5 text-xs font-medium ${statusStyles.color} pt-1 shrink-0`}
                     >
                       {statusStyles.icon}
-                      {statusStyles.label}
+                      <span className="hidden md:block">
+                        {statusStyles.label}
+                      </span>
                     </div>
                   </div>
 
@@ -185,7 +170,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
                         <div className="absolute inset-0 z-0 flex items-center">
                           <ProgressBar
                             isLoading={isSyncing === acc.id.toString()}
-                            className="bg-transparent rounded-none"
+                            className="bg-transparent rounded-lg"
                             barClassName="bg-primary-400/60"
                           />
                         </div>
@@ -210,7 +195,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
               </motion.div>
             );
           })}
-        </motion.div>
+        </div>
       </div>
     </Container>
   );

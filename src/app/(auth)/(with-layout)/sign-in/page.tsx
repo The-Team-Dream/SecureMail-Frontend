@@ -17,7 +17,8 @@ import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
 import BackEndError from "@/_components/shared/BackEndError";
 import { useServerErrors } from "@/utils/form-utils";
-function SigninContent() {
+
+function SignInForm() {
   const {
     handleSubmit,
     register,
@@ -54,90 +55,86 @@ function SigninContent() {
   };
 
   return (
-    <>
-      <div className="flex flex-col gap-8">
-        <div className="flex justify-center lg:justify-start">
-          <Logo />
-        </div>
-        <div className="space-y-2">
-          <Text as={"h1"} size={"32"}>
-            Hello, Welcome back
-          </Text>
-          <Text color={"primary-500"} className="text-sm lg:text-base">
-            Enter your email address and password to log in.
-          </Text>
-        </div>
-        {/* Form Input Fields */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Input
-            {...register("email", {
-              onChange: () => clearErrors(["email", "root" as any]),
-            })}
-            type="email"
-            placeholder="Email Address"
-            leftIcon={<Mail />}
-            error={errors?.email?.message}
-          />
-          <Input
-            {...register("password", {
-              onChange: () => clearErrors(["password", "root" as any]),
-            })}
-            type="password"
-            placeholder="Password"
-            leftIcon={<LockIcon />}
-            error={errors?.password?.message}
-          />
-          <Link
-            href={"/forgot-password"}
-            className="font-medium text-primary hover:underline float-right"
-          >
-            Forgot Password?
-          </Link>
-          <BackEndError
-            error={
-              errors.root?.message ? String(errors.root.message) : undefined
-            }
-          />
-          <Button
-            size={"lg"}
-            type="submit"
-            disabled={signinMutation.isPending}
-            className="w-full"
-          >
-            {signinMutation.isPending ? (
-              <>
-                <Spinner />
-                <Text font={"medium"} className="text-white">
-                  Logging in...
-                </Text>
-              </>
-            ) : (
-              <Text font={"medium"} className="text-white">
-                Login
-              </Text>
-            )}
-          </Button>
-        </form>
-        {/* OAuth Buttons */}
-        <SocialAuthWrapper />
-        <div className="text-primary-600 text-center">
-          Don&apos;t have an account?{" "}
-          <Link
-            className="text-primary font-medium hover:underline"
-            href={"/sign-up"}
-          >
-            Register
-          </Link>
-        </div>
+    <div className="flex flex-col gap-8">
+      <div className="flex justify-center lg:justify-start">
+        <Logo />
       </div>
-    </>
+      <div className="space-y-2">
+        <Text as={"h1"} size={"32"}>
+          Hello, Welcome back
+        </Text>
+        <Text color={"primary-500"} className="text-sm lg:text-base">
+          Enter your email address and password to log in.
+        </Text>
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Input
+          {...register("email", {
+            onChange: () => clearErrors(["email", "root" as any]),
+          })}
+          type="email"
+          placeholder="Email Address"
+          leftIcon={<Mail />}
+          error={errors?.email?.message}
+        />
+        <Input
+          {...register("password", {
+            onChange: () => clearErrors(["password", "root" as any]),
+          })}
+          type="password"
+          placeholder="Password"
+          leftIcon={<LockIcon />}
+          error={errors?.password?.message}
+        />
+        <Link
+          href={"/forgot-password"}
+          className="font-medium text-primary hover:underline float-right"
+        >
+          Forgot Password?
+        </Link>
+        <BackEndError
+          error={
+            errors.root?.message ? String(errors.root.message) : undefined
+          }
+        />
+        <Button
+          size={"lg"}
+          type="submit"
+          disabled={signinMutation.isPending}
+          className="w-full"
+        >
+          {signinMutation.isPending ? (
+            <>
+              <Spinner />
+              <Text font={"medium"} className="text-background">
+                Logging in...
+              </Text>
+            </>
+          ) : (
+            <Text font={"medium"} className="text-background">
+              Login
+            </Text>
+          )}
+        </Button>
+      </form>
+      <SocialAuthWrapper />
+      <div className="text-primary-600 text-center">
+        Don&apos;t have an account?{" "}
+        <Link
+          className="text-primary font-medium hover:underline"
+          href={"/sign-up"}
+        >
+          Register
+        </Link>
+      </div>
+    </div>
   );
 }
 
-export default function Signin() {
+export default function SignIn() {
   return (
     <Suspense fallback={<Spinner />}>
-      <SigninContent />
+      <SignInForm />
     </Suspense>
   );
 }

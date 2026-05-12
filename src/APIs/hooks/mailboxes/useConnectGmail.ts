@@ -13,8 +13,13 @@ export const useConnectGmail = () => {
       code: string;
       redirectUri: string;
     }) => mailboxApi.connectGmail(code, redirectUri),
-    onSuccess: () => {
+    onSuccess: (newMailbox) => {
       toast.success("Gmail connected successfully");
+      // Optimistically update the mailboxes list
+      queryClient.setQueryData(["mailboxes"], (old: any) => {
+        const mailboxes = Array.isArray(old) ? old : [];
+        return [...mailboxes, newMailbox];
+      });
       queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
     },
     onError: (error: any) => {
@@ -22,4 +27,3 @@ export const useConnectGmail = () => {
     },
   });
 };
-

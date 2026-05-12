@@ -97,12 +97,6 @@ export function useAddAccountWizard({
   // ─── OAuth Popup Listener ──────────────────────────────────────────────────
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      console.log(
-        "OAuth Message Received:",
-        event.data,
-        "Origin:",
-        event.origin,
-      );
       if (
         event.origin !== window.location.origin ||
         event.data?.type !== "OAUTH_CODE_RECEIVED" ||

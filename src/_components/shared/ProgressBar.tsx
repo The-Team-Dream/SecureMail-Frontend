@@ -20,7 +20,7 @@ export const ProgressBar = ({
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "100%" }}
           exit={{ opacity: 0, height: 0 }}
-          className={cn("w-full  relative overflow-hidden", className)}
+          className={cn("w-full relative overflow-hidden", className)}
         >
           {/* Infinite Moving Bar */}
           <motion.div

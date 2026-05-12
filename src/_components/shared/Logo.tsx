@@ -35,7 +35,10 @@ const Logo = ({
   textClassName,
 }: LogoProps) => {
   return (
-    <Link href={"/mailboxes"} className={`flex items-center gap-2 ${className}`}>
+    <Link
+      href={"/mailboxes"}
+      className={`flex items-center gap-2 ${className}`}
+    >
       <Image
         src={logo}
         alt="Logo"
