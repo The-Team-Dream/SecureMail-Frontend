@@ -112,10 +112,7 @@ export function useAddAccountWizard({
       }
 
       const { code } = event.data;
-      const origin = window.location.origin.includes("localhost")
-        ? "http://localhost:3001"
-        : window.location.origin;
-      const redirectUri = `${origin}/auth/google/callback`;
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
       const oauthProvider = provider.toLowerCase();
 
       setIsOAuthLoading(true);

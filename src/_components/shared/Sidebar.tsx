@@ -10,37 +10,12 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
 import { useMailStore } from "@/stores/useMailStore";
-import type { EmailFolder } from "@/APIs/types/Email";
 import { useUnreadCount } from "@/APIs/hooks/notifications";
-
-const dashboardNavItems = [
-  { name: "Mailboxes", icon: Icons.Inbox, href: "/mailboxes" },
-  { name: "Analytics", icon: Icons.Analytics, href: "/analytics" },
-  { name: "Reports", icon: Icons.Reports, href: "/reports" },
-  { name: "Settings", icon: Icons.Settings, href: "/settings" },
-];
-
-const mailboxNavItems: {
-  name: string;
-  icon: React.ElementType;
-  folder: EmailFolder;
-}[] = [
-  { name: "Inbox", icon: Icons.Inbox, folder: "inbox" },
-  { name: "Sent", icon: Icons.Sent, folder: "sent" },
-  { name: "Star", icon: Icons.Star, folder: "starred" },
-  { name: "Spam", icon: Icons.Spam, folder: "spam" },
-  { name: "Trash", icon: Icons.Delete, folder: "trash" },
-];
-
-const securityNavItems = [
-  {
-    name: "Security Reports",
-    icon: Icons.Reports,
-    href: "security-reports",
-  },
-  { name: "Phishing", icon: Icons.Phishing, href: "phishing" },
-  { name: "Malware", icon: Icons.Malware, href: "malware" },
-];
+import {
+  dashboardNavItems,
+  mailboxNavItems,
+  securityNavItems,
+} from "@/constants";
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -149,9 +124,9 @@ export const Sidebar = () => {
                         </Text>
                         {item.folder === "inbox" &&
                           (unreadCount?.count ?? 0) > 0 && (
-                              <span className="bg-primary text-background text-[10px] p-0.5 flex items-center justify-center rounded-full">
-                                {unreadCount?.count}
-                              </span>
+                            <span className="bg-primary text-background text-[10px] p-0.5 flex items-center justify-center rounded-full">
+                              {unreadCount?.count}
+                            </span>
                           )}
                       </div>
                     )}

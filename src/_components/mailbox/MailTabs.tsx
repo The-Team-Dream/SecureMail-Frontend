@@ -2,7 +2,7 @@
 import React from "react";
 import { Inbox, Tag, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Classification } from "@/types/mail";
+import type { Classification } from "@/APIs/types/Email";
 import { useMailStore } from "@/stores/useMailStore";
 import { MailList } from "./MailList";
 import { useUnreadEmailsCount } from "@/APIs/hooks/emails";

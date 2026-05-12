@@ -49,15 +49,10 @@ const NotificationAvatar = ({
     <div
       className={cn(
         size,
-        "rounded-full bg-secondary-50 flex items-center justify-center border border-secondary-200 shadow-sm",
+        "rounded-full bg-primary-50 flex items-center justify-center border border-primary-200 shadow-sm",
       )}
     >
-      <Text
-        font="bold"
-        size="xs"
-        color={"secondary-700"}
-        className="text-secondary-700 uppercase"
-      >
+      <Text font="bold" size="xs" color={"primary-700"} className="uppercase">
         {initials}
       </Text>
     </div>
@@ -164,7 +159,7 @@ export const NotificationCard = ({
                   className={cn(
                     "text-[10px] py-0 h-4 uppercase",
                     notification.metadata.verdict === "SPAM"
-                      ? "border-error-200 bg-error-50 text-error-600"
+                      ? "border-secondary-800 bg-secondary-50/20 text-secondary-800"
                       : "border-primary-100 bg-primary-50",
                   )}
                 >
