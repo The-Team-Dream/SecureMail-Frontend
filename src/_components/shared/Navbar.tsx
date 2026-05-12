@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Check, ChevronRight, Plus } from "lucide-react";
+import { Check, ChevronRight, Plus } from "lucide-react";
 import Logo from "./Logo";
 import { Text } from "@/_components/shared/Text";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,7 +87,7 @@ export const Navbar = () => {
           textClassName="text-xl md:text-2xl"
         />
         {isMailPage && (
-          <div className="ml-18 hidden md:block">
+          <div className="ml-18 hidden lg:block">
             <SearchAutocomplete inputClassName="w-[600px] bg-primary-100/10" />
           </div>
         )}

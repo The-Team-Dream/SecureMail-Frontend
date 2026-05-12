@@ -108,13 +108,13 @@ export const Sidebar = () => {
                     />
                   )}
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <item.icon
                       active={isActive}
                       className="w-[22px] h-[22px] min-w-[22px]"
                     />
                     {!isCollapsed && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <Text
                           as={"span"}
                           font={isActive ? "medium" : "default"}
@@ -124,7 +124,7 @@ export const Sidebar = () => {
                         </Text>
                         {item.folder === "inbox" &&
                           (unreadCount?.count ?? 0) > 0 && (
-                            <span className="bg-primary text-background text-[10px] p-0.5 flex items-center justify-center rounded-full">
+                            <span className="bg-primary text-background flex items-center justify-center w-3.5 h-4 text-[10px] font-medium rounded-xs">
                               {unreadCount?.count}
                             </span>
                           )}

@@ -52,7 +52,7 @@ export function useAddAccountWizard({
     formState: { errors },
   } = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
-    mode: "onChange",
+    mode: "onBlur",
     shouldUnregister: false,
     defaultValues: {
       mailboxName: "",
@@ -112,7 +112,13 @@ export function useAddAccountWizard({
       }
 
       const { code } = event.data;
-      const redirectUri = `${window.location.origin}/auth/google/callback`;
+      const origin = window.location.origin.includes("localhost")
+        ? "http://localhost:3001"
+        : window.location.origin;
+      const redirectUri =
+        provider.toLowerCase() === "gmail"
+          ? `${origin}/mailboxes/gmail/callback`
+          : `${origin}/mailboxes/outlook/callback`;
       const oauthProvider = provider.toLowerCase();
 
       setIsOAuthLoading(true);
@@ -126,7 +132,7 @@ export function useAddAccountWizard({
         // On Success
         clearPersistence();
         reset();
-        updateStepUrl(6);
+        handleCancel(); // Go back to mailboxes list directly
       } catch (error: any) {
         console.error(
           "OAuth Connection Failed Details:",
@@ -191,7 +197,7 @@ export function useAddAccountWizard({
       const origin = window.location.origin.includes("localhost")
         ? "http://localhost:3001"
         : window.location.origin;
-      const redirectUri = `${origin}/auth/google/callback`;
+      const redirectUri = `${origin}/mailboxes/gmail/callback`;
       let url: string;
 
       if (oauthProvider === "GMAIL") {
@@ -305,10 +311,10 @@ export function useAddAccountWizard({
         smtpPort: smtpPortNum,
       });
 
-      // ── Success: clear state and show success step ──────────
+      // ── Success: clear state and go back to list ──────────
       clearPersistence();
       reset();
-      updateStepUrl(6);
+      handleCancel();
     } catch (error: any) {
       const message =
         error?.response?.data?.message ||
