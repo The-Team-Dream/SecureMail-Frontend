@@ -88,11 +88,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
             You have Total {mailboxes?.length || 0} connected accounts
           </Text>
         </div>
-        <Button
-          size={"lg"}
-          className="w-auto rounded-xl font-medium"
-          onClick={onAddAccount}
-        >
+        <Button size={"lg"} onClick={onAddAccount}>
           Add New Account +
         </Button>
       </motion.div>
