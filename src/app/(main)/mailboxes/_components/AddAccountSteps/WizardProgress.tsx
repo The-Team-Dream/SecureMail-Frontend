@@ -15,7 +15,7 @@ export function WizardProgress({ step, steps }: WizardProgressProps) {
         const Icon = s.icon;
 
         return (
-          <React.Fragment key={s.id}>
+          <React.Fragment key={`step-${s.id}`}>
             <div className="flex flex-col items-center shrink-0">
               {isActive ? (
                 <div className="w-[46px] h-[46px] rounded-full border-dashed border-2 border-secondary-600 flex items-center justify-center p-[3px]">

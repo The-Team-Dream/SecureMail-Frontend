@@ -53,7 +53,7 @@ export function StepAdvanced({
               <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-primary-50 rounded-[16px] z-50 flex flex-col p-2 gap-1 animate-in fade-in zoom-in-95 duration-150 shadow-sm border border-primary-100">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <button
-                    key={i}
+                    key={`interval-${i}`}
                     type="button"
                     onClick={() => {
                       handleChange("syncInterval", i.toString());

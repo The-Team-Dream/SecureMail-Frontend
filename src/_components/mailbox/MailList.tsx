@@ -49,6 +49,8 @@ export const MailList = () => {
   };
 
   const finalEmails = pagedEmails.filter((email: Email) => {
+    if (activeFolder !== "inbox") return true;
+
     const social = isSocialEmail(email);
     const promo = !social && isPromotionEmail(email);
     if (activeClassification === "social") return social;

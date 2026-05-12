@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { LockIcon, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import { Input } from "@/_components/shared/Input";
 import Logo from "@/_components/shared/Logo";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +17,7 @@ import { Spinner } from "@/components/ui/spinner";
 import BackEndError from "@/_components/shared/BackEndError";
 import { useServerErrors } from "@/utils/form-utils";
 
-function SignInForm() {
+const SignIn = () => {
   const {
     handleSubmit,
     register,
@@ -93,9 +92,7 @@ function SignInForm() {
           Forgot Password?
         </Link>
         <BackEndError
-          error={
-            errors.root?.message ? String(errors.root.message) : undefined
-          }
+          error={errors.root?.message ? String(errors.root.message) : undefined}
         />
         <Button
           size={"lg"}
@@ -129,12 +126,6 @@ function SignInForm() {
       </div>
     </div>
   );
-}
+};
 
-export default function SignIn() {
-  return (
-    <Suspense fallback={<Spinner />}>
-      <SignInForm />
-    </Suspense>
-  );
-}
+export default SignIn;

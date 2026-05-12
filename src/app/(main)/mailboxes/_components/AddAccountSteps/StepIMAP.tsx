@@ -21,26 +21,18 @@ export function StepIMAP({ register, errors, clearErrors }: WizardStepProps) {
             placeholder="Imap.Company.Com"
             {...(register
               ? register("imapHost", {
-                  onChange: () => {
-                    if (errors?.imapHost) {
-                      clearErrors?.("imapHost");
-                    }
-                  },
+                  onChange: () => clearErrors?.(["imapHost"]),
                 })
               : {})}
             error={errors?.imapHost?.message}
           />
           <Input
             label="Port"
-            required
+            type="number"
             placeholder="993"
             {...(register
               ? register("imapPort", {
-                  onChange: () => {
-                    if (errors?.imapPort) {
-                      clearErrors?.("imapPort");
-                    }
-                  },
+                  onChange: () => clearErrors?.(["imapPort"]),
                 })
               : {})}
             error={errors?.imapPort?.message}
@@ -57,11 +49,7 @@ export function StepIMAP({ register, errors, clearErrors }: WizardStepProps) {
               className={`w-full h-12 px-4 border text-[14px] text-primary rounded-lg outline-none transition duration-500 appearance-none bg-card ${errors?.imapSecurity ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
               {...(register
                 ? register("imapSecurity", {
-                    onChange: () => {
-                      if (errors?.imapSecurity) {
-                        clearErrors?.("imapSecurity");
-                      }
-                    },
+                    onChange: () => clearErrors?.(["imapSecurity"]),
                   })
                 : {})}
             >
@@ -100,11 +88,7 @@ export function StepIMAP({ register, errors, clearErrors }: WizardStepProps) {
           placeholder="Enter Your Username"
           {...(register
             ? register("imapUsername", {
-                onChange: () => {
-                  if (errors?.imapUsername) {
-                    clearErrors?.("imapUsername");
-                  }
-                },
+                onChange: () => clearErrors?.(["imapUsername"]),
               })
             : {})}
           error={errors?.imapUsername?.message}
@@ -117,11 +101,7 @@ export function StepIMAP({ register, errors, clearErrors }: WizardStepProps) {
           placeholder="Enter Password"
           {...(register
             ? register("imapPassword", {
-                onChange: () => {
-                  if (errors?.imapPassword) {
-                    clearErrors?.("imapPassword");
-                  }
-                },
+                onChange: () => clearErrors?.(["imapPassword"]),
               })
             : {})}
           error={errors?.imapPassword?.message}

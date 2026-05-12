@@ -7,7 +7,10 @@ export const stepProviderSchema = z.object({
 // Step 1
 export const stepIMAPSchema = z.object({
   imapHost: z.string().min(1, "IMAP Host is required"),
-  imapPort: z.string().min(1, "Port is required"),
+  imapPort: z
+    .string()
+    .min(1, "Port is required")
+    .regex(/^\d+$/, "Port must be a number"),
   imapSecurity: z.string().min(1, "Security is required"),
   imapUsername: z
     .string()
@@ -18,13 +21,16 @@ export const stepIMAPSchema = z.object({
   imapPassword: z
     .string()
     .min(1, { message: "Password is required" })
-    .min(8, { message: "Password must be between 8 and 32 characters" })
-    .max(32, { message: "Password must be between 8 and 32 characters" }),
+    .min(16, { message: "Password must be at least 16 characters" })
+    .max(32, { message: "Password must not exceed 32 characters" }),
 });
 // Step 2
 export const stepSMTPSchema = z.object({
   smtpHost: z.string().min(1, "SMTP Host is required"),
-  smtpPort: z.string().min(1, "Port is required"),
+  smtpPort: z
+    .string()
+    .min(1, "Port is required")
+    .regex(/^\d+$/, "Port must be a number"),
   smtpSecurity: z.string().min(1, "Security is required"),
   smtpUsername: z
     .string()

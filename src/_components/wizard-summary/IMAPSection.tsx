@@ -14,16 +14,20 @@ import {
 } from "@/_components/wizard-summary/Shared";
 import { Icons } from "@/constants/icons";
 
+import { FieldErrors } from "react-hook-form";
+
 export function IMAPSection({
   formData,
   handleChange,
   showPassword,
   onTogglePassword,
+  errors,
 }: {
   formData: WizardFormData;
   handleChange: (field: keyof WizardFormData, value: string) => void;
   showPassword: boolean;
   onTogglePassword: () => void;
+  errors?: FieldErrors<WizardFormData>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -82,14 +86,17 @@ export function IMAPSection({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("imapHost", e.target.value)
               }
+              error={errors?.imapHost?.message}
             />
             <Input
               label="Port"
+              type="number"
               value={formData.imapPort}
               className="w-full"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("imapPort", e.target.value)
               }
+              error={errors?.imapPort?.message}
             />
             <SecuritySelect
               value={formData.imapSecurity}
@@ -102,6 +109,7 @@ export function IMAPSection({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("imapUsername", e.target.value)
               }
+              error={errors?.imapUsername?.message}
             />
           </div>
           <div className="grid grid-cols-4 gap-4 w-full">
@@ -113,6 +121,7 @@ export function IMAPSection({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("imapPassword", e.target.value)
               }
+              error={errors?.imapPassword?.message}
             />
           </div>
           <div className="flex justify-end">

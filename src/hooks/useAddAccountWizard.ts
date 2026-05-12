@@ -42,17 +42,10 @@ export function useAddAccountWizard({
     DATA: "securemail_wizard_data",
   };
 
-  const {
-    register,
-    trigger,
-    watch,
-    setValue,
-    reset,
-    clearErrors,
-    formState: { errors },
-  } = useForm<WizardFormData>({
+  const form = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
-    mode: "onBlur",
+    mode: "all",
+    reValidateMode: "onChange",
     shouldUnregister: false,
     defaultValues: {
       mailboxName: "",
@@ -70,6 +63,15 @@ export function useAddAccountWizard({
       syncInterval: "",
     },
   });
+
+  const {
+    register,
+    trigger,
+    watch,
+    setValue,
+    reset,
+    clearErrors,
+  } = form;
 
   const formData = watch();
 
@@ -148,20 +150,16 @@ export function useAddAccountWizard({
 
   // Form State Persistence (IMAP only)
   useEffect(() => {
-    const stepParam = searchParams.get("step");
     const storedData = sessionStorage.getItem(STORAGE_KEYS.DATA);
-
-    if (stepParam && storedData) {
+    if (storedData) {
       try {
         reset(JSON.parse(storedData));
       } catch (e) {
         console.error("Failed to load persisted form data", e);
       }
-    } else if (!stepParam) {
-      sessionStorage.removeItem(STORAGE_KEYS.DATA);
     }
     setIsLoaded(true);
-  }, [reset, searchParams]);
+  }, [reset]);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -182,6 +180,7 @@ export function useAddAccountWizard({
 
   const handleChange = (field: keyof WizardFormData, value: string) => {
     setValue(field, value, { shouldValidate: true, shouldDirty: true });
+    clearErrors(field);
   };
 
   // ─── OAuth Popup Trigger ──────────────────────────────────────────────────
@@ -384,6 +383,10 @@ export function useAddAccountWizard({
         : isOAuthProvider && step === 1
           ? `Connect ${provider}`
           : "Next";
+
+  const {
+    formState: { errors },
+  } = form;
 
   return {
     step,

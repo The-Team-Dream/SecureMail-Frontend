@@ -12,24 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/_components/shared/Input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Paperclip,
   Smile,
   Link as LinkIcon,
   Image as ImageIcon,
-  Trash2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import BackEndError from "@/_components/shared/BackEndError";
-import Error from "@/_components/shared/Error";
 import dynamic from "next/dynamic";
 import { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
@@ -38,7 +29,6 @@ import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { useComposeEmail } from "@/hooks/useComposeEmail";
 
-// Lazy-load EmojiPicker to avoid including ~270KB+ in the main bundle
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
   loading: () => (
@@ -57,7 +47,10 @@ export const ComposeEmailSheet = () => {
     isOpen,
     setOpen,
     composeMode,
-    form,
+    register,
+    handleSubmit,
+    errors,
+    clearErrors,
     attachments,
     setAttachments,
     fileInputRef,
@@ -71,9 +64,11 @@ export const ComposeEmailSheet = () => {
     handleAddFiles,
     removeAttachment,
     insertEmoji,
+    control,
+    getValues,
+    setValue,
     onSubmit,
     isPending,
-    mailboxes,
   } = useComposeEmail();
 
   const titleMap = {
@@ -97,7 +92,7 @@ export const ComposeEmailSheet = () => {
         <hr className="border-primary-100 mx-6" />
 
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col flex-1 overflow-hidden"
         >
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -111,18 +106,13 @@ export const ComposeEmailSheet = () => {
                   <div className="flex items-center gap-1">
                     <div className="flex-1 w-full">
                       <Input
-                        {...form.register("to", {
-                          onChange: () =>
-                            form.clearErrors(["to", "root" as any]),
+                        {...register("to", {
+                          onChange: () => clearErrors(["to", "root" as any]),
                         })}
                         className="w-full"
                         placeholder="recipient@example.com"
                         disabled={isPending}
-                        error={
-                          form.formState.errors.to?.type !== "server"
-                            ? (form.formState.errors.to?.message as string)
-                            : undefined
-                        }
+                        error={errors.to?.message as string}
                       />
                     </div>
                     {composeMode === "new" && (
@@ -144,13 +134,6 @@ export const ComposeEmailSheet = () => {
                       </div>
                     )}
                   </div>
-                  <BackEndError
-                    error={
-                      form.formState.errors.to?.type === "server"
-                        ? String(form.formState.errors.to.message)
-                        : undefined
-                    }
-                  />
                 </div>
               </div>
             )}
@@ -163,20 +146,13 @@ export const ComposeEmailSheet = () => {
                 </label>
                 <div className="flex-1">
                   <Input
-                    {...form.register("cc", {
-                      onChange: () =>
-                        form.clearErrors(["cc", "root" as any]),
+                    {...register("cc", {
+                      onChange: () => clearErrors(["cc", "root" as any]),
                     })}
                     className="w-full border-primary-200"
                     placeholder="cc@example.com, ..."
                     disabled={isPending}
-                  />
-                  <BackEndError
-                    error={
-                      form.formState.errors.cc?.type === "server"
-                        ? String(form.formState.errors.cc.message)
-                        : undefined
-                    }
+                    error={errors.cc?.message as string}
                   />
                 </div>
               </div>
@@ -190,20 +166,13 @@ export const ComposeEmailSheet = () => {
                 </label>
                 <div className="flex-1">
                   <Input
-                    {...form.register("bcc", {
-                      onChange: () =>
-                        form.clearErrors(["bcc", "root" as any]),
+                    {...register("bcc", {
+                      onChange: () => clearErrors(["bcc", "root" as any]),
                     })}
                     className="w-full border-primary-200"
                     placeholder="bcc@example.com, ..."
                     disabled={isPending}
-                  />
-                  <BackEndError
-                    error={
-                      form.formState.errors.bcc?.type === "server"
-                        ? String(form.formState.errors.bcc.message)
-                        : undefined
-                    }
+                    error={errors.bcc?.message as string}
                   />
                 </div>
               </div>
@@ -217,24 +186,12 @@ export const ComposeEmailSheet = () => {
                 </label>
                 <div className="flex-1">
                   <Input
-                    {...form.register("subject", {
-                      onChange: () =>
-                        form.clearErrors(["subject", "root" as any]),
+                    {...register("subject", {
+                      onChange: () => clearErrors(["subject", "root" as any]),
                     })}
                     placeholder="Email subject..."
                     disabled={isPending}
-                    error={
-                      form.formState.errors.subject?.type !== "server"
-                        ? (form.formState.errors.subject?.message as string)
-                        : undefined
-                    }
-                  />
-                  <BackEndError
-                    error={
-                      form.formState.errors.subject?.type === "server"
-                        ? String(form.formState.errors.subject.message)
-                        : undefined
-                    }
+                    error={errors.subject?.message as string}
                   />
                 </div>
               </div>
@@ -254,14 +211,14 @@ export const ComposeEmailSheet = () => {
               </label>
               <Controller
                 name="bodyText"
-                control={form.control}
+                control={control}
                 render={({ field }) => (
                   <div className="flex flex-col gap-1">
                     <Textarea
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
-                        form.clearErrors(["bodyText", "root" as any]);
+                        clearErrors(["bodyText", "root" as any]);
                       }}
                       placeholder={
                         composeMode === "reply"
@@ -271,19 +228,7 @@ export const ComposeEmailSheet = () => {
                             : "Type your message here..."
                       }
                       disabled={isPending}
-                      error={
-                        form.formState.errors.bodyText?.type !== "server"
-                          ? (form.formState.errors.bodyText?.message as string)
-                          : undefined
-                      }
-                      className=""
-                    />
-                    <BackEndError
-                      error={
-                        form.formState.errors.bodyText?.type === "server"
-                          ? String(form.formState.errors.bodyText.message)
-                          : undefined
-                      }
+                      error={errors.bodyText?.message as string}
                     />
                   </div>
                 )}
@@ -321,9 +266,7 @@ export const ComposeEmailSheet = () => {
           <div className="px-4">
             <BackEndError
               error={
-                form.formState.errors.root?.message
-                  ? String(form.formState.errors.root.message)
-                  : undefined
+                errors.root?.message ? String(errors.root.message) : undefined
               }
             />
           </div>
@@ -423,8 +366,8 @@ export const ComposeEmailSheet = () => {
                             e.preventDefault();
                             const val = e.currentTarget.value;
                             if (val) {
-                              const current = form.getValues("bodyText") ?? "";
-                              form.setValue("bodyText", `${current} ${val}`);
+                              const current = getValues("bodyText") ?? "";
+                              setValue("bodyText", `${current} ${val}`);
                               setShowLinkInput(false);
                             }
                           } else if (e.key === "Escape") {

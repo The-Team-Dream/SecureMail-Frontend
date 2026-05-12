@@ -8,12 +8,16 @@ import { WizardFormData } from "@/schemas/CustomAccount";
 import { SectionBlock, ViewField, MailboxDraft } from "@/_components/wizard-summary/Shared";
 import { Icons } from "@/constants/icons";
 
+import { FieldErrors } from "react-hook-form";
+
 export function MailboxSection({
   formData,
   handleChange,
+  errors,
 }: {
   formData: WizardFormData;
   handleChange: (field: keyof WizardFormData, value: string) => void;
+  errors?: FieldErrors<WizardFormData>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -58,12 +62,12 @@ export function MailboxSection({
             <div className="col-span-1">
               <Input
                 label="Mailbox Name"
-                required
                 value={formData.mailboxName}
                 className="w-full"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleChange("mailboxName", e.target.value)
                 }
+                error={errors?.mailboxName?.message}
               />
             </div>
             <div className="col-span-1">
@@ -75,6 +79,7 @@ export function MailboxSection({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleChange("emailAddress", e.target.value)
                 }
+                error={errors?.emailAddress?.message}
               />
             </div>
           </div>

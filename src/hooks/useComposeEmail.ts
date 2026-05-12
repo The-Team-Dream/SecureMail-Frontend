@@ -1,11 +1,14 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMailStore } from "@/stores/useMailStore";
 import { useParams, useRouter } from "next/navigation";
-import { useSendEmail, useReplyEmail, useForwardEmail } from "@/APIs/hooks/emails";
+import {
+  useSendEmail,
+  useReplyEmail,
+  useForwardEmail,
+} from "@/APIs/hooks/emails";
 import { toast } from "sonner";
 import { emailSchema, type EmailFormValues } from "@/schemas/SendEmail";
 import { type EmojiClickData } from "emoji-picker-react";
@@ -21,8 +24,12 @@ export const useComposeEmail = () => {
     composeData,
   } = useMailStore();
   const router = useRouter();
-
+  const params = useParams();
   const { data: mailboxes = [] } = useMailboxes();
+
+  // Determine the current mailbox ID from params or fallback to first mailbox
+  const mailboxIdToUse =
+    (params?.mailboxId as string) || mailboxes[0]?.id?.toString() || "";
 
   // ── Form ──────────────────────────────────────────────────────────────
   const form = useForm<EmailFormValues>({
@@ -31,30 +38,19 @@ export const useComposeEmail = () => {
     resolver: zodResolver(emailSchema),
     defaultValues: {
       mode: composeMode,
-      from: "",
+      from: mailboxIdToUse,
       to: "",
       subject: "",
       cc: "",
       bcc: "",
       bodyText: "",
       bodyHtml: "",
-    } as any,
+    } as EmailFormValues,
   });
 
   const { handleServerErrors } = useServerErrors<EmailFormValues>(
     form.setError,
   );
-
-  const formFrom = form.watch("from");
-  const params = useParams();
-
-  // Find the selected mailbox based on the "from" ID
-  const selectedMailbox =
-    mailboxes.find((m) => m.id.toString() === formFrom) ||
-    mailboxes.find((m) => m.id.toString() === params?.mailboxId) ||
-    mailboxes[0];
-  const mailboxIdToUse =
-    selectedMailbox?.id?.toString() || (params?.mailboxId as string);
 
   const sendMutation = useSendEmail(mailboxIdToUse ?? "");
   const replyMutation = useReplyEmail(mailboxIdToUse ?? "");
@@ -77,24 +73,16 @@ export const useComposeEmail = () => {
   // Reset form when opened / mode changes
   useEffect(() => {
     if (isOpen) {
-      // Determine the initial mailbox ID
-      const initialMailboxId =
-        mailboxes
-          .find((m) => m.id.toString() === params?.mailboxId)
-          ?.id?.toString() ||
-        mailboxes[0]?.id?.toString() ||
-        "";
-
       form.reset({
         mode: composeMode,
-        from: initialMailboxId,
+        from: mailboxIdToUse,
         to: composeData?.to ?? "",
         subject: "",
         cc: "",
         bcc: "",
         bodyText: "",
         bodyHtml: (composeData as any)?.bodyHtml ?? "",
-      } as any);
+      } as EmailFormValues);
       setAttachments([]);
       setShowEmoji(false);
       setShowCc(false);
@@ -198,7 +186,10 @@ export const useComposeEmail = () => {
       if (sanitizedBodyText) {
         fd.append("bodyText", sanitizedBodyText);
         if (!data.bodyHtml) {
-          fd.append("bodyHtml", `<p>${sanitizedBodyText.replace(/\n/g, "<br/>")}</p>`);
+          fd.append(
+            "bodyHtml",
+            `<p>${sanitizedBodyText.replace(/\n/g, "<br/>")}</p>`,
+          );
         }
       }
       if (data.bodyHtml) fd.append("bodyHtml", data.bodyHtml);
@@ -216,12 +207,31 @@ export const useComposeEmail = () => {
     replyMutation.isPending ||
     forwardMutation.isPending;
 
+  const {
+    register,
+    handleSubmit,
+    clearErrors,
+    reset,
+    control,
+    getValues,
+    setValue,
+    formState: { errors },
+  } = form;
+
   return {
     isOpen,
     setOpen,
     composeMode,
     composeData,
     form,
+    register,
+    handleSubmit,
+    clearErrors,
+    reset,
+    control,
+    getValues,
+    setValue,
+    errors,
     attachments,
     setAttachments,
     fileInputRef,
