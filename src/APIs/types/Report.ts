@@ -10,5 +10,5 @@ export interface SecurityReport {
   malwareVerdict: string | null;
   malwareScore: number | null;
   malwareSeverity: string | null;
-  aiReport: any;
+  aiReport: string;
 }

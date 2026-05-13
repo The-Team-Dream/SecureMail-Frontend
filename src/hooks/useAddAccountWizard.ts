@@ -64,7 +64,14 @@ export function useAddAccountWizard({
     },
   });
 
-  const { register, trigger, watch, setValue, reset, clearErrors } = form;
+  const {
+    register,
+    trigger,
+    watch,
+    setValue,
+    reset,
+    clearErrors,
+  } = form;
 
   const formData = watch();
 

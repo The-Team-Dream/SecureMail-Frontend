@@ -196,6 +196,10 @@ export const ComposeEmailSheet = () => {
     handleSubmit,
     errors,
     clearErrors,
+    register,
+    handleSubmit,
+    errors,
+    clearErrors,
     attachments,
     setAttachments,
     fileInputRef,
@@ -209,6 +213,9 @@ export const ComposeEmailSheet = () => {
     handleAddFiles,
     removeAttachment,
     insertEmoji,
+    control,
+    getValues,
+    setValue,
     control,
     getValues,
     setValue,
@@ -238,6 +245,7 @@ export const ComposeEmailSheet = () => {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col flex-1 overflow-hidden"
         >
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -253,10 +261,13 @@ export const ComposeEmailSheet = () => {
                       <Input
                         {...register("to", {
                           onChange: () => clearErrors(["to", "root" as any]),
+                        {...register("to", {
+                          onChange: () => clearErrors(["to", "root" as any]),
                         })}
                         className="w-full"
                         placeholder="recipient@example.com"
                         disabled={isPending}
+                        error={errors.to?.message as string}
                         error={errors.to?.message as string}
                       />
                     </div>
@@ -293,10 +304,13 @@ export const ComposeEmailSheet = () => {
                   <Input
                     {...register("cc", {
                       onChange: () => clearErrors(["cc", "root" as any]),
+                    {...register("cc", {
+                      onChange: () => clearErrors(["cc", "root" as any]),
                     })}
                     className="w-full border-primary-200"
                     placeholder="cc@example.com, ..."
                     disabled={isPending}
+                    error={errors.cc?.message as string}
                     error={errors.cc?.message as string}
                   />
                 </div>
@@ -313,10 +327,13 @@ export const ComposeEmailSheet = () => {
                   <Input
                     {...register("bcc", {
                       onChange: () => clearErrors(["bcc", "root" as any]),
+                    {...register("bcc", {
+                      onChange: () => clearErrors(["bcc", "root" as any]),
                     })}
                     className="w-full border-primary-200"
                     placeholder="bcc@example.com, ..."
                     disabled={isPending}
+                    error={errors.bcc?.message as string}
                     error={errors.bcc?.message as string}
                   />
                 </div>
@@ -333,9 +350,12 @@ export const ComposeEmailSheet = () => {
                   <Input
                     {...register("subject", {
                       onChange: () => clearErrors(["subject", "root" as any]),
+                    {...register("subject", {
+                      onChange: () => clearErrors(["subject", "root" as any]),
                     })}
                     placeholder="Email subject..."
                     disabled={isPending}
+                    error={errors.subject?.message as string}
                     error={errors.subject?.message as string}
                   />
                 </div>
@@ -389,6 +409,7 @@ export const ComposeEmailSheet = () => {
           <div className="px-4">
             <BackEndError
               error={
+                errors.root?.message ? String(errors.root.message) : undefined
                 errors.root?.message ? String(errors.root.message) : undefined
               }
             />
@@ -489,6 +510,8 @@ export const ComposeEmailSheet = () => {
                             e.preventDefault();
                             const val = e.currentTarget.value;
                             if (val) {
+                              const current = getValues("bodyText") ?? "";
+                              setValue("bodyText", `${current} ${val}`);
                               const current = getValues("bodyText") ?? "";
                               setValue("bodyText", `${current} ${val}`);
                               setShowLinkInput(false);

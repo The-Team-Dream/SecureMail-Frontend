@@ -12,8 +12,7 @@ export const useSendEmail = (mailboxId: string) => {
       queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
       toast.success("Email sent successfully");
     },
-    onError: (err: any) =>
-      toast.error(err.response?.data?.message || "Failed to send email"),
+    onError: () => {},
   });
 };
 

@@ -12,8 +12,7 @@ export const useForwardEmail = (mailboxId: string) => {
       queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
       toast.success("Email forwarded successfully");
     },
-    onError: (err: any) =>
-      toast.error(err.response?.data?.message || "Failed to forward email"),
+    onError: () => {},
   });
 };
 
