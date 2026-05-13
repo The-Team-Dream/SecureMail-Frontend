@@ -11,7 +11,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ISignin, signinSchema } from "@/schemas/auth/signin";
 import { toast } from "sonner";
-import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
+import dynamic from "next/dynamic";
+
+const SocialAuthWrapper = dynamic(() => import("@/_components/auth/SocialAuthWrapper"));
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
 import BackEndError from "@/_components/shared/BackEndError";

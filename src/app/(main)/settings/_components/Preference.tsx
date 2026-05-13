@@ -1,4 +1,5 @@
 "use client";
+import { memo, useCallback } from "react";
 import { Text } from "@/_components/shared/Text";
 import {
   Accordion,
@@ -15,37 +16,32 @@ import {
   useUpdateNotifications,
 } from "@/APIs/hooks/userSettings";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
 
-const Preference = () => {
+const Preference = memo(() => {
   const { data: settings, isLoading } = useGetUserSettings();
   const { mutate: updateNotifications, isPending: isUpdating } =
     useUpdateNotifications();
 
-  const [localEnabled, setLocalEnabled] = useState<boolean | undefined>(
-    undefined,
+  // The optimistic update in useUpdateNotifications handles the UI toggle state;
+  // no need for a local copy - we just read from the (optimistically updated) cache.
+  const notificationsEnabled = Boolean(settings?.notificationsEnabled);
+
+  const handleToggle = useCallback(
+    (checked: boolean) => {
+      updateNotifications(checked, {
+        onSuccess: () => {
+          toast.success(
+            `Notifications ${checked ? "enabled" : "disabled"} successfully.`,
+          );
+        },
+        onError: () => {
+          toast.error("Failed to update notification settings.");
+        },
+      });
+    },
+    [updateNotifications],
   );
 
-  useEffect(() => {
-    if (settings !== undefined) {
-      setLocalEnabled(Boolean(settings?.notificationsEnabled));
-    }
-  }, [settings]);
-
-  const handleToggle = (checked: boolean) => {
-    setLocalEnabled(checked);
-    updateNotifications(checked, {
-      onSuccess: () => {
-        toast.success(
-          `Notifications ${checked ? "enabled" : "disabled"} successfully.`,
-        );
-      },
-      onError: () => {
-        setLocalEnabled(!checked);
-        toast.error("Failed to update notification settings.");
-      },
-    });
-  };
 
   return (
     <Accordion type="single" collapsible defaultValue="item-1">
@@ -82,9 +78,7 @@ const Preference = () => {
                   <Loader2 className="w-4 h-4 text-primary animate-spin" />
                 )}
                 <Switch
-                  checked={
-                    localEnabled ?? Boolean(settings?.notificationsEnabled)
-                  }
+                  checked={notificationsEnabled}
                   onCheckedChange={handleToggle}
                   disabled={isLoading || isUpdating}
                 />
@@ -116,6 +110,6 @@ const Preference = () => {
       </AccordionItem>
     </Accordion>
   );
-};
+});
 
 export default Preference;

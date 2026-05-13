@@ -44,11 +44,13 @@ export default function ForgotPassword() {
       <div className="max-w-sm lg:max-w-lg w-full mx-auto">
         {/* Forgot Password Image */}
         <Image
-          src={"/images/forgot-password.jpg"}
+          src="/images/forgot-password.jpg"
           width={350}
           height={350}
           alt="Forgot Password Image"
           className="mx-auto mb-4"
+          priority
+          unoptimized
         />
         <div className="flex flex-col text-center gap-8">
           {/* Text Container */}

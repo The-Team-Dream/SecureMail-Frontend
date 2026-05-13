@@ -17,6 +17,7 @@ export const ActionButton = ({
 }) => (
   <div className="group relative">
     <Button
+      type="button"
       variant="ghost"
       size="icon"
       className={cn(

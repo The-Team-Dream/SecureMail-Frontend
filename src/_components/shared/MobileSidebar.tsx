@@ -25,7 +25,7 @@ import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggler from "@/_components/ThemeToggler";
-import type { Folder } from "@/types/mail";
+import type { EmailFolder as Folder } from "@/APIs/types/Email";
 import { useMailStore } from "@/stores/useMailStore";
 import { useEmails } from "@/APIs/hooks/emails";
 

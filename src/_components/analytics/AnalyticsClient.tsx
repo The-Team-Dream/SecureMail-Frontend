@@ -1,5 +1,6 @@
 "use client";
-import { AnalyticsChart } from "./AnalyticsChart";
+import { useMemo } from "react";
+import dynamic from "next/dynamic";
 import { format, subDays, isValid } from "date-fns";
 import { AnalyticsStats } from "./AnalyticsStats";
 import Container from "@/_components/shared/Container";
@@ -19,6 +20,14 @@ import notFoundImg from "../../../public/images/not-found.png";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChartSkeleton } from "../skeleton/ChartSkeleton";
+
+const AnalyticsChart = dynamic(
+  () => import("./AnalyticsChart").then((mod) => mod.AnalyticsChart),
+  {
+    ssr: false,
+    loading: () => <ChartSkeleton />,
+  }
+);
 
 interface AnalyticsClientProps {
   mailboxId?: string;
@@ -57,14 +66,16 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
     }
   };
 
-  // Handle nested "data" property from API responses
-  const finalOverviewData = (overviewData as any)?.data || overviewData;
-  const finalMailboxData = (mailboxData as any)?.data || mailboxData;
-  const finalActivityData = Array.isArray((activityData as any)?.data)
-    ? (activityData as any).data
-    : Array.isArray(activityData)
-      ? activityData
-      : [];
+  // Handle nested "data" property from API responses - Memoized for performance
+  const finalOverviewData = useMemo(() => (overviewData as any)?.data || overviewData, [overviewData]);
+  const finalMailboxData = useMemo(() => (mailboxData as any)?.data || mailboxData, [mailboxData]);
+  const finalActivityData = useMemo(() => {
+    return Array.isArray((activityData as any)?.data)
+      ? (activityData as any).data
+      : Array.isArray(activityData)
+        ? activityData
+        : [];
+  }, [activityData]);
 
   if (isError)
     return (
@@ -79,88 +90,92 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
       />
     );
 
-  // Chart Data Mapping
-  // Chart Data Mapping
-  let rawChartData: {
-    date: Date;
-    spam: number;
-    phishing: number;
-    sent: number;
-    received: number;
-  }[] = [];
-  if (mailboxId && finalMailboxData?.threatsHistory) {
-    rawChartData = finalMailboxData.threatsHistory.map((item: any) => ({
-      date: new Date(item.date),
-      spam: item.count || 0,
-      phishing: Math.floor((item.count || 0) * 0.4),
-      sent: item.sent || 0,
-      received: item.received || 0,
-    }));
-  } else if (finalActivityData?.length > 0) {
-    rawChartData = finalActivityData.map((item: ActivityData) => ({
-      date: new Date(item.date),
-      spam: item.spam || 0,
-      phishing: item.phishing || 0,
-      sent: item.sent || 0,
-      received: item.received || 0,
-    }));
-  }
+  // Chart Data Mapping - Memoized to prevent expensive recalculations on every render
+  const { finalChartData, totalSpam, totalPhishing, totalSent, totalReceived } = useMemo(() => {
+    let rawChartData: {
+      date: Date;
+      spam: number;
+      phishing: number;
+      sent: number;
+      received: number;
+    }[] = [];
 
-  // Filter, sort and format
-  const validData = rawChartData.filter((item) => isValid(item.date));
+    if (mailboxId && finalMailboxData?.threatsHistory) {
+      rawChartData = finalMailboxData.threatsHistory.map((item: any) => ({
+        date: new Date(item.date),
+        spam: item.count || 0,
+        phishing: Math.floor((item.count || 0) * 0.4),
+        sent: item.sent || 0,
+        received: item.received || 0,
+      }));
+    } else if (finalActivityData?.length > 0) {
+      rawChartData = finalActivityData.map((item: ActivityData) => ({
+        date: new Date(item.date),
+        spam: item.spam || 0,
+        phishing: item.phishing || 0,
+        sent: item.sent || 0,
+        received: item.received || 0,
+      }));
+    }
 
-  // Create a map of existing data by full date string
-  const dataMap = new Map();
-  validData.forEach((item) => {
-    dataMap.set(format(item.date, "yyyy-MM-dd"), item);
-  });
+    // Filter, sort and format
+    const validData = rawChartData.filter((item) => isValid(item.date));
 
-  // Find earliest date with data
-  const datesWithData = validData
-    .map((item) => format(item.date, "yyyy-MM-dd"))
-    .sort();
+    // Create a map of existing data by full date string
+    const dataMap = new Map();
+    validData.forEach((item) => {
+      dataMap.set(format(item.date, "yyyy-MM-dd"), item);
+    });
 
-  const earliestDateStr = datesWithData[0];
-  const earliestDate = earliestDateStr
-    ? new Date(earliestDateStr)
-    : subDays(new Date(), 6);
+    // Find earliest date with data
+    const datesWithData = validData
+      .map((item) => format(item.date, "yyyy-MM-dd"))
+      .sort();
 
-  // Calculate how many days to show (at least 7, but more if data goes back further)
-  const diffInDays = Math.max(
-    7,
-    Math.ceil(
-      (new Date().getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24),
-    ),
-  );
-  const chartLength = Math.min(diffInDays + 1, 30); // Max 30 days to keep it clean
+    const earliestDateStr = datesWithData[0];
+    const earliestDate = earliestDateStr
+      ? new Date(earliestDateStr)
+      : subDays(new Date(), 6);
 
-  // Generate chart data starting from earliest data point or 7 days ago
-  const finalChartData = Array.from({ length: chartLength }, (_, i) => {
-    const day = subDays(new Date(), chartLength - 1 - i);
-    const dateKey = format(day, "yyyy-MM-dd");
-    const isToday = i === chartLength - 1;
-    const dayLabel = isToday ? "Today" : format(day, "EEE");
-    const existingDay = dataMap.get(dateKey);
+    // Calculate how many days to show (at least 7, but more if data goes back further)
+    const diffInDays = Math.max(
+      7,
+      Math.ceil(
+        (new Date().getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24),
+      ),
+    );
+    const chartLength = Math.min(diffInDays + 1, 30); // Max 30 days to keep it clean
+
+    // Generate chart data starting from earliest data point or 7 days ago
+    const calculatedChartData = Array.from({ length: chartLength }, (_, i) => {
+      const day = subDays(new Date(), chartLength - 1 - i);
+      const dateKey = format(day, "yyyy-MM-dd");
+      const isToday = i === chartLength - 1;
+      const dayLabel = isToday ? "Today" : format(day, "EEE");
+      const existingDay = dataMap.get(dateKey);
+
+      return {
+        month: dayLabel,
+        spam: existingDay?.spam || 0,
+        phishing: existingDay?.phishing || 0,
+        sent: existingDay?.sent || 0,
+        received: existingDay?.received || 0,
+      };
+    });
+
+    const tSpam = calculatedChartData.reduce((acc, curr) => acc + curr.spam, 0);
+    const tPhishing = calculatedChartData.reduce((acc, curr) => acc + curr.phishing, 0);
+    const tSent = calculatedChartData.reduce((acc, curr) => acc + curr.sent, 0);
+    const tReceived = calculatedChartData.reduce((acc, curr) => acc + curr.received, 0);
 
     return {
-      month: dayLabel,
-      spam: existingDay?.spam || 0,
-      phishing: existingDay?.phishing || 0,
-      sent: existingDay?.sent || 0,
-      received: existingDay?.received || 0,
+      finalChartData: calculatedChartData,
+      totalSpam: tSpam,
+      totalPhishing: tPhishing,
+      totalSent: tSent,
+      totalReceived: tReceived,
     };
-  });
-
-  const totalSpam = finalChartData.reduce((acc, curr) => acc + curr.spam, 0);
-  const totalPhishing = finalChartData.reduce(
-    (acc, curr) => acc + curr.phishing,
-    0,
-  );
-  const totalSent = finalChartData.reduce((acc, curr) => acc + curr.sent, 0);
-  const totalReceived = finalChartData.reduce(
-    (acc, curr) => acc + curr.received,
-    0,
-  );
+  }, [mailboxId, finalMailboxData, finalActivityData]);
 
   const spamCount = mailboxId
     ? totalSpam.toLocaleString()

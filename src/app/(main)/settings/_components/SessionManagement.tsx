@@ -147,7 +147,10 @@ const SessionManagement = () => {
                             </span>{" "}
                             {isCurrent
                               ? "Active now"
-                              : format(new Date(device.loginAt), "dd MMM yyyy, HH:mm")}
+                              : format(
+                                  new Date(device.loginAt),
+                                  "dd MMM yyyy, HH:mm",
+                                )}
                           </Text>
                         </div>
                       </div>

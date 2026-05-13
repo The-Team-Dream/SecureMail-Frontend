@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { ConnectedAccounts } from "./_components/ConnectedAccounts";
-import { AddAccountWizard } from "./_components/AddAccountWizard";
-import { EmptyMailbox } from "./_components/EmptyMailbox";
+import dynamic from "next/dynamic";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { ConnectedAccountsSkeleton } from "@/_components/skeleton/ConnectedAccountsSkeleton";
+
+const ConnectedAccounts = dynamic(() => import("./_components/ConnectedAccounts").then((mod) => mod.ConnectedAccounts));
+const AddAccountWizard = dynamic(() => import("./_components/AddAccountWizard").then((mod) => mod.AddAccountWizard));
+const EmptyMailbox = dynamic(() => import("./_components/EmptyMailbox").then((mod) => mod.EmptyMailbox));
 
 export default function Mailboxes() {
   const searchParams = useSearchParams();

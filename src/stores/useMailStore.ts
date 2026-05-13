@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Folder, Classification } from "@/types/mail";
+import type { EmailFolder as Folder, Classification } from "@/APIs/types/Email";
 
 interface MailState {
   activeFolder: Folder;

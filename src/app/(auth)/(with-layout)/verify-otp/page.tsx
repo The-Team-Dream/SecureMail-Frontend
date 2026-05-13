@@ -14,7 +14,9 @@ import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
-import SuccessOverlay from "@/_components/shared/SuccessOverlay";
+import dynamic from "next/dynamic";
+
+const SuccessOverlay = dynamic(() => import("@/_components/shared/SuccessOverlay"));
 
 function VerifyOtpContent() {
   const [otp, setOtp] = useState("");

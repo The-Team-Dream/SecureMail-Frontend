@@ -40,6 +40,7 @@ COPY . .
 # the frontend uses client-side axios (no server-side API calls).
 ARG NEXT_PUBLIC_API_URL=http://localhost:3000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV BUILD_STANDALONE=true
 
 # Build produces .next/standalone/ due to next.config.ts output: "standalone"
 RUN pnpm build

@@ -84,12 +84,19 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   const handleEmailSent = useCallback(
     (data: EmailSentEvent) => {
-      const { mailboxId } = data;
-      // Refresh the email list to show the newly sent email in the Sent folder
-      queryClient.invalidateQueries({
-        queryKey: ["emails", String(mailboxId)],
-      });
-      // Optionally refresh analytics if sent emails count towards stats
+      const { mailboxId } = data || {};
+      
+      if (mailboxId) {
+        queryClient.invalidateQueries({
+          queryKey: ["emails", String(mailboxId)],
+        });
+      } else {
+        // Fallback if backend payload differs
+        queryClient.invalidateQueries({
+          queryKey: ["emails"],
+        });
+      }
+      
       queryClient.invalidateQueries({
         queryKey: ["analytics"],
       });

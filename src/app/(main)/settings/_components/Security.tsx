@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { KeyRound, Pencil, X, Save } from "lucide-react";
@@ -19,7 +19,14 @@ import { useChangePassword } from "@/APIs/hooks/userSettings";
 import { useServerErrors } from "@/utils/form-utils";
 import BackEndError from "@/_components/shared/BackEndError";
 
-const Security = () => {
+// Compute once at module load — avoids recalculating on every render
+const TODAY_STRING = new Date().toLocaleDateString(undefined, {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+});
+
+const Security = memo(() => {
   const [isEditing, setIsEditing] = useState(false);
   const { mutate: changePassword, isPending: isChangingPassword } = useChangePassword();
 
@@ -87,7 +94,7 @@ const Security = () => {
                       color={"primary-600"}
                       className="text-[10px] md:text-sm"
                     >
-                      Last changed {new Date().toDateString()}
+                      Last changed {TODAY_STRING}
                     </Text>
                   </div>
                 </div>
@@ -211,6 +218,6 @@ const Security = () => {
       </AccordionItem>
     </Accordion>
   );
-};
+});
 
 export default Security;

@@ -1,3 +1,5 @@
+export type Classification = "primary" | "promotions" | "social";
+
 export type EmailFolder =
   | "inbox"
   | "sent"

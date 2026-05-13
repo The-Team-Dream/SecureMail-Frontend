@@ -12,7 +12,9 @@ import { ISignUp, signupSchema } from "@/schemas/auth/signup";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { Text } from "@/_components/shared/Text";
-import SocialAuthWrapper from "@/_components/auth/SocialAuthWrapper";
+import dynamic from "next/dynamic";
+
+const SocialAuthWrapper = dynamic(() => import("@/_components/auth/SocialAuthWrapper"));
 import { Spinner } from "@/components/ui/spinner";
 import { useServerErrors } from "@/utils/form-utils";
 import BackEndError from "@/_components/shared/BackEndError";

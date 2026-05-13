@@ -21,9 +21,6 @@ export const useUpdateTheme = () => {
 
       return { previousSettings };
     },
-    onSuccess: () => {
-      toast.success("Theme updated");
-    },
     onError: (_err, _newTheme, context) => {
       queryClient.setQueryData(["user-settings"], context?.previousSettings);
       toast.error("Failed to update theme");

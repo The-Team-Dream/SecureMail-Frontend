@@ -35,6 +35,7 @@ import { Text } from "@/_components/shared/Text";
 import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { useComposeEmail } from "@/hooks/useComposeEmail";
+import { ActionButton } from "@/_components/shared/ActionButton";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
@@ -146,8 +147,8 @@ const getFileIcon = (mimeType: string, fileName: string) => {
   )
     return {
       icon: FileSpreadsheet,
-      color: "text-green-600",
-      bg: "bg-green-50",
+      color: "text-secondary-600",
+      bg: "bg-secondary-50",
     };
 
   // Zip/Archive
@@ -225,14 +226,21 @@ export const ComposeEmailSheet = () => {
   return (
     <Sheet open={isOpen} onOpenChange={(v) => setOpen(v)}>
       <SheetContent
-        className="w-full sm:max-w-2xl p-0 flex flex-col bg-background [&>button]:top-5 [&>button]:right-5 rounded-l-xl"
+        className="w-full sm:max-w-2xl p-0 flex flex-col bg-background rounded-l-xl"
         side="right"
+        showCloseButton={false}
       >
         {/* ── Header ────────────────────────────────────────────────── */}
         <SheetHeader className="px-6 pt-6 pb-2 flex flex-row items-center justify-between shrink-0">
           <SheetTitle className="text-xl font-semibold text-primary-950">
             {titleMap[composeMode]}
           </SheetTitle>
+          <ActionButton
+            label="Close"
+            icon={<X className="w-5 h-5" />}
+            onClick={() => setOpen(false)}
+            className="text-primary-500 hover:text-primary-900"
+          />
         </SheetHeader>
         <hr className="border-primary-100 mx-6" />
 
@@ -415,17 +423,12 @@ export const ComposeEmailSheet = () => {
 
               {/* Toolbar icons */}
               <div className="flex items-center gap-0.5">
-                {/* Attach file */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size={"icon-sm"}
-                  title="Attach file (max 10, 10 MB each)"
+                <ActionButton
+                  label="Attach file (max 10, 10 MB each)"
                   className="text-primary-500 hover:text-primary-900"
                   onClick={() => fileInputRef.current?.click()}
-                >
-                  <Paperclip className="w-5 h-5" />
-                </Button>
+                  icon={<Paperclip className="w-5 h-5" />}
+                />
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -437,19 +440,15 @@ export const ComposeEmailSheet = () => {
 
                 {/* Emoji picker */}
                 <div className="relative" ref={emojiRef}>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    title="Insert emoji"
+                  <ActionButton
+                    label="Insert emoji"
                     className={cn(
                       "text-primary-500 hover:text-primary-900",
                       showEmoji && "bg-primary-100 text-primary-900",
                     )}
                     onClick={() => setShowEmoji((v) => !v)}
-                  >
-                    <Smile className="w-5 h-5 text-primary-500 hover:text-primary-900" />
-                  </Button>
+                    icon={<Smile className="w-5 h-5" />}
+                  />
 
                   {showEmoji && (
                     <div className="absolute bottom-full mb-2 left-0 z-9999">
@@ -468,16 +467,12 @@ export const ComposeEmailSheet = () => {
                 </div>
 
                 <div className="relative">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    title="Insert link"
+                  <ActionButton
+                    label="Insert link"
                     className="text-primary-500 hover:text-primary-900"
                     onClick={() => setShowLinkInput((v) => !v)}
-                  >
-                    <LinkIcon className="w-5 h-5" />
-                  </Button>
+                    icon={<LinkIcon className="w-5 h-5" />}
+                  />
                   {showLinkInput && (
                     <div className="absolute bottom-full mb-2 left-0 z-50 bg-background p-2 rounded-lg border border-primary-200 shadow-lg flex items-center gap-2">
                       <Input
@@ -503,11 +498,8 @@ export const ComposeEmailSheet = () => {
                 </div>
 
                 {/* Insert Image (UI only) */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  title="Attach image"
+                <ActionButton
+                  label="Attach image"
                   className="text-primary-500 hover:text-primary-900"
                   onClick={() => {
                     const imgInput = document.createElement("input");
@@ -529,14 +521,13 @@ export const ComposeEmailSheet = () => {
                     };
                     imgInput.click();
                   }}
-                >
-                  <ImageIcon className="w-5 h-5" />
-                </Button>
+                  icon={<ImageIcon className="w-5 h-5" />}
+                />
               </div>
 
               {/* Attachment count badge */}
               {attachments.length > 0 && (
-                <span className="text-xs text-primar bg-background px-2 py-0.5 rounded-full border border-primary-100">
+                <span className="text-xs text-primary bg-background px-2 py-0.5 rounded-full border border-primary-100">
                   {attachments.length} file{attachments.length > 1 ? "s" : ""}
                 </span>
               )}

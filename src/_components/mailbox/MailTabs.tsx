@@ -23,11 +23,11 @@ export const MailTabs = () => {
   const setActiveClassification = useMailStore(
     (s) => s.setActiveClassification,
   );
-  
+
   const params = useParams();
   const mailboxId = params.mailboxId as string;
   const unreadInboxCount = useUnreadEmailsCount(mailboxId, "inbox");
-  
+
   const activeFolder = useMailStore((s) => s.activeFolder);
 
   if (activeFolder !== "inbox") return null;
@@ -36,8 +36,6 @@ export const MailTabs = () => {
     <div className="grid grid-cols-1 md:grid-cols-3 md:mb-6">
       {tabs.map((tab) => {
         const isActive = activeClassification === tab.id;
-        // Currently API doesn't distinguish between classifications like promotions/social, 
-        // so we'll show the total inbox unread count for primary and 0 for others to be safe.
         const unreadCount = tab.id === "primary" ? unreadInboxCount : 0;
 
         return (
@@ -57,8 +55,6 @@ export const MailTabs = () => {
                 className={cn("w-5 h-5", isActive && "text-secondary-800")}
               />
               <span className="text-base">{tab.label}</span>
-
-
             </button>
 
             {isActive && (

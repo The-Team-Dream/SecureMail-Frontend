@@ -69,7 +69,7 @@ export enum SocketEvent {
   // Email events
   NEW_EMAIL = "new-email",
   EMAIL_SCANNED = "email-scanned",
-  EMAIL_SENT = "EMAIL_SENT",
+  EMAIL_SENT = "email-sent",
 
   // Notification events
   NEW_NOTIFICATION = "new-notification",

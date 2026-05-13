@@ -1,14 +1,17 @@
 "use client";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { stats, listItems } from "./data";
-import { ReportStatCard } from "./ReportStatCard";
-import { ReportListItem } from "./ReportListItem";
 import { ReportsSkeleton } from "@/_components/skeleton/ReportsSkeleton";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useGetAuthMe } from "@/APIs/hooks/auth";
+
+const ReportStatCard = dynamic(() => import("./ReportStatCard").then((mod) => mod.ReportStatCard));
+const ReportListItem = dynamic(() => import("./ReportListItem").then((mod) => mod.ReportListItem));
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -74,9 +77,9 @@ export default function Reports() {
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          {stats.map(({ id, ...props }) => (
+          {useMemo(() => stats.map(({ id, ...props }) => (
             <ReportStatCard key={id} {...props} />
-          ))}
+          )), [stats])}
         </motion.div>
 
         {/* List Items */}
@@ -86,9 +89,9 @@ export default function Reports() {
           animate="visible"
           className="flex flex-col gap-4 mt-2"
         >
-          {listItems.map(({ id, ...props }) => (
+          {useMemo(() => listItems.map(({ id, ...props }) => (
             <ReportListItem key={id} {...props} />
-          ))}
+          )), [listItems])}
         </motion.div>
       </div>
     </Container>

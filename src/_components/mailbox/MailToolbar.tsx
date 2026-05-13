@@ -21,7 +21,7 @@ import {
   useReclassifyEmail,
 } from "@/APIs/hooks/emails";
 import type { EmailFolder } from "@/APIs/types/Email";
-import type { Email } from "@/types/mail";
+import type { Email } from "@/APIs/types/Email";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface MailToolbarProps {
