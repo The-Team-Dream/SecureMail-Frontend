@@ -36,33 +36,15 @@ export function StepProvider({
         <div className="flex flex-col md:flex-row gap-4 ">
           <Input
             label="Mailbox Name"
-            required
             placeholder="Mailbox Name"
-            {...(register
-              ? register("mailboxName", {
-                  onChange: () => {
-                    if (errors?.mailboxName) {
-                      clearErrors?.("mailboxName");
-                    }
-                  },
-                })
-              : {})}
+            {...(register ? register("mailboxName") : {})}
             error={errors?.mailboxName?.message}
           />
           <Input
             label="Email"
-            required
             type="email"
             placeholder="Email"
-            {...(register
-              ? register("emailAddress", {
-                  onChange: () => {
-                    if (errors?.emailAddress) {
-                      clearErrors?.("emailAddress");
-                    }
-                  },
-                })
-              : {})}
+            {...(register ? register("emailAddress") : {})}
             error={errors?.emailAddress?.message}
           />
         </div>

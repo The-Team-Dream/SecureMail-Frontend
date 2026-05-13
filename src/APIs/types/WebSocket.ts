@@ -9,6 +9,11 @@ export interface NewEmailEvent {
   email: Email;
 }
 
+/** Fired when an email is successfully sent and saved */
+export interface EmailSentEvent {
+  mailboxId: number;
+}
+
 /** Fired when email scan/analysis is complete */
 export interface EmailScannedEvent {
   mailboxId: number;
@@ -64,6 +69,7 @@ export enum SocketEvent {
   // Email events
   NEW_EMAIL = "new-email",
   EMAIL_SCANNED = "email-scanned",
+  EMAIL_SENT = "EMAIL_SENT",
 
   // Notification events
   NEW_NOTIFICATION = "new-notification",
@@ -82,6 +88,7 @@ export enum SocketEvent {
 export interface ServerToClientEvents {
   [SocketEvent.NEW_EMAIL]: (data: NewEmailEvent) => void;
   [SocketEvent.EMAIL_SCANNED]: (data: EmailScannedEvent) => void;
+  [SocketEvent.EMAIL_SENT]: (data: EmailSentEvent) => void;
   [SocketEvent.NEW_NOTIFICATION]: (data: NewNotificationEvent) => void;
   [SocketEvent.MAILBOX_SYNC_COMPLETE]: (data: MailboxSyncCompleteEvent) => void;
   [SocketEvent.MAILBOX_SYNC_FAILED]: (data: MailboxSyncFailedEvent) => void;

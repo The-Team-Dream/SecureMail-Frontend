@@ -4,15 +4,23 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Save, Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { WizardFormData } from "@/schemas/CustomAccount";
-import { SectionBlock, ViewField, AdvancedDraft } from "@/_components/wizard-summary/Shared";
+import {
+  SectionBlock,
+  ViewField,
+  AdvancedDraft,
+} from "@/_components/wizard-summary/Shared";
 import { Icons } from "@/constants/icons";
 
+import { FieldErrors } from "react-hook-form";
+import Error from "@/_components/shared/Error";
 export function AdvancedSection({
   formData,
   handleChange,
+  errors,
 }: {
   formData: WizardFormData;
   handleChange: (field: keyof WizardFormData, value: string) => void;
+  errors?: FieldErrors<WizardFormData>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -75,7 +83,7 @@ export function AdvancedSection({
                   <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-primary-50 rounded-[16px] z-50 flex flex-col p-2 gap-1 animate-in fade-in zoom-in-95 duration-150 shadow-sm border border-primary-100">
                     {[1, 2, 3, 4, 5].map((i) => (
                       <button
-                        key={i}
+                        key={`summary-interval-${i}`}
                         type="button"
                         onClick={() => {
                           handleChange("syncInterval", i.toString());
@@ -92,6 +100,7 @@ export function AdvancedSection({
                   </div>
                 )}
               </div>
+              <Error error={errors?.syncInterval?.message} />
             </div>
           </div>
           <div className="flex justify-end">

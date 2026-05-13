@@ -10,26 +10,24 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/_components/shared/Input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Textarea } from "@/_components/shared/Textarea";
 import {
   Paperclip,
   Smile,
   Link as LinkIcon,
   Image as ImageIcon,
-  Trash2,
   X,
+  FileText,
+  FileCode,
+  FileArchive,
+  FileVideo,
+  FileAudio,
+  FileSpreadsheet,
+  File as FileIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import BackEndError from "@/_components/shared/BackEndError";
-import Error from "@/_components/shared/Error";
 import dynamic from "next/dynamic";
 import { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
@@ -38,7 +36,6 @@ import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { useComposeEmail } from "@/hooks/useComposeEmail";
 
-// Lazy-load EmojiPicker to avoid including ~270KB+ in the main bundle
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
   loading: () => (
@@ -47,6 +44,144 @@ const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
     </div>
   ),
 });
+
+// ─── Sub-Components ────────────────────────────────────────────────────────
+const AttachmentCard = ({
+  file,
+  onRemove,
+}: {
+  file: File;
+  onRemove: () => void;
+}) => {
+  const isImage = file.type.startsWith("image/");
+  const isVideo = file.type.startsWith("video/");
+  const [url, setUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (isImage || isVideo) {
+      const objectUrl = URL.createObjectURL(file);
+      setUrl(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+  }, [file, isImage, isVideo]);
+
+  const { icon: Icon, color, bg } = getFileIcon(file.type, file.name);
+
+  return (
+    <div
+      className={cn(
+        "relative group w-24 h-24 rounded-xl overflow-hidden border border-primary-100 shadow-sm transition-all hover:border-primary-300 bg-background",
+        !isImage && !isVideo && bg,
+      )}
+    >
+      {isImage ? (
+        <img
+          src={url!}
+          alt={file.name}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : isVideo ? (
+        <div className="absolute inset-0 bg-primary-900 flex flex-col items-center justify-center gap-1">
+          <FileVideo className="w-8 h-8 text-background/80" />
+          <span className="text-[8px] text-background/60 px-1 truncate w-full text-center">
+            Video
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full gap-1.5 p-2">
+          <Icon className={cn("w-8 h-8", color)} />
+          <span className="text-[9px] font-medium text-primary-700 line-clamp-2 break-all leading-tight">
+            {file.name}
+          </span>
+        </div>
+      )}
+
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-background/0 group-hover:bg-background/10 transition-colors pointer-events-none" />
+
+      {/* Size Badge */}
+      <div className="absolute bottom-0 left-0 right-0 bg-background/40 text-background text-[8px] py-0.5 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+        {(file.size / 1024).toFixed(0)} KB
+      </div>
+
+      {/* Delete Button */}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute top-1 right-1 p-1 bg-background/90 rounded-full text-error-500 opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-error-50 z-10"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────
+const getFileIcon = (mimeType: string, fileName: string) => {
+  const extension = fileName.split(".").pop()?.toLowerCase();
+
+  if (mimeType.startsWith("video/"))
+    return { icon: FileVideo, color: "text-info-500", bg: "bg-info-50" };
+  if (mimeType.startsWith("audio/"))
+    return { icon: FileAudio, color: "text-warning-500", bg: "bg-warning-50" };
+
+  if (mimeType === "application/pdf" || extension === "pdf")
+    return { icon: FileText, color: "text-error-500", bg: "bg-error-50" };
+
+  // Word
+  if (
+    mimeType === "application/msword" ||
+    mimeType ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    ["doc", "docx"].includes(extension || "")
+  )
+    return { icon: FileText, color: "text-info-600", bg: "bg-info-50" };
+
+  // Excel
+  if (
+    mimeType === "application/vnd.ms-excel" ||
+    mimeType ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+    ["xls", "xlsx", "csv"].includes(extension || "")
+  )
+    return {
+      icon: FileSpreadsheet,
+      color: "text-green-600",
+      bg: "bg-green-50",
+    };
+
+  // Zip/Archive
+  if (
+    mimeType === "application/zip" ||
+    mimeType === "application/x-rar-compressed" ||
+    ["zip", "rar", "7z", "tar", "gz"].includes(extension || "")
+  )
+    return {
+      icon: FileArchive,
+      color: "text-warning-600",
+      bg: "bg-warning-50",
+    };
+
+  // Code
+  if (
+    [
+      "js",
+      "ts",
+      "jsx",
+      "tsx",
+      "html",
+      "css",
+      "json",
+      "py",
+      "java",
+      "c",
+      "cpp",
+    ].includes(extension || "")
+  )
+    return { icon: FileCode, color: "text-primary-600", bg: "bg-primary-50" };
+
+  return { icon: FileIcon, color: "text-primary-500", bg: "bg-primary-50" };
+};
 
 // ─── Component ─────────────────────────────────────────────────────────────
 export const ComposeEmailSheet = () => {
@@ -57,7 +192,10 @@ export const ComposeEmailSheet = () => {
     isOpen,
     setOpen,
     composeMode,
-    form,
+    register,
+    handleSubmit,
+    errors,
+    clearErrors,
     attachments,
     setAttachments,
     fileInputRef,
@@ -71,9 +209,11 @@ export const ComposeEmailSheet = () => {
     handleAddFiles,
     removeAttachment,
     insertEmoji,
+    control,
+    getValues,
+    setValue,
     onSubmit,
     isPending,
-    mailboxes,
   } = useComposeEmail();
 
   const titleMap = {
@@ -97,7 +237,7 @@ export const ComposeEmailSheet = () => {
         <hr className="border-primary-100 mx-6" />
 
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col flex-1 overflow-hidden"
         >
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -111,18 +251,13 @@ export const ComposeEmailSheet = () => {
                   <div className="flex items-center gap-1">
                     <div className="flex-1 w-full">
                       <Input
-                        {...form.register("to", {
-                          onChange: () =>
-                            form.clearErrors(["to", "root" as any]),
+                        {...register("to", {
+                          onChange: () => clearErrors(["to", "root" as any]),
                         })}
                         className="w-full"
                         placeholder="recipient@example.com"
                         disabled={isPending}
-                        error={
-                          form.formState.errors.to?.type !== "server"
-                            ? (form.formState.errors.to?.message as string)
-                            : undefined
-                        }
+                        error={errors.to?.message as string}
                       />
                     </div>
                     {composeMode === "new" && (
@@ -144,13 +279,6 @@ export const ComposeEmailSheet = () => {
                       </div>
                     )}
                   </div>
-                  <BackEndError
-                    error={
-                      form.formState.errors.to?.type === "server"
-                        ? String(form.formState.errors.to.message)
-                        : undefined
-                    }
-                  />
                 </div>
               </div>
             )}
@@ -163,20 +291,13 @@ export const ComposeEmailSheet = () => {
                 </label>
                 <div className="flex-1">
                   <Input
-                    {...form.register("cc", {
-                      onChange: () =>
-                        form.clearErrors(["cc", "root" as any]),
+                    {...register("cc", {
+                      onChange: () => clearErrors(["cc", "root" as any]),
                     })}
                     className="w-full border-primary-200"
                     placeholder="cc@example.com, ..."
                     disabled={isPending}
-                  />
-                  <BackEndError
-                    error={
-                      form.formState.errors.cc?.type === "server"
-                        ? String(form.formState.errors.cc.message)
-                        : undefined
-                    }
+                    error={errors.cc?.message as string}
                   />
                 </div>
               </div>
@@ -190,20 +311,13 @@ export const ComposeEmailSheet = () => {
                 </label>
                 <div className="flex-1">
                   <Input
-                    {...form.register("bcc", {
-                      onChange: () =>
-                        form.clearErrors(["bcc", "root" as any]),
+                    {...register("bcc", {
+                      onChange: () => clearErrors(["bcc", "root" as any]),
                     })}
                     className="w-full border-primary-200"
                     placeholder="bcc@example.com, ..."
                     disabled={isPending}
-                  />
-                  <BackEndError
-                    error={
-                      form.formState.errors.bcc?.type === "server"
-                        ? String(form.formState.errors.bcc.message)
-                        : undefined
-                    }
+                    error={errors.bcc?.message as string}
                   />
                 </div>
               </div>
@@ -217,24 +331,12 @@ export const ComposeEmailSheet = () => {
                 </label>
                 <div className="flex-1">
                   <Input
-                    {...form.register("subject", {
-                      onChange: () =>
-                        form.clearErrors(["subject", "root" as any]),
+                    {...register("subject", {
+                      onChange: () => clearErrors(["subject", "root" as any]),
                     })}
                     placeholder="Email subject..."
                     disabled={isPending}
-                    error={
-                      form.formState.errors.subject?.type !== "server"
-                        ? (form.formState.errors.subject?.message as string)
-                        : undefined
-                    }
-                  />
-                  <BackEndError
-                    error={
-                      form.formState.errors.subject?.type === "server"
-                        ? String(form.formState.errors.subject.message)
-                        : undefined
-                    }
+                    error={errors.subject?.message as string}
                   />
                 </div>
               </div>
@@ -252,67 +354,33 @@ export const ComposeEmailSheet = () => {
                   <span className="text-error-500">*</span>
                 )}
               </label>
-              <Controller
-                name="bodyText"
-                control={form.control}
-                render={({ field }) => (
-                  <div className="flex flex-col gap-1">
-                    <Textarea
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        form.clearErrors(["bodyText", "root" as any]);
-                      }}
-                      placeholder={
-                        composeMode === "reply"
-                          ? "Type your reply..."
-                          : composeMode === "forward"
-                            ? "Add a message to this forward..."
-                            : "Type your message here..."
-                      }
-                      disabled={isPending}
-                      error={
-                        form.formState.errors.bodyText?.type !== "server"
-                          ? (form.formState.errors.bodyText?.message as string)
-                          : undefined
-                      }
-                      className=""
-                    />
-                    <BackEndError
-                      error={
-                        form.formState.errors.bodyText?.type === "server"
-                          ? String(form.formState.errors.bodyText.message)
-                          : undefined
-                      }
-                    />
-                  </div>
-                )}
-              />
+              <div className="flex flex-col gap-1">
+                <Textarea
+                  {...register("bodyText", {
+                    onChange: () => clearErrors(["bodyText", "root" as any]),
+                  })}
+                  placeholder={
+                    composeMode === "reply"
+                      ? "Type your reply..."
+                      : composeMode === "forward"
+                        ? "Add a message to this forward..."
+                        : "Type your message here..."
+                  }
+                  className="min-h-[220px]"
+                  disabled={isPending}
+                  error={errors.bodyText?.message as string}
+                />
+              </div>
             </div>
 
-            {/* Attachments Preview */}
             {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-1">
+              <div className="flex flex-wrap gap-3 pt-2">
                 {attachments.map((file, idx) => (
-                  <div
+                  <AttachmentCard
                     key={idx}
-                    className="flex items-center gap-1.5 bg-primary-50 border border-primary-100 rounded-lg px-3 py-1.5 text-xs text-primary-700"
-                  >
-                    <Paperclip className="w-3 h-3 shrink-0" />
-                    <Text as={"span"} className="max-w-[140px] truncate">
-                      {file.name}
-                    </Text>
-                    <Text color={"primary-400"} as={"span"}>
-                      ({(file.size / 1024).toFixed(0)} KB)
-                    </Text>
-                    <button
-                      type="button"
-                      onClick={() => removeAttachment(idx)}
-                      className="ml-1 text-primary-400 hover:text-red-500 transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
+                    file={file}
+                    onRemove={() => removeAttachment(idx)}
+                  />
                 ))}
               </div>
             )}
@@ -321,9 +389,7 @@ export const ComposeEmailSheet = () => {
           <div className="px-4">
             <BackEndError
               error={
-                form.formState.errors.root?.message
-                  ? String(form.formState.errors.root.message)
-                  : undefined
+                errors.root?.message ? String(errors.root.message) : undefined
               }
             />
           </div>
@@ -423,8 +489,8 @@ export const ComposeEmailSheet = () => {
                             e.preventDefault();
                             const val = e.currentTarget.value;
                             if (val) {
-                              const current = form.getValues("bodyText") ?? "";
-                              form.setValue("bodyText", `${current} ${val}`);
+                              const current = getValues("bodyText") ?? "";
+                              setValue("bodyText", `${current} ${val}`);
                               setShowLinkInput(false);
                             }
                           } else if (e.key === "Escape") {
@@ -470,13 +536,11 @@ export const ComposeEmailSheet = () => {
 
               {/* Attachment count badge */}
               {attachments.length > 0 && (
-                <span className="text-xs text-primary-500 bg-primary-50 px-2 py-0.5 rounded-full border border-primary-100">
+                <span className="text-xs text-primar bg-background px-2 py-0.5 rounded-full border border-primary-100">
                   {attachments.length} file{attachments.length > 1 ? "s" : ""}
                 </span>
               )}
             </div>
-
-            {/* Discard button removed as per user request */}
           </div>
         </form>
       </SheetContent>

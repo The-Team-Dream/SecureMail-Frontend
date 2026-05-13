@@ -23,6 +23,7 @@ import {
   type MailboxSyncFailedEvent,
   type SecurityAlertEvent,
   type MailboxStatusEvent,
+  type EmailSentEvent,
 } from "@/APIs/types/WebSocket";
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -76,6 +77,21 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       toast.info("📩 New email received", {
         description: data.email?.subject || "You have a new email",
         duration: 4000,
+      });
+    },
+    [queryClient],
+  );
+
+  const handleEmailSent = useCallback(
+    (data: EmailSentEvent) => {
+      const { mailboxId } = data;
+      // Refresh the email list to show the newly sent email in the Sent folder
+      queryClient.invalidateQueries({
+        queryKey: ["emails", String(mailboxId)],
+      });
+      // Optionally refresh analytics if sent emails count towards stats
+      queryClient.invalidateQueries({
+        queryKey: ["analytics"],
       });
     },
     [queryClient],
@@ -281,6 +297,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
     // Register domain event listeners
     socket.on(SocketEvent.NEW_EMAIL, handleNewEmail);
+    socket.on(SocketEvent.EMAIL_SENT, handleEmailSent);
     socket.on(SocketEvent.EMAIL_SCANNED, handleEmailScanned);
     socket.on(SocketEvent.NEW_NOTIFICATION, handleNewNotification);
     socket.on(SocketEvent.MAILBOX_SYNC_COMPLETE, handleMailboxSyncComplete);
@@ -299,6 +316,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       socket.off(SocketEvent.DISCONNECT, onDisconnect);
       socket.off(SocketEvent.CONNECT_ERROR, onConnectError);
       socket.off(SocketEvent.NEW_EMAIL, handleNewEmail);
+      socket.off(SocketEvent.EMAIL_SENT, handleEmailSent);
       socket.off(SocketEvent.EMAIL_SCANNED, handleEmailScanned);
       socket.off(SocketEvent.NEW_NOTIFICATION, handleNewNotification);
       socket.off(SocketEvent.MAILBOX_SYNC_COMPLETE, handleMailboxSyncComplete);
@@ -308,6 +326,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [
     handleNewEmail,
+    handleEmailSent,
     handleEmailScanned,
     handleNewNotification,
     handleMailboxSyncComplete,

@@ -46,7 +46,9 @@ export const Navbar = () => {
   >(null);
 
   const activeAccount =
-    mailboxes.find((m) => m.id === (mailboxId || selectedMailboxId)) ||
+    mailboxes.find(
+      (m) => String(m.id) === String(mailboxId || selectedMailboxId),
+    ) ||
     mailboxes[0] ||
     null;
 

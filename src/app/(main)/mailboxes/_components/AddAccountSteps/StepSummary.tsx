@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { Text } from "@/_components/shared/Text";
 import {
@@ -26,14 +24,19 @@ export function StepSummary({
   formData = {} as WizardFormData,
   handleChange = () => {},
   handleImapSubmit,
-  isPending,
 }: StepSummaryProps) {
   const [showImapPassword, setShowImapPassword] = useState(false);
   const [showSmtpPassword, setShowSmtpPassword] = useState(false);
 
-  const { handleSubmit, setValue, watch } = useForm<WizardFormData>({
+  const {
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
     defaultValues: formData,
+    mode: "all",
   });
 
   const localFormData = watch();
@@ -76,6 +79,7 @@ export function StepSummary({
         <MailboxSection
           formData={localFormData}
           handleChange={localHandleChange}
+          errors={errors}
         />
 
         <IMAPSection
@@ -83,6 +87,7 @@ export function StepSummary({
           handleChange={localHandleChange}
           showPassword={showImapPassword}
           onTogglePassword={() => setShowImapPassword((p) => !p)}
+          errors={errors}
         />
 
         <SMTPSection
@@ -90,11 +95,13 @@ export function StepSummary({
           handleChange={localHandleChange}
           showPassword={showSmtpPassword}
           onTogglePassword={() => setShowSmtpPassword((p) => !p)}
+          errors={errors}
         />
 
         <AdvancedSection
           formData={localFormData}
           handleChange={localHandleChange}
+          errors={errors}
         />
       </div>
     </form>

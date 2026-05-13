@@ -14,16 +14,20 @@ import {
 } from "@/_components/wizard-summary/Shared";
 import { Icons } from "@/constants/icons";
 
+import { FieldErrors } from "react-hook-form";
+
 export function SMTPSection({
   formData,
   handleChange,
   showPassword,
   onTogglePassword,
+  errors,
 }: {
   formData: WizardFormData;
   handleChange: (field: keyof WizardFormData, value: string) => void;
   showPassword: boolean;
   onTogglePassword: () => void;
+  errors?: FieldErrors<WizardFormData>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -80,14 +84,17 @@ export function SMTPSection({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("smtpHost", e.target.value)
               }
+              error={errors?.smtpHost?.message}
             />
             <Input
               label="Port"
+              type="number"
               value={formData.smtpPort}
               className="w-full"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("smtpPort", e.target.value)
               }
+              error={errors?.smtpPort?.message}
             />
             <SecuritySelect
               value={formData.smtpSecurity}
@@ -100,6 +107,7 @@ export function SMTPSection({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("smtpUsername", e.target.value)
               }
+              error={errors?.smtpUsername?.message}
             />
           </div>
           <div className="grid grid-cols-4 gap-4 w-full">
@@ -111,6 +119,7 @@ export function SMTPSection({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("smtpPassword", e.target.value)
               }
+              error={errors?.smtpPassword?.message}
             />
           </div>
           <div className="flex justify-end">
