@@ -10,7 +10,6 @@ import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { ProgressBar } from "@/_components/shared/ProgressBar";
 import { useMailboxStats } from "@/APIs/hooks/analytics";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export const getStatusStyles = (isActive: boolean) => {
   if (isActive) {

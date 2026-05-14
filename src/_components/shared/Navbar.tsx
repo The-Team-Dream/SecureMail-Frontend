@@ -16,19 +16,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-// Image removed in favor of standard img
 import { usePathname, useParams, useRouter } from "next/navigation";
 import { MobileSidebar } from "./MobileSidebar";
 import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
 import Link from "next/link";
 import { NotificationDropdown } from "../Notification";
 import { Icons } from "@/constants/icons";
-import { getInitials, getImageUrl, cn } from "@/lib/utils";
+import { getImageUrl, cn } from "@/lib/utils";
 import { useGetAuthMe } from "@/APIs/hooks/auth";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
 import { ActionButton } from "./ActionButton";
+import LogoImg from "@/../public/icons/logo.png";
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -37,7 +37,7 @@ export const Navbar = () => {
   const mailboxId = params?.mailboxId as string | undefined;
 
   const { data: mailboxes = [], isPending: mailboxesLoading } = useMailboxes();
-  const { data: user, isPending, isError } = useGetAuthMe();
+  const { data: user } = useGetAuthMe();
 
   const isMailPage =
     pathname.split("/").length >= 3 && pathname.startsWith("/mailboxes");
@@ -65,7 +65,6 @@ export const Navbar = () => {
 
   const displayEmail = activeAccount?.emailAddress ?? userData?.email ?? "";
   const displayAvatar = (activeAccount as any)?.avatar ?? null;
-  const initials = getInitials(displayName);
 
   const handleSwitchAccount = async (id: string | number) => {
     setIsSwitching(true);
@@ -131,9 +130,13 @@ export const Navbar = () => {
                   className="w-12 h-12 rounded-full object-cover"
                 />
               ) : (
-                <Text color="secondary-900" font="medium">
-                  {initials}
-                </Text>
+                <Image
+                  src={LogoImg}
+                  alt="SecureMail"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 object-contain"
+                />
               )}
             </button>
           </DropdownMenuTrigger>
@@ -154,9 +157,13 @@ export const Navbar = () => {
                     className="w-[72px] h-[72px] rounded-full object-cover"
                   />
                 ) : (
-                  <Text color="secondary-900" font="bold" size="2xl">
-                    {initials}
-                  </Text>
+                  <Image
+                    src={LogoImg}
+                    alt="SecureMail"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 object-contain"
+                  />
                 )}
               </div>
               <div className="mt-3 text-center">
@@ -207,17 +214,13 @@ export const Navbar = () => {
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <Text
-                                  font="bold"
-                                  className="text-[8px]"
-                                  color="primary-500"
-                                >
-                                  {getInitials(
-                                    mailbox.displayName ||
-                                      mailbox.emailAddress ||
-                                      "",
-                                  )}
-                                </Text>
+                                <Image
+                                  src={LogoImg}
+                                  alt="SecureMail"
+                                  width={24}
+                                  height={24}
+                                  className="w-4 h-4 object-contain"
+                                />
                               )}
                             </div>
                           ))}
@@ -266,21 +269,13 @@ export const Navbar = () => {
                                       className="md:size-10 size-8 rounded-full object-cover"
                                     />
                                   ) : (
-                                    <Text
-                                      font="bold"
-                                      className="text-[10px] md:text-base"
-                                      color={
-                                        isActive
-                                          ? "secondary-900"
-                                          : "primary-500"
-                                      }
-                                    >
-                                      {getInitials(
-                                        mailbox.displayName ||
-                                          mailbox.emailAddress ||
-                                          "",
-                                      )}
-                                    </Text>
+                                    <Image
+                                      src={LogoImg}
+                                      alt="SecureMail"
+                                      width={40}
+                                      height={40}
+                                      className="w-6 h-6 object-contain"
+                                    />
                                   )}
                                 </div>
                                 <div className="flex flex-col">
