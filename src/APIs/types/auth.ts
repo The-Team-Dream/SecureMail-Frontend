@@ -78,13 +78,15 @@ export interface LogoutResponse {
 }
 
 export interface AuthMe {
-  id: number;
-  username: string;
-  email: string;
-  avatar: string | null;
-  isVerified: boolean;
-  totpEnabled: boolean;
-  provider: string;
-  role: string;
-  createdAt: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    avatar: string | null;
+    isVerified: boolean;
+    totpEnabled: boolean;
+    provider: string;
+    role: string;
+    createdAt: string;
+  };
 }
