@@ -22,26 +22,11 @@ const Preference = memo(() => {
   const { mutate: updateNotifications, isPending: isUpdating } =
     useUpdateNotifications();
 
-  // The optimistic update in useUpdateNotifications handles the UI toggle state;
-  // no need for a local copy - we just read from the (optimistically updated) cache.
   const notificationsEnabled = Boolean(settings?.notificationsEnabled);
 
-  const handleToggle = useCallback(
-    (checked: boolean) => {
-      updateNotifications(checked, {
-        onSuccess: () => {
-          toast.success(
-            `Notifications ${checked ? "enabled" : "disabled"} successfully.`,
-          );
-        },
-        onError: () => {
-          toast.error("Failed to update notification settings.");
-        },
-      });
-    },
-    [updateNotifications],
-  );
-
+  const handleToggle = useCallback((checked: boolean) => {
+    updateNotifications(checked);
+  }, []);
 
   return (
     <Accordion type="single" collapsible defaultValue="item-1">

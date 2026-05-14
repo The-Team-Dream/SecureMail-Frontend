@@ -105,7 +105,7 @@ export function MailboxCard({
                 ? new Date(acc.lastSyncedAt).toLocaleDateString()
                 : "Never"}
             </Text>
-            <Text size="xs" className="mt-1">
+            <Text size="xs" color={"primary-500"} className="mt-1">
               Last sync
             </Text>
           </div>

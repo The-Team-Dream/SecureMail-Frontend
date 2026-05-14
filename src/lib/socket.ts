@@ -20,16 +20,16 @@ export const getSocket = (): Socket => {
   }
 
   const token = Cookies.get("token");
+  console.log("[WebSocket] Attempting to connect to:", baseURL);
+  console.log("[WebSocket] Token exists:", !!token);
 
   socket = io(baseURL, {
     auth: { token },
-    transports: ["polling", "websocket"],
     autoConnect: true,
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 10000,
-    withCredentials: true,
   });
 
   return socket;
