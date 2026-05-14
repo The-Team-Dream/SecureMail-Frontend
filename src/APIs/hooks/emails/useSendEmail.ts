@@ -9,9 +9,18 @@ export const useSendEmail = (mailboxId: string) => {
     mutationFn: (formData: FormData) =>
       emailsApi.sendEmail(mailboxId, formData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
+      queryClient.invalidateQueries({
+        queryKey: ["emails", mailboxId, "sent"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["emails", mailboxId],
+      });
+
       toast.success("Email sent successfully");
     },
-    onError: () => {},
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to send email");
+    },
   });
 };

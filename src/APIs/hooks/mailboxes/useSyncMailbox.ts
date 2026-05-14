@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { mailboxApi } from "../../features/mailboxes";
 import { toast } from "sonner";
+import { Mailbox } from "@/APIs/types/Mailbox";
 
 export const useSyncMailbox = () => {
   const queryClient = useQueryClient();
@@ -9,7 +10,9 @@ export const useSyncMailbox = () => {
     mutationFn: (id: number | string) => mailboxApi.syncMailbox(Number(id)),
     onMutate: async (id: string | number) => {
       await queryClient.cancelQueries({ queryKey: ["mailboxes"] });
-      const previousMailboxes = queryClient.getQueryData<any[]>(["mailboxes"]);
+      const previousMailboxes = queryClient.getQueryData<Mailbox[]>([
+        "mailboxes",
+      ]);
 
       if (previousMailboxes) {
         queryClient.setQueryData(
@@ -28,26 +31,20 @@ export const useSyncMailbox = () => {
       const mailboxId = data?.id?.toString() || variables?.toString();
       if (!mailboxId) return;
 
+      // getMailboxes always returns a flat Mailbox[] — update it in place.
       queryClient.setQueryData(["mailboxes"], (old: any) => {
-        if (Array.isArray(old)) {
-          return old.map((m) =>
-            m.id?.toString() === mailboxId ? { ...m, ...data } : m,
-          );
-        }
-        if (old?.data && Array.isArray(old.data)) {
-          return {
-            ...old,
-            data: old.data.map((m: any) =>
-              m.id?.toString() === mailboxId ? { ...m, ...data } : m,
-            ),
-          };
-        }
-        return old;
+        if (!Array.isArray(old)) return old;
+        return old.map((m) =>
+          m.id?.toString() === mailboxId ? { ...m, ...data } : m,
+        );
       });
 
+      // Also update the individual mailbox cache if it exists.
       queryClient.setQueryData(["mailboxes", mailboxId], (old: any) =>
         old ? { ...old, ...data } : data,
       );
+
+      toast.success("Mailbox synced successfully");
     },
     onError: (error: any, _id, context) => {
       if (context?.previousMailboxes) {
@@ -64,16 +61,16 @@ export const useSyncMailbox = () => {
     // here as a safety-net fallback.
     onSettled: async (_data, _error, variables) => {
       if (!variables) return;
-      const id = Number(variables);
+      const mailboxId = variables.toString();
 
       // Short delay to let the server start processing
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["mailboxes"] }),
-        queryClient.invalidateQueries({
-          queryKey: ["emails", id.toString()],
-        }),
+        queryClient.invalidateQueries({ queryKey: ["mailboxes", mailboxId] }),
+        // emails query key shape: ["emails", mailboxId, folder, page]
+        queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] }),
       ]);
     },
   });
