@@ -406,6 +406,57 @@ export function useAddAccountWizard({
     if (step > 1) updateStepUrl(step - 1);
   }, [step, updateStepUrl]);
 
+  const goToStep = useCallback(
+    async (targetStep: number) => {
+      if (targetStep < 1 || targetStep > 6) return;
+
+      if (targetStep < step) {
+        updateStepUrl(targetStep);
+      } else {
+        // Validate all intermediate steps if moving forward
+        let isValid = true;
+        for (let i = step; i < targetStep; i++) {
+          let fieldsToValidate: (keyof WizardFormData)[] = [];
+          if (i === 1) fieldsToValidate = ["mailboxName", "emailAddress"];
+          if (i === 2)
+            fieldsToValidate = [
+              "imapHost",
+              "imapPort",
+              "imapSecurity",
+              "imapUsername",
+              "imapPassword",
+            ];
+          if (i === 3)
+            fieldsToValidate = [
+              "smtpHost",
+              "smtpPort",
+              "smtpSecurity",
+              "smtpUsername",
+              "smtpPassword",
+            ];
+          if (i === 4) fieldsToValidate = ["syncInterval"];
+
+          if (fieldsToValidate.length > 0) {
+            const stepValid = await trigger(fieldsToValidate);
+            if (!stepValid) {
+              isValid = false;
+              // Stop at the first invalid step
+              if (i !== step) {
+                updateStepUrl(i);
+              }
+              break;
+            }
+          }
+        }
+
+        if (isValid) {
+          updateStepUrl(targetStep);
+        }
+      }
+    },
+    [step, trigger, updateStepUrl]
+  );
+
   const handleSuccessCancel = useCallback(() => {
     onSuccess?.(formData, provider);
     clearPersistence();
@@ -420,12 +471,14 @@ export function useAddAccountWizard({
   }, [clearPersistence, updateStepUrl, reset]);
 
   const steps = [
-    { id: 1, icon: Icons.Mail },
-    { id: 2, icon: Icons.Settings2 },
-    { id: 3, icon: Icons.Lock },
-    { id: 4, icon: Icons.Rocket },
-    { id: 5, icon: Icons.Report },
+    { id: 1, icon: Icons.Mail, title: "Select Provider" },
+    { id: 2, icon: Icons.Settings2, title: "IMAP Settings" },
+    { id: 3, icon: Icons.Lock, title: "SMTP Settings" },
+    { id: 4, icon: Icons.Rocket, title: "Advanced Settings" },
+    { id: 5, icon: Icons.Report, title: "Summary" },
   ];
+
+  const currentStepTitle = steps.find((s) => s.id === step)?.title || "";
 
   const isOAuthProvider = provider === "GMAIL" || provider === "OUTLOOK";
   const isLastStep = step === 5;
@@ -454,6 +507,7 @@ export function useAddAccountWizard({
     steps,
     handleNext,
     handlePrev,
+    goToStep,
     handleCancel,
     handleChange,
     handleImapSubmit,
@@ -463,5 +517,6 @@ export function useAddAccountWizard({
     isImapLoading,
     isOAuthProvider,
     nextButtonLabel,
+    currentStepTitle,
   };
 }

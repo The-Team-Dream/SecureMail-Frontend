@@ -4,9 +4,10 @@ import { Check } from "lucide-react";
 interface WizardProgressProps {
   step: number;
   steps: { id: number; icon: React.ElementType }[];
+  goToStep?: (step: number) => void;
 }
 
-export function WizardProgress({ step, steps }: WizardProgressProps) {
+export function WizardProgress({ step, steps, goToStep }: WizardProgressProps) {
   return (
     <div className="flex items-center justify-between w-full max-w-2xl mx-auto mb-8">
       {steps.map((s, index) => {
@@ -16,7 +17,10 @@ export function WizardProgress({ step, steps }: WizardProgressProps) {
 
         return (
           <React.Fragment key={`step-${s.id}`}>
-            <div className="flex flex-col items-center shrink-0">
+            <div 
+              className={`flex flex-col items-center shrink-0 ${goToStep ? 'cursor-pointer' : ''}`}
+              onClick={() => goToStep && goToStep(s.id)}
+            >
               {isActive ? (
                 <div className="w-[46px] h-[46px] rounded-full border-dashed border-2 border-secondary-600 flex items-center justify-center p-[3px]">
                   <div className="w-full h-full rounded-full flex items-center justify-center bg-secondary-200">

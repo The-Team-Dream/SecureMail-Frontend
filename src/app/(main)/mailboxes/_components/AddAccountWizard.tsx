@@ -12,6 +12,7 @@ import { StepAdvanced } from "./AddAccountSteps/StepAdvanced";
 import { StepSummary } from "./AddAccountSteps/StepSummary";
 import { StepSuccess } from "./AddAccountSteps/StepSuccess";
 import { useAddAccountWizard } from "../../../../hooks/useAddAccountWizard";
+import React from "react";
 
 interface AddAccountWizardProps {
   onCancel: () => void;
@@ -33,6 +34,7 @@ export function AddAccountWizard({
     steps,
     handleNext,
     handlePrev,
+    goToStep,
     handleCancel,
     handleChange,
     handleImapSubmit,
@@ -42,6 +44,7 @@ export function AddAccountWizard({
     isImapLoading,
     isOAuthProvider,
     nextButtonLabel,
+    currentStepTitle,
   } = useAddAccountWizard({ onCancel, onSuccess });
 
   if (step === 6) {
@@ -62,23 +65,60 @@ export function AddAccountWizard({
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-card relative"
     >
-      <div className="flex items-center gap-2.5 px-10 py-3 w-full bg-ghostBlue border-b border-primary-100/80 z-10">
+      <div className="flex items-center gap-2.5 px-10 py-3 w-full bg-ghostBlue border-b border-primary-100/80 z-10 flex-wrap">
         <button
           onClick={handleCancel}
-          className="hover:underline cursor-pointer"
+          className="hover:underline cursor-pointer shrink-0"
         >
           <Text font="semiBold" size="sm">
             My Accounts
           </Text>
         </button>
-        <ChevronRight className="w-4 h-4 text-primary-400 stroke-[2.5px]" />
-        <Text color={"primary-400"} font={"medium"} size="sm">
-          Add Account
-        </Text>
+        <ChevronRight className="w-4 h-4 text-primary-400 stroke-[2.5px] shrink-0" />
+        
+        {/* We can make "Add Account" always go to step 1 if we are further along */}
+        {step > 1 ? (
+          <button
+            onClick={() => goToStep(1)}
+            className="hover:underline cursor-pointer shrink-0"
+          >
+            <Text font="semiBold" size="sm">
+              Add Account
+            </Text>
+          </button>
+        ) : (
+          <Text font="semiBold" size="sm" className="shrink-0">
+            Add Account
+          </Text>
+        )}
+
+        {/* Accumulate the steps up to the current one */}
+        {steps.slice(0, step).map((s) => {
+          const isLast = s.id === step;
+          return (
+            <React.Fragment key={`bc-step-${s.id}`}>
+              <ChevronRight className="w-4 h-4 text-primary-400 stroke-[2.5px] shrink-0" />
+              {!isLast ? (
+                <button
+                  onClick={() => goToStep(s.id)}
+                  className="hover:underline cursor-pointer shrink-0"
+                >
+                  <Text font="semiBold" size="sm">
+                    {s.title}
+                  </Text>
+                </button>
+              ) : (
+                <Text color={"primary-400"} font={"medium"} size="sm" className="shrink-0">
+                  {s.title}
+                </Text>
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
 
       <div className="flex flex-col flex-1 w-full mx-auto px-10 max-w-8xl pt-6">
-        <WizardProgress step={step} steps={steps} />
+        <WizardProgress step={step} steps={steps} goToStep={goToStep} />
         <hr className="h-px bg-primary-100 w-full absolute left-0 top-32" />
 
         <div
