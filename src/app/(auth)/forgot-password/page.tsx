@@ -25,7 +25,7 @@ export default function ForgotPassword() {
     setError,
   } = useForm<IForgotPassword>({
     mode: "onBlur",
-    reValidateMode: "onChange",
+    reValidateMode: "onBlur",
     resolver: zodResolver(forgotPasswordSchema),
   });
   const { mutate, isPending } = useForgetPassword({

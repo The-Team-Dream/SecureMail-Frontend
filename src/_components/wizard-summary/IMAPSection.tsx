@@ -22,12 +22,18 @@ export function IMAPSection({
   showPassword,
   onTogglePassword,
   errors,
+  clearErrors,
+  handleBlur,
+  validateFields,
 }: {
   formData: WizardFormData;
   handleChange: (field: keyof WizardFormData, value: string) => void;
   showPassword: boolean;
   onTogglePassword: () => void;
   errors?: FieldErrors<WizardFormData>;
+  clearErrors?: any;
+  handleBlur?: (field: keyof WizardFormData) => void;
+  validateFields?: (fields: (keyof WizardFormData)[]) => Promise<boolean>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -62,6 +68,16 @@ export function IMAPSection({
   };
 
   const handleSave = async () => {
+    if (validateFields) {
+      const isValid = await validateFields([
+        "imapHost",
+        "imapPort",
+        "imapSecurity",
+        "imapUsername",
+        "imapPassword",
+      ]);
+      if (!isValid) return;
+    }
     setIsSaving(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
     setIsSaving(false);
@@ -83,9 +99,11 @@ export function IMAPSection({
               label="IMAP Host"
               value={formData.imapHost}
               className="w-full"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange("imapHost", e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleChange("imapHost", e.target.value);
+                clearErrors?.("imapHost");
+              }}
+              onBlur={() => handleBlur?.("imapHost")}
               error={errors?.imapHost?.message}
             />
             <Input
@@ -93,22 +111,29 @@ export function IMAPSection({
               type="number"
               value={formData.imapPort}
               className="w-full"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange("imapPort", e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleChange("imapPort", e.target.value);
+                clearErrors?.("imapPort");
+              }}
+              onBlur={() => handleBlur?.("imapPort")}
               error={errors?.imapPort?.message}
             />
             <SecuritySelect
               value={formData.imapSecurity}
-              onChange={(v) => handleChange("imapSecurity", v)}
+              onChange={(v) => {
+                handleChange("imapSecurity", v);
+                clearErrors?.("imapSecurity");
+              }}
             />
             <Input
               label="Username"
               value={formData.imapUsername || ""}
               className="w-full"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange("imapUsername", e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleChange("imapUsername", e.target.value);
+                clearErrors?.("imapUsername");
+              }}
+              onBlur={() => handleBlur?.("imapUsername")}
               error={errors?.imapUsername?.message}
             />
           </div>
@@ -118,9 +143,11 @@ export function IMAPSection({
               label="Password"
               value={formData.imapPassword || ""}
               className="w-full"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange("imapPassword", e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleChange("imapPassword", e.target.value);
+                clearErrors?.("imapPassword");
+              }}
+              onBlur={() => handleBlur?.("imapPassword")}
               error={errors?.imapPassword?.message}
             />
           </div>

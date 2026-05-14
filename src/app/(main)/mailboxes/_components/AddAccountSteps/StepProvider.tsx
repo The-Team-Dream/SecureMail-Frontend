@@ -37,14 +37,14 @@ export function StepProvider({
           <Input
             label="Mailbox Name"
             placeholder="Mailbox Name"
-            {...(register ? register("mailboxName") : {})}
+            {...(register ? register("mailboxName", { onChange: () => clearErrors?.("mailboxName") }) : {})}
             error={errors?.mailboxName?.message}
           />
           <Input
             label="Email"
             type="email"
             placeholder="Email"
-            {...(register ? register("emailAddress") : {})}
+            {...(register ? register("emailAddress", { onChange: () => clearErrors?.("emailAddress") }) : {})}
             error={errors?.emailAddress?.message}
           />
         </div>

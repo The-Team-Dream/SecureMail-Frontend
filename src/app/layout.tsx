@@ -4,7 +4,6 @@ import "../styles/globals.css";
 import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
-import { CheckCheckIcon, X } from "lucide-react";
 import { ThemeProvider } from "@/utils/providers/ThemeProvider";
 import SplashPreloader from "@/_components/SplashScreen";
 

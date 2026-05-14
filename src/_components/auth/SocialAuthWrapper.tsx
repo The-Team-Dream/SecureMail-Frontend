@@ -25,7 +25,7 @@ const SocialAuthWrapper = () => {
       }
     };
 
-    const channel = new BroadcastChannel('oauth_channel');
+    const channel = new BroadcastChannel("oauth_channel");
     channel.onmessage = (event) => {
       if (event.data?.type === "OAUTH_SUCCESS" && event.data?.token) {
         handleSuccess(event.data.token);

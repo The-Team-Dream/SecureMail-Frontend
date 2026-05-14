@@ -275,7 +275,7 @@ const PersonalInfo = () => {
                             if (errors.username) {
                               clearErrors("username");
                             }
-                          },
+                          }
                         })}
                         placeholder="Your Name"
                         error={errors.username?.message}
@@ -300,7 +300,7 @@ const PersonalInfo = () => {
                             if (errors.email) {
                               clearErrors("email");
                             }
-                          },
+                          }
                         })}
                         placeholder="email@example.com"
                         error={errors.email?.message}

@@ -19,7 +19,6 @@ import { useChangePassword } from "@/APIs/hooks/userSettings";
 import { useServerErrors } from "@/utils/form-utils";
 import BackEndError from "@/_components/shared/BackEndError";
 
-// Compute once at module load — avoids recalculating on every render
 const TODAY_STRING = new Date().toLocaleDateString(undefined, {
   year: "numeric",
   month: "short",
@@ -28,7 +27,8 @@ const TODAY_STRING = new Date().toLocaleDateString(undefined, {
 
 const Security = memo(() => {
   const [isEditing, setIsEditing] = useState(false);
-  const { mutate: changePassword, isPending: isChangingPassword } = useChangePassword();
+  const { mutate: changePassword, isPending: isChangingPassword } =
+    useChangePassword();
 
   const {
     handleSubmit,
@@ -180,15 +180,15 @@ const Security = memo(() => {
                 </div>
               )}
 
-                <div className="mt-4">
-                  <BackEndError
-                    error={
-                      errors.root?.message
-                        ? String(errors.root.message)
-                        : undefined
-                    }
-                  />
-                </div>
+              <div className="mt-4">
+                <BackEndError
+                  error={
+                    errors.root?.message
+                      ? String(errors.root.message)
+                      : undefined
+                  }
+                />
+              </div>
 
               {isEditing && (
                 <div className="mt-8 flex justify-end">

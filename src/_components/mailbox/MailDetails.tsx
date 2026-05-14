@@ -45,7 +45,6 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
   }
 
   if (error || !email) {
-    console.log("📨 MailDetails: Showing error state (Data Missing)");
     return (
       <StateMessage
         title="Error"

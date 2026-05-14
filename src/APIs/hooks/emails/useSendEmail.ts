@@ -15,4 +15,3 @@ export const useSendEmail = (mailboxId: string) => {
     onError: () => {},
   });
 };
-

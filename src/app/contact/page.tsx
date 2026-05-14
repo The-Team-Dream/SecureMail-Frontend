@@ -50,7 +50,7 @@ const Contact = () => {
     reset,
   } = useForm<IContact>({
     mode: "onBlur",
-    reValidateMode: "onChange",
+    reValidateMode: "onBlur",
     resolver: zodResolver(ContactSchema),
   });
   const onSubmit = async (data: IContact) => {

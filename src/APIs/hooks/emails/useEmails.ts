@@ -10,7 +10,6 @@ export const useEmails = (
   return useQuery({
     queryKey: ["emails", mailboxId, folder, page],
     queryFn: () => emailsApi.getEmails(mailboxId, folder, page),
-    staleTime: 5 * 60 * 1000,
     enabled: !!mailboxId && !!folder,
     placeholderData: keepPreviousData,
   });

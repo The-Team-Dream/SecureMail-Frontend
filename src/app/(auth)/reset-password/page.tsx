@@ -113,10 +113,17 @@ function ResetPasswordContent() {
                 </div>
                 <BackEndError
                   error={
-                    errors.root?.message ? String(errors.root.message) : undefined
+                    errors.root?.message
+                      ? String(errors.root.message)
+                      : undefined
                   }
                 />
-                <Button size={"lg"} type="submit" disabled={isPending} className="w-full">
+                <Button
+                  size={"lg"}
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full"
+                >
                   {isPending ? (
                     <>
                       <Spinner />

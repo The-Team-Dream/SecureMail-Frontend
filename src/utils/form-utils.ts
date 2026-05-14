@@ -29,11 +29,9 @@ export const useServerErrors = <T extends FieldValues>(
         }
       });
 
-      // If it's a single message that wasn't matched to a field, put it in root
       if (!errorHandled && typeof errors === "string") {
         setError("root" as Path<T>, { type: "server", message: errors });
       } else if (!errorHandled && Array.isArray(errors) && errors.length > 0) {
-        // If it's an array but none matched, put the first one in root or join them
         setError("root" as Path<T>, {
           type: "server",
           message: errors[0],

@@ -20,6 +20,17 @@ interface StepSummaryProps extends WizardStepProps {
   isPending?: boolean;
 }
 
+export interface SectionProps {
+  formData: WizardFormData;
+  handleChange: (field: keyof WizardFormData, value: string) => void;
+  errors?: any;
+  clearErrors?: any;
+  handleBlur?: (field: keyof WizardFormData) => void;
+  validateFields?: (fields: (keyof WizardFormData)[]) => Promise<boolean>;
+  showPassword?: boolean;
+  onTogglePassword?: () => void;
+}
+
 export function StepSummary({
   formData = {} as WizardFormData,
   handleChange = () => {},
@@ -32,18 +43,28 @@ export function StepSummary({
     handleSubmit,
     setValue,
     watch,
+    clearErrors,
+    trigger,
     formState: { errors },
   } = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
     defaultValues: formData,
-    mode: "all",
+    mode: "onBlur",
   });
 
   const localFormData = watch();
 
   const localHandleChange = (field: keyof WizardFormData, value: string) => {
-    setValue(field, value, { shouldValidate: true, shouldDirty: true });
+    setValue(field, value, { shouldValidate: false, shouldDirty: true });
     handleChange(field, value);
+  };
+
+  const localHandleBlur = (field: keyof WizardFormData) => {
+    trigger(field);
+  };
+
+  const validateFields = async (fields: (keyof WizardFormData)[]) => {
+    return await trigger(fields);
   };
 
   const onSubmit = async () => {
@@ -80,6 +101,9 @@ export function StepSummary({
           formData={localFormData}
           handleChange={localHandleChange}
           errors={errors}
+          clearErrors={clearErrors}
+          handleBlur={localHandleBlur}
+          validateFields={validateFields}
         />
 
         <IMAPSection
@@ -88,6 +112,9 @@ export function StepSummary({
           showPassword={showImapPassword}
           onTogglePassword={() => setShowImapPassword((p) => !p)}
           errors={errors}
+          clearErrors={clearErrors}
+          handleBlur={localHandleBlur}
+          validateFields={validateFields}
         />
 
         <SMTPSection
@@ -96,12 +123,18 @@ export function StepSummary({
           showPassword={showSmtpPassword}
           onTogglePassword={() => setShowSmtpPassword((p) => !p)}
           errors={errors}
+          clearErrors={clearErrors}
+          handleBlur={localHandleBlur}
+          validateFields={validateFields}
         />
 
         <AdvancedSection
           formData={localFormData}
           handleChange={localHandleChange}
           errors={errors}
+          clearErrors={clearErrors}
+          handleBlur={localHandleBlur}
+          validateFields={validateFields}
         />
       </div>
     </form>

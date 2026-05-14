@@ -14,7 +14,9 @@ import { toast } from "sonner";
 import { Text } from "@/_components/shared/Text";
 import dynamic from "next/dynamic";
 
-const SocialAuthWrapper = dynamic(() => import("@/_components/auth/SocialAuthWrapper"));
+const SocialAuthWrapper = dynamic(
+  () => import("@/_components/auth/SocialAuthWrapper"),
+);
 import { Spinner } from "@/components/ui/spinner";
 import { useServerErrors } from "@/utils/form-utils";
 import BackEndError from "@/_components/shared/BackEndError";
@@ -29,7 +31,7 @@ export default function Signup() {
     reset,
   } = useForm<ISignUp>({
     mode: "onBlur",
-    reValidateMode: "onChange",
+    reValidateMode: "onBlur",
     resolver: zodResolver(signupSchema),
   });
   const router = useRouter();
@@ -142,7 +144,12 @@ export default function Signup() {
               errors.root?.message ? String(errors.root.message) : undefined
             }
           />
-          <Button size={"lg"} type="submit" disabled={signupMutation.isPending} className="w-full">
+          <Button
+            size={"lg"}
+            type="submit"
+            disabled={signupMutation.isPending}
+            className="w-full"
+          >
             {signupMutation.isPending ? (
               <>
                 <Spinner />

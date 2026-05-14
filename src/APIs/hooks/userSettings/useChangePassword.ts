@@ -9,7 +9,7 @@ export const useChangePassword = () => {
       toast.success("Password changed successfully");
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Failed to change password");
+      console.error(err.response?.data?.message || "Failed to change password");
     },
   });
 };

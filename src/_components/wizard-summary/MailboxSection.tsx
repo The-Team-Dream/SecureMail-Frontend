@@ -14,10 +14,16 @@ export function MailboxSection({
   formData,
   handleChange,
   errors,
+  clearErrors,
+  handleBlur,
+  validateFields,
 }: {
   formData: WizardFormData;
   handleChange: (field: keyof WizardFormData, value: string) => void;
   errors?: FieldErrors<WizardFormData>;
+  clearErrors?: any;
+  handleBlur?: (field: keyof WizardFormData) => void;
+  validateFields?: (fields: (keyof WizardFormData)[]) => Promise<boolean>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -41,6 +47,10 @@ export function MailboxSection({
   };
 
   const handleSave = async () => {
+    if (validateFields) {
+      const isValid = await validateFields(["mailboxName", "emailAddress"]);
+      if (!isValid) return;
+    }
     setIsSaving(true);
     // Simulate API call / save logic
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -64,9 +74,11 @@ export function MailboxSection({
                 label="Mailbox Name"
                 value={formData.mailboxName}
                 className="w-full"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChange("mailboxName", e.target.value)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleChange("mailboxName", e.target.value);
+                  clearErrors?.("mailboxName");
+                }}
+                onBlur={() => handleBlur?.("mailboxName")}
                 error={errors?.mailboxName?.message}
               />
             </div>
@@ -76,9 +88,11 @@ export function MailboxSection({
                 value={formData.emailAddress || ""}
                 className="w-full"
                 placeholder="you@example.com"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChange("emailAddress", e.target.value)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleChange("emailAddress", e.target.value);
+                  clearErrors?.("emailAddress");
+                }}
+                onBlur={() => handleBlur?.("emailAddress")}
                 error={errors?.emailAddress?.message}
               />
             </div>

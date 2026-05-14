@@ -44,8 +44,8 @@ export function useAddAccountWizard({
 
   const form = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
-    mode: "all",
-    reValidateMode: "onChange",
+    mode: "onBlur",
+    reValidateMode: "onBlur",
     shouldUnregister: false,
     defaultValues: {
       mailboxName: "",
@@ -257,51 +257,20 @@ export function useAddAccountWizard({
 
   // ─── IMAP Submission (step 5 → save) ───────────────────────────────────────
   const handleImapSubmit = async () => {
-    // ── Pre-call client-side validation (with descriptive toasts) ────────────
-    if (!formData.mailboxName?.trim()) {
-      toast.error("Display name is required.");
-      return;
-    }
-    if (!formData.emailAddress?.trim()) {
-      toast.error("Email address is required.");
-      return;
-    }
-    if (!formData.imapHost?.trim()) {
-      toast.error("IMAP host is required.");
-      return;
-    }
-    if (!formData.imapPassword?.trim()) {
-      toast.error("Password is required.");
-      return;
-    }
-    const portNum = Number(formData.imapPort);
-    if (
-      !formData.imapPort ||
-      isNaN(portNum) ||
-      portNum < 1 ||
-      portNum > 65535
-    ) {
-      toast.error("IMAP port must be a number between 1 and 65535.");
-      return;
-    }
-
     setIsImapLoading(true);
     try {
       const security = formData.imapSecurity?.toUpperCase();
       const isSecure = Boolean(security === "SSL/TLS");
-      const smtpPortRaw = Number(formData.smtpPort);
-      const smtpPortNum =
-        formData.smtpPort && !isNaN(smtpPortRaw) ? smtpPortRaw : undefined;
 
       await connectImap({
-        host: formData.imapHost.trim(),
-        port: portNum,
-        email: formData.emailAddress.trim(),
+        host: formData.imapHost,
+        port: formData.imapPort as unknown as number,
+        email: formData.emailAddress,
         password: formData.imapPassword,
         secure: isSecure,
-        displayName: formData.mailboxName.trim(),
-        smtpHost: formData.smtpHost?.trim() || undefined,
-        smtpPort: smtpPortNum,
+        displayName: formData.mailboxName,
+        smtpHost: formData.smtpHost || undefined,
+        smtpPort: formData.smtpPort as unknown as number,
       });
 
       // ── Success: clear state and go back to list ──────────

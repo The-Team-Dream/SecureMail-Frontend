@@ -72,3 +72,14 @@ export interface WizardStepProps {
   clearErrors?: UseFormClearErrors<WizardFormData>;
   onPrev?: () => void;
 }
+
+export const imapConfigSchema = z.object({
+  host: z.string().min(1, "IMAP server host is required"),
+  port: z.coerce.number().min(1).max(65535),
+  email: z.string().min(1, "Email is required"),
+  password: z.string().min(1, "Password is required"),
+  secure: z.boolean().default(true),
+  displayName: z.string().min(1, "Name is required"),
+  smtpHost: z.string().optional(),
+  smtpPort: z.coerce.number().min(1).max(65535).optional(),
+});

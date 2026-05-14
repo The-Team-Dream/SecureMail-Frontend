@@ -17,10 +17,16 @@ export function AdvancedSection({
   formData,
   handleChange,
   errors,
+  clearErrors,
+  handleBlur,
+  validateFields,
 }: {
   formData: WizardFormData;
   handleChange: (field: keyof WizardFormData, value: string) => void;
   errors?: FieldErrors<WizardFormData>;
+  clearErrors?: any;
+  handleBlur?: (field: keyof WizardFormData) => void;
+  validateFields?: (fields: (keyof WizardFormData)[]) => Promise<boolean>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -39,6 +45,10 @@ export function AdvancedSection({
   };
 
   const handleSave = async () => {
+    if (validateFields) {
+      const isValid = await validateFields(["syncInterval"]);
+      if (!isValid) return;
+    }
     setShowSyncDropdown(false);
     setIsSaving(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -87,6 +97,7 @@ export function AdvancedSection({
                         type="button"
                         onClick={() => {
                           handleChange("syncInterval", i.toString());
+                          clearErrors?.("syncInterval");
                           setShowSyncDropdown(false);
                         }}
                         className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-[12px] transition-colors hover:bg-primary-200/60 ${formData.syncInterval === i.toString() ? "bg-primary-200/40 text-primary-900" : "text-primary-500"}`}

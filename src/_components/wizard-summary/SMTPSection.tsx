@@ -22,12 +22,18 @@ export function SMTPSection({
   showPassword,
   onTogglePassword,
   errors,
+  clearErrors,
+  handleBlur,
+  validateFields,
 }: {
   formData: WizardFormData;
   handleChange: (field: keyof WizardFormData, value: string) => void;
   showPassword: boolean;
   onTogglePassword: () => void;
   errors?: FieldErrors<WizardFormData>;
+  clearErrors?: any;
+  handleBlur?: (field: keyof WizardFormData) => void;
+  validateFields?: (fields: (keyof WizardFormData)[]) => Promise<boolean>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -60,6 +66,16 @@ export function SMTPSection({
   };
 
   const handleSave = async () => {
+    if (validateFields) {
+      const isValid = await validateFields([
+        "smtpHost",
+        "smtpPort",
+        "smtpSecurity",
+        "smtpUsername",
+        "smtpPassword",
+      ]);
+      if (!isValid) return;
+    }
     setIsSaving(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
     setIsSaving(false);
@@ -81,9 +97,11 @@ export function SMTPSection({
               label="SMTP Host"
               value={formData.smtpHost}
               className="w-full"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange("smtpHost", e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleChange("smtpHost", e.target.value);
+                clearErrors?.("smtpHost");
+              }}
+              onBlur={() => handleBlur?.("smtpHost")}
               error={errors?.smtpHost?.message}
             />
             <Input
@@ -91,22 +109,29 @@ export function SMTPSection({
               type="number"
               value={formData.smtpPort}
               className="w-full"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange("smtpPort", e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleChange("smtpPort", e.target.value);
+                clearErrors?.("smtpPort");
+              }}
+              onBlur={() => handleBlur?.("smtpPort")}
               error={errors?.smtpPort?.message}
             />
             <SecuritySelect
               value={formData.smtpSecurity}
-              onChange={(v) => handleChange("smtpSecurity", v)}
+              onChange={(v) => {
+                handleChange("smtpSecurity", v);
+                clearErrors?.("smtpSecurity");
+              }}
             />
             <Input
               label="Username"
               value={formData.smtpUsername || ""}
               className="w-full"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange("smtpUsername", e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleChange("smtpUsername", e.target.value);
+                clearErrors?.("smtpUsername");
+              }}
+              onBlur={() => handleBlur?.("smtpUsername")}
               error={errors?.smtpUsername?.message}
             />
           </div>
@@ -116,9 +141,11 @@ export function SMTPSection({
               label="App Password"
               value={formData.smtpPassword || ""}
               className="w-full"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange("smtpPassword", e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleChange("smtpPassword", e.target.value);
+                clearErrors?.("smtpPassword");
+              }}
+              onBlur={() => handleBlur?.("smtpPassword")}
               error={errors?.smtpPassword?.message}
             />
           </div>

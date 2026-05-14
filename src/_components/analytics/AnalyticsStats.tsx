@@ -70,14 +70,10 @@ export const AnalyticsStats = ({
       icon: ShieldAlert,
     },
     {
-      title: "Connected Mailboxes",
-      value: overview?.totalMailboxesConnected || 0,
-      badge: {
-        text: "Active",
-        type: "increase",
-        description: "Across all security layers",
-      },
-      icon: Mail,
+      id: "health",
+      title: "System Health",
+      value: "99.9%",
+      status: "Stable",
     },
   ];
 
@@ -92,42 +88,61 @@ export const AnalyticsStats = ({
         <motion.div
           variants={itemVariants}
           key={index}
-          className="flex flex-col justify-between gap-4 rounded-2xl bg-ghostBlue p-6 transition-all hover:shadow-sm border border-primary-100/20 relative overflow-hidden group"
+          className="flex flex-col justify-between gap-2 rounded-2xl bg-ghostBlue p-6 transition-all hover:shadow-sm border border-primary-100/20 relative overflow-hidden group"
         >
-          <div className="space-y-3">
-            <Text color="primary-800" size={"sm"}>
-              {card.title}
-            </Text>
+          {card.id === "health" ? (
+            <div className="flex flex-col h-full justify-between gap-2">
+              <div className="space-y-3">
+                <Text color="primary-800">{card.title}</Text>
 
-            <Text size={"4xl"} font={"bold"}>
-              {card.value}
-            </Text>
-          </div>
-
-          <div className="space-y-3">
-            {card.badge ? (
-              <div className="flex items-center gap-2">
-                <div
-                  className={cn(
-                    "flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-medium",
-                    card.badge.type === "increase"
-                      ? "bg-secondary-200 text-secondary-900"
-                      : "bg-error-50 text-error-500",
-                  )}
-                >
-                  {card.badge.type === "increase" ? (
-                    <ArrowUpRight size={12} className="stroke-[3px]" />
-                  ) : (
-                    <ArrowDownRight size={12} className="stroke-[3px]" />
-                  )}
-                  {card.badge.text}
-                </div>
-                <Text size="xs" color="primary-700">
-                  {card.badge.description}
+                <Text size={"4xl"} font={"bold"}>
+                  {card.value}
                 </Text>
               </div>
-            ) : null}
-          </div>
+
+              <div className="flex flex-col gap-1">
+                <Text color={"secondary-800"} size={"lg"} font={"medium"}>
+                  {card.status}
+                </Text>
+                <div className="w-full h-[3px] bg-secondary-800 rounded-full" />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-3">
+                <Text>{card.title}</Text>
+
+                <Text size={"4xl"} font={"bold"}>
+                  {card.value}
+                </Text>
+              </div>
+
+              <div className="space-y-3">
+                {card.badge ? (
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={cn(
+                        "flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-medium",
+                        card.badge.type === "increase"
+                          ? "bg-secondary-200 text-secondary-900"
+                          : "bg-error-50 text-error-500",
+                      )}
+                    >
+                      {card.badge.type === "increase" ? (
+                        <ArrowUpRight size={12} className="stroke-[3px]" />
+                      ) : (
+                        <ArrowDownRight size={12} className="stroke-[3px]" />
+                      )}
+                      {card.badge.text}
+                    </div>
+                    <Text size="xs" color="primary-700">
+                      {card.badge.description}
+                    </Text>
+                  </div>
+                ) : null}
+              </div>
+            </>
+          )}
         </motion.div>
       ))}
     </motion.div>

@@ -20,22 +20,14 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
             label="SMTP Host"
             required
             placeholder="Smtp.Company.Com"
-            {...(register
-              ? register("smtpHost", {
-                  onChange: () => clearErrors?.(["smtpHost"]),
-                })
-              : {})}
+            {...(register ? register("smtpHost", { onChange: () => clearErrors?.("smtpHost") }) : {})}
             error={errors?.smtpHost?.message}
           />
           <Input
             label="Port"
             type="number"
             placeholder="465"
-            {...(register
-              ? register("smtpPort", {
-                  onChange: () => clearErrors?.(["smtpPort"]),
-                })
-              : {})}
+            {...(register ? register("smtpPort", { onChange: () => clearErrors?.("smtpPort") }) : {})}
             error={errors?.smtpPort?.message}
           />
         </div>
@@ -48,11 +40,7 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
           <div className="relative">
             <select
               className={`w-full h-12 px-4 border text-[14px] text-primary rounded-lg outline-none transition duration-500 appearance-none bg-card ${errors?.smtpSecurity ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
-              {...(register
-                ? register("smtpSecurity", {
-                    onChange: () => clearErrors?.(["smtpSecurity"]),
-                  })
-                : {})}
+              {...(register ? register("smtpSecurity", { onChange: () => clearErrors?.("smtpSecurity") }) : {})}
             >
               <option value="SSL/TLS">SSL/TLS</option>
               <option value="STARTTLS">STARTTLS</option>
@@ -87,11 +75,7 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
         <Input
           label="Username"
           placeholder="Enter Your Username"
-          {...(register
-            ? register("smtpUsername", {
-                onChange: () => clearErrors?.(["smtpUsername"]),
-              })
-            : {})}
+          {...(register ? register("smtpUsername", { onChange: () => clearErrors?.("smtpUsername") }) : {})}
           error={errors?.smtpUsername?.message}
         />
 
@@ -100,11 +84,7 @@ export function StepSMTP({ register, errors, clearErrors }: WizardStepProps) {
           label="App Password"
           type="password"
           placeholder="Enter Password"
-          {...(register
-            ? register("smtpPassword", {
-                onChange: () => clearErrors?.(["smtpPassword"]),
-              })
-            : {})}
+          {...(register ? register("smtpPassword", { onChange: () => clearErrors?.("smtpPassword") }) : {})}
           error={errors?.smtpPassword?.message}
         />
       </div>
