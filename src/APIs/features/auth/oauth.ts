@@ -1,5 +1,5 @@
 import axiosInstance, { baseURL } from "@/lib/axios";
-import { OAuthProvider } from "../../types/auth";
+import { AuthMe, OAuthProvider } from "../../types/auth";
 
 export const getOAuthLoginUrl = (
   provider: OAuthProvider,
@@ -18,7 +18,7 @@ export const getOAuthLoginUrl = (
 };
 
 export const validateOAuthToken = async (token: string) => {
-  const res = await axiosInstance.get("/user/profile", {
+  const res = await axiosInstance.get<AuthMe>("/user/profile", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
