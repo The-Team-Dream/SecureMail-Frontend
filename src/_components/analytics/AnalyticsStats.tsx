@@ -3,12 +3,7 @@ import { motion } from "framer-motion";
 import { AnalyticsOverview } from "@/APIs/types/Analytics";
 import { Text } from "@/_components/shared/Text";
 import { cn } from "@/lib/utils";
-import {
-  Shield,
-  ShieldAlert,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
+import { Shield, ShieldAlert, TrendingUp, TrendingDown } from "lucide-react";
 
 import { StatsSkeleton } from "../skeleton/StatsSkeleton";
 
@@ -128,10 +123,10 @@ export const AnalyticsStats = ({
                       )}
                     >
                       {card.badge.type === "increase" ? (
-                        <ArrowUpRight size={12} className="stroke-[3px]" />
+                        <TrendingUp size={12} className="stroke-[3px]" />
                       ) : (
-                        <ArrowDownRight size={12} className="stroke-[3px]" />
-                      )}
+                        <TrendingDown size={12} className="stroke-[3px]" />
+                    )}
                       {card.badge.text}
                     </div>
                     <Text size="xs" color="primary-700">

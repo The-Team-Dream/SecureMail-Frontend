@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Icons } from "@/constants/icons";
 import { Menu, PencilLine, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";

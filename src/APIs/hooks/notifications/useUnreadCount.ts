@@ -5,6 +5,5 @@ export const useUnreadCount = () => {
   return useQuery({
     queryKey: ["notifications", "unread-count"],
     queryFn: notificationsApi.getUnreadCount,
-    staleTime: 2 * 60 * 1000,
   });
 };

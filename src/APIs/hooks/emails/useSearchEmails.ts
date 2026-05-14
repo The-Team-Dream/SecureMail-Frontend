@@ -5,7 +5,6 @@ export const useSearchEmails = (mailboxId: string, q: string, page: number) => {
   return useQuery({
     queryKey: ["emails", "search", mailboxId, q, page],
     queryFn: () => emailsApi.searchEmails(mailboxId, q, page),
-    staleTime: 5 * 60 * 1000,
     enabled: !!mailboxId && !!q,
   });
 };

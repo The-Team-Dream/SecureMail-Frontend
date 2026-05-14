@@ -5,6 +5,5 @@ export const useSessions = () => {
   return useQuery({
     queryKey: ["sessions"],
     queryFn: sessionsApi.getSessions,
-    staleTime: 2 * 60 * 1000,
   });
 };

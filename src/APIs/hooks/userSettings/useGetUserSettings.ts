@@ -5,7 +5,6 @@ export const useGetUserSettings = () => {
   return useQuery({
     queryKey: ["user-settings"],
     queryFn: settingsApi.getSettings,
-    staleTime: 5 * 60 * 1000,
     // Normalize the backend shape: { user, settings } → flat UserSettings object
     select: (data: any) => {
       if (data?.settings) {
