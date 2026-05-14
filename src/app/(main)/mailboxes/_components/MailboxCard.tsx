@@ -39,9 +39,7 @@ export function MailboxCard({
   syncMailbox: (id: number) => void;
 }) {
   const statusStyles = getStatusStyles(acc.isActive);
-  const { data: stats, isLoading: statsLoading } = useMailboxStats(
-    String(acc.id),
-  );
+  const { data: stats } = useMailboxStats(String(acc.id));
 
   const totalThreats = (stats?.phishingEmails ?? 0) + (stats?.spamEmails ?? 0);
 
@@ -83,56 +81,36 @@ export function MailboxCard({
         </div>
 
         {/* Analytics Section */}
-        {statsLoading ? (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex flex-col items-center flex-1">
-              <Skeleton className="h-8 w-12" />
-              <Skeleton className="h-3 w-16 mt-1" />
-            </div>
-            <div className="w-px h-10 bg-primary-100/60 shrink-0"></div>
-            <div className="flex flex-col items-center flex-1">
-              <Skeleton className="h-8 w-12" />
-              <Skeleton className="h-3 w-16 mt-1" />
-            </div>
-            <div className="w-px h-10 bg-primary-100/60 shrink-0" />
-            <div className="flex flex-col items-center flex-1">
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-3 w-12 mt-1" />
-            </div>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex flex-col items-center flex-1">
+            <Text size="2xl" color={"info-700"} font="medium">
+              {stats?.totalEmails ?? 0}
+            </Text>
+            <Text size="xs" color={"primary-500"} className="mt-1">
+              Total Emails
+            </Text>
           </div>
-        ) : (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex flex-col items-center flex-1">
-              <Text size="2xl" color={"info-700"} font="medium">
-                {stats?.totalEmails ?? 0}
-              </Text>
-              <Text size="xs" color={"primary-500"} className="mt-1">
-                Total Emails
-              </Text>
-            </div>
-            <div className="w-px h-10 bg-primary-100/60 shrink-0"></div>
-            <div className="flex flex-col items-center flex-1">
-              <Text size="2xl" color={"error-600"} font="semiBold">
-                {totalThreats}
-              </Text>
-              <Text size="xs" color={"primary-500"} className="mt-1">
-                Threats
-              </Text>
-            </div>
-            <div className="w-px h-10 bg-primary-100/60 shrink-0" />
-            <div className="flex flex-col items-center flex-1">
-              <Text size="xl" font="semiBold" color={"primary-800"}>
-                {acc?.lastSyncedAt
-                  ? new Date(acc.lastSyncedAt).toLocaleDateString()
-                  : "Never"}
-              </Text>
-              <Text size="xs" className="mt-1">
-                Last sync
-              </Text>
-            </div>
+          <div className="w-px h-10 bg-primary-100/60 shrink-0"></div>
+          <div className="flex flex-col items-center flex-1">
+            <Text size="2xl" color={"error-600"} font="semiBold">
+              {totalThreats}
+            </Text>
+            <Text size="xs" color={"primary-500"} className="mt-1">
+              Threats
+            </Text>
           </div>
-        )}
-
+          <div className="w-px h-10 bg-primary-100/60 shrink-0" />
+          <div className="flex flex-col items-center flex-1">
+            <Text size="xl" font="semiBold" color={"primary-800"}>
+              {acc?.lastSyncedAt
+                ? new Date(acc.lastSyncedAt).toLocaleDateString()
+                : "Never"}
+            </Text>
+            <Text size="xs" className="mt-1">
+              Last sync
+            </Text>
+          </div>
+        </div>
         {/* Sync Button Section */}
         <div className="flex flex-col gap-3">
           <Button
