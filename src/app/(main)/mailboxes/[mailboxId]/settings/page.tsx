@@ -54,14 +54,14 @@ const MailboxSettings = () => {
   });
 
   useEffect(() => {
-    if (mailbox) {
+    if (mailbox && !isLoading) {
       reset({
         mailboxName: mailbox.displayName || "",
         emailForwarding: false,
         pushNotifications: mailbox.pushNotificationsEnabled,
       });
     }
-  }, [mailbox, reset]);
+  }, [mailbox, isLoading, reset]);
 
   const onSubmit = (data: IMailboxSettings) => {
     updateMailbox({
@@ -107,14 +107,6 @@ const MailboxSettings = () => {
             General
           </Text>
           <div className="border-b border-primary-100 pb-10 space-y-6">
-            <div className="flex flex-col gap-1">
-              <Text size="sm" color="primary-500">
-                Email Address
-              </Text>
-              <Text font="medium" size="lg" color="primary-950">
-                {mailbox?.emailAddress}
-              </Text>
-            </div>
             <Input
               label="Mailbox Name"
               {...register("mailboxName", {

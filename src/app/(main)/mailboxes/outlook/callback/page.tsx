@@ -14,6 +14,12 @@ export default function OutlookOAuthCallback() {
     const code = searchParams.get("code");
     const error = searchParams.get("error");
 
+    const finish = () => {
+      setTimeout(() => {
+        window.close();
+      }, 100);
+    };
+
     if (window.opener) {
       sentRef.current = true;
       if (code) {
@@ -22,17 +28,17 @@ export default function OutlookOAuthCallback() {
           { type: "OAUTH_CODE_RECEIVED", code },
           window.location.origin,
         );
-        window.close();
+        finish();
       } else if (error) {
         console.error("Outlook Callback Error:", error);
         window.opener.postMessage(
           { type: "OAUTH_ERROR", error },
           window.location.origin,
         );
-        window.close();
+        finish();
       } else {
         console.warn("Outlook Callback: No code or error found");
-        window.close();
+        finish();
       }
     } else {
       console.error(

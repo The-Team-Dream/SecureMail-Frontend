@@ -6,3 +6,4 @@ export * from "./useVerifyOtp";
 export * from "./useResendOtp";
 export * from "./useLogout";
 export * from "./useGetAuthMe";
+export * from "./useOAuthLogin";

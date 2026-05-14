@@ -27,6 +27,8 @@ import DOMPurify from "dompurify";
 import { MailDetailsSkeleton } from "../skeleton/MailDetailsSkeleton";
 import { StateMessage } from "../shared/StateMessage";
 import { Icons } from "@/constants/icons";
+import notFoundImg from "../../../public/images/not-found.png";
+import Image from "next/image";
 
 export const MailDetails = ({ emailId }: { emailId: string }) => {
   const router = useRouter();
@@ -50,7 +52,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
         title="Error"
         variant="error"
         description="Failed to load email details."
-        image={"/images/not-found.png"}
+        image={notFoundImg}
       />
     );
   }
@@ -226,7 +228,9 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                   {/* Inline images */}
                   {imageAtts.map((att: any) => (
                     <div key={att.id} className="rounded-xl overflow-hidden">
-                      <img
+                      <Image
+                        width={500}
+                        height={500}
                         src={att.url}
                         alt={att.filename}
                         className="max-w-full rounded-xl object-contain"

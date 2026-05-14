@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Plus, Wifi, WifiOff } from "lucide-react";
 import Container from "@/_components/shared/Container";
 import { useMailboxes, useSyncMailbox } from "@/APIs/hooks/mailboxes";
-import { useMailboxStats } from "@/APIs/hooks/analytics";
 import { Mailbox } from "@/APIs/types/Mailbox";
 import { Icons } from "@/constants/icons";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { Spinner } from "@/components/ui/spinner";
 import { ProgressBar } from "@/_components/shared/ProgressBar";
-import notFoundImg from "../../../../../public/images/not-found.png";
+import notFoundImg from "@/../public/images/not-found.png";
 
 interface ConnectedAccountsProps {
   onAddAccount: () => void;

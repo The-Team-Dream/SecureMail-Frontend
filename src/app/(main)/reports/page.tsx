@@ -23,7 +23,7 @@ const containerVariants = {
   },
 };
 
-import notFoundImg from "../../../../public/images/not-found.png";
+import notFoundImg from "@/../public/images/not-found.png";
 
 
 export default function Reports() {
@@ -79,7 +79,7 @@ export default function Reports() {
         >
           {useMemo(() => stats.map(({ id, ...props }) => (
             <ReportStatCard key={id} {...props} />
-          )), [stats])}
+          )), [])}
         </motion.div>
 
         {/* List Items */}
@@ -91,7 +91,7 @@ export default function Reports() {
         >
           {useMemo(() => listItems.map(({ id, ...props }) => (
             <ReportListItem key={id} {...props} />
-          )), [listItems])}
+          )), [])}
         </motion.div>
       </div>
     </Container>

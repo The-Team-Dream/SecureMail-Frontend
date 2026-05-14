@@ -1,6 +1,6 @@
 import React from "react";
 import { StateMessage } from "@/_components/shared/StateMessage";
-import notFoundImg from "../../../../../public/images/not-found.png";
+import notFoundImg from "@/../public/images/not-found.png";
 
 interface EmptyMailboxProps {
   onAddAccount: () => void;

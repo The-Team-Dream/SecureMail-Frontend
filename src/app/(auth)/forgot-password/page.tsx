@@ -1,4 +1,5 @@
 "use client";
+
 import { Input } from "@/_components/shared/Input";
 import { useForgetPassword } from "@/APIs/hooks/auth";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,8 @@ import { Text } from "@/_components/shared/Text";
 import { Spinner } from "@/components/ui/spinner";
 import { useServerErrors } from "@/utils/form-utils";
 import BackEndError from "@/_components/shared/BackEndError";
+import forgotPasswordImg from "../../../../public/images/forgot-password.png";
+
 export default function ForgotPassword() {
   const {
     handleSubmit,
@@ -44,13 +47,12 @@ export default function ForgotPassword() {
       <div className="max-w-sm lg:max-w-lg w-full mx-auto">
         {/* Forgot Password Image */}
         <Image
-          src="/images/forgot-password.jpg"
+          src={forgotPasswordImg}
           width={350}
           height={350}
           alt="Forgot Password Image"
           className="mx-auto mb-4"
           priority
-          unoptimized
         />
         <div className="flex flex-col text-center gap-8">
           {/* Text Container */}

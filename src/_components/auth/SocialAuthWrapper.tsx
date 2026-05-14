@@ -1,34 +1,40 @@
 "use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
 import { getOAuthLoginUrl } from "@/APIs/features/auth";
 import { SocialAuthButton } from "./SocialAuthButton";
 import googleIcon from "../../../public/icons/google.svg";
+import logo from "../../../public/icons/logo.png";
+import { toast } from "sonner";
+import { useOAuthLogin } from "@/APIs/hooks/auth";
+
 const SocialAuthWrapper = () => {
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const oauthIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { mutate: handleOAuthSuccess } = useOAuthLogin();
 
   useEffect(() => {
-    const handleSuccess = (token: string) => {
-      import("js-cookie").then((Cookies) => {
-        Cookies.default.set("token", token, {
-          path: "/",
-          expires: 1,
-        });
-        router.push("/mailboxes");
-      });
-    };
-
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
+      // Robust origin check
+      const currentOrigin = window.location.origin;
+      if (event.origin !== currentOrigin) return;
+
       if (event.data?.type === "OAUTH_SUCCESS" && event.data?.token) {
-        handleSuccess(event.data.token);
+        if (oauthIntervalRef.current) {
+          clearInterval(oauthIntervalRef.current);
+          oauthIntervalRef.current = null;
+        }
+        handleOAuthSuccess(event.data.token);
       }
     };
 
     const channel = new BroadcastChannel("oauth_channel");
     channel.onmessage = (event) => {
       if (event.data?.type === "OAUTH_SUCCESS" && event.data?.token) {
-        handleSuccess(event.data.token);
+        if (oauthIntervalRef.current) {
+          clearInterval(oauthIntervalRef.current);
+          oauthIntervalRef.current = null;
+        }
+        handleOAuthSuccess(event.data.token);
       }
     };
 
@@ -36,24 +42,75 @@ const SocialAuthWrapper = () => {
     return () => {
       window.removeEventListener("message", handleMessage);
       channel.close();
+      if (oauthIntervalRef.current) clearInterval(oauthIntervalRef.current);
     };
-  }, [router]);
+  }, [handleOAuthSuccess]);
 
-  const handleOAuthClick = (provider: "google" | "outlook") => {
-    const callbackUrl = `${window.location.origin}/auth/${provider}/callback`;
-    const url = getOAuthLoginUrl(provider, callbackUrl);
+  const handleOAuthClick = async (provider: "google" | "outlook") => {
+    setIsLoading(true);
 
-    // Open a popup window centered on the screen
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
-
-    window.open(
-      url,
+    const popup = window.open(
+      "about:blank",
       "OAuthLogin",
       `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
     );
+
+    if (!popup) {
+      setIsLoading(false);
+      toast.error("Popup blocked. Please allow popups for this site.");
+      return;
+    }
+
+    // Show a loading message with logo in the popup while waiting for the URL
+    popup.document.write(`
+      <html>
+        <head>
+          <title>Connecting...</title>
+          <style>
+            body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f9fafb; color: #111827; }
+            .logo { width: 80px; height: 80px; margin-bottom: 24px; }
+            .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-top: 16px; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            h1 { font-size: 24px; font-weight: 800; margin: 0; color: #000; }
+          </style>
+        </head>
+        <body>
+          <img src="${logo.src}" class="logo" alt="SecureMail" />
+          <h1>SecureMail</h1>
+          <div class="spinner"></div>
+          <div style="margin-top: 12px; color: #64748b;">Connecting to Provider...</div>
+        </body>
+      </html>
+    `);
+
+    try {
+      const origin = window.location.origin;
+      const callbackUrl = `${origin}/auth/${provider}/callback`;
+      const url = getOAuthLoginUrl(provider, callbackUrl);
+
+      // Update the popup URL immediately
+      popup.location.href = url;
+
+      // Start polling to check if the window is closed
+      if (oauthIntervalRef.current) clearInterval(oauthIntervalRef.current);
+      oauthIntervalRef.current = setInterval(() => {
+        if (popup.closed) {
+          if (oauthIntervalRef.current) {
+            clearInterval(oauthIntervalRef.current);
+            oauthIntervalRef.current = null;
+          }
+          setIsLoading(false);
+        }
+      }, 1000);
+    } catch (error) {
+      console.error("OAuth error:", error);
+      if (popup) popup.close();
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,6 +126,7 @@ const SocialAuthWrapper = () => {
           provider="google"
           title="Google"
           iconSrc={googleIcon}
+          isLoading={isLoading}
           onClick={() => handleOAuthClick("google")}
         />
       </div>

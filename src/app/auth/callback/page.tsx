@@ -15,6 +15,12 @@ export default function OAuthSuccess() {
     const token = searchParams.get("token");
     const code = searchParams.get("code");
 
+    const finish = () => {
+      setTimeout(() => {
+        window.close();
+      }, 100);
+    };
+
     if (token) {
       Cookies.set("token", token, { path: "/", expires: 1 });
       
@@ -30,7 +36,7 @@ export default function OAuthSuccess() {
         window.opener.postMessage({ type: "OAUTH_SUCCESS", token }, window.location.origin);
       }
 
-      window.close();
+      finish();
 
       setTimeout(() => {
         toast.success("Logged in successfully");
@@ -41,13 +47,13 @@ export default function OAuthSuccess() {
       if (window.opener) {
         window.opener.postMessage({ type: "OAUTH_CODE_RECEIVED", code }, window.location.origin);
       }
-      window.close();
+      finish();
     } else {
       if (!window.opener) {
         toast.error("Authentication failed. No token or code received.");
         router.push("/sign-in");
       } else {
-        window.close();
+        finish();
       }
     }
   }, [searchParams, router]);

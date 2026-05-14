@@ -1,4 +1,8 @@
-import { useMutation, UseMutationOptions, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { resendOtp } from "../../features/auth";
 import { ResendOtpData } from "../../types/auth";

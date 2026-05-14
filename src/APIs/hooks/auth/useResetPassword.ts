@@ -1,4 +1,8 @@
-import { useMutation, UseMutationOptions, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { resetPassword } from "../../features/auth";
 import { ResetPasswordData } from "../../types/auth";

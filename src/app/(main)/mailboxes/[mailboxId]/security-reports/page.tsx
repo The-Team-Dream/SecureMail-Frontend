@@ -14,7 +14,7 @@ import { ReportsSkeleton } from "@/_components/skeleton/ReportsSkeleton";
 import { StatCard } from "./_components/StatCard";
 import { ReportCard } from "./_components/ReportCard";
 import { containerVariants, itemVariants } from "./_components/variants";
-import notFoundImg from "../../../../../../public/images/not-found.png";
+import notFoundImg from "@/../public/images/not-found.png";
 import { cn } from "@/lib/utils";
 
 export default function SecurityReportsPage({

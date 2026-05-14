@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,11 +14,16 @@ import {
 } from "@/APIs/hooks/mailboxes";
 import { toast } from "sonner";
 import { MailboxProvider } from "@/APIs/types/Mailbox";
+import logo from "../../public/icons/logo.png";
 
 interface UseAddAccountWizardProps {
   onCancel: () => void;
   onSuccess?: (data: WizardFormData, provider: string) => void;
 }
+
+const STORAGE_KEYS = {
+  DATA: "securemail_wizard_data",
+};
 
 export function useAddAccountWizard({
   onCancel,
@@ -33,14 +38,11 @@ export function useAddAccountWizard({
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isImapLoading, setIsImapLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const oauthIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { mutateAsync: connectImap } = useConnectImap();
   const { mutateAsync: connectGmail } = useConnectGmail();
   const { mutateAsync: connectOutlook } = useConnectOutlook();
-
-  const STORAGE_KEYS = {
-    DATA: "securemail_wizard_data",
-  };
 
   const form = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
@@ -64,16 +66,18 @@ export function useAddAccountWizard({
     },
   });
 
-  const {
-    register,
-    trigger,
-    watch,
-    setValue,
-    reset,
-    clearErrors,
-  } = form;
+  const { register, trigger, watch, setValue, reset, clearErrors } = form;
 
   const formData = watch();
+
+  const updateStepUrl = useCallback(
+    (newStep: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("step", newStep.toString());
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
 
   // Sync step from URL
   useEffect(() => {
@@ -88,13 +92,19 @@ export function useAddAccountWizard({
     } else {
       updateStepUrl(1);
     }
-  }, [searchParams]);
+  }, [searchParams, updateStepUrl]);
 
-  const updateStepUrl = (newStep: number) => {
+  const clearPersistence = useCallback(() => {
+    sessionStorage.removeItem(STORAGE_KEYS.DATA);
     const params = new URLSearchParams(searchParams.toString());
-    params.set("step", newStep.toString());
-    router.replace(`${pathname}?${params.toString()}`);
-  };
+    params.delete("step");
+    router.replace(pathname);
+  }, [pathname, router, searchParams]);
+
+  const handleCancel = useCallback(() => {
+    clearPersistence();
+    onCancel();
+  }, [clearPersistence, onCancel]);
 
   // ─── OAuth Popup Listener ──────────────────────────────────────────────────
   useEffect(() => {
@@ -107,10 +117,12 @@ export function useAddAccountWizard({
         return;
       }
 
+      if (oauthIntervalRef.current) {
+        clearInterval(oauthIntervalRef.current);
+        oauthIntervalRef.current = null;
+      }
       const { code } = event.data;
-      const origin = window.location.origin.includes("localhost")
-        ? "http://localhost:3001"
-        : window.location.origin;
+      const origin = window.location.origin;
       const redirectUri =
         provider.toLowerCase() === "gmail"
           ? `${origin}/mailboxes/gmail/callback`
@@ -145,8 +157,25 @@ export function useAddAccountWizard({
     };
 
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [provider, connectGmail, connectOutlook, router]);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      if (oauthIntervalRef.current) clearInterval(oauthIntervalRef.current);
+    };
+  }, [
+    provider,
+    connectGmail,
+    connectOutlook,
+    clearPersistence,
+    reset,
+    handleCancel,
+  ]);
+
+  // Reset loading state when provider changes
+  useEffect(() => {
+    if (provider === "IMAP") {
+      setIsOAuthLoading(false);
+    }
+  }, [provider]);
 
   // Form State Persistence (IMAP only)
   useEffect(() => {
@@ -166,69 +195,110 @@ export function useAddAccountWizard({
     sessionStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(formData));
   }, [formData, isLoaded]);
 
-  const clearPersistence = () => {
-    sessionStorage.removeItem(STORAGE_KEYS.DATA);
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("step");
-    router.replace(pathname);
-  };
-
-  const handleCancel = () => {
-    clearPersistence();
-    onCancel();
-  };
-
-  const handleChange = (field: keyof WizardFormData, value: string) => {
-    setValue(field, value, { shouldValidate: true, shouldDirty: true });
-    clearErrors(field);
-  };
+  const handleChange = useCallback(
+    (field: keyof WizardFormData, value: string) => {
+      setValue(field, value, { shouldValidate: true, shouldDirty: true });
+      clearErrors(field);
+    },
+    [clearErrors, setValue],
+  );
 
   // ─── OAuth Popup Trigger ──────────────────────────────────────────────────
-  const handleOAuthRedirect = async (oauthProvider: "GMAIL" | "OUTLOOK") => {
-    setIsOAuthLoading(true);
-    try {
-      const origin = window.location.origin.includes("localhost")
-        ? "http://localhost:3001"
-        : window.location.origin;
-      const redirectUri = `${origin}/mailboxes/gmail/callback`;
-      let url: string;
+  const handleOAuthRedirect = useCallback(
+    async (oauthProvider: "GMAIL" | "OUTLOOK") => {
+      setIsOAuthLoading(true);
 
-      if (oauthProvider === "GMAIL") {
-        const result = await mailboxApi.getGmailAuthUrl(redirectUri);
-        url = result.url;
-      } else {
-        const result = await mailboxApi.getOutlookAuthUrl(redirectUri);
-        url = result.url;
-      }
-
-      if (!url || !url.startsWith("http")) {
-        throw new Error("Received an invalid redirect URL from the server.");
-      }
-
-      // Open centered popup
+      // Open a blank window immediately to satisfy the browser's user-interaction requirement
       const width = 500;
       const height = 600;
       const left = window.screen.width / 2 - width / 2;
       const top = window.screen.height / 2 - height / 2;
-
-      window.open(
-        url,
+      const popup = window.open(
+        "about:blank",
         "ConnectMailbox",
         `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
       );
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        `Failed to connect ${oauthProvider}. Please try again.`;
-      console.error(`OAuth error [${oauthProvider}]:`, error);
-      toast.error(message);
-      setIsOAuthLoading(false);
-    }
-  };
+
+      if (!popup) {
+        setIsOAuthLoading(false);
+        toast.error(
+          "Popup blocker is enabled. Please allow popups for this site.",
+        );
+        return;
+      }
+
+      // Show a loading message with logo in the popup while waiting for the URL
+      popup.document.write(`
+        <html>
+          <head>
+            <title>Connecting...</title>
+            <style>
+              body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f9fafb; color: #111827; }
+              .logo { width: 80px; height: 80px; margin-bottom: 24px; }
+              .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-top: 16px; }
+              @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+              h1 { font-size: 24px; font-weight: 900; margin: 0; color: #0f172a; }
+            </style>
+          </head>
+          <body>
+            <img src="${logo.src}" class="logo" alt="SecureMail" />
+            <h1>SecureMail</h1>
+            <div class="spinner"></div>
+            <div style="margin-top: 12px; color: #64748b;">Connecting to Provider...</div>
+          </body>
+        </html>
+      `);
+
+      try {
+        const origin = window.location.origin;
+        const redirectUri =
+          oauthProvider === "GMAIL"
+            ? `${origin}/mailboxes/gmail/callback`
+            : `${origin}/mailboxes/outlook/callback`;
+        let url: string;
+
+        if (oauthProvider === "GMAIL") {
+          const result = await mailboxApi.getGmailAuthUrl(redirectUri);
+          url = result.url;
+        } else {
+          const result = await mailboxApi.getOutlookAuthUrl(redirectUri);
+          url = result.url;
+        }
+
+        if (!url || !url.startsWith("http")) {
+          throw new Error("Received an invalid redirect URL from the server.");
+        }
+
+        // Update the popup URL
+        popup.location.href = url;
+
+        // Start polling to check if the window is closed
+        if (oauthIntervalRef.current) clearInterval(oauthIntervalRef.current);
+        oauthIntervalRef.current = setInterval(() => {
+          if (popup.closed) {
+            if (oauthIntervalRef.current) {
+              clearInterval(oauthIntervalRef.current);
+              oauthIntervalRef.current = null;
+            }
+            setIsOAuthLoading(false);
+          }
+        }, 1000);
+      } catch (error: any) {
+        if (popup) popup.close();
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          `Failed to connect ${oauthProvider}. Please try again.`;
+        console.error(`OAuth error [${oauthProvider}]:`, error);
+        toast.error(message);
+        setIsOAuthLoading(false);
+      }
+    },
+    [],
+  );
 
   // ─── Step Validation ────────────────────────────────────────────────────────
-  const validateStep = async (): Promise<boolean> => {
+  const validateStep = useCallback(async (): Promise<boolean> => {
     let fieldsToValidate: (keyof WizardFormData)[] = [];
     if (step === 1) fieldsToValidate = ["mailboxName", "emailAddress"];
     if (step === 2)
@@ -253,10 +323,10 @@ export function useAddAccountWizard({
       return await trigger(fieldsToValidate);
     }
     return true;
-  };
+  }, [step, trigger]);
 
   // ─── IMAP Submission (step 5 → save) ───────────────────────────────────────
-  const handleImapSubmit = async () => {
+  const handleImapSubmit = useCallback(async () => {
     setIsImapLoading(true);
     try {
       const security = formData.imapSecurity?.toUpperCase();
@@ -288,50 +358,66 @@ export function useAddAccountWizard({
     } finally {
       setIsImapLoading(false);
     }
-  };
+  }, [
+    connectImap,
+    formData,
+    clearPersistence,
+    reset,
+    handleCancel,
+  ]);
 
   // ─── Next Handler ───────────────────────────────────────────────────────────
-  const handleNext = async (explicitProvider?: "GMAIL" | "OUTLOOK") => {
-    const activeProvider = explicitProvider || provider;
-    // OAuth providers skip all form steps — instant redirect
-    if (
-      step === 1 &&
-      (activeProvider === "GMAIL" || activeProvider === "OUTLOOK")
-    ) {
-      await handleOAuthRedirect(activeProvider as "GMAIL" | "OUTLOOK");
-      return;
-    }
+  const handleNext = useCallback(
+    async (explicitProvider?: "GMAIL" | "OUTLOOK") => {
+      const activeProvider = explicitProvider || provider;
+      // OAuth providers skip all form steps — instant redirect
+      if (
+        step === 1 &&
+        (activeProvider === "GMAIL" || activeProvider === "OUTLOOK")
+      ) {
+        await handleOAuthRedirect(activeProvider as "GMAIL" | "OUTLOOK");
+        return;
+      }
 
-    const isValid = await validateStep();
-    if (!isValid) return;
+      const isValid = await validateStep();
+      if (!isValid) return;
 
-    // Final IMAP step
-    if (step === 5 && provider === "IMAP") {
-      await handleImapSubmit();
-      return;
-    }
+      // Final IMAP step
+      if (step === 5 && provider === "IMAP") {
+        await handleImapSubmit();
+        return;
+      }
 
-    if (step < 6) {
-      updateStepUrl(step + 1);
-    }
-  };
+      if (step < 6) {
+        updateStepUrl(step + 1);
+      }
+    },
+    [
+      provider,
+      step,
+      handleOAuthRedirect,
+      validateStep,
+      handleImapSubmit,
+      updateStepUrl,
+    ],
+  );
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (step > 1) updateStepUrl(step - 1);
-  };
+  }, [step, updateStepUrl]);
 
-  const handleSuccessCancel = () => {
+  const handleSuccessCancel = useCallback(() => {
     onSuccess?.(formData, provider);
     clearPersistence();
     onCancel();
-  };
+  }, [formData, provider, onSuccess, clearPersistence, onCancel]);
 
-  const handleResetWizard = () => {
+  const handleResetWizard = useCallback(() => {
     clearPersistence();
     updateStepUrl(1);
     reset();
     setProvider("IMAP");
-  };
+  }, [clearPersistence, updateStepUrl, reset]);
 
   const steps = [
     { id: 1, icon: Icons.Mail },

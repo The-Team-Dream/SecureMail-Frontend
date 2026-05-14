@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Text } from "./shared/Text";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { NotificationCardSkeleton } from "@/_components/skeleton/NotificationSkeleton";
 import {
@@ -40,13 +39,15 @@ export const NotificationDropdown = () => {
   const { mutate: readAll } = useReadAllNotifications();
   const { mutate: deleteNotification } = useDeleteNotification();
 
-  const notifications = Array.isArray(notificationsData?.data?.data)
-    ? notificationsData.data.data
-    : Array.isArray(notificationsData?.data)
-      ? notificationsData.data
-      : Array.isArray(notificationsData)
-        ? notificationsData
-        : [];
+  const notifications = useMemo(() => {
+    return Array.isArray(notificationsData?.data?.data)
+      ? notificationsData.data.data
+      : Array.isArray(notificationsData?.data)
+        ? notificationsData.data
+        : Array.isArray(notificationsData)
+          ? notificationsData
+          : [];
+  }, [notificationsData]);
 
   const unreadCount = unreadData?.count || 0;
 
