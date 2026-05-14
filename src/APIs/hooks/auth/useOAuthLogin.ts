@@ -17,7 +17,7 @@ export const useOAuthLogin = (
         path: "/",
         expires: 1,
       });
-      toast.success("Logged in successfully");
+      toast.success("Logged in successfully", { id: "oauth-login" });
       router.push("/mailboxes");
     },
     onError: (error: any) => {

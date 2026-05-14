@@ -4,7 +4,6 @@ import { AnalyticsOverview } from "@/APIs/types/Analytics";
 import { Text } from "@/_components/shared/Text";
 import { cn } from "@/lib/utils";
 import {
-  Mail,
   Shield,
   ShieldAlert,
   ArrowUpRight,

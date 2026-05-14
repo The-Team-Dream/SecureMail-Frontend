@@ -101,8 +101,17 @@ const Settings = () => {
           onClick={() => mutate()}
           size={"sm"}
         >
-          {isPending ? <Spinner /> : <LogOut className="w-4 h-4" />}
-          {isPending ? "Logging out..." : "Log out"}
+          {isPending ? (
+            <>
+              <Spinner />
+              <span className="text-white">Logging out...</span>
+            </>
+          ) : (
+            <>
+              <LogOut className="w-4 h-4 text-white" />
+              <span className="text-white">Log out</span>
+            </>
+          )}
         </Button>
       </Container>
     </Suspense>
@@ -110,4 +119,3 @@ const Settings = () => {
 };
 
 export default Settings;
-

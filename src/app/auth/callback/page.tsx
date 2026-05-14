@@ -39,7 +39,7 @@ export default function OAuthSuccess() {
       finish();
 
       setTimeout(() => {
-        toast.success("Logged in successfully");
+        toast.success("Logged in successfully", { id: "oauth-login" });
         router.push("/mailboxes");
       }, 500);
 

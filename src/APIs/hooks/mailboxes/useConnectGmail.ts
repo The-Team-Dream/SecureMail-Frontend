@@ -14,7 +14,7 @@ export const useConnectGmail = () => {
       redirectUri: string;
     }) => mailboxApi.connectGmail(code, redirectUri),
     onSuccess: (newMailbox) => {
-      toast.success("Gmail connected successfully");
+      toast.success("Gmail connected successfully", { id: "connect-gmail" });
       // Optimistically update the mailboxes list
       queryClient.setQueryData(["mailboxes"], (old: any) => {
         const mailboxes = Array.isArray(old) ? old : [];

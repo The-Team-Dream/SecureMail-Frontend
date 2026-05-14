@@ -7,7 +7,7 @@ export const useUpdateMailbox = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number | string; data: Mailbox }) =>
+    mutationFn: ({ id, data }: { id: number | string; data: Partial<Mailbox> }) =>
       mailboxApi.updateMailbox(Number(id), data),
     onSuccess: (updatedMailbox, variables) => {
       toast.success("Settings Updated Successfully");

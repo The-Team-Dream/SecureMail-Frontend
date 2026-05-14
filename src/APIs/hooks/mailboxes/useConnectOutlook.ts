@@ -15,7 +15,7 @@ export const useConnectOutlook = () => {
       redirectUri: string;
     }) => mailboxApi.connectOutlook(code, redirectUri),
     onSuccess: (newMailbox) => {
-      toast.success("Outlook connected successfully");
+      toast.success("Outlook connected successfully", { id: "connect-outlook" });
       // Optimistically update the mailboxes list
       queryClient.setQueryData(["mailboxes"], (old: Mailbox[]) => {
         const mailboxes = Array.isArray(old) ? old : [];
