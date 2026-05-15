@@ -85,8 +85,10 @@ const textVariants = cva("transition-colors", {
     },
 
     color: {
-      default: "text-primary",
+      default: "text-primary-900",
       muted: "text-muted-foreground",
+      white: "text-white",
+      black: "text-black",
       error: "text-error-500",
       warning: "text-warning-500",
 
@@ -165,8 +167,8 @@ const textVariants = cva("transition-colors", {
 
 interface TextProps
   extends
-    Omit<React.HTMLAttributes<HTMLElement>, "color">,
-    VariantProps<typeof textVariants> {
+  Omit<React.HTMLAttributes<HTMLElement>, "color">,
+  VariantProps<typeof textVariants> {
   as?: ElementType;
 }
 

@@ -170,11 +170,10 @@ const PersonalInfo = () => {
                     variant="outline"
                     size="sm"
                     disabled={isUpdating}
-                    className={`gap-2 transition-all ${
-                      isEditing
+                    className={`gap-2 transition-all ${isEditing
                         ? "bg-error-500 text-white border-error-200 hover:bg-error-700 group"
                         : "bg-transparent border-primary-100"
-                    }`}
+                      }`}
                     onClick={
                       isEditing ? handleCancel : () => setIsEditing(true)
                     }

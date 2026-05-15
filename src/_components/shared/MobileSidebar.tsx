@@ -18,7 +18,14 @@ import {
   Ghost,
   ShieldAlert,
   Trash2,
+  User,
+  LogOut,
 } from "lucide-react";
+import { useLogout } from "@/APIs/hooks/auth";
+import Cookies from "js-cookie";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { Text } from "@/_components/shared/Text";
@@ -66,6 +73,23 @@ export const MobileSidebar = () => {
 
   const isMailPage = !!params.mailboxId;
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
+  const router = useRouter();
+
+  const { mutate: logout, isPending: isLoggingOut } = useLogout({
+    onSuccess: () => {
+      toast.success("Logged out successfully");
+      Cookies.remove("token");
+      router.replace("/sign-in");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Logout failed");
+    },
+  });
+
+  const handleLogout = () => {
+    setOpen(false);
+    logout();
+  };
 
   // Fetch inbox emails for unread count
   const { data: inboxData } = useEmails(params.mailboxId as string, "inbox", 1);
@@ -205,7 +229,7 @@ export const MobileSidebar = () => {
                               <Text
                                 as={"span"}
                                 font={isActive ? "medium" : "default"}
-                                color={isActive ? "primary-950" : "primary-600"}
+                                color={isActive ? "primary-950" : "muted"}
                               >
                                 {item.name}
                               </Text>
@@ -273,7 +297,7 @@ export const MobileSidebar = () => {
                               <Text
                                 as={"span"}
                                 font={isActive ? "medium" : "default"}
-                                color={isActive ? "primary-950" : "primary-600"}
+                                color={isActive ? "primary-950" : "muted"}
                               >
                                 {item.name}
                               </Text>
@@ -328,7 +352,7 @@ export const MobileSidebar = () => {
                             <Text
                               as={"span"}
                               font={isActive ? "medium" : "default"}
-                              color={isActive ? "primary-950" : "primary-600"}
+                              color={isActive ? "primary-950" : "muted"}
                             >
                               {item.name}
                             </Text>
@@ -346,6 +370,67 @@ export const MobileSidebar = () => {
                       );
                     })
                   )}
+
+                  {/* Divider */}
+                  <div className="mt-4 pt-4 border-t border-primary-100 flex flex-col gap-1">
+                    {/* Profile Link */}
+                    <Link
+                      href="/profile"
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
+                        "justify-between px-3 py-2",
+                        pathname === "/profile"
+                          ? "text-primary"
+                          : "text-primary-600 hover:bg-primary-100 hover:text-primary",
+                      )}
+                    >
+                      {pathname === "/profile" && (
+                        <motion.div
+                          layoutId="mobileActiveNavIndicator"
+                          className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                      <div className="flex items-center gap-3">
+                        <User className={cn("w-5 h-5", pathname === "/profile" ? "text-primary" : "text-primary-400")} />
+                        <Text
+                          as={"span"}
+                          font={pathname === "/profile" ? "medium" : "default"}
+                          color={pathname === "/profile" ? "primary-950" : "muted"}
+                        >
+                          Profile
+                        </Text>
+                      </div>
+                      <ChevronRight
+                        className={cn(
+                          "w-4 h-4 transition-transform",
+                          pathname === "/profile" ? "translate-x-1 text-primary" : "text-primary-600 opacity-0 group-hover:opacity-100",
+                        )}
+                      />
+                    </Link>
+
+                    {/* Logout Button */}
+                    <button
+                      onClick={handleLogout}
+                      disabled={isLoggingOut}
+                      className={cn(
+                        "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
+                        "justify-between px-3 py-2 text-error-500 hover:bg-error-50",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        {isLoggingOut ? (
+                          <Spinner className="w-4 h-4 text-error-500" />
+                        ) : (
+                          <LogOut className="w-5 h-5 text-error-500" />
+                        )}
+                        <Text as={"span"} color="error-500">
+                          {isLoggingOut ? "Logging out..." : "Logout"}
+                        </Text>
+                      </div>
+                    </button>
+                  </div>
                 </nav>
 
                 <div className="mt-4">

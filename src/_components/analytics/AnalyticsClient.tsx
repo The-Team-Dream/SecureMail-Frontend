@@ -103,8 +103,8 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
     if (mailboxId && finalMailboxData?.threatsHistory) {
       rawChartData = finalMailboxData.threatsHistory.map((item: any) => ({
         date: new Date(item.date),
-        spam: item.count || 0,
-        phishing: Math.floor((item.count || 0) * 0.4),
+        spam: item.spam || 0,
+        phishing: item.phishing || 0,
         sent: item.sent || 0,
         received: item.received || 0,
       }));
@@ -209,7 +209,7 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
         {isUserLoading ? (
           <Skeleton className="h-9 w-64" />
         ) : (
-          <Text size={"2xl"} font={"medium"}>
+          <Text size={"2xl"} font={"bold"}>
             Good Morning, {user?.user?.username || "User"}
           </Text>
         )}

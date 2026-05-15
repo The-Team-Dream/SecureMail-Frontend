@@ -5,10 +5,17 @@ import {
   Reply,
   Forward,
   ShieldAlert,
+  ShieldCheck,
+  Shield,
   MailOpen,
   Mail,
+  AlertCircle,
+  Activity,
+  ChevronRight,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Text } from "@/_components/shared/Text";
 import { useRouter, useParams } from "next/navigation";
 import { ReclassifyMenu } from "./ReclassifyMenu";
@@ -19,6 +26,7 @@ import {
   useReportEmail,
   useReadEmail,
   useDeleteEmail,
+  useScanEmail,
 } from "@/APIs/hooks/emails";
 import { emailsApi } from "@/APIs/features/emails";
 import { RISK_STYLE_MAP, RiskLevel } from "@/constants/security";
@@ -29,17 +37,28 @@ import { StateMessage } from "../shared/StateMessage";
 import { Icons } from "@/constants/icons";
 import notFoundImg from "../../../public/images/not-found.png";
 import Image from "next/image";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useState } from "react";
+import { motion } from "framer-motion";
 
 export const MailDetails = ({ emailId }: { emailId: string }) => {
   const router = useRouter();
   const params = useParams();
   const mailboxId = params.mailboxId as string;
+  const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
 
   const { data: email, isLoading, error } = useEmailDetails(mailboxId, emailId);
   const reportMutation = useReportEmail(mailboxId);
   const readMutation = useReadEmail(mailboxId);
   const activeFolder = useMailStore((s) => s.activeFolder);
   const deleteMutation = useDeleteEmail(mailboxId, activeFolder ?? undefined);
+  const scanMutation = useScanEmail(mailboxId);
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
 
   if (isLoading) {
@@ -73,6 +92,10 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
 
   const handleToggleRead = () => {
     readMutation.mutate({ id: emailId, read: !email?.isRead });
+  };
+
+  const handleScan = () => {
+    scanMutation.mutate(emailId);
   };
 
   const handleReply = () => {
@@ -112,6 +135,171 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
           {email.subject}.
         </Text>
       </div>
+
+      {/* Security Status Banner (The Hook) */}
+      {email.securityReport && (
+        <div className={cn(
+          "mb-6 p-2 pl-4 rounded-xl border flex items-center justify-between transition-all duration-500",
+          email.securityReport.status === 'SAFE' 
+            ? "bg-success-50/50 border-success-100" 
+            : email.securityReport.status === 'MALICIOUS' 
+              ? "bg-error-50/50 border-error-100" 
+              : "bg-warning-50/50 border-warning-100"
+        )}>
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "p-1.5 rounded-lg",
+              email.securityReport.status === 'SAFE' ? "bg-success-100/50" : "bg-primary-100/50"
+            )}>
+              <ShieldCheck className={cn(
+                "w-4 h-4",
+                email.securityReport.status === 'SAFE' ? "text-success-600" : "text-primary-600"
+              )} />
+            </div>
+            <div className="flex items-center gap-2">
+              <Text size="sm" font="bold" className={cn(
+                email.securityReport.status === 'SAFE' ? "text-success-700" : "text-primary-700"
+              )}>
+                {email.securityReport.status} Analysis
+              </Text>
+              <div className="w-1 h-1 rounded-full bg-primary-200" />
+              <Text size="xs" font="medium" className="opacity-60">
+                {Math.round(email.securityReport.confidenceScore * 100)}% Confidence
+              </Text>
+            </div>
+          </div>
+
+          <Sheet open={isAnalysisOpen} onOpenChange={setIsAnalysisOpen}>
+            <SheetTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 px-3 text-xs font-bold uppercase tracking-tight text-primary-600 hover:bg-white/50"
+              >
+                Full Analysis <ChevronRight className="w-3 h-3 ml-1" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="sm:max-w-md w-full p-0 border-l border-primary-100 overflow-y-auto">
+              <div className="h-full flex flex-col bg-ghostBlue/5">
+                <div className="p-6 border-b border-primary-100 bg-white sticky top-0 z-10">
+                  <SheetHeader className="space-y-1">
+                    <div className="flex items-center gap-2 text-primary-500 mb-2">
+                      <ShieldCheck className="w-5 h-5" />
+                      <Text size="xs" font="black" className="uppercase tracking-[0.2em]">SecureMail AI-Guard</Text>
+                    </div>
+                    <SheetTitle className="text-2xl font-bold text-primary-950">Security Deep-Dive</SheetTitle>
+                  </SheetHeader>
+                </div>
+
+                <div className="p-6 space-y-6">
+                  {/* Risk Score Circle */}
+                  <div className="flex flex-col items-center p-8 rounded-[2rem] bg-white border border-primary-100 shadow-xs relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary-500 via-secondary-500 to-primary-500" />
+                    <div className="relative w-32 h-32 mb-4">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-primary-50" />
+                        <motion.circle 
+                          cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" 
+                          strokeDasharray={364.4}
+                          initial={{ strokeDashoffset: 364.4 }}
+                          animate={{ strokeDashoffset: 364.4 - (364.4 * email.securityReport.confidenceScore) }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          strokeLinecap="round"
+                          className={cn(
+                            email.securityReport.confidenceScore < 0.4 ? "text-error-500" :
+                            email.securityReport.confidenceScore < 0.7 ? "text-warning-500" : "text-success-500"
+                          )}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <Text size="2xl" font="black" className="leading-none">
+                          {Math.round(email.securityReport.confidenceScore * 100)}%
+                        </Text>
+                        <Text size="xs" font="bold" className="opacity-40 uppercase">Confidence</Text>
+                      </div>
+                    </div>
+                    <Text font="bold" size="lg" className={cn(
+                      email.securityReport.status === 'SAFE' ? "text-success-600" : "text-error-600"
+                    )}>
+                      {email.securityReport.status} Verdict
+                    </Text>
+                  </div>
+
+                  {/* Analysis Summary */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-6 bg-primary-500 rounded-full" />
+                      <Text font="bold" size="sm" className="uppercase tracking-wide text-primary-900">Analysis Summary</Text>
+                    </div>
+                    <div className="p-5 rounded-2xl bg-white border border-primary-100 leading-relaxed text-sm text-primary-700">
+                      {email.securityReport.description || email.securityReport.detectionMessage}
+                    </div>
+                  </div>
+
+                  {/* Insights Grid */}
+                  <div className="grid grid-cols-1 gap-4">
+                     {(email.securityReport as any).isCampaign && (
+                        <div className="p-5 rounded-2xl bg-purple-50 border border-purple-100">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Mail className="w-4 h-4 text-purple-600" />
+                            <Text size="xs" font="black" className="text-purple-700 uppercase tracking-widest">Campaign Detected</Text>
+                          </div>
+                          <Text size="sm" className="text-purple-700 leading-relaxed">
+                            {(email.securityReport as any).campaignDescription || "Coordinated threat campaign identified."}
+                          </Text>
+                        </div>
+                     )}
+
+                     {email.securityReport.anomalies && email.securityReport.anomalies.length > 0 && (
+                        <div className="p-5 rounded-2xl bg-orange-50 border border-orange-100">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Activity className="w-4 h-4 text-orange-600" />
+                            <Text size="xs" font="black" className="text-orange-700 uppercase tracking-widest">Behavioral Anomaly</Text>
+                          </div>
+                          <Text size="sm" className="text-orange-700 leading-relaxed">
+                            {email.securityReport.anomalies[0].description}
+                          </Text>
+                        </div>
+                     )}
+                  </div>
+
+                  {/* Priority Insight */}
+                  <div className="p-5 rounded-2xl bg-primary-100/30 border border-primary-100 flex flex-col gap-2">
+                     <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 text-primary-600" />
+                          <Text size="xs" font="black" className="text-primary-700 uppercase tracking-widest">Priority Reasoning</Text>
+                        </div>
+                        <Badge variant="outline" className="text-[10px] bg-white border-primary-200 text-primary-600 font-bold px-2 py-0">
+                          {email.securityReport.priority}
+                        </Badge>
+                     </div>
+                     <Text size="sm" color="primary-700" className="leading-relaxed">
+                       {email.securityReport.reason}
+                     </Text>
+                  </div>
+
+                  {/* Recommendation */}
+                  {email.securityReport.recommendationText && (
+                    <div className="p-5 rounded-2xl bg-primary-900 shadow-lg relative overflow-hidden">
+                      <div className="absolute right-0 bottom-0 w-24 h-24 bg-white/5 rounded-full -mr-8 -mb-8 blur-2xl" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Shield className="w-4 h-4 text-primary-300" />
+                          <Text size="xs" font="black" className="text-primary-300 uppercase tracking-widest">AI Recommendation</Text>
+                        </div>
+                        <Text size="sm" className="text-white italic leading-relaxed">
+                          "{email.securityReport.recommendationText}"
+                        </Text>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      )}
 
       <div className="flex items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
@@ -160,6 +348,19 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
             onClick={handleReply}
           />
           <ActionButton
+            icon={
+              <ShieldCheck
+                className={cn(
+                  "size-4 text-primary",
+                  scanMutation.isPending && "animate-spin",
+                )}
+              />
+            }
+            label={scanMutation.isPending ? "Scanning..." : "Scan"}
+            onClick={handleScan}
+            disabled={scanMutation.isPending}
+          />
+          <ActionButton
             icon={<Forward className="size-4 text-primary" />}
             label="Forward"
             onClick={handleForward}
@@ -177,7 +378,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
             className={email.isRead ? "text-primary-400" : ""}
           />
           <ActionButton
-            icon={<Icons.Delete className="size-4 text-primary" />}
+            icon={<Trash2 className="size-4 text-primary" />}
             label="Delete"
             onClick={handleDelete}
             variant="danger"
@@ -190,6 +391,8 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
           />
         </div>
       </div>
+
+
 
       <div className="flex-1 border-l-2 border-primary-100 pl-6 ml-6 overflow-y-auto">
         <div className="text-primary-800 space-y-6 text-[15px] leading-relaxed">
@@ -265,42 +468,6 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                 </div>
               );
             })()}
-
-          {/* Security Report Section (Basic display) */}
-          {email.securityReport && (
-            <div className="mt-8 p-4 rounded-lg bg-primary-50 border border-primary-100">
-              <div className="flex items-center justify-between mb-4">
-                <Text font="semiBold">Security Analysis</Text>
-                {email.isPhishing &&
-                  (() => {
-                    const riskLevel = "High";
-                    return (
-                      <div
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-1 rounded-full",
-                          RISK_STYLE_MAP[riskLevel as RiskLevel],
-                        )}
-                      >
-                        <div className="w-1.5 h-1.5 rounded-full bg-current" />
-                        <span className="text-xs font-bold uppercase tracking-wider">
-                          {riskLevel} Risk
-                        </span>
-                      </div>
-                    );
-                  })()}
-              </div>
-              <Text size="sm" className="mb-2">
-                Verdict:{" "}
-                {email.malwareVerdict ||
-                  (email.isPhishing ? "Phishing" : "Suspicious")}
-              </Text>
-              {email.securityReport?.aiAnalysis && (
-                <Text size="sm" color="primary-600">
-                  {email.securityReport.aiAnalysis}
-                </Text>
-              )}
-            </div>
-          )}
         </div>
       </div>
 

@@ -54,7 +54,7 @@ export const RecentSecurityEvents = () => {
 
   return (
     <div className="flex flex-col gap-8 p-6 bg-background border border-primary-100 rounded-lg h-full">
-      <Text size="lg" font="bold" color="primary-950" className="mb-2">
+      <Text size="lg" font="bold" className="mb-2">
         Recent Security Events
       </Text>
 

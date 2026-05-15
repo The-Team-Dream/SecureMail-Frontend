@@ -95,24 +95,6 @@ const Settings = () => {
             <Trash2 className="w-4 h-4 text-error-500 group-hover:text-background" />
           </Button>
         </div>
-        <Button
-          className="w-fit px-6 py-2 mt-4 bg-error-500 hover:bg-error-600 gap-2"
-          disabled={isPending}
-          onClick={() => mutate()}
-          size={"sm"}
-        >
-          {isPending ? (
-            <>
-              <Spinner />
-              <span className="text-white">Logging out...</span>
-            </>
-          ) : (
-            <>
-              <LogOut className="w-4 h-4 text-white" />
-              <span className="text-white">Log out</span>
-            </>
-          )}
-        </Button>
       </Container>
     </Suspense>
   );

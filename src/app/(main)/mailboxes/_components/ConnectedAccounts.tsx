@@ -48,7 +48,7 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
           <Text as="h2" size="3xl" font="semiBold">
             Connected Accounts
           </Text>
-          <Text color={"primary-400"}>
+          <Text color="muted">
             You have Total {mailboxes?.length || 0} connected accounts
           </Text>
         </div>

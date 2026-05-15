@@ -3,9 +3,12 @@ export interface AnalyticsOverview {
   totalMailboxesConnected: number;
   totalPhishingDetected: number;
   totalSpamDetected: number;
+  totalMalwareDetected: number;
   totalStorageUsed: number;
   totalEmailsSent: number;
   totalEmailsReceived: number;
+  threatsChange: string;
+  phishingChange: string;
 }
 
 export interface MailboxStats {

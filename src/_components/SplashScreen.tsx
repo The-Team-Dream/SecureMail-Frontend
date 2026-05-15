@@ -137,7 +137,7 @@ export default function SplashPreloader({ children }: SplashPreloaderProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
                   >
-                    <Text font="medium" size="sm" color={'primary-600'} className="tracking-widest uppercase">
+                    <Text font="medium" size="sm" color="muted" className="tracking-widest uppercase">
                       {progress < 30 ? "Initializing Security..." : 
                        progress < 60 ? "Encrypting Channels..." : 
                        progress < 90 ? "Verifying Protocols..." : 

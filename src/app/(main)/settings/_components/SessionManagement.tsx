@@ -93,20 +93,18 @@ const SessionManagement = () => {
                   return (
                     <div
                       key={device.id}
-                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 transition-all duration-300 gap-4 rounded-sm ${
-                        isCurrent
+                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 transition-all duration-300 gap-4 rounded-sm ${isCurrent
                           ? "bg-secondary-50 border-l-4 border-l-secondary-800"
                           : "bg-primary-50"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
                         {/* Icon Container */}
                         <div
-                          className={`shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${
-                            isCurrent
+                          className={`shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${isCurrent
                               ? "bg-secondary-200 text-secondary-800"
                               : "bg-background text-primary"
-                          }`}
+                            }`}
                         >
                           <Icon
                             size={20}
@@ -148,9 +146,9 @@ const SessionManagement = () => {
                             {isCurrent
                               ? "Active now"
                               : format(
-                                  new Date(device.loginAt),
-                                  "dd MMM yyyy, HH:mm",
-                                )}
+                                new Date(device.loginAt),
+                                "dd MMM yyyy, HH:mm",
+                              )}
                           </Text>
                         </div>
                       </div>

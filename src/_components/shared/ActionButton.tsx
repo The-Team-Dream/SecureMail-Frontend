@@ -8,18 +8,21 @@ export const ActionButton = ({
   onClick,
   className,
   variant = "ghost",
+  disabled,
 }: {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
   className?: string;
   variant?: "ghost" | "danger";
+  disabled?: boolean;
 }) => (
   <div className="group relative">
     <Button
       type="button"
       variant="ghost"
       size="icon"
+      disabled={disabled}
       className={cn(
         "rounded-full transition-all",
         variant === "danger"

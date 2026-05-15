@@ -39,7 +39,7 @@ export function AnalyticsChart({
     <div className="min-w-0 rounded-lg p-6 bg-background border border-primary-100 flex flex-col h-full">
       <div className="flex items-center justify-between mb-8">
         <div className="flex flex-col gap-1">
-          <Text size={"lg"} font={"bold"} color="primary-950">
+          <Text size={"lg"} font={"bold"}>
             Weekly Threat Distribution
           </Text>
         </div>

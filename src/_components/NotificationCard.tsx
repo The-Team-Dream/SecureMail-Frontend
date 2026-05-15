@@ -125,7 +125,7 @@ export const NotificationCard = ({
               </Button>
             </div>
             <div className="opacity-100 group-hover:opacity-0 transition-opacity whitespace-nowrap">
-              <Text size="xs" color="primary-800">
+              <Text size="xs" color="muted">
                 {formatDistanceToNow(new Date(notification.createdAt), {
                   addSuffix: true,
                 })}
@@ -137,7 +137,7 @@ export const NotificationCard = ({
         <div className="flex flex-col gap-1">
           <Text
             size="xs"
-            color="primary-500"
+            color="muted"
             className="leading-relaxed line-clamp-2 pr-2"
           >
             {notification.message}

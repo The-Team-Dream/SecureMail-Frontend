@@ -345,10 +345,41 @@ export function ReportCard({ report, isExpanded, onToggle }: ReportCardProps) {
                           font="medium"
                           className="text-background italic leading-relaxed"
                         >
-                          {typeof report.aiReport === "string"
-                            ? report.aiReport
-                            : "Heuristic pattern matched with high-confidence threat signatures found in our global threat database."}
+                          {(() => {
+                            if (!report.aiReport) return "Heuristic pattern matched with high-confidence threat signatures found in our global threat database.";
+                            const ai = report.aiReport as any;
+                            return ai.summary || ai.explanation || ai.verdict || "Advanced neural analysis identified suspicious patterns consistent with identified threat vectors.";
+                          })()}
                         </Text>
+                      </div>
+
+                      {((report.aiReport as any)?.recommendation) && (
+                        <div className="mt-4 p-3 rounded-xl bg-background/10 border border-background/5">
+                           <Text size="xs" font="bold" className="text-primary-200 uppercase mb-1">Recommendation</Text>
+                           <Text size="xs" className="text-primary-100 italic">{(report.aiReport as any).recommendation}</Text>
+                        </div>
+                      )}
+
+                      {/* Compact Insights Row */}
+                      <div className="grid grid-cols-2 gap-3 mt-4">
+                        {(report.aiReport as any).isCampaign && (
+                          <div className="px-3 py-2 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2">
+                            <Icons.Mail className="w-3 h-3 text-purple-300" />
+                            <Text size="xs" className="text-purple-100 font-bold">Campaign</Text>
+                          </div>
+                        )}
+                        {(report.aiReport as any).behavioralAnomaly && (
+                          <div className="px-3 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center gap-2">
+                            <Activity className="w-3 h-3 text-orange-300" />
+                            <Text size="xs" className="text-orange-100 font-bold">Anomaly</Text>
+                          </div>
+                        )}
+                        {(report.aiReport as any).priority && (
+                          <div className="px-3 py-2 rounded-xl bg-background/10 border border-background/10 flex items-center gap-2">
+                            <AlertCircle className="w-3 h-3 text-primary-300" />
+                            <Text size="xs" className="text-primary-100 font-bold">{(report.aiReport as any).priority} Priority</Text>
+                          </div>
+                        )}
                       </div>
 
                       <div className="mt-6 flex items-center gap-3 px-1">

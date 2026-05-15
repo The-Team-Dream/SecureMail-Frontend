@@ -7,6 +7,7 @@ import {
   Archive,
   Trash2,
   MailOpen,
+  ShieldCheck,
 } from "lucide-react";
 import { useMailStore } from "@/stores/useMailStore";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,8 @@ import {
   useDeleteEmail,
   useReadEmail,
   useReclassifyEmail,
+  useScanAllEmails,
+  useScanProgress,
 } from "@/APIs/hooks/emails";
 import type { EmailFolder } from "@/APIs/types/Email";
 import type { Email } from "@/APIs/types/Email";
@@ -59,6 +62,8 @@ export const MailToolbar = ({
   const deleteMutation = useDeleteEmail(mailboxId);
   const readMutation = useReadEmail(mailboxId);
   const reclassifyMutation = useReclassifyEmail(mailboxId);
+  const scanAllMutation = useScanAllEmails(mailboxId);
+  const { data: scanProgress } = useScanProgress(mailboxId);
 
   const isRefreshing = isFetching || isSearchingFetching;
 
@@ -165,8 +170,12 @@ export const MailToolbar = ({
     }
   };
 
+  const handleScanAll = () => {
+    scanAllMutation.mutate();
+  };
+
   return (
-    <div className="flex items-center justify-between px-2 sm:px-4 py-2">
+    <div className="relative flex items-center justify-between px-2 sm:px-4 py-2">
       {/* ══════  Checkbox + Refresh ══════ */}
       <div className="flex items-center gap-1">
         {showCheckbox && (
@@ -209,6 +218,20 @@ export const MailToolbar = ({
             />
           </button>
         )}
+
+        <button
+          onClick={handleScanAll}
+          disabled={scanAllMutation.isPending}
+          className="p-1.5 sm:p-2 rounded-lg text-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-50"
+          title="Scan All Emails"
+        >
+          <ShieldCheck
+            className={cn(
+              "w-4 h-4 sm:w-5 sm:h-5",
+              scanAllMutation.isPending && "animate-spin",
+            )}
+          />
+        </button>
 
         {/* ══════ Bulk Actions ══════ */}
         {selectedIds.length > 0 && (
@@ -275,6 +298,19 @@ export const MailToolbar = ({
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
+
+      {/* ══════ Progress Bar ══════ */}
+      {scanProgress?.isScanning && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary-100 overflow-hidden">
+          <div
+            className="h-full bg-secondary-500 transition-all duration-500 ease-in-out"
+            style={{ width: `${scanProgress.percentage}%` }}
+          />
+          <div className="absolute right-2 -top-5 text-[10px] text-secondary-600 font-semibold">
+            {scanProgress.completed} / {scanProgress.total} ({scanProgress.percentage}%)
+          </div>
+        </div>
+      )}
     </div>
   );
 };

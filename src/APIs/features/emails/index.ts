@@ -10,6 +10,9 @@ import { sendEmail } from "./sendEmail";
 import { replyEmail } from "./replyEmail";
 import { forwardEmail } from "./forwardEmail";
 import { downloadAttachment } from "./downloadAttachment";
+import { scanEmail } from "./scanEmail";
+import { scanAllEmails } from "./scanAllEmails";
+import { getScanProgress } from "./getScanProgress";
 
 export const emailsApi = {
   getEmails,
@@ -24,4 +27,7 @@ export const emailsApi = {
   replyEmail,
   forwardEmail,
   downloadAttachment,
+  scanEmail,
+  scanAllEmails,
+  getScanProgress,
 };

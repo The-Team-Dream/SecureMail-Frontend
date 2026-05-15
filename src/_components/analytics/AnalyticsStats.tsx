@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { AnalyticsOverview } from "@/APIs/types/Analytics";
 import { Text } from "@/_components/shared/Text";
 import { cn } from "@/lib/utils";
-import { Shield, ShieldAlert, TrendingUp, TrendingDown } from "lucide-react";
+import { Shield, ShieldAlert, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { useSystemHealth } from "@/APIs/hooks/system/useSystemHealth";
 
 import { StatsSkeleton } from "../skeleton/StatsSkeleton";
 
@@ -35,39 +36,50 @@ export const AnalyticsStats = ({
   overview,
   isLoading,
 }: AnalyticsStatsProps) => {
-  if (isLoading) {
+  const { data: healthData, isLoading: isHealthLoading } = useSystemHealth();
+
+  if (isLoading || isHealthLoading) {
     return <StatsSkeleton />;
   }
 
   const totalThreats =
-    (overview?.totalPhishingDetected || 0) + (overview?.totalSpamDetected || 0);
+    (overview?.totalPhishingDetected || 0) + 
+    (overview?.totalSpamDetected || 0) + 
+    (overview?.totalMalwareDetected || 0);
+
+  const getTrendType = (trend?: string) => {
+    if (!trend) return "increase";
+    return trend.startsWith("-") ? "decrease" : "increase";
+  };
 
   const statCards = [
     {
       title: "Total Threats Blocked",
       value: totalThreats,
       badge: {
-        text: "14%",
-        type: "increase",
+        text: overview?.threatsChange || "0%",
+        type: getTrendType(overview?.threatsChange),
         description: "Comparison vs previous 30 days",
       },
       icon: Shield,
     },
     {
-      title: "Critical Alerts",
-      value: overview?.totalPhishingDetected,
+      title: "Phishing & Malware",
+      value: (overview?.totalPhishingDetected || 0) + (overview?.totalMalwareDetected || 0),
       badge: {
-        text: "14%",
-        type: "decrease",
-        description: "Active incidents requiring attention",
+        text: overview?.phishingChange || "0%",
+        type: getTrendType(overview?.phishingChange),
+        description: "Critical threats detected",
       },
       icon: ShieldAlert,
     },
     {
       id: "health",
       title: "System Health",
-      value: "99.9%",
-      status: "Stable",
+      value: healthData?.overall === "healthy" ? "100%" : "Issues",
+      status: healthData?.overall === "healthy" ? "Operational" : "Degraded",
+      color: healthData?.overall === "healthy" ? "secondary-800" : "error-500",
+      icon: Activity,
     },
   ];
 
@@ -87,7 +99,10 @@ export const AnalyticsStats = ({
           {card.id === "health" ? (
             <div className="flex flex-col h-full justify-between gap-2">
               <div className="space-y-3">
-                <Text color="primary-800">{card.title}</Text>
+                <div className="flex items-center justify-between">
+                   <Text color="primary-800">{card.title}</Text>
+                   <card.icon className={cn("w-4 h-4", healthData?.overall === "healthy" ? "text-secondary-800" : "text-error-500")} />
+                </div>
 
                 <Text size={"4xl"} font={"bold"}>
                   {card.value}
@@ -95,16 +110,19 @@ export const AnalyticsStats = ({
               </div>
 
               <div className="flex flex-col gap-1">
-                <Text color={"secondary-800"} size={"lg"} font={"medium"}>
+                <Text color={card.color as any} size={"lg"} font={"medium"}>
                   {card.status}
                 </Text>
-                <div className="w-full h-[3px] bg-secondary-800 rounded-full" />
+                <div className={cn("w-full h-[3px] rounded-full", healthData?.overall === "healthy" ? "bg-secondary-800" : "bg-error-500")} />
               </div>
             </div>
           ) : (
             <>
               <div className="space-y-3">
-                <Text>{card.title}</Text>
+                <div className="flex items-center justify-between">
+                  <Text>{card.title}</Text>
+                  <card.icon className="w-4 h-4 text-primary-400" />
+                </div>
 
                 <Text size={"4xl"} font={"bold"}>
                   {card.value}

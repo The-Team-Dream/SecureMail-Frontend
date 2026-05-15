@@ -82,7 +82,7 @@ export const StateMessage = ({
         </Text>
         <Text
           size="sm"
-          color={image ? undefined : "primary-500"}
+          color={image ? undefined : "muted"}
           font={image ? "normal" : "medium"}
           className={cn(
             "max-w-[320px] mb-6 leading-relaxed",

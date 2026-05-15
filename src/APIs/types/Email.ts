@@ -60,10 +60,22 @@ export interface EmailDetails extends Email {
   cc?: string[];
   bcc?: string[];
   securityReport: {
-    isPhishing: boolean;
-    isMalware: boolean;
-    threatDetails: string[];
-    aiAnalysis: string;
+    status: string;
+    confidenceScore: number;
+    detectionMessage: string;
+    severity: string;
+    priority: string;
+    reason: string;
+    description: string;
+    recommendationTitle: string;
+    recommendationText: string;
+    suggestedActions: string[];
+    anomalies: Array<{
+      type: string;
+      title: string;
+      description: string;
+    }>;
+    analysisEngine: string;
   };
 }
 export interface SendEmailPayload {

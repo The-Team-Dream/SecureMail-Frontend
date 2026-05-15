@@ -109,11 +109,11 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                 <Text
                   size="sm"
                   font="medium"
-                  className="truncate text-primary-900"
+                  className="truncate"
                 >
                   {email.subject}
                 </Text>
-                <Text size="xs" color="primary-500" className="truncate">
+                <Text size="xs" color="muted" className="truncate">
                   {email.fromName || email.fromAddr || "Unknown"}
                 </Text>
               </li>
