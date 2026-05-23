@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Montserrat, Inter } from "next/font/google";
 import "../styles/globals.css";
 import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/utils/providers/ThemeProvider";
 import SplashPreloader from "@/_components/SplashScreen";
@@ -44,7 +43,6 @@ export default function RootLayout({
             <SplashPreloader>{children}</SplashPreloader>
             <Toaster position="top-left" />
           </ThemeProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
         </ReactQueryProvider>
       </body>
     </html>

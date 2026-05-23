@@ -80,7 +80,7 @@ export const useComposeEmail = () => {
         subject: "",
         cc: "",
         bcc: "",
-        bodyText: "",
+        bodyText: composeData?.body ?? "",
         bodyHtml: (composeData as any)?.bodyHtml ?? "",
       } as EmailFormValues);
       setAttachments([]);

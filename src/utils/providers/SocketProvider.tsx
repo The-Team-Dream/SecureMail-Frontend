@@ -105,8 +105,10 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const handleEmailScanned = useCallback(
-    (data: EmailScannedEvent) => {
-      const { mailboxId, emailId, securityVerdict } = data;
+    (data: any) => {
+      const mailboxId = data.mailboxId ?? data.mailBoxId;
+      const emailId = data.emailId;
+      const securityVerdict = data.securityVerdict ?? data.verdict;
 
       // Refresh the email list to show updated verdict
       queryClient.invalidateQueries({
@@ -115,7 +117,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
       // Refresh specific email details if open
       queryClient.invalidateQueries({
-        queryKey: ["email", String(mailboxId), String(emailId)],
+        queryKey: ["email", String(emailId)],
       });
 
       // Refresh analytics for updated threat stats
@@ -123,7 +125,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         queryKey: ["analytics"],
       });
 
-      if (securityVerdict !== "clean") {
+      if (securityVerdict && securityVerdict !== "SAFE" && securityVerdict !== "clean") {
         toast.warning("⚠️ Threat Detected", {
           description: `Email flagged as ${securityVerdict}`,
           duration: 6000,
@@ -134,7 +136,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const handleNewNotification = useCallback(
-    (data: NewNotificationEvent) => {
+    (data: any) => {
       // Invalidate the notifications list
       queryClient.invalidateQueries({
         queryKey: ["notifications"],
@@ -145,7 +147,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         queryKey: ["notifications", "unread-count"],
       });
 
-      const { notification } = data;
+      const notification = data?.notification ?? data;
       if (notification) {
         const isSecurityAlert =
           notification.type === "NEW_LOGIN_DETECTED" ||
@@ -169,8 +171,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const handleMailboxSyncComplete = useCallback(
-    (data: MailboxSyncCompleteEvent) => {
-      const { mailboxId, newEmailsCount } = data;
+    (data: any) => {
+      const mailboxId = data.mailboxId ?? data.mailBoxId;
+      const success = data.success !== false;
 
       // Refresh mailbox list
       queryClient.invalidateQueries({
@@ -192,10 +195,15 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         queryKey: ["analytics"],
       });
 
-      if (newEmailsCount > 0) {
+      if (success) {
         toast.success("✅ Sync Complete", {
-          description: `${newEmailsCount} new email${newEmailsCount > 1 ? "s" : ""} synced`,
+          description: "Mailbox synchronized successfully",
           duration: 4000,
+        });
+      } else {
+        toast.error("❌ Sync Failed", {
+          description: "Mailbox synchronization failed",
+          duration: 6000,
         });
       }
     },
@@ -203,7 +211,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const handleMailboxSyncFailed = useCallback(
-    (data: MailboxSyncFailedEvent) => {
+    (data: any) => {
       // Refresh mailbox to show error state
       queryClient.invalidateQueries({
         queryKey: ["mailboxes"],

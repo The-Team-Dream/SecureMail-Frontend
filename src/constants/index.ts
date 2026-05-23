@@ -77,6 +77,7 @@ export const securityNavItems = [
     icon: Icons.Reports,
     href: "security-reports",
   },
+  { name: "Analytics", icon: Icons.Analytics, href: "analytics" },
   { name: "Phishing", icon: Icons.Phishing, href: "phishing" },
   { name: "Malware", icon: Icons.Malware, href: "malware" },
 ];

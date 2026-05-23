@@ -34,6 +34,8 @@ export interface Email {
   folder?: EmailFolder;
   hasAttachments?: boolean;
   attachments?: Attachment[];
+  analysisStatus?: 'PENDING' | 'COMPLETED' | 'FAILED';
+  isRescanning?: boolean;
 }
 
 export interface EmailsResponse {

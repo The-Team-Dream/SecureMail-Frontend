@@ -10,6 +10,7 @@ import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { ProgressBar } from "@/_components/shared/ProgressBar";
 import { useMailboxStats } from "@/APIs/hooks/analytics";
+import { ScanQueueBanner } from "@/_components/mailbox/ScanQueueBanner";
 
 export const getStatusStyles = (isActive: boolean) => {
   if (isActive) {
@@ -52,8 +53,9 @@ export function MailboxCard({
         ease: "easeOut",
       }}
       whileHover={{ y: -5 }}
-      className="group"
+      className="group flex flex-col gap-3"
     >
+      <ScanQueueBanner mailboxId={String(acc.id)} />
       <Link
         href={`/mailboxes/${acc.id}/inbox`}
         className="bg-background border border-primary-100/60 rounded-lg py-6 px-8 flex flex-col gap-8 shadow-[0_4px_16px_rgba(223, 223, 223, 0.5)] transition-all hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] cursor-pointer hover:border-primary-200"

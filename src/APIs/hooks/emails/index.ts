@@ -14,3 +14,5 @@ export * from "./useReportEmail";
 export * from "./useScanEmail";
 export * from "./useScanAllEmails";
 export * from "./useScanProgress";
+export * from "./useScanQueue";
+

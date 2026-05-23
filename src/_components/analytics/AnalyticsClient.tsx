@@ -77,6 +77,22 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
         : [];
   }, [activityData]);
 
+  const statsOverview = useMemo(() => {
+    if (mailboxId && finalMailboxData) {
+      return {
+        totalMailboxesConnected: 1,
+        totalEmails: finalMailboxData.totalEmails || 0,
+        totalPhishingDetected: finalMailboxData.phishingEmails || 0,
+        totalSpamDetected: finalMailboxData.spamEmails || 0,
+        totalMalwareDetected: 0,
+        totalStorageUsed: finalMailboxData.storageUsed || 0,
+        threatsChange: "0%",
+        phishingChange: "0%",
+      };
+    }
+    return finalOverviewData;
+  }, [mailboxId, finalOverviewData, finalMailboxData]);
+
   if (isError)
     return (
       <StateMessage
@@ -216,7 +232,7 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
       </motion.div>
 
       <AnalyticsStats
-        overview={finalOverviewData}
+        overview={statsOverview}
         isLoading={mailboxId ? isMailboxLoading : isOverviewLoading}
       />
 

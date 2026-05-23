@@ -68,14 +68,14 @@ export enum SocketEvent {
 
   // Email events
   NEW_EMAIL = "new-email",
-  EMAIL_SCANNED = "email-scanned",
+  EMAIL_SCANNED = "email_analyzed",
   EMAIL_SENT = "email-sent",
 
   // Notification events
-  NEW_NOTIFICATION = "new-notification",
+  NEW_NOTIFICATION = "notification",
 
   // Mailbox events
-  MAILBOX_SYNC_COMPLETE = "mailbox-sync-complete",
+  MAILBOX_SYNC_COMPLETE = "mailbox_sync_complete",
   MAILBOX_SYNC_FAILED = "mailbox-sync-failed",
   MAILBOX_STATUS = "mailbox-status",
 

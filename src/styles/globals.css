@@ -392,3 +392,9 @@
 .dark .scrollbar-slim::-webkit-scrollbar-thumb:hover {
   background-color: var(--primary-500);
 }
+
+/* ── ScanQueueBanner: indeterminate progress slide animation ─────────────── */
+@keyframes scan-slide {
+  0%   { left: -45%; }
+  100% { left: 100%; }
+}

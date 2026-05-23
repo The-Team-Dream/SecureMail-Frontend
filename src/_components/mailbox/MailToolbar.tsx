@@ -1,4 +1,5 @@
 "use client";
+
 import {
   ChevronDown,
   ChevronLeft,
@@ -12,6 +13,7 @@ import {
 import { useMailStore } from "@/stores/useMailStore";
 import { cn } from "@/lib/utils";
 import { Text } from "@/_components/shared/Text";
+
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import {
@@ -311,6 +313,7 @@ export const MailToolbar = ({
           </div>
         </div>
       )}
+
     </div>
   );
 };

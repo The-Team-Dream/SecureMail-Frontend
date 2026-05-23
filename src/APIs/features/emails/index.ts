@@ -13,6 +13,7 @@ import { downloadAttachment } from "./downloadAttachment";
 import { scanEmail } from "./scanEmail";
 import { scanAllEmails } from "./scanAllEmails";
 import { getScanProgress } from "./getScanProgress";
+import { getQueueStatus, controlQueue, cancelScanJob } from "./scanQueue";
 
 export const emailsApi = {
   getEmails,
@@ -30,4 +31,7 @@ export const emailsApi = {
   scanEmail,
   scanAllEmails,
   getScanProgress,
+  getQueueStatus,
+  controlQueue,
+  cancelScanJob,
 };

@@ -13,7 +13,9 @@ import {
   Activity,
   ChevronRight,
   Trash2,
+  Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Text } from "@/_components/shared/Text";
@@ -137,7 +139,20 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
       </div>
 
       {/* Security Status Banner (The Hook) */}
-      {email.securityReport && (
+      {email.analysisStatus === 'PENDING' ? (
+        <div className="mb-6 p-4 rounded-xl border flex items-center justify-between bg-primary-50/50 border-primary-100 animate-pulse">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary-100/50">
+              <ShieldCheck className="w-5 h-5 text-primary-600 animate-spin" />
+            </div>
+            <div className="flex flex-col">
+              <Text size="sm" font="bold" className="text-primary-700">
+                Scanning... Please wait.
+              </Text>
+            </div>
+          </div>
+        </div>
+      ) : email.securityReport && (
         <div className={cn(
           "mb-6 p-2 pl-4 rounded-xl border flex items-center justify-between transition-all duration-500",
           email.securityReport.status === 'SAFE' 
@@ -166,6 +181,11 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
               <Text size="xs" font="medium" className="opacity-60">
                 {Math.round(email.securityReport.confidenceScore * 100)}% Confidence
               </Text>
+              {email.isRescanning && (
+                <Badge variant="outline" className="ml-2 bg-primary-50 text-primary-700 border-primary-200 animate-pulse text-[10px] px-2 py-0.5 font-bold">
+                  AI Rescanning...
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -294,6 +314,47 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                       </div>
                     </div>
                   )}
+
+                  {/* Suggested Replies inside Sheet */}
+                  {email.securityReport.suggestedActions && email.securityReport.suggestedActions.length > 0 && (
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-6 bg-primary-500 rounded-full" />
+                        <Text font="bold" size="sm" className="uppercase tracking-wide text-primary-900">Zero-Trust Secure Replies</Text>
+                      </div>
+                      <div className="space-y-3">
+                         {email.securityReport.suggestedActions.map((suggestion: string, idx: number) => (
+                           <button
+                             key={idx}
+                             onClick={() => {
+                               setIsAnalysisOpen(false);
+                               setComposeOpen(true, {
+                                 mode: "reply",
+                                 data: {
+                                   to: email.fromAddr,
+                                   subject: email.subject,
+                                   fromName: email.fromName,
+                                   receivedAt: email.receivedAt,
+                                   emailId: String(email.id),
+                                   bodyHtml: email.bodyHtml,
+                                   body: suggestion,
+                                 },
+                               });
+                               toast.success("Safe reply draft loaded!");
+                             }}
+                             className="w-full flex flex-col p-4 rounded-xl border border-primary-100 bg-white hover:border-primary-300 hover:shadow-xs transition-all duration-300 text-left group"
+                           >
+                             <Text size="sm" className="text-primary-800 leading-relaxed font-medium line-clamp-3 mb-2">
+                               "{suggestion}"
+                             </Text>
+                             <div className="flex items-center gap-1 text-[10px] font-bold text-primary-600 group-hover:text-primary-800 transition-colors uppercase tracking-wider">
+                               Use Safe Draft <Reply className="w-3 h-3 ml-1" />
+                             </div>
+                           </button>
+                         ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </SheetContent>
@@ -352,13 +413,13 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
               <ShieldCheck
                 className={cn(
                   "size-4 text-primary",
-                  scanMutation.isPending && "animate-spin",
+                  (scanMutation.isPending || email.isRescanning) && "animate-spin",
                 )}
               />
             }
-            label={scanMutation.isPending ? "Scanning..." : "Scan"}
+            label={scanMutation.isPending ? "Scanning..." : email.isRescanning ? "Rescanning..." : "Scan"}
             onClick={handleScan}
-            disabled={scanMutation.isPending}
+            disabled={scanMutation.isPending || email.isRescanning}
           />
           <ActionButton
             icon={<Forward className="size-4 text-primary" />}
@@ -468,6 +529,53 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                 </div>
               );
             })()}
+
+          {/* Zero-Trust Secure Replies Section */}
+          {email.securityReport?.suggestedActions && email.securityReport.suggestedActions.length > 0 && (
+             <div className="mt-12 p-6 rounded-2xl bg-linear-to-br from-primary-50/20 to-primary-100/10 border border-primary-100/60 space-y-4">
+                <div className="flex items-center gap-2 text-primary-800">
+                  <Sparkles className="w-5 h-5 text-primary-600 animate-pulse" />
+                  <Text font="bold" size="lg">Zero-Trust Secure Replies</Text>
+                  <Badge variant="secondary" className="text-[10px] bg-primary-100/50 text-primary-700 font-bold px-2 py-0.5">
+                    AI Suggested
+                  </Badge>
+                </div>
+                <Text size="xs" className="text-primary-600/80 -mt-1 block">
+                  Click any suggested reply below to draft a secure, zero-trust response instantly.
+                </Text>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                   {email.securityReport.suggestedActions.map((suggestion: string, idx: number) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setComposeOpen(true, {
+                            mode: "reply",
+                            data: {
+                              to: email.fromAddr,
+                              subject: email.subject,
+                              fromName: email.fromName,
+                              receivedAt: email.receivedAt,
+                              emailId: String(email.id),
+                              bodyHtml: email.bodyHtml,
+                              body: suggestion,
+                            },
+                          });
+                          toast.success("Safe reply draft loaded!");
+                        }}
+                        className="flex flex-col justify-between p-4 rounded-xl border border-primary-100 bg-white hover:border-primary-300 hover:shadow-xs transition-all duration-300 text-left group"
+                      >
+                        <Text size="sm" className="text-primary-800 leading-relaxed font-medium line-clamp-3 mb-3">
+                          "{suggestion}"
+                        </Text>
+                        <div className="flex items-center gap-1 text-[11px] font-bold text-primary-600 group-hover:text-primary-800 transition-colors mt-auto uppercase tracking-wider">
+                          Use Safe Draft <Reply className="w-3.5 h-3.5 ml-1 transition-transform group-hover:-translate-x-1" />
+                        </div>
+                      </button>
+                   ))}
+                </div>
+             </div>
+          )}
         </div>
       </div>
 
