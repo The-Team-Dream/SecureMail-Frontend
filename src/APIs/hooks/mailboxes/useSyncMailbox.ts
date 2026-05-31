@@ -43,8 +43,6 @@ export const useSyncMailbox = () => {
       queryClient.setQueryData(["mailboxes", mailboxId], (old: any) =>
         old ? { ...old, ...data } : data,
       );
-
-      toast.success("Mailbox synced successfully");
     },
     onError: (error: any, _id, context) => {
       if (context?.previousMailboxes) {

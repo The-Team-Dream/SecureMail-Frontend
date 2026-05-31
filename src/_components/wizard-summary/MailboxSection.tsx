@@ -27,28 +27,25 @@ export function MailboxSection({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [draft, setDraft] = useState<MailboxDraft>({
+  const [draft, setDraft] = useState({
     mailboxName: "",
-    emailAddress: "",
   });
 
   const handleEdit = () => {
     setDraft({
       mailboxName: formData.mailboxName || "",
-      emailAddress: formData.emailAddress || "",
     });
     setIsEditing(true);
   };
 
   const handleCancel = () => {
     handleChange("mailboxName", draft.mailboxName);
-    handleChange("emailAddress", draft.emailAddress);
     setIsEditing(false);
   };
 
   const handleSave = async () => {
     if (validateFields) {
-      const isValid = await validateFields(["mailboxName", "emailAddress"]);
+      const isValid = await validateFields(["mailboxName"]);
       if (!isValid) return;
     }
     setIsSaving(true);
@@ -69,7 +66,7 @@ export function MailboxSection({
       {isEditing ? (
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-4 gap-6 w-full">
-            <div className="col-span-1">
+            <div className="col-span-2">
               <Input
                 label="Mailbox Name"
                 value={formData.mailboxName}
@@ -80,20 +77,6 @@ export function MailboxSection({
                 }}
                 onBlur={() => handleBlur?.("mailboxName")}
                 error={errors?.mailboxName?.message}
-              />
-            </div>
-            <div className="w-[250px]">
-              <Input
-                label="Email Address"
-                value={formData.emailAddress || ""}
-                className="w-full"
-                placeholder="you@example.com"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  handleChange("emailAddress", e.target.value);
-                  clearErrors?.("emailAddress");
-                }}
-                onBlur={() => handleBlur?.("emailAddress")}
-                error={errors?.emailAddress?.message}
               />
             </div>
           </div>
@@ -116,17 +99,10 @@ export function MailboxSection({
         </div>
       ) : (
         <div className="grid grid-cols-4 gap-6 w-full">
-          <div className="col-span-1">
+          <div className="col-span-2">
             <ViewField
               label="Mailbox Name"
               value={formData.mailboxName}
-              fallback="—"
-            />
-          </div>
-          <div className="col-span-3">
-            <ViewField
-              label="Email Address"
-              value={formData.emailAddress}
               fallback="—"
             />
           </div>

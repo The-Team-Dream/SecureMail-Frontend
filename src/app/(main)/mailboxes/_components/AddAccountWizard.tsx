@@ -6,8 +6,7 @@ import { ArrowRight, ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
 import { WizardFormData } from "../../../../schemas/CustomAccount";
 import { WizardProgress } from "./AddAccountSteps/WizardProgress";
 import { StepProvider } from "./AddAccountSteps/StepProvider";
-import { StepIMAP } from "./AddAccountSteps/StepIMAP";
-import { StepSMTP } from "./AddAccountSteps/StepSMTP";
+import { StepImapSmtp } from "./AddAccountSteps/StepImapSmtp";
 import { StepAdvanced } from "./AddAccountSteps/StepAdvanced";
 import { StepSummary } from "./AddAccountSteps/StepSummary";
 import { StepSuccess } from "./AddAccountSteps/StepSuccess";
@@ -47,7 +46,7 @@ export function AddAccountWizard({
     currentStepTitle,
   } = useAddAccountWizard({ onCancel, onSuccess });
 
-  if (step === 6) {
+  if (step === 5) {
     return (
       <StepSuccess
         onCancel={handleSuccessCancel}
@@ -122,7 +121,7 @@ export function AddAccountWizard({
         <hr className="h-px bg-primary-100 w-full absolute left-0 top-32" />
 
         <div
-          className={`flex flex-col mb-8 w-full mx-auto flex-1 mt-8 ${step === 5 ? "max-w-[900px]" : "max-w-[560px]"}`}
+          className={`flex flex-col mb-8 w-full mx-auto flex-1 mt-8 ${step === 4 ? "max-w-[900px]" : "max-w-[560px]"}`}
         >
           {step === 1 && (
             <StepProvider
@@ -138,7 +137,7 @@ export function AddAccountWizard({
             />
           )}
           {step === 2 && (
-            <StepIMAP
+            <StepImapSmtp
               formData={formData}
               handleChange={handleChange}
               register={register}
@@ -147,22 +146,13 @@ export function AddAccountWizard({
             />
           )}
           {step === 3 && (
-            <StepSMTP
-              formData={formData}
-              handleChange={handleChange}
-              register={register}
-              errors={errors}
-              clearErrors={clearErrors}
-            />
-          )}
-          {step === 4 && (
             <StepAdvanced
               formData={formData}
               handleChange={handleChange}
               errors={errors}
             />
           )}
-          {step === 5 && (
+          {step === 4 && (
             <StepSummary 
               formData={formData} 
               handleChange={handleChange} 
@@ -187,9 +177,9 @@ export function AddAccountWizard({
 
           {!(step === 1 && isOAuthProvider) && (
             <Button
-              type={step === 5 ? "submit" : "button"}
-              form={step === 5 ? "summary-form" : undefined}
-              onClick={step === 5 ? undefined : () => handleNext()}
+              type={step === 4 ? "submit" : "button"}
+              form={step === 4 ? "summary-form" : undefined}
+              onClick={step === 4 ? undefined : () => handleNext()}
               disabled={isLoading}
               className="min-w-[130px] h-[46px] font-semibold gap-2"
             >

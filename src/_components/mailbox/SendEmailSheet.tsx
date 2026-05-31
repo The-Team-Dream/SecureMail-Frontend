@@ -36,6 +36,7 @@ import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { useComposeEmail } from "@/hooks/useComposeEmail";
 import { ActionButton } from "@/_components/shared/ActionButton";
+import DOMPurify from "dompurify";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
@@ -193,6 +194,7 @@ export const ComposeEmailSheet = () => {
     isOpen,
     setOpen,
     composeMode,
+    composeData,
     register,
     handleSubmit,
     errors,
@@ -380,6 +382,35 @@ export const ComposeEmailSheet = () => {
                 />
               </div>
             </div>
+
+            {/* Original Email (View Only) */}
+            {composeMode === "forward" && (composeData as any)?.originalHtml && (
+              <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
+                <Text size="sm" font="bold" className="text-primary-700">
+                  Original Message
+                </Text>
+                <div className="p-4 rounded-xl border border-primary-100 bg-primary-50/30 overflow-y-auto max-h-[300px]">
+                  <div
+                    className="text-primary-800 text-[15px] leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize((composeData as any).originalHtml),
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            {composeMode === "forward" && !(composeData as any)?.originalHtml && (composeData as any)?.originalText && (
+              <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
+                <Text size="sm" font="bold" className="text-primary-700">
+                  Original Message
+                </Text>
+                <div className="p-4 rounded-xl border border-primary-100 bg-primary-50/30 overflow-y-auto max-h-[300px]">
+                  <div className="text-primary-800 text-[15px] leading-relaxed whitespace-pre-wrap">
+                    {(composeData as any).originalText}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {attachments.length > 0 && (
               <div className="flex flex-wrap gap-3 pt-2">

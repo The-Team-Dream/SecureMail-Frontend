@@ -1,6 +1,5 @@
 "use client";
 import { MailToolbar } from "@/_components/mailbox/MailToolbar";
-import { MailTabs } from "@/_components/mailbox/MailTabs";
 import { MailList } from "@/_components/mailbox/MailList";
 import Container from "@/_components/shared/Container";
 import { SearchAutocomplete } from "@/_components/mailbox/SearchAutocomplete";
@@ -15,8 +14,9 @@ export const MailInbox = () => {
         </div>
         <MailToolbar />
         <ScanQueueBanner />
-        <MailTabs />
-        <MailList />
+        <div className="mt-2">
+          <MailList />
+        </div>
       </div>
     </Container>
   );

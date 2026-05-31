@@ -21,7 +21,9 @@ export const useStarEmail = (mailboxId: string) => {
           return {
             ...old,
             data: old.data.map((email: any) =>
-              String(email.id) === String(id) ? { ...email, isFlagged: starred } : email,
+              String(email.id) === String(id)
+                ? { ...email, isFlagged: starred }
+                : email,
             ),
           };
         },
@@ -29,9 +31,7 @@ export const useStarEmail = (mailboxId: string) => {
 
       return { previousQueries };
     },
-    onSuccess: (_, { starred }) => {
-      toast.success(starred ? "Email starred" : "Email unstarred");
-    },
+
     onError: (err: any, _variables, context) => {
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {

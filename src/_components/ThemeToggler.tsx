@@ -49,7 +49,7 @@ const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
 
   return (
     <div>
-      <hr className="mb-4 -m-2 h-px bg-primary-100" />
+     
       <div
         className={cn(
           "relative mx-auto flex rounded-xl bg-primary-100 p-1 transition-all duration-300",

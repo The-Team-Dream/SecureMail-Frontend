@@ -71,6 +71,7 @@ export const Icons = {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        fill={props.active && !props.disableFill ? "currentColor" : "none"}
       />
     </CustomIcon>
   ),

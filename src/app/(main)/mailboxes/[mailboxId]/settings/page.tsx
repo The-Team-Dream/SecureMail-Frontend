@@ -146,7 +146,7 @@ const MailboxSettings = () => {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-secondary-500"
+                    className="data-[state=checked]:bg-primary"
                   />
                 )}
               />
@@ -172,7 +172,7 @@ const MailboxSettings = () => {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-secondary-500"
+                    className="data-[state=checked]:bg-primary"
                   />
                 )}
               />

@@ -124,7 +124,7 @@ export default function SplashPreloader({ children }: SplashPreloaderProps) {
               <div className="w-64 space-y-4">
                 <div className="h-1.5 w-full bg-primary-100 rounded-full overflow-hidden">
                   <motion.div 
-                    className="h-full bg-secondary-500"
+                    className="h-full bg-primary"
                     initial={{ width: "0%" }}
                     animate={{ width: `${progress}%` }}
                     transition={{ ease: "easeOut" }}

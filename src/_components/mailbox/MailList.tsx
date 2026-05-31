@@ -8,7 +8,6 @@ import type { Email, EmailFolder } from "@/APIs/types/Email";
 import { MailListSkeleton } from "../skeleton/MailListSkeleton";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import notFoundImg from "../../../public/images/not-found.png";
-import { PROMOTION_KEYWORDS, SOCIAL_PLATFORMS } from "@/constants";
 
 export const MailList = () => {
   const params = useParams();
@@ -16,7 +15,6 @@ export const MailList = () => {
   const activeFolder = useMailStore((s) => s.activeFolder) as EmailFolder;
   const currentPage = useMailStore((s) => s.currentPage);
   const searchQuery = useMailStore((s) => s.searchQuery);
-  const activeClassification = useMailStore((s) => s.activeClassification);
 
   const { data: emailsData, isLoading: isLoadingEmails } = useEmails(
     mailboxId,
@@ -36,27 +34,7 @@ export const MailList = () => {
     ? currentData
     : currentData?.data || [];
 
-  const isSocialEmail = (email: Email) => {
-    const name = (email.fromName || "").toLowerCase();
-    const addr = (email.fromAddr || "").toLowerCase();
-    return SOCIAL_PLATFORMS.some((p) => name.includes(p) || addr.includes(p));
-  };
-
-  const isPromotionEmail = (email: Email) => {
-    const name = (email.fromName || "").toLowerCase();
-    const addr = (email.fromAddr || "").toLowerCase();
-    return PROMOTION_KEYWORDS.some((k) => name.includes(k) || addr.includes(k));
-  };
-
-  const finalEmails = pagedEmails.filter((email: Email) => {
-    if (activeFolder !== "inbox") return true;
-
-    const social = isSocialEmail(email);
-    const promo = !social && isPromotionEmail(email);
-    if (activeClassification === "social") return social;
-    if (activeClassification === "promotions") return promo;
-    return !social && !promo;
-  });
+  const finalEmails = pagedEmails;
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const handleDragStart = useCallback((index: number) => {

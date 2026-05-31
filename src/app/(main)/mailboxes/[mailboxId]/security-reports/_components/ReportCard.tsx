@@ -362,19 +362,19 @@ export function ReportCard({ report, isExpanded, onToggle }: ReportCardProps) {
 
                       {/* Compact Insights Row */}
                       <div className="grid grid-cols-2 gap-3 mt-4">
-                        {(report.aiReport as any).isCampaign && (
+                        {report.aiReport && (report.aiReport as any).isCampaign && (
                           <div className="px-3 py-2 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2">
                             <Icons.Mail className="w-3 h-3 text-purple-300" />
                             <Text size="xs" className="text-purple-100 font-bold">Campaign</Text>
                           </div>
                         )}
-                        {(report.aiReport as any).behavioralAnomaly && (
+                        {report.aiReport && (report.aiReport as any).behavioralAnomaly && (
                           <div className="px-3 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center gap-2">
                             <Activity className="w-3 h-3 text-orange-300" />
                             <Text size="xs" className="text-orange-100 font-bold">Anomaly</Text>
                           </div>
                         )}
-                        {(report.aiReport as any).priority && (
+                        {report.aiReport && (report.aiReport as any).priority && (
                           <div className="px-3 py-2 rounded-xl bg-background/10 border border-background/10 flex items-center gap-2">
                             <AlertCircle className="w-3 h-3 text-primary-300" />
                             <Text size="xs" className="text-primary-100 font-bold">{(report.aiReport as any).priority} Priority</Text>

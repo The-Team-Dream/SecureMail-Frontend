@@ -51,17 +51,13 @@ export function useAddAccountWizard({
     shouldUnregister: false,
     defaultValues: {
       mailboxName: "",
-      emailAddress: "",
+      email: "",
       imapHost: "",
       imapPort: "",
-      imapSecurity: "SSL/TLS",
-      imapUsername: "",
-      imapPassword: "",
+      encryption: "SSL/TLS",
       smtpHost: "",
       smtpPort: "",
-      smtpSecurity: "SSL/TLS",
-      smtpUsername: "",
-      smtpPassword: "",
+      password: "",
       syncInterval: "",
     },
   });
@@ -84,7 +80,7 @@ export function useAddAccountWizard({
     const stepParam = searchParams.get("step");
     if (stepParam) {
       const parsedStep = parseInt(stepParam);
-      if (!isNaN(parsedStep) && parsedStep >= 1 && parsedStep <= 6) {
+      if (!isNaN(parsedStep) && parsedStep >= 1 && parsedStep <= 5) {
         setStep(parsedStep);
       } else {
         updateStepUrl(1);
@@ -300,24 +296,18 @@ export function useAddAccountWizard({
   // ─── Step Validation ────────────────────────────────────────────────────────
   const validateStep = useCallback(async (): Promise<boolean> => {
     let fieldsToValidate: (keyof WizardFormData)[] = [];
-    if (step === 1) fieldsToValidate = ["mailboxName", "emailAddress"];
+    if (step === 1) fieldsToValidate = ["mailboxName"];
     if (step === 2)
       fieldsToValidate = [
+        "email",
         "imapHost",
         "imapPort",
-        "imapSecurity",
-        "imapUsername",
-        "imapPassword",
-      ];
-    if (step === 3)
-      fieldsToValidate = [
+        "encryption",
         "smtpHost",
         "smtpPort",
-        "smtpSecurity",
-        "smtpUsername",
-        "smtpPassword",
+        "password",
       ];
-    if (step === 4) fieldsToValidate = ["syncInterval"];
+    if (step === 3) fieldsToValidate = ["syncInterval"];
 
     if (fieldsToValidate.length > 0) {
       return await trigger(fieldsToValidate);
@@ -329,14 +319,14 @@ export function useAddAccountWizard({
   const handleImapSubmit = useCallback(async () => {
     setIsImapLoading(true);
     try {
-      const security = formData.imapSecurity?.toUpperCase();
+      const security = formData.encryption?.toUpperCase();
       const isSecure = Boolean(security === "SSL/TLS");
 
       await connectImap({
         host: formData.imapHost,
         port: formData.imapPort as unknown as number,
-        email: formData.emailAddress,
-        password: formData.imapPassword,
+        email: formData.email,
+        password: formData.password,
         secure: isSecure,
         displayName: formData.mailboxName,
         smtpHost: formData.smtpHost || undefined,
@@ -383,12 +373,12 @@ export function useAddAccountWizard({
       if (!isValid) return;
 
       // Final IMAP step
-      if (step === 5 && provider === "IMAP") {
+      if (step === 4 && provider === "IMAP") {
         await handleImapSubmit();
         return;
       }
 
-      if (step < 6) {
+      if (step < 5) {
         updateStepUrl(step + 1);
       }
     },
@@ -408,7 +398,7 @@ export function useAddAccountWizard({
 
   const goToStep = useCallback(
     async (targetStep: number) => {
-      if (targetStep < 1 || targetStep > 6) return;
+      if (targetStep < 1 || targetStep > 5) return;
 
       if (targetStep < step) {
         updateStepUrl(targetStep);
@@ -417,24 +407,18 @@ export function useAddAccountWizard({
         let isValid = true;
         for (let i = step; i < targetStep; i++) {
           let fieldsToValidate: (keyof WizardFormData)[] = [];
-          if (i === 1) fieldsToValidate = ["mailboxName", "emailAddress"];
+          if (i === 1) fieldsToValidate = ["mailboxName"];
           if (i === 2)
             fieldsToValidate = [
+              "email",
               "imapHost",
               "imapPort",
-              "imapSecurity",
-              "imapUsername",
-              "imapPassword",
-            ];
-          if (i === 3)
-            fieldsToValidate = [
+              "encryption",
               "smtpHost",
               "smtpPort",
-              "smtpSecurity",
-              "smtpUsername",
-              "smtpPassword",
+              "password",
             ];
-          if (i === 4) fieldsToValidate = ["syncInterval"];
+          if (i === 3) fieldsToValidate = ["syncInterval"];
 
           if (fieldsToValidate.length > 0) {
             const stepValid = await trigger(fieldsToValidate);
@@ -472,16 +456,15 @@ export function useAddAccountWizard({
 
   const steps = [
     { id: 1, icon: Icons.Mail, title: "Select Provider" },
-    { id: 2, icon: Icons.Settings2, title: "IMAP Settings" },
-    { id: 3, icon: Icons.Lock, title: "SMTP Settings" },
-    { id: 4, icon: Icons.Rocket, title: "Advanced Settings" },
-    { id: 5, icon: Icons.Report, title: "Summary" },
+    { id: 2, icon: Icons.Settings2, title: "IMAP/SMTP Config" },
+    { id: 3, icon: Icons.Rocket, title: "Advanced Settings" },
+    { id: 4, icon: Icons.Report, title: "Summary" },
   ];
 
   const currentStepTitle = steps.find((s) => s.id === step)?.title || "";
 
   const isOAuthProvider = provider === "GMAIL" || provider === "OUTLOOK";
-  const isLastStep = step === 5;
+  const isLastStep = step === 4;
   const nextButtonLabel = isOAuthLoading
     ? "Redirecting..."
     : isImapLoading

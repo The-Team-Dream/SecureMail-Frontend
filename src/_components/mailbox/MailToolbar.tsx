@@ -5,7 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
-  Archive,
+  Star,
   Trash2,
   MailOpen,
   ShieldCheck,
@@ -13,6 +13,7 @@ import {
 import { useMailStore } from "@/stores/useMailStore";
 import { cn } from "@/lib/utils";
 import { Text } from "@/_components/shared/Text";
+import { ActionButton } from "@/_components/shared/ActionButton";
 
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
@@ -24,6 +25,7 @@ import {
   useReclassifyEmail,
   useScanAllEmails,
   useScanProgress,
+  useStarEmail,
 } from "@/APIs/hooks/emails";
 import type { EmailFolder } from "@/APIs/types/Email";
 import type { Email } from "@/APIs/types/Email";
@@ -65,6 +67,7 @@ export const MailToolbar = ({
   const readMutation = useReadEmail(mailboxId);
   const reclassifyMutation = useReclassifyEmail(mailboxId);
   const scanAllMutation = useScanAllEmails(mailboxId);
+  const starMutation = useStarEmail(mailboxId);
   const { data: scanProgress } = useScanProgress(mailboxId);
 
   const isRefreshing = isFetching || isSearchingFetching;
@@ -172,6 +175,21 @@ export const MailToolbar = ({
     }
   };
 
+  const handleBulkStar = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      await Promise.all(
+        selectedIds.map((id) =>
+          starMutation.mutateAsync({ id, starred: true }),
+        ),
+      );
+      deselectAll();
+      toast.success("Selected emails starred");
+    } catch (e) {
+      toast.error("Some emails failed to star");
+    }
+  };
+
   const handleScanAll = () => {
     scanAllMutation.mutate();
   };
@@ -206,62 +224,54 @@ export const MailToolbar = ({
         )}
 
         {showRefresh && (
-          <button
+          <ActionButton
+            icon={
+              <RefreshCw
+                className={cn(
+                  "w-4 h-4 sm:w-5 sm:h-5",
+                  isRefreshing && "animate-spin",
+                )}
+              />
+            }
+            label="Refresh"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="p-1.5 sm:p-2 rounded-lg text-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-50"
-            title="Refresh"
-          >
-            <RefreshCw
-              className={cn(
-                "w-4 h-4 sm:w-5 sm:h-5",
-                isRefreshing && "animate-spin",
-              )}
-            />
-          </button>
+          />
         )}
 
-        <button
+        <ActionButton
+          icon={
+            <ShieldCheck
+              className={cn(
+                "w-4 h-4 sm:w-5 sm:h-5",
+                scanAllMutation.isPending && "animate-spin",
+              )}
+            />
+          }
+          label="Scan All Emails"
           onClick={handleScanAll}
           disabled={scanAllMutation.isPending}
-          className="p-1.5 sm:p-2 rounded-lg text-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-50"
-          title="Scan All Emails"
-        >
-          <ShieldCheck
-            className={cn(
-              "w-4 h-4 sm:w-5 sm:h-5",
-              scanAllMutation.isPending && "animate-spin",
-            )}
-          />
-        </button>
+        />
 
         {/* ══════ Bulk Actions ══════ */}
         {selectedIds.length > 0 && (
           <div className="flex items-center gap-1 ml-2 pl-2 border-l border-primary-200">
-            <button
-              onClick={handleBulkArchive}
-              className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer"
-              aria-label="Archive selected"
-              title="Archive selected"
-            >
-              <Archive className="w-4 h-4" />
-            </button>
-            <button
+            <ActionButton
+              icon={<Trash2 className="w-4 h-4" />}
+              label="Delete selected"
               onClick={handleBulkDelete}
-              className="p-1.5 text-primary-900 hover:text-error-500 hover:bg-error-50 rounded-full transition-colors cursor-pointer"
-              aria-label="Delete selected"
-              title="Delete selected"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-            <button
+              variant="danger"
+            />
+            <ActionButton
+              icon={<MailOpen className="w-4 h-4" />}
+              label="Mark as read/unread"
               onClick={handleBulkToggleRead}
-              className="p-1.5 text-primary-900 hover:bg-primary-100 rounded-full transition-colors cursor-pointer"
-              aria-label="Mark selected as read/unread"
-              title="Mark selected as read/unread"
-            >
-              <MailOpen className="w-4 h-4" />
-            </button>
+            />
+            <ActionButton
+              icon={<Star className="w-4 h-4" />}
+              label="Star selected"
+              onClick={handleBulkStar}
+            />
           </div>
         )}
       </div>
@@ -272,33 +282,19 @@ export const MailToolbar = ({
           {total === 0 ? "0" : `${start}-${end}`} of {total}
         </Text>
 
-        <button
+        <ActionButton
+          icon={<ChevronLeft className="w-5 h-5" />}
+          label="Previous page"
           onClick={handlePrevPage}
           disabled={currentPage <= 1}
-          className={cn(
-            "p-1 rounded-full transition-colors cursor-pointer",
-            currentPage <= 1
-              ? "text-primary-300 cursor-not-allowed"
-              : "text-primary hover:bg-primary-100",
-          )}
-          aria-label="Previous page"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+        />
 
-        <button
+        <ActionButton
+          icon={<ChevronRight className="w-5 h-5" />}
+          label="Next page"
           onClick={handleNextPage}
           disabled={currentPage >= totalPages}
-          className={cn(
-            "p-1 rounded-full transition-colors cursor-pointer",
-            currentPage >= totalPages
-              ? "text-primary-300 cursor-not-allowed"
-              : "text-primary hover:bg-primary-100",
-          )}
-          aria-label="Next page"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
+        />
       </div>
 
       {/* ══════ Progress Bar ══════ */}

@@ -26,7 +26,7 @@ const AnalyticsChart = dynamic(
   {
     ssr: false,
     loading: () => <ChartSkeleton />,
-  }
+  },
 );
 
 interface AnalyticsClientProps {
@@ -67,8 +67,14 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
   };
 
   // Handle nested "data" property from API responses - Memoized for performance
-  const finalOverviewData = useMemo(() => (overviewData as any)?.data || overviewData, [overviewData]);
-  const finalMailboxData = useMemo(() => (mailboxData as any)?.data || mailboxData, [mailboxData]);
+  const finalOverviewData = useMemo(
+    () => (overviewData as any)?.data || overviewData,
+    [overviewData],
+  );
+  const finalMailboxData = useMemo(
+    () => (mailboxData as any)?.data || mailboxData,
+    [mailboxData],
+  );
   const finalActivityData = useMemo(() => {
     return Array.isArray((activityData as any)?.data)
       ? (activityData as any).data
@@ -86,8 +92,8 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
         totalSpamDetected: finalMailboxData.spamEmails || 0,
         totalMalwareDetected: 0,
         totalStorageUsed: finalMailboxData.storageUsed || 0,
-        threatsChange: "0%",
-        phishingChange: "0%",
+        threatsChange: finalMailboxData.threatsChange || "0%",
+        phishingChange: finalMailboxData.phishingChange || "0%",
       };
     }
     return finalOverviewData;
@@ -107,91 +113,91 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
     );
 
   // Chart Data Mapping - Memoized to prevent expensive recalculations on every render
-  const { finalChartData, totalSpam, totalPhishing, totalSent, totalReceived } = useMemo(() => {
-    let rawChartData: {
-      date: Date;
-      spam: number;
-      phishing: number;
-      sent: number;
-      received: number;
-    }[] = [];
+  const { finalChartData, totalSpam, totalPhishing, totalSent, totalReceived } =
+    useMemo(() => {
+      let rawChartData: {
+        date: Date;
+        spam: number;
+        phishing: number;
+        sent: number;
+        received: number;
+      }[] = [];
 
-    if (mailboxId && finalMailboxData?.threatsHistory) {
-      rawChartData = finalMailboxData.threatsHistory.map((item: any) => ({
-        date: new Date(item.date),
-        spam: item.spam || 0,
-        phishing: item.phishing || 0,
-        sent: item.sent || 0,
-        received: item.received || 0,
-      }));
-    } else if (finalActivityData?.length > 0) {
-      rawChartData = finalActivityData.map((item: ActivityData) => ({
-        date: new Date(item.date),
-        spam: item.spam || 0,
-        phishing: item.phishing || 0,
-        sent: item.sent || 0,
-        received: item.received || 0,
-      }));
-    }
+      if (mailboxId && finalMailboxData?.threatsHistory) {
+        rawChartData = finalMailboxData.threatsHistory.map((item: any) => ({
+          date: new Date(item.date),
+          spam: item.spam || 0,
+          phishing: item.phishing || 0,
+          sent: item.sent || 0,
+          received: item.received || 0,
+        }));
+      } else if (finalActivityData?.length > 0) {
+        rawChartData = finalActivityData.map((item: ActivityData) => ({
+          date: new Date(item.date),
+          spam: item.spam || 0,
+          phishing: item.phishing || 0,
+          sent: item.sent || 0,
+          received: item.received || 0,
+        }));
+      }
 
-    // Filter, sort and format
-    const validData = rawChartData.filter((item) => isValid(item.date));
+      // Filter, sort and format
+      const validData = rawChartData.filter((item) => isValid(item.date));
 
-    // Create a map of existing data by full date string
-    const dataMap = new Map();
-    validData.forEach((item) => {
-      dataMap.set(format(item.date, "yyyy-MM-dd"), item);
-    });
+      // Create a map of existing data by full date string
+      const dataMap = new Map();
+      validData.forEach((item) => {
+        dataMap.set(format(item.date, "yyyy-MM-dd"), item);
+      });
 
-    // Find earliest date with data
-    const datesWithData = validData
-      .map((item) => format(item.date, "yyyy-MM-dd"))
-      .sort();
+      const chartLength = 7;
+      const calculatedChartData = Array.from(
+        { length: chartLength },
+        (_, i) => {
+          const daysAgo = i === 0 ? 0 : 7 - i;
+          const day = subDays(new Date(), daysAgo);
+          const dateKey = format(day, "yyyy-MM-dd");
 
-    const earliestDateStr = datesWithData[0];
-    const earliestDate = earliestDateStr
-      ? new Date(earliestDateStr)
-      : subDays(new Date(), 6);
+          const dayLabel = format(day, "EEE");
+          const existingDay = dataMap.get(dateKey);
 
-    // Calculate how many days to show (at least 7, but more if data goes back further)
-    const diffInDays = Math.max(
-      7,
-      Math.ceil(
-        (new Date().getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24),
-      ),
-    );
-    const chartLength = Math.min(diffInDays + 1, 30); // Max 30 days to keep it clean
+          return {
+            day: dayLabel,
+            spam: existingDay?.spam || 0,
+            phishing: existingDay?.phishing || 0,
+            sent: existingDay?.sent || 0,
+            received: existingDay?.received || 0,
+          };
+        },
+      );
 
-    // Generate chart data starting from earliest data point or 7 days ago
-    const calculatedChartData = Array.from({ length: chartLength }, (_, i) => {
-      const day = subDays(new Date(), chartLength - 1 - i);
-      const dateKey = format(day, "yyyy-MM-dd");
-      const isToday = i === chartLength - 1;
-      const dayLabel = isToday ? "Today" : format(day, "EEE");
-      const existingDay = dataMap.get(dateKey);
+      let tSpam = calculatedChartData.reduce((acc, curr) => acc + curr.spam, 0);
+      let tPhishing = calculatedChartData.reduce((acc, curr) => acc + curr.phishing, 0);
+      const tSent = calculatedChartData.reduce((acc, curr) => acc + curr.sent, 0);
+      const tReceived = calculatedChartData.reduce((acc, curr) => acc + curr.received, 0);
+
+      // If the overview/mailbox totals exceed what's in the history,
+      // inject the difference into today's slot (index 0) so the line is visible.
+      if (!mailboxId && finalOverviewData) {
+        const spamDiff = (finalOverviewData.totalSpamDetected || 0) - tSpam;
+        if (spamDiff > 0) { calculatedChartData[0].spam += spamDiff; tSpam += spamDiff; }
+        const phishingDiff = (finalOverviewData.totalPhishingDetected || 0) - tPhishing;
+        if (phishingDiff > 0) { calculatedChartData[0].phishing += phishingDiff; tPhishing += phishingDiff; }
+      } else if (mailboxId && finalMailboxData) {
+        const spamDiff = (finalMailboxData.spamEmails || 0) - tSpam;
+        if (spamDiff > 0) { calculatedChartData[0].spam += spamDiff; tSpam += spamDiff; }
+        const phishingDiff = (finalMailboxData.phishingEmails || 0) - tPhishing;
+        if (phishingDiff > 0) { calculatedChartData[0].phishing += phishingDiff; tPhishing += phishingDiff; }
+      }
 
       return {
-        month: dayLabel,
-        spam: existingDay?.spam || 0,
-        phishing: existingDay?.phishing || 0,
-        sent: existingDay?.sent || 0,
-        received: existingDay?.received || 0,
+        finalChartData: calculatedChartData,
+        totalSpam: tSpam,
+        totalPhishing: tPhishing,
+        totalSent: tSent,
+        totalReceived: tReceived,
       };
-    });
-
-    const tSpam = calculatedChartData.reduce((acc, curr) => acc + curr.spam, 0);
-    const tPhishing = calculatedChartData.reduce((acc, curr) => acc + curr.phishing, 0);
-    const tSent = calculatedChartData.reduce((acc, curr) => acc + curr.sent, 0);
-    const tReceived = calculatedChartData.reduce((acc, curr) => acc + curr.received, 0);
-
-    return {
-      finalChartData: calculatedChartData,
-      totalSpam: tSpam,
-      totalPhishing: tPhishing,
-      totalSent: tSent,
-      totalReceived: tReceived,
-    };
-  }, [mailboxId, finalMailboxData, finalActivityData]);
+    }, [mailboxId, finalMailboxData, finalActivityData, finalOverviewData]);
 
   const spamCount = mailboxId
     ? totalSpam.toLocaleString()

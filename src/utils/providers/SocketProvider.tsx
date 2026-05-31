@@ -64,6 +64,11 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         queryKey: ["emails", String(mailboxId)],
       });
 
+      // Invalidate notifications
+      queryClient.invalidateQueries({
+        queryKey: ["notifications"],
+      });
+
       // Invalidate unread counts
       queryClient.invalidateQueries({
         queryKey: ["notifications", "unread-count"],
@@ -195,12 +200,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         queryKey: ["analytics"],
       });
 
-      if (success) {
-        toast.success("✅ Sync Complete", {
-          description: "Mailbox synchronized successfully",
-          duration: 4000,
-        });
-      } else {
+      if (!success) {
         toast.error("❌ Sync Failed", {
           description: "Mailbox synchronization failed",
           duration: 6000,

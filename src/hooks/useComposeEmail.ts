@@ -80,8 +80,8 @@ export const useComposeEmail = () => {
         subject: "",
         cc: "",
         bcc: "",
-        bodyText: composeData?.body ?? "",
-        bodyHtml: (composeData as any)?.bodyHtml ?? "",
+        bodyText: composeMode === "reply" ? (composeData?.body ?? "") : "",
+        bodyHtml: "",
       } as EmailFormValues);
       setAttachments([]);
       setShowEmoji(false);
@@ -170,7 +170,6 @@ export const useComposeEmail = () => {
     } else if (composeMode === "forward" && composeData?.emailId) {
       fd.append("to", sanitizedTo);
       if (sanitizedBodyText) fd.append("message", sanitizedBodyText);
-      if (data.bodyHtml) fd.append("bodyHtml", data.bodyHtml);
       forwardMutation.mutate(
         { id: composeData.emailId, formData: fd },
         {

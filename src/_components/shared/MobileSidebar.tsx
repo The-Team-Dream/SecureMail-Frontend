@@ -175,7 +175,10 @@ export const MobileSidebar = () => {
                   className="overflow-hidden bg-secondary-400 text-primary transition-all hover:bg-secondary-600 px-4 mb-4"
                   onClick={() => {
                     setOpen(false);
-                    setTimeout(() => setComposeOpen(true, { mode: "new" }), 150);
+                    setTimeout(
+                      () => setComposeOpen(true, { mode: "new" }),
+                      150,
+                    );
                   }}
                 >
                   <PencilLine className="w-6 h-6 text-black mr-2" />
@@ -190,7 +193,9 @@ export const MobileSidebar = () => {
                     <>
                       {mailboxNavItems.map((item) => {
                         const targetHref = `/mailboxes/${params.mailboxId}/${item.folder}`;
-                        const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.folder}`);
+                        const isActive = pathname.startsWith(
+                          `/mailboxes/${params.mailboxId}/${item.folder}`,
+                        );
                         return (
                           <Link
                             key={item.name}
@@ -233,11 +238,12 @@ export const MobileSidebar = () => {
                               >
                                 {item.name}
                               </Text>
-                              {item.folder === "inbox" && unreadInboxCount > 0 && (
-                                <span className="bg-primary-800 text-background text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                                  {unreadInboxCount}
-                                </span>
-                              )}
+                              {item.folder === "inbox" &&
+                                unreadInboxCount > 0 && (
+                                  <span className="bg-primary-800 text-background text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                                    {unreadInboxCount}
+                                  </span>
+                                )}
                             </div>
 
                             <ChevronRight
@@ -258,7 +264,9 @@ export const MobileSidebar = () => {
                       {/* Security Navigation */}
                       {securityNavItems.map((item) => {
                         const targetHref = `/mailboxes/${params.mailboxId}/${item.href}`;
-                        const isActive = pathname.startsWith(`/mailboxes/${params.mailboxId}/${item.href}`);
+                        const isActive = pathname.startsWith(
+                          `/mailboxes/${params.mailboxId}/${item.href}`,
+                        );
                         return (
                           <Link
                             key={item.name}
@@ -335,7 +343,11 @@ export const MobileSidebar = () => {
                             <motion.div
                               layoutId="mobileActiveNavIndicator"
                               className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
-                              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 30,
+                              }}
                             />
                           )}
 
@@ -389,15 +401,28 @@ export const MobileSidebar = () => {
                         <motion.div
                           layoutId="mobileActiveNavIndicator"
                           className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
-                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 30,
+                          }}
                         />
                       )}
                       <div className="flex items-center gap-3">
-                        <User className={cn("w-5 h-5", pathname === "/profile" ? "text-primary" : "text-primary-400")} />
+                        <User
+                          className={cn(
+                            "w-5 h-5",
+                            pathname === "/profile"
+                              ? "text-primary"
+                              : "text-primary-400",
+                          )}
+                        />
                         <Text
                           as={"span"}
                           font={pathname === "/profile" ? "medium" : "default"}
-                          color={pathname === "/profile" ? "primary-950" : "muted"}
+                          color={
+                            pathname === "/profile" ? "primary-950" : "muted"
+                          }
                         >
                           Profile
                         </Text>
@@ -405,7 +430,9 @@ export const MobileSidebar = () => {
                       <ChevronRight
                         className={cn(
                           "w-4 h-4 transition-transform",
-                          pathname === "/profile" ? "translate-x-1 text-primary" : "text-primary-600 opacity-0 group-hover:opacity-100",
+                          pathname === "/profile"
+                            ? "translate-x-1 text-primary"
+                            : "text-primary-600 opacity-0 group-hover:opacity-100",
                         )}
                       />
                     </Link>

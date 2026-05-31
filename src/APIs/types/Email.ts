@@ -48,11 +48,11 @@ export interface EmailsResponse {
   };
 }
 export interface Attachment {
-  id: string;
+  id: string | number;
   filename: string;
-  contentType: string;
+  contentType?: string;
   size: number;
-  url: string;
+  url?: string;
 }
 
 export interface EmailDetails extends Email {

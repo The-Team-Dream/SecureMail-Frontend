@@ -11,8 +11,7 @@ import {
   WizardStepProps,
 } from "../../../../../schemas/CustomAccount";
 import { MailboxSection } from "@/_components/wizard-summary/MailboxSection";
-import { IMAPSection } from "@/_components/wizard-summary/IMAPSection";
-import { SMTPSection } from "@/_components/wizard-summary/SMTPSection";
+import { ImapSmtpSection } from "@/_components/wizard-summary/ImapSmtpSection";
 import { AdvancedSection } from "@/_components/wizard-summary/AdvancedSection";
 
 interface StepSummaryProps extends WizardStepProps {
@@ -36,8 +35,7 @@ export function StepSummary({
   handleChange = () => {},
   handleImapSubmit,
 }: StepSummaryProps) {
-  const [showImapPassword, setShowImapPassword] = useState(false);
-  const [showSmtpPassword, setShowSmtpPassword] = useState(false);
+
 
   const {
     handleSubmit,
@@ -106,22 +104,9 @@ export function StepSummary({
           validateFields={validateFields}
         />
 
-        <IMAPSection
+        <ImapSmtpSection
           formData={localFormData}
           handleChange={localHandleChange}
-          showPassword={showImapPassword}
-          onTogglePassword={() => setShowImapPassword((p) => !p)}
-          errors={errors}
-          clearErrors={clearErrors}
-          handleBlur={localHandleBlur}
-          validateFields={validateFields}
-        />
-
-        <SMTPSection
-          formData={localFormData}
-          handleChange={localHandleChange}
-          showPassword={showSmtpPassword}
-          onTogglePassword={() => setShowSmtpPassword((p) => !p)}
           errors={errors}
           clearErrors={clearErrors}
           handleBlur={localHandleBlur}

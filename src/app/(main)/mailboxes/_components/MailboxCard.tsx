@@ -11,7 +11,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { ProgressBar } from "@/_components/shared/ProgressBar";
 import { useMailboxStats } from "@/APIs/hooks/analytics";
 import { ScanQueueBanner } from "@/_components/mailbox/ScanQueueBanner";
-
+import { formatDistanceToNow } from "date-fns";
+import { arEG } from "date-fns/locale"; // لو عايز الوقت يظهر بالعربي (اختياري)
 export const getStatusStyles = (isActive: boolean) => {
   if (isActive) {
     return {
@@ -58,10 +59,10 @@ export function MailboxCard({
       <ScanQueueBanner mailboxId={String(acc.id)} />
       <Link
         href={`/mailboxes/${acc.id}/inbox`}
-        className="bg-background border border-primary-100/60 rounded-lg py-6 px-8 flex flex-col gap-8 shadow-[0_4px_16px_rgba(223, 223, 223, 0.5)] transition-all hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] cursor-pointer hover:border-primary-200"
+        className="bg-background border border-primary-100/60 rounded-lg py-6 px-8 max-h-[350px] h-full flex flex-col gap-8 shadow-[0_4px_16px_rgba(223, 223, 223, 0.5)] transition-all hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] cursor-pointer hover:border-primary-200"
       >
         {/* Header Section */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center h-full">
           <div className="flex items-center gap-4 min-w-0 flex-1 pr-4">
             <div className="w-[46px] h-[46px] min-w-[46px] rounded-full bg-primary-50 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
               <Icons.Mail className="w-5 h-5 text-primary" />
@@ -102,9 +103,16 @@ export function MailboxCard({
           </div>
           <div className="w-px h-10 bg-primary-100/60 shrink-0" />
           <div className="flex flex-col items-center flex-1">
-            <Text size="xl" font="semiBold" color={"primary-800"}>
+            <Text
+              size="xl"
+              font="semiBold"
+              color={"primary-800"}
+              className="text-center"
+            >
               {acc?.lastSyncedAt
-                ? new Date(acc.lastSyncedAt).toLocaleDateString()
+                ? formatDistanceToNow(new Date(acc.lastSyncedAt), {
+                    addSuffix: true,
+                  })
                 : "Never"}
             </Text>
             <Text size="xs" color={"primary-500"} className="mt-1">

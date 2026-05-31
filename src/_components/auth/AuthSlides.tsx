@@ -76,7 +76,7 @@ export const AuthSlides = () => {
               key={index}
               onClick={() => swiperRef.current?.swiper?.slideToLoop(index)}
               className={`h-1 transition-all duration-300 ${
-                active === index ? "w-24 bg-secondary-500" : "w-10 bg-bgGrey"
+                active === index ? "w-24 bg-primary" : "w-10 bg-bgGrey"
               }`}
             />
           ))}

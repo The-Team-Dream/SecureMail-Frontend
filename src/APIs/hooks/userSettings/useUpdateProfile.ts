@@ -19,12 +19,14 @@ export const useUpdateProfile = () => {
           ? URL.createObjectURL(avatarFile)
           : null;
 
+      const isAvatarDeleted = avatarFile === "";
+
       queryClient.setQueryData(["user-settings"], (old: any) => {
         if (!old) return old;
         return {
           ...old,
           username: newUsername || old?.username,
-          avatarUrl: tempAvatarUrl || old?.avatarUrl,
+          avatarUrl: isAvatarDeleted ? null : (tempAvatarUrl || old?.avatarUrl),
         };
       });
 
@@ -39,14 +41,14 @@ export const useUpdateProfile = () => {
             user: {
               ...old.user,
               username: newUsername || old.user.username,
-              avatar: tempAvatarUrl || old.user.avatar,
+              avatar: isAvatarDeleted ? null : (tempAvatarUrl || old.user.avatar),
             },
           };
         }
         return {
           ...old,
           username: newUsername || old.username,
-          avatar: tempAvatarUrl || old.avatar,
+          avatar: isAvatarDeleted ? null : (tempAvatarUrl || old.avatar),
         };
       });
 

@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { FileText, MailOpen, Mail, Paperclip } from "lucide-react";
+import {
+  MailOpen,
+  Mail,
+  Paperclip,
+  ImageIcon,
+  FileText,
+  Film,
+  File,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Email, EmailFolder } from "@/APIs/types/Email";
 import { useMailStore } from "@/stores/useMailStore";
@@ -25,238 +33,376 @@ interface MailRowProps {
   onDragEnd: () => void;
 }
 
-export const MailRow = React.memo(({
-  email,
-  index,
-  onDragStart,
-  onDragOver,
-  onDragEnd,
-}: MailRowProps) => {
-  const toggleSelectEmail = useMailStore((s) => s.toggleSelectEmail);
-  const selectedIds = useMailStore((s) => s.selectedIds);
-  const isSelected = selectedIds.includes(String(email.id));
-  const router = useRouter();
-  const pathname = usePathname();
-  const params = useParams();
-  const mailboxId = params.mailboxId as string;
-  const activeFolder = useMailStore((s) => s.activeFolder);
+export const MailRow = React.memo(
+  ({ email, index, onDragStart, onDragOver, onDragEnd }: MailRowProps) => {
+    const toggleSelectEmail = useMailStore((s) => s.toggleSelectEmail);
+    const selectedIds = useMailStore((s) => s.selectedIds);
+    const isSelected = selectedIds.includes(String(email.id));
+    const router = useRouter();
+    const pathname = usePathname();
+    const params = useParams();
+    const mailboxId = params.mailboxId as string;
+    const activeFolder = useMailStore((s) => s.activeFolder);
 
-  const readMutation = useReadEmail(mailboxId);
-  const starMutation = useStarEmail(mailboxId);
-  const deleteWithUndo = useDeleteEmailWithUndo(
-    mailboxId,
-    activeFolder as EmailFolder,
-  );
+    const readMutation = useReadEmail(mailboxId);
+    const starMutation = useStarEmail(mailboxId);
+    const deleteWithUndo = useDeleteEmailWithUndo(
+      mailboxId,
+      activeFolder as EmailFolder,
+    );
 
-  const riskLevel = email.malwareVerdict
-    ? "High"
-    : email.isPhishing
+    const riskLevel = email.malwareVerdict
       ? "High"
-      : email.isSpam
-        ? "Medium"
-        : "Low";
+      : email.isPhishing
+        ? "High"
+        : email.isSpam
+          ? "Medium"
+          : "Low";
 
-  // Memoize formatted date to avoid creating Date objects on every render
-  const formattedDate = useMemo(
-    () => new Date(email.receivedAt).toLocaleDateString(),
-    [email.receivedAt],
-  );
+    const formattedDate = useMemo(
+      () =>
+        new Date(email.receivedAt).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        }),
+      [email.receivedAt],
+    );
 
-  return (
-    <div
-      draggable
-      onDragStart={() => onDragStart(index)}
-      onDragOver={(e) => {
-        e.preventDefault();
-        onDragOver(index);
-      }}
-      onDragEnd={onDragEnd}
-      onClick={() => router.push(`${pathname}/${String(email.id)}`)}
-      className={cn(
-        "group flex items-center gap-4 p-4 border-b border-primary-50 hover:bg-primary-50 transition-colors cursor-pointer relative z-0 hover:z-10",
-        !email.isRead ? "bg-background" : "bg-transparent",
-      )}
-    >
-      <div className="flex items-center pt-0.5 sm:pt-0 gap-1 sm:gap-2 shrink-0">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={() => toggleSelectEmail(String(email.id))}
-          className="w-4 h-4 rounded border-[1.5px] border-primary-400 text-secondary-600 focus:ring-secondary-600 cursor-pointer accent-secondary-600 shrink-0"
-          onClick={(e) => e.stopPropagation()}
-        />
+    const formattedTime = useMemo(
+      () =>
+        new Date(email.receivedAt).toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      [email.receivedAt],
+    );
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            starMutation.mutate({
-              id: String(email.id),
-              starred: !email.isFlagged,
-            });
-          }}
-          className="p-0.5 rounded-full transition-colors shrink-0 cursor-pointer sm:mr-2"
-          aria-label={email.isFlagged ? "Unstar email" : "Star email"}
-        >
-          <Icons.Star
-            active={email.isFlagged || email.folder === "starred"}
-            className={cn(
-              "w-4 h-4 sm:w-5 sm:h-5 transition-colors",
-              email.isFlagged || email.folder === "starred"
-                ? "text-warning-500"
-                : "text-primary-400 hover:text-warning-400",
-            )}
+    const isNewRef = React.useRef(
+      !email.isRead && !sessionStorage.getItem(`seen_email_${email.id}`),
+    );
+
+    React.useEffect(() => {
+      if (isNewRef.current) {
+        sessionStorage.setItem(`seen_email_${email.id}`, "true");
+      }
+    }, [email.id]);
+
+    // Hide badge immediately if email has been read (e.g. after markAsRead action)
+    const showNewBadge = isNewRef.current && !email.isRead;
+    const isStarred = email.isFlagged || email.folder === "starred";
+
+    const senderName =
+      activeFolder === "sent"
+        ? `To: ${email.toAddr && email.toAddr.length > 0 ? email.toAddr.map((addr) => addr.split("@")[0]).join(", ") : "Unknown Recipient"}`
+        : email.fromName ||
+          (email.fromAddr ? email.fromAddr.split("@")[0] : "Unknown Sender");
+
+    return (
+      <div
+        draggable
+        onDragStart={() => onDragStart(index)}
+        onDragOver={(e) => {
+          e.preventDefault();
+          onDragOver(index);
+        }}
+        onDragEnd={onDragEnd}
+        onClick={() => router.push(`${pathname}/${String(email.id)}`)}
+        className={cn(
+          "group flex items-center gap-0 border-b border-primary-50 hover:bg-primary-50/70 transition-all duration-150 cursor-pointer relative z-0 hover:z-10",
+          !email.isRead ? "bg-background" : "bg-transparent",
+          isSelected && "bg-secondary-50/30",
+        )}
+      >
+
+        {/* Checkbox + Star — always flex-row, star hidden on mobile (moves to actions) */}
+        <div className="flex flex-row items-center justify-center gap-2 px-2 sm:px-3 py-3 shrink-0">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => toggleSelectEmail(String(email.id))}
+            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-[1.5px] border-primary-300 text-secondary-600 focus:ring-secondary-600 cursor-pointer accent-secondary-600 shrink-0"
+            onClick={(e) => e.stopPropagation()}
           />
-        </button>
-      </div>
 
-      <div className="flex-1 flex items-center gap-4 min-w-0">
-        <div className="flex min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-0.5">
-            <Text
-              font={!email.isRead ? "bold" : "medium"}
-              className={"truncate sm:w-28 md:w-52 shrink-0 sm:text-sm"}
-            >
-              {activeFolder === "sent"
-                ? `To: ${email.toAddr && email.toAddr.length > 0 ? email.toAddr.map((addr) => addr.split("@")[0]).join(", ") : "Unknown Recipient"}`
-                : `${email.fromName || (email.fromAddr ? email.fromAddr.split("@")[0] : "Unknown Sender")}`}
-              {!email.isRead && (
-                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-primary text-background rounded uppercase">
+          {/* Star: only visible on desktop here; on mobile it moves to the right actions row */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              starMutation.mutate({
+                id: String(email.id),
+                starred: !email.isFlagged,
+              });
+            }}
+            className="hidden sm:block p-0.5 rounded-full transition-colors shrink-0 cursor-pointer"
+            aria-label={isStarred ? "Unstar email" : "Star email"}
+          >
+            <Icons.Star
+              active={isStarred}
+              className={cn(
+                "w-4 h-4 transition-colors",
+                isStarred
+                  ? "text-warning-500"
+                  : "text-primary-300 hover:text-warning-400",
+              )}
+            />
+          </button>
+        </div>
+
+        {/* Main content */}
+        <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 min-w-0 py-3 pr-3 sm:pr-4">
+          {/* Sender name row */}
+          <div className="flex items-center justify-between sm:justify-start gap-2 min-w-0 sm:w-[180px] sm:shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <Text
+                font={!email.isRead ? "bold" : "medium"}
+                className="truncate text-sm"
+              >
+                {senderName}
+              </Text>
+              {/* Desktop New Badge */}
+              {showNewBadge && (
+                <span className="hidden sm:inline-flex shrink-0 px-1.5 py-0.5 text-[9px] font-black bg-primary text-background rounded uppercase tracking-wider">
                   New
                 </span>
               )}
-            </Text>
-            {email.hasAttachments && (
-              <FileText className="w-3.5 h-3.5 text-primary-400 shrink-0" />
-            )}
+              {email.hasAttachments && (
+                <Paperclip className="w-3 h-3 text-primary-400 shrink-0" />
+              )}
+            </div>
+            {/* Mobile: blue dot + date side by side on the right */}
+            <div className="sm:hidden flex items-center gap-1.5 shrink-0">
+              {showNewBadge && (
+                <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+              )}
+              <span
+                className={cn(
+                  "text-[11px] whitespace-nowrap",
+                  !email.isRead ? "font-semibold text-primary-600" : "font-normal text-primary-400",
+                )}
+              >
+                {formattedDate}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col gap-1">
-            <Text
-              size="sm"
-              font={!email.isRead ? "semiBold" : "normal"}
-              color={!email.isRead ? "primary-900" : "primary-500"}
-              className="truncate"
-            >
-              {email.subject}
-            </Text>
 
-            {/* Phishing Specific Style */}
-            {activeFolder === "phishing" && (
-              <div className="flex items-center gap-1.5">
+          {/* Subject + attachments + date (mobile) */}
+          <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+            <div className="flex items-start gap-2">
+              <Text
+                size="sm"
+                font={!email.isRead ? "semiBold" : "normal"}
+                color={!email.isRead ? "primary-900" : "primary-500"}
+                className="line-clamp-2 leading-snug"
+              >
+                {email.subject}
+              </Text>
+
+              {/* Risk badge for phishing folder */}
+              {activeFolder === "phishing" && (
                 <span
                   className={cn(
-                    "w-1 h-1 rounded-full bg-current",
-                    RISK_STYLE_MAP[riskLevel as keyof typeof RISK_STYLE_MAP] ||
-                      "text-error-500",
-                  )}
-                />
-                <Text
-                  size="xs"
-                  className={cn(
-                    "font-medium",
-                    RISK_STYLE_MAP[riskLevel as keyof typeof RISK_STYLE_MAP] ||
-                      "text-error-500",
+                    "shrink-0 mt-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider border",
+                    riskLevel === "High"
+                      ? "bg-error-50 text-error-600 border-error-200"
+                      : riskLevel === "Medium"
+                        ? "bg-warning-50 text-warning-600 border-warning-200"
+                        : "bg-primary-50 text-primary-500 border-primary-200",
                   )}
                 >
                   {riskLevel}
-                </Text>
-              </div>
-            )}
+                </span>
+              )}
+            </div>
 
-            {/* Attachment Chips */}
+
+            {/* Attachment chips */}
             {email.attachments && email.attachments.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-1">
-                {email.attachments.slice(0, 3).map((att) => {
-                  const isImage = att.contentType?.startsWith("image/");
-                  const isExternal =
-                    att.url &&
-                    (att.url.startsWith("http://") ||
-                      att.url.startsWith("https://"));
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                {email.attachments.slice(0, 2).map((att) => {
+                  const getAttachmentIcon = () => {
+                    const ct = att.contentType || "";
+                    const fn = (att.filename || "").toLowerCase();
+                    if (
+                      ct.startsWith("image/") ||
+                      /\.(jpg|jpeg|png|gif|webp|svg)$/.test(fn)
+                    )
+                      return (
+                        <ImageIcon className="w-3 h-3 shrink-0 text-primary-500" />
+                      );
+                    if (
+                      ct.startsWith("video/") ||
+                      /\.(mp4|mov|avi|webm)$/.test(fn)
+                    )
+                      return (
+                        <Film className="w-3 h-3 shrink-0 text-primary-500" />
+                      );
+                    if (
+                      ct.startsWith("text/") ||
+                      /\.(txt|md|csv|json)$/.test(fn)
+                    )
+                      return (
+                        <FileText className="w-3 h-3 shrink-0 text-primary-500" />
+                      );
+                    if (/\.(pdf)$/.test(fn))
+                      return (
+                        <FileText className="w-3 h-3 shrink-0 text-error-500" />
+                      );
+                    return (
+                      <File className="w-3 h-3 shrink-0 text-primary-500" />
+                    );
+                  };
+
                   return (
                     <span
                       key={att.id}
-                      className="inline-flex items-center gap-1.5 bg-primary-100 border border-primary-200 rounded-full px-2 py-0.5 text-[11px] text-primary-700 max-w-[140px]"
+                      className="inline-flex items-center gap-1 bg-transparent border border-primary-200 rounded-full px-2 py-0 text-[10px] text-primary-600 max-w-[120px]"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {isImage && isExternal ? (
-                        <img
-                          src={att.url}
-                          alt=""
-                          className="w-4 h-4 rounded object-cover shrink-0"
-                          onError={(e) =>
-                            ((e.target as HTMLImageElement).style.display =
-                              "none")
-                          }
-                        />
-                      ) : (
-                        <Paperclip className="w-3 h-3 shrink-0 text-primary-500" />
-                      )}
-                      <span className="truncate">{att.filename}</span>
+                      {getAttachmentIcon()}
+                      <span className="truncate text-xs">{att.filename}</span>
                     </span>
                   );
                 })}
-                {email.attachments.length > 3 && (
-                  <span className="inline-flex items-center bg-primary-100 border border-primary-200 rounded-full px-2 py-0.5 text-[11px] text-primary-500">
-                    +{email.attachments.length - 3} more
+                {email.attachments.length > 2 && (
+                  <span className="inline-flex items-center bg-transparent border border-primary-200 rounded-full px-2 py-0 text-[10px] text-primary-500">
+                    +{email.attachments.length - 2}
                   </span>
                 )}
               </div>
             )}
           </div>
-        </div>
-        <span
-          className={cn(
-            "text-xs shrink-0 ml-auto pl-2 hidden sm:block",
-            "group-hover:hidden text-primary-800",
-            !email.isRead ? "font-bold" : "font-normal",
-          )}
-        >
-          {formattedDate}
-        </span>
 
-        {/* Actions on Desktop */}
-        <div className="hidden sm:group-hover:flex items-center gap-1 shrink-0 ml-auto pl-2">
-          <Button
-            size={"icon-sm"}
-            variant={"ghost"}
-            className={cn(
-              activeFolder === "trash" && "cursor-not-allowed opacity-50",
-            )}
-            onClick={(e) => {
-              e.stopPropagation();
-              deleteWithUndo(String(email.id));
-            }}
-            disabled={activeFolder === "trash"}
-            aria-label="Delete email"
-            title={
-              activeFolder === "trash" ? "Cannot delete from trash" : "Delete"
-            }
-          >
-            <Icons.Delete className="w-6 h-6 text-primary-800 hover:text-error-500 transition-colors" />
-          </Button>
+          {/* Right side: date (desktop) + actions */}
+          <div className="flex items-center justify-end gap-2 shrink-0">
+            {/* Date — desktop only, hidden on hover */}
+            <div className="hidden sm:flex sm:group-hover:hidden flex-col items-end">
+              <span
+                className={cn(
+                  "text-xs text-primary-500 whitespace-nowrap",
+                  !email.isRead ? "font-bold text-primary-800" : "font-normal",
+                )}
+              >
+                {formattedDate}
+              </span>
+              <span className="text-[10px] text-primary-400 whitespace-nowrap">
+                {formattedTime}
+              </span>
+            </div>
 
-          <Button
-            size={"icon-sm"}
-            variant={"ghost"}
-            onClick={(e) => {
-              e.stopPropagation();
-              readMutation.mutate({
-                id: String(email.id),
-                read: !email.isRead,
-              });
-            }}
-            aria-label={email.isRead ? "Mark as unread" : "Mark as read"}
-            title={email.isRead ? "Mark as unread" : "Mark as read"}
-          >
-            {email.isRead ? (
-              <Mail className="w-4 h-4 text-primary-800" />
-            ) : (
-              <MailOpen className="w-4 h-4 text-primary-800" />
-            )}
-          </Button>
+            {/* Desktop hover actions */}
+            <div className="hidden sm:group-hover:flex items-center gap-0.5">
+              <Button
+                size={"icon-sm"}
+                variant={"ghost"}
+                className={cn(
+                  "h-7 w-7",
+                  activeFolder === "trash" && "cursor-not-allowed opacity-50",
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteWithUndo(String(email.id));
+                }}
+                disabled={activeFolder === "trash"}
+                aria-label="Delete email"
+                title={
+                  activeFolder === "trash"
+                    ? "Cannot delete from trash"
+                    : "Delete"
+                }
+              >
+                <Icons.Delete className="w-4 h-4 text-primary-600 hover:text-error-500 transition-colors" />
+              </Button>
+
+              <Button
+                size={"icon-sm"}
+                variant={"ghost"}
+                className="h-7 w-7"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  readMutation.mutate({
+                    id: String(email.id),
+                    read: !email.isRead,
+                  });
+                }}
+                aria-label={email.isRead ? "Mark as unread" : "Mark as read"}
+                title={email.isRead ? "Mark as unread" : "Mark as read"}
+              >
+                {email.isRead ? (
+                  <Mail className="w-3.5 h-3.5 text-primary-600" />
+                ) : (
+                  <MailOpen className="w-3.5 h-3.5 text-primary-600" />
+                )}
+              </Button>
+            </div>
+
+            {/* Mobile actions: star + read + delete */}
+            <div className="flex sm:hidden items-center gap-1 ml-1">
+              {/* Star */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  starMutation.mutate({
+                    id: String(email.id),
+                    starred: !email.isFlagged,
+                  });
+                }}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-[10px] font-medium",
+                  isStarred
+                    ? "text-warning-500 bg-warning-50"
+                    : "text-primary-400 hover:text-warning-500 hover:bg-warning-50",
+                )}
+                aria-label={isStarred ? "Unstar email" : "Star email"}
+              >
+                <Icons.Star
+                  active={isStarred}
+                  className="w-3.5 h-3.5 transition-colors"
+                />
+              </button>
+
+              {/* Read toggle */}
+              <button
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-[10px] font-medium",
+                  email.isRead
+                    ? "text-primary-400 hover:text-primary hover:bg-primary-50"
+                    : "text-primary hover:text-primary hover:bg-primary-50",
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  readMutation.mutate({
+                    id: String(email.id),
+                    read: !email.isRead,
+                  });
+                }}
+                aria-label={email.isRead ? "Mark as unread" : "Mark as read"}
+              >
+                {email.isRead ? (
+                  <Mail className="w-3.5 h-3.5" />
+                ) : (
+                  <MailOpen className="w-3.5 h-3.5" />
+                )}
+              </button>
+
+              {/* Delete */}
+              {activeFolder !== "trash" && (
+                <button
+                  className="flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-[10px] font-medium text-primary-400 hover:text-error-500 hover:bg-error-50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteWithUndo(String(email.id));
+                  }}
+                  aria-label="Delete email"
+                >
+                  <Icons.Delete className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 MailRow.displayName = "MailRow";

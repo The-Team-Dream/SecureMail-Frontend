@@ -31,7 +31,6 @@ const PersonalInfo = () => {
   const { mutate: updateProfile, isPending: isUpdating } = useUpdateProfile();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [isDeletingImg, setIsDeletingImg] = useState(false);
   const [profileImage, setProfileImage] = useState<string | undefined>(
     user?.user?.avatar || undefined,
   );
@@ -75,8 +74,11 @@ const PersonalInfo = () => {
     try {
       const formData = new FormData();
       formData.append("username", data.username);
-      // Append avatar file if a new one was selected (actual File object, NOT a URL)
-      if (selectedFile) formData.append("avatar", selectedFile);
+      if (selectedFile) {
+        formData.append("avatar", selectedFile);
+      } else if (profileImage === undefined && user?.user?.avatar) {
+        formData.append("avatar", "");
+      }
 
       await new Promise<void>((resolve, reject) =>
         updateProfile(formData, {
@@ -122,16 +124,10 @@ const PersonalInfo = () => {
     }
   };
 
-  const handleDeleteImage = async () => {
-    setIsDeletingImg(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setProfileImage(undefined);
-      setSelectedFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    } finally {
-      setIsDeletingImg(false);
-    }
+  const handleDeleteImage = () => {
+    setProfileImage(undefined);
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -219,9 +215,7 @@ const PersonalInfo = () => {
                   />
 
                   <div className="flex items-center gap-6">
-                    <Avatar
-                      className={`w-16 h-16 ${isDeletingImg ? "opacity-40" : ""}`}
-                    >
+                    <Avatar className={`w-16 h-16`}>
                       <AvatarImage
                         src={profileImage}
                         className="object-cover"
@@ -234,27 +228,20 @@ const PersonalInfo = () => {
                     <div className="flex gap-4">
                       <button
                         type="button"
-                        disabled={!isEditing || isUpdating || isDeletingImg}
+                        disabled={!isEditing || isUpdating}
                         onClick={handleUpdateClick}
-                        className="text-info-600 text-sm hover:underline font-medium disabled:text-primary-400 disabled:cursor-not-allowed"
+                        className="text-info-600 text-sm hover:underline font-medium cursor-pointer disabled:text-primary-400 disabled:cursor-not-allowed"
                       >
                         Update
                       </button>
 
                       <button
                         type="button"
-                        disabled={!isEditing || isUpdating || isDeletingImg}
+                        disabled={!isEditing || isUpdating}
                         onClick={handleDeleteImage}
                         className="flex items-center gap-1 text-sm text-error-500 hover:underline font-medium disabled:text-primary-400 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        {isDeletingImg ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            Delete{" "}
-                            <Icons.Delete className="w-4 h-4 text-error-500" />
-                          </>
-                        )}
+                        Delete <Icons.Delete className="w-4 h-4 text-error-500" />
                       </button>
                     </div>
                   </div>

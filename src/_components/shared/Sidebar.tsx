@@ -88,11 +88,7 @@ export const Sidebar = () => {
           <PencilLine
             className={cn("w-6 h-6 text-primary-900", !isCollapsed && "mr-2")}
           />
-          {!isCollapsed && (
-            <Text font={"bold"}>
-              New Email
-            </Text>
-          )}
+          {!isCollapsed && <Text font={"bold"}>New Email</Text>}
         </Button>
       )}
       {/* Nav Links */}
@@ -134,6 +130,7 @@ export const Sidebar = () => {
                   <div className="flex items-center gap-2">
                     <item.icon
                       active={isActive}
+                      disableFill={true}
                       className="w-[22px] h-[22px] min-w-[22px]"
                     />
                     {!isCollapsed && (
@@ -141,7 +138,7 @@ export const Sidebar = () => {
                         <Text
                           as={"span"}
                           font={isActive ? "medium" : "default"}
-                          color={isActive ? "default" : "muted"}
+                          color={isActive ? "primary-950" : "muted"}
                         >
                           {item.name}
                         </Text>
@@ -159,9 +156,7 @@ export const Sidebar = () => {
                     <ChevronRight
                       className={cn(
                         "w-4 h-4 transition-transform",
-                        isActive
-                          ? "translate-x-1 text-primary"
-                          : "text-muted",
+                        isActive ? "translate-x-1 text-primary" : "text-muted",
                       )}
                     />
                   )}
@@ -209,13 +204,14 @@ export const Sidebar = () => {
                   <div className="flex items-center gap-3">
                     <item.icon
                       active={isActive}
+                      disableFill={true}
                       className="w-[22px] h-[22px] min-w-[22px]"
                     />
                     {!isCollapsed && (
                       <Text
                         as={"span"}
                         font={isActive ? "medium" : "default"}
-                        color={isActive ? "default" : "muted"}
+                        color={isActive ? "primary-950" : "muted"}
                       >
                         {item.name}
                       </Text>
@@ -226,9 +222,7 @@ export const Sidebar = () => {
                     <ChevronRight
                       className={cn(
                         "w-4 h-4 transition-transform",
-                        isActive
-                          ? "translate-x-1 text-primary"
-                          : "text-muted",
+                        isActive ? "translate-x-1 text-primary" : "text-muted",
                       )}
                     />
                   )}
@@ -319,6 +313,7 @@ export const Sidebar = () => {
                 <div className="flex items-center gap-3">
                   <item.icon
                     active={isActive}
+                    disableFill={true}
                     className="w-[22px] h-[22px] min-w-[22px]"
                   />
                   {!isCollapsed && (
@@ -336,9 +331,7 @@ export const Sidebar = () => {
                   <ChevronRight
                     className={cn(
                       "w-4 h-4 transition-transform",
-                      isActive
-                        ? "translate-x-1 text-primary"
-                        : "text-muted",
+                      isActive ? "translate-x-1 text-primary" : "text-muted",
                     )}
                   />
                 )}
@@ -347,16 +340,18 @@ export const Sidebar = () => {
           })
         )}
       </nav>
-
+      <hr className="-m-2 mt-2 h-px bg-primary-100" />
       {/* Bottom Actions */}
-      <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-primary-100/50">
+      <div className="mt-auto pt-4 flex flex-col gap-1">
         {/* Profile Link */}
         <Link
           href="/profile"
           title={isCollapsed ? "Profile" : ""}
           className={cn(
             "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
-            isCollapsed ? "justify-center w-10 h-10" : "justify-between px-3 py-2",
+            isCollapsed
+              ? "justify-center w-10 h-10"
+              : "justify-between px-3 py-2",
             pathname === "/profile"
               ? "text-primary"
               : "text-primary-600 hover:bg-primary-100 hover:text-primary",
@@ -370,7 +365,12 @@ export const Sidebar = () => {
             />
           )}
           <div className="flex items-center gap-3">
-            <User className={cn("w-[22px] h-[22px]", pathname === "/profile" ? "text-primary" : "text-primary-400")} />
+            <User
+              className={cn(
+                "w-[22px] h-[22px]",
+                pathname === "/profile" ? "text-primary" : "text-primary-400",
+              )}
+            />
             {!isCollapsed && (
               <Text
                 as={"span"}
@@ -385,7 +385,9 @@ export const Sidebar = () => {
             <ChevronRight
               className={cn(
                 "w-4 h-4 transition-transform",
-                pathname === "/profile" ? "translate-x-1 text-primary" : "text-muted",
+                pathname === "/profile"
+                  ? "translate-x-1 text-primary"
+                  : "text-muted",
               )}
             />
           )}
@@ -397,8 +399,10 @@ export const Sidebar = () => {
           disabled={isLoggingOut}
           title={isCollapsed ? "Logout" : ""}
           className={cn(
-            "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
-            isCollapsed ? "justify-center w-10 h-10" : "justify-between px-3 py-2",
+            "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full cursor-pointer",
+            isCollapsed
+              ? "justify-center w-10 h-10"
+              : "justify-between px-3 py-2",
             "text-error-500 hover:bg-error-50",
           )}
         >
@@ -416,8 +420,8 @@ export const Sidebar = () => {
           </div>
         </button>
       </div>
-
-      <div className="mt-4">
+      <hr className="-m-2 my-2 h-px bg-primary-100" />
+      <div className="mt-2">
         <ThemeToggler isCollapsed={isCollapsed} />
       </div>
 
