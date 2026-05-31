@@ -160,7 +160,7 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
             <div className="space-y-2">
               <Text font="semiBold">For Gmail / Google Workspace:</Text>
               <ol className="list-decimal pl-5 space-y-1 text-primary-600">
-                <li>Go to <Link href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">your Google Account Settings</Link>.</li>
+                <li>Go to your <Link href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">Google Account Settings</Link>.</li>
                 <li>Select <strong>Security</strong> on the left panel.</li>
                 <li>Under "How you sign in to Google", turn on <strong>2-Step Verification</strong>.</li>
                 <li>Once enabled, go back to Security and select <strong>App passwords</strong> (or search for it).</li>
@@ -170,7 +170,7 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
             <div className="space-y-2">
               <Text font="semiBold">For Outlook / Microsoft 365:</Text>
               <ol className="list-decimal pl-5 space-y-1 text-primary-600">
-                <li>Go to <Link href="https://account.microsoft.com/security" target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">your Microsoft Account Security page</Link>.</li>
+                <li>Go to your <Link href="https://account.microsoft.com/security" target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">Microsoft Account Security page</Link>.</li>
                 <li>Select <strong>Advanced security options</strong>.</li>
                 <li>Ensure <strong>Two-step verification</strong> is turned on.</li>
                 <li>Under "App passwords", select <strong>Create a new app password</strong>.</li>
