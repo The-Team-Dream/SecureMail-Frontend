@@ -1,9 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { Text } from "@/_components/shared/Text";
 import { Input } from "@/_components/shared/Input";
 import { WizardStepProps } from "../../../../../schemas/CustomAccount";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import Link from "next/link";
 
 export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <div className="w-full flex flex-col items-center max-w-2xl mx-auto">
       <Text as="h2" size="4xl" font="normal" className="mb-2.5">
@@ -24,14 +33,23 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
         />
 
         {/* Row 2: App Password */}
-        <Input
-          label="App Password"
-          required
-          type="password"
-          placeholder="Enter App Password"
-          {...(register ? register("password", { onChange: () => clearErrors?.("password") }) : {})}
-          error={errors?.password?.message}
-        />
+        <div className="flex flex-col gap-1">
+          <Input
+            label="App Password"
+            required
+            type="password"
+            placeholder="Enter App Password"
+            {...(register ? register("password", { onChange: () => clearErrors?.("password") }) : {})}
+            error={errors?.password?.message}
+          />
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="text-xs text-primary hover:text-primary-500 self-start hover:underline cursor-pointer transition-colors"
+          >
+            How can I get App password?
+          </button>
+        </div>
 
         {/* Row 2.5: Encryption */}
         <div className="flex flex-col">
@@ -129,6 +147,38 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
         </div>
 
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md bg-card">
+          <DialogHeader>
+            <DialogTitle>How to generate an App Password</DialogTitle>
+            <DialogDescription className="text-primary-400 mt-2">
+              App passwords let you sign in to your email account from apps on devices that don't support 2-Step Verification.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4 text-sm text-primary">
+            <div className="space-y-2">
+              <Text font="semiBold">For Gmail / Google Workspace:</Text>
+              <ol className="list-decimal pl-5 space-y-1 text-primary-600">
+                <li>Go to <Link href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">your Google Account Settings</Link>.</li>
+                <li>Select <strong>Security</strong> on the left panel.</li>
+                <li>Under "How you sign in to Google", turn on <strong>2-Step Verification</strong>.</li>
+                <li>Once enabled, go back to Security and select <strong>App passwords</strong> (or search for it).</li>
+                <li>Generate a password and paste it here.</li>
+              </ol>
+            </div>
+            <div className="space-y-2">
+              <Text font="semiBold">For Outlook / Microsoft 365:</Text>
+              <ol className="list-decimal pl-5 space-y-1 text-primary-600">
+                <li>Go to <Link href="https://account.microsoft.com/security" target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">your Microsoft Account Security page</Link>.</li>
+                <li>Select <strong>Advanced security options</strong>.</li>
+                <li>Ensure <strong>Two-step verification</strong> is turned on.</li>
+                <li>Under "App passwords", select <strong>Create a new app password</strong>.</li>
+              </ol>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
