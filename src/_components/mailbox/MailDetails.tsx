@@ -557,7 +557,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
               color={"primary-600"}
               className="uppercase"
             >
-              {getInitials(email.fromName)}
+              {getInitials(email.fromName || email.fromAddr)}
             </Text>
           </div>
           <div className="flex flex-col">

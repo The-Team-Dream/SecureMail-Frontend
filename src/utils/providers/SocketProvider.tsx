@@ -56,8 +56,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   // ── Event Handlers ───────────────────────────────────────────────────────
 
   const handleNewEmail = useCallback(
-    (data: NewEmailEvent) => {
-      const { mailboxId } = data;
+    (data: any) => {
+      const mailboxId = data?.mailboxId ?? data?.mailBoxId;
 
       // Invalidate email lists for this mailbox
       queryClient.invalidateQueries({
@@ -88,8 +88,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const handleEmailSent = useCallback(
-    (data: EmailSentEvent) => {
-      const { mailboxId } = data || {};
+    (data: any) => {
+      console.log("[WebSocket] handleEmailSent payload:", data);
+      const mailboxId = data?.mailboxId ?? data?.mailBoxId;
       
       if (mailboxId) {
         queryClient.invalidateQueries({

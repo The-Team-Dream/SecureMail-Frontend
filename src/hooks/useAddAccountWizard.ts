@@ -348,13 +348,7 @@ export function useAddAccountWizard({
     } finally {
       setIsImapLoading(false);
     }
-  }, [
-    connectImap,
-    formData,
-    clearPersistence,
-    reset,
-    handleCancel,
-  ]);
+  }, [connectImap, formData, clearPersistence, reset, handleCancel]);
 
   // ─── Next Handler ───────────────────────────────────────────────────────────
   const handleNext = useCallback(
@@ -438,7 +432,7 @@ export function useAddAccountWizard({
         }
       }
     },
-    [step, trigger, updateStepUrl]
+    [step, trigger, updateStepUrl],
   );
 
   const handleSuccessCancel = useCallback(() => {

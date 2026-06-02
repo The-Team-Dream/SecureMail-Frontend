@@ -11,14 +11,23 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 
-export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps) {
+export function StepImapSmtp({
+  register,
+  errors,
+  clearErrors,
+}: WizardStepProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <div className="w-full flex flex-col items-center max-w-2xl mx-auto">
       <Text as="h2" size="4xl" font="normal" className="mb-2.5">
         IMAP/SMTP Config
       </Text>
-      <Text color={"primary-500"} size="sm" font="normal" className="mb-10 text-center">
+      <Text
+        color={"primary-500"}
+        size="sm"
+        font="normal"
+        className="mb-10 text-center"
+      >
         Please add the below data to complete adding your account
       </Text>
 
@@ -28,7 +37,9 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
           label="Email Address"
           required
           placeholder="you@company.com"
-          {...(register ? register("email", { onChange: () => clearErrors?.("email") }) : {})}
+          {...(register
+            ? register("email", { onChange: () => clearErrors?.("email") })
+            : {})}
           error={errors?.email?.message}
         />
 
@@ -39,7 +50,11 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
             required
             type="password"
             placeholder="Enter App Password"
-            {...(register ? register("password", { onChange: () => clearErrors?.("password") }) : {})}
+            {...(register
+              ? register("password", {
+                  onChange: () => clearErrors?.("password"),
+                })
+              : {})}
             error={errors?.password?.message}
           />
           <button
@@ -59,7 +74,11 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
           <div className="relative">
             <select
               className={`w-full h-12 px-4 border text-[14px] text-primary rounded-lg outline-none transition duration-500 appearance-none bg-card ${errors?.encryption ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
-              {...(register ? register("encryption", { onChange: () => clearErrors?.("encryption") }) : {})}
+              {...(register
+                ? register("encryption", {
+                    onChange: () => clearErrors?.("encryption"),
+                  })
+                : {})}
             >
               <option value="SSL/TLS">SSL/TLS</option>
               <option value="STARTTLS">STARTTLS</option>
@@ -93,7 +112,12 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
         {/* Row 3: IMAP Divider */}
         <div className="flex items-center gap-4 mt-4">
           <div className="h-px bg-primary-100 flex-1" />
-          <Text font="medium" size="xs" color="primary-400" className="uppercase tracking-wider">
+          <Text
+            font="medium"
+            size="xs"
+            color="primary-400"
+            className="uppercase tracking-wider"
+          >
             IMAP Settings
           </Text>
           <div className="h-px bg-primary-100 flex-1" />
@@ -105,7 +129,11 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
             label="IMAP Host"
             required
             placeholder="imap.company.com"
-            {...(register ? register("imapHost", { onChange: () => clearErrors?.("imapHost") }) : {})}
+            {...(register
+              ? register("imapHost", {
+                  onChange: () => clearErrors?.("imapHost"),
+                })
+              : {})}
             error={errors?.imapHost?.message}
           />
           <Input
@@ -113,7 +141,11 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
             required
             type="number"
             placeholder="993"
-            {...(register ? register("imapPort", { onChange: () => clearErrors?.("imapPort") }) : {})}
+            {...(register
+              ? register("imapPort", {
+                  onChange: () => clearErrors?.("imapPort"),
+                })
+              : {})}
             error={errors?.imapPort?.message}
           />
         </div>
@@ -121,7 +153,12 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
         {/* Row 6: SMTP Divider */}
         <div className="flex items-center gap-4 mt-4">
           <div className="h-px bg-primary-100 flex-1" />
-          <Text font="medium" size="xs" color="primary-400" className="uppercase tracking-wider">
+          <Text
+            font="medium"
+            size="xs"
+            color="primary-400"
+            className="uppercase tracking-wider"
+          >
             SMTP Settings
           </Text>
           <div className="h-px bg-primary-100 flex-1" />
@@ -133,7 +170,11 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
             label="SMTP Host"
             required
             placeholder="smtp.company.com"
-            {...(register ? register("smtpHost", { onChange: () => clearErrors?.("smtpHost") }) : {})}
+            {...(register
+              ? register("smtpHost", {
+                  onChange: () => clearErrors?.("smtpHost"),
+                })
+              : {})}
             error={errors?.smtpHost?.message}
           />
           <Input
@@ -141,11 +182,14 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
             required
             type="number"
             placeholder="465"
-            {...(register ? register("smtpPort", { onChange: () => clearErrors?.("smtpPort") }) : {})}
+            {...(register
+              ? register("smtpPort", {
+                  onChange: () => clearErrors?.("smtpPort"),
+                })
+              : {})}
             error={errors?.smtpPort?.message}
           />
         </div>
-
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -153,27 +197,65 @@ export function StepImapSmtp({ register, errors, clearErrors }: WizardStepProps)
           <DialogHeader>
             <DialogTitle>How to generate an App Password</DialogTitle>
             <DialogDescription className="text-primary-400 mt-2">
-              App passwords let you sign in to your email account from apps on devices that don't support 2-Step Verification.
+              App passwords let you sign in to your email account from apps on
+              devices that don't support 2-Step Verification.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4 text-sm text-primary">
             <div className="space-y-2">
               <Text font="semiBold">For Gmail / Google Workspace:</Text>
               <ol className="list-decimal pl-5 space-y-1 text-primary-600">
-                <li>Go to your <Link href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">Google Account Settings</Link>.</li>
-                <li>Select <strong>Security</strong> on the left panel.</li>
-                <li>Under "How you sign in to Google", turn on <strong>2-Step Verification</strong>.</li>
-                <li>Once enabled, go back to Security and select <strong>App passwords</strong> (or search for it).</li>
+                <li>
+                  Go to your{" "}
+                  <Link
+                    href="https://myaccount.google.com/security"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-primary"
+                  >
+                    Google Account Settings
+                  </Link>
+                  .
+                </li>
+                <li>
+                  Select <strong>Security</strong> on the left panel.
+                </li>
+                <li>
+                  Under "How you sign in to Google", turn on{" "}
+                  <strong>2-Step Verification</strong>.
+                </li>
+                <li>
+                  Once enabled, go back to Security and select{" "}
+                  <strong>App passwords</strong> (or search for it).
+                </li>
                 <li>Generate a password and paste it here.</li>
               </ol>
             </div>
             <div className="space-y-2">
               <Text font="semiBold">For Outlook / Microsoft 365:</Text>
               <ol className="list-decimal pl-5 space-y-1 text-primary-600">
-                <li>Go to your <Link href="https://account.microsoft.com/security" target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">Microsoft Account Security page</Link>.</li>
-                <li>Select <strong>Advanced security options</strong>.</li>
-                <li>Ensure <strong>Two-step verification</strong> is turned on.</li>
-                <li>Under "App passwords", select <strong>Create a new app password</strong>.</li>
+                <li>
+                  Go to your{" "}
+                  <Link
+                    href="https://account.microsoft.com/security"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-primary"
+                  >
+                    Microsoft Account Security page
+                  </Link>
+                  .
+                </li>
+                <li>
+                  Select <strong>Advanced security options</strong>.
+                </li>
+                <li>
+                  Ensure <strong>Two-step verification</strong> is turned on.
+                </li>
+                <li>
+                  Under "App passwords", select{" "}
+                  <strong>Create a new app password</strong>.
+                </li>
               </ol>
             </div>
           </div>
