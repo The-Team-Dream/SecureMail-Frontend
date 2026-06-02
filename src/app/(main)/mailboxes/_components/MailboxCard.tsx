@@ -11,7 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { ProgressBar } from "@/_components/shared/ProgressBar";
 import { useMailboxStats } from "@/APIs/hooks/analytics";
 import { ScanQueueBanner } from "@/_components/mailbox/ScanQueueBanner";
-import { formatDistanceToNow } from "date-fns";
+import { differenceInSeconds, formatDistanceToNow } from "date-fns";
 import { arEG } from "date-fns/locale"; // لو عايز الوقت يظهر بالعربي (اختياري)
 export const getStatusStyles = (isActive: boolean) => {
   if (isActive) {
@@ -110,9 +110,24 @@ export function MailboxCard({
               className="text-center"
             >
               {acc?.lastSyncedAt
-                ? formatDistanceToNow(new Date(acc.lastSyncedAt), {
-                    addSuffix: true,
-                  })
+                ? (() => {
+                    const diffInSecs = differenceInSeconds(
+                      new Date(),
+                      new Date(acc.lastSyncedAt),
+                    );
+
+                    if (diffInSecs <= 0) {
+                      return "Just now";
+                    }
+
+                    if (diffInSecs < 60) {
+                      return `${diffInSecs} ${diffInSecs === 1 ? "second" : "seconds"} ago`;
+                    }
+                    
+                    return formatDistanceToNow(new Date(acc.lastSyncedAt), {
+                      addSuffix: true,
+                    });
+                  })()
                 : "Never"}
             </Text>
             <Text size="xs" color={"primary-500"} className="mt-1">

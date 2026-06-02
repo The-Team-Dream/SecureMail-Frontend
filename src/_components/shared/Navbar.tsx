@@ -107,7 +107,7 @@ export const Navbar = () => {
         : "bg-error-500";
 
   return (
-    <nav className="flex items-center justify-between py-6 px-4.5 bg-background sticky top-0 z-50 shadow-[0_4px_16px_0_rgba(0,0,0,0.1)]">
+    <nav className="flex items-center justify-between py-4 px-4.5 bg-background sticky top-0 z-50 shadow-[0_4px_16px_0_rgba(0,0,0,0.1)]">
       <div className="flex items-center gap-2">
         <MobileSidebar />
         <Logo

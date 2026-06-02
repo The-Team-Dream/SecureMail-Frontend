@@ -10,8 +10,12 @@ import { StateMessage } from "@/_components/shared/StateMessage";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useGetAuthMe } from "@/APIs/hooks/auth";
 
-const ReportStatCard = dynamic(() => import("./ReportStatCard").then((mod) => mod.ReportStatCard));
-const ReportListItem = dynamic(() => import("./ReportListItem").then((mod) => mod.ReportListItem));
+const ReportStatCard = dynamic(() =>
+  import("./ReportStatCard").then((mod) => mod.ReportStatCard),
+);
+const ReportListItem = dynamic(() =>
+  import("./ReportListItem").then((mod) => mod.ReportListItem),
+);
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -24,7 +28,6 @@ const containerVariants = {
 };
 
 import notFoundImg from "@/../public/images/not-found.png";
-
 
 export default function Reports() {
   const {
@@ -43,7 +46,7 @@ export default function Reports() {
 
   if (userIsError || reportsIsError) {
     return (
-      <Container >
+      <Container>
         <StateMessage
           variant="error"
           image={notFoundImg}
@@ -77,9 +80,13 @@ export default function Reports() {
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          {useMemo(() => stats.map(({ id, ...props }) => (
-            <ReportStatCard key={id} {...props} />
-          )), [])}
+          {useMemo(
+            () =>
+              stats.map(({ id, ...props }) => (
+                <ReportStatCard key={id} {...props} />
+              )),
+            [],
+          )}
         </motion.div>
 
         {/* List Items */}
@@ -89,9 +96,13 @@ export default function Reports() {
           animate="visible"
           className="flex flex-col gap-4 mt-2"
         >
-          {useMemo(() => listItems.map(({ id, ...props }) => (
-            <ReportListItem key={id} {...props} />
-          )), [])}
+          {useMemo(
+            () =>
+              listItems.map(({ id, ...props }) => (
+                <ReportListItem key={id} {...props} />
+              )),
+            [],
+          )}
         </motion.div>
       </div>
     </Container>

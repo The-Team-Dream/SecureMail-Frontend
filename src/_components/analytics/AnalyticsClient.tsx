@@ -172,22 +172,45 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
       );
 
       let tSpam = calculatedChartData.reduce((acc, curr) => acc + curr.spam, 0);
-      let tPhishing = calculatedChartData.reduce((acc, curr) => acc + curr.phishing, 0);
-      const tSent = calculatedChartData.reduce((acc, curr) => acc + curr.sent, 0);
-      const tReceived = calculatedChartData.reduce((acc, curr) => acc + curr.received, 0);
+      let tPhishing = calculatedChartData.reduce(
+        (acc, curr) => acc + curr.phishing,
+        0,
+      );
+      const tSent = calculatedChartData.reduce(
+        (acc, curr) => acc + curr.sent,
+        0,
+      );
+      const tReceived = calculatedChartData.reduce(
+        (acc, curr) => acc + curr.received,
+        0,
+      );
 
       // If the overview/mailbox totals exceed what's in the history,
-      // inject the difference into today's slot (index 0) so the line is visible.
+      // inject the difference into a middle slot to create a peak curve shape
+      const peakIndex = 1;
       if (!mailboxId && finalOverviewData) {
         const spamDiff = (finalOverviewData.totalSpamDetected || 0) - tSpam;
-        if (spamDiff > 0) { calculatedChartData[0].spam += spamDiff; tSpam += spamDiff; }
-        const phishingDiff = (finalOverviewData.totalPhishingDetected || 0) - tPhishing;
-        if (phishingDiff > 0) { calculatedChartData[0].phishing += phishingDiff; tPhishing += phishingDiff; }
+        if (spamDiff > 0) {
+          calculatedChartData[peakIndex].spam += spamDiff;
+          tSpam += spamDiff;
+        }
+        const phishingDiff =
+          (finalOverviewData.totalPhishingDetected || 0) - tPhishing;
+        if (phishingDiff > 0) {
+          calculatedChartData[peakIndex].phishing += phishingDiff;
+          tPhishing += phishingDiff;
+        }
       } else if (mailboxId && finalMailboxData) {
         const spamDiff = (finalMailboxData.spamEmails || 0) - tSpam;
-        if (spamDiff > 0) { calculatedChartData[0].spam += spamDiff; tSpam += spamDiff; }
+        if (spamDiff > 0) {
+          calculatedChartData[peakIndex].spam += spamDiff;
+          tSpam += spamDiff;
+        }
         const phishingDiff = (finalMailboxData.phishingEmails || 0) - tPhishing;
-        if (phishingDiff > 0) { calculatedChartData[0].phishing += phishingDiff; tPhishing += phishingDiff; }
+        if (phishingDiff > 0) {
+          calculatedChartData[peakIndex].phishing += phishingDiff;
+          tPhishing += phishingDiff;
+        }
       }
 
       return {
