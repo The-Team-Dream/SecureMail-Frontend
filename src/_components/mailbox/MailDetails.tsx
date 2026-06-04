@@ -54,11 +54,23 @@ import { motion } from "framer-motion";
 import { useAuthenticatedImage } from "@/APIs/hooks/emails/useAuthenticatedImage";
 
 // Helper component to securely fetch and display an image attachment using react-query and Blob
-const AuthenticatedImage = ({ url, alt, className }: { url: string; alt: string; className: string }) => {
+const AuthenticatedImage = ({
+  url,
+  alt,
+  className,
+}: {
+  url: string;
+  alt: string;
+  className: string;
+}) => {
   const { data: imgSrc, isLoading } = useAuthenticatedImage(url);
 
   if (isLoading || !imgSrc) {
-    return <div className={cn(className, "animate-pulse bg-primary-100 min-h-[100px]")} />;
+    return (
+      <div
+        className={cn(className, "animate-pulse bg-primary-100 min-h-[100px]")}
+      />
+    );
   }
 
   return <img src={imgSrc} alt={alt} className={className} />;
@@ -154,31 +166,41 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
         } catch (e) {
           return match;
         }
-      }
+      },
     );
   };
 
   const processHtmlBody = (html: string) => {
     let processedHtml = formatBodyDates(html);
     const token = Cookies.get("token");
-    
+
     // Inject auth token or replace cid references for inline images
     if (email?.attachments) {
-      email.attachments.forEach(att => {
+      email.attachments.forEach((att) => {
         const defaultUrl = `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${att.id}/download`;
-        const authenticatedUrl = att.url ? att.url : (token ? `${defaultUrl}?token=${token}` : defaultUrl);
-        
+        const authenticatedUrl = att.url
+          ? att.url
+          : token
+            ? `${defaultUrl}?token=${token}`
+            : defaultUrl;
+
         // Replace cid:
-        const cidRegex1 = new RegExp(`cid:${att.id}`, 'gi');
-        const cidRegex2 = new RegExp(`cid:${att.filename}`, 'gi');
-        processedHtml = processedHtml.replace(cidRegex1, authenticatedUrl).replace(cidRegex2, authenticatedUrl);
+        const cidRegex1 = new RegExp(`cid:${att.id}`, "gi");
+        const cidRegex2 = new RegExp(`cid:${att.filename}`, "gi");
+        processedHtml = processedHtml
+          .replace(cidRegex1, authenticatedUrl)
+          .replace(cidRegex2, authenticatedUrl);
       });
     }
 
     // Also catch any relative download URLs that the backend might have sent
     if (token) {
-      const downloadRegex = /(src=["'])(\/mailboxes\/\d+\/emails\/\d+\/attachments\/\d+\/download)(["'])/gi;
-      processedHtml = processedHtml.replace(downloadRegex, `$1${baseURL}$2?token=${token}$3`);
+      const downloadRegex =
+        /(src=["'])(\/mailboxes\/\d+\/emails\/\d+\/attachments\/\d+\/download)(["'])/gi;
+      processedHtml = processedHtml.replace(
+        downloadRegex,
+        `$1${baseURL}$2?token=${token}$3`,
+      );
     }
 
     return DOMPurify.sanitize(processedHtml);
@@ -186,10 +208,30 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
 
   return (
     <div className="flex flex-col h-full bg-background p-4 sm:p-8 duration-300">
-      <div className="mb-6 flex items-center gap-4">
-        <Text size="2xl" font="semiBold">
-          {email.subject}
-        </Text>
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant={"ghost"}
+            size="sm"
+            className="font-medium text-primary-800 shrink-0 hover:bg-transparent"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+          </Button>
+          <Text size="2xl" font="semiBold">
+            {email.subject}
+          </Text>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleScan}
+            variant={"outline"}
+            disabled={scanMutation.isPending || email.isRescanning}
+          >
+            <Shield className="w-4 h-4" /> Scan
+          </Button>
+          <ReclassifyMenu emailId={emailId} />
+        </div>
       </div>
 
       {/* Security Status Banner */}
@@ -591,28 +633,8 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
           />
           <ActionButton
             icon={
-              <ShieldCheck
-                className={cn(
-                  "size-4 text-primary",
-                  (scanMutation.isPending || email.isRescanning) &&
-                    "animate-spin",
-                )}
-              />
-            }
-            label={
-              scanMutation.isPending
-                ? "Scanning..."
-                : email.isRescanning
-                  ? "Rescanning..."
-                  : "Scan"
-            }
-            onClick={handleScan}
-            disabled={scanMutation.isPending || email.isRescanning}
-          />
-          <ActionButton
-            icon={
               email.isRead ? (
-               <Mail className="size-4 text-primary" />
+                <Mail className="size-4 text-primary" />
               ) : (
                 <MailOpen className="size-4 text-primary" />
               )
@@ -627,16 +649,10 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
             onClick={handleDelete}
             variant="danger"
           />
-          <ActionButton
-            icon={<ShieldAlert className="size-4 text-primary" />}
-            label="Spam"
-            onClick={handleReportSpam}
-            variant="danger"
-          />
         </div>
       </div>
 
-      <div className="flex-1 border-l-2 border-primary-100 pl-6 ml-6 overflow-y-auto">
+      <div className="flex-1 border-l-2 border-primary-100 pl-6 ml-6 ">
         <div className="text-primary-800 space-y-6 text-[15px] leading-relaxed">
           {email.bodyHtml ? (
             <div
@@ -645,7 +661,9 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
               }}
             />
           ) : (
-            <div className="whitespace-pre-wrap">{formatBodyDates(email.bodyText || "")}</div>
+            <div className="whitespace-pre-wrap">
+              {formatBodyDates(email.bodyText || "")}
+            </div>
           )}
 
           {/* Attachments Section */}
@@ -655,11 +673,15 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
               const isImageAttachment = (att: any) => {
                 if (att.contentType?.startsWith("image/")) return true;
                 const ext = att.filename?.split(".").pop()?.toLowerCase();
-                return ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext || "");
+                return ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(
+                  ext || "",
+                );
               };
 
               const imageAtts = email.attachments.filter(isImageAttachment);
-              const fileAtts = email.attachments.filter((att: any) => !isImageAttachment(att));
+              const fileAtts = email.attachments.filter(
+                (att: any) => !isImageAttachment(att),
+              );
 
               return (
                 <div className="mt-6 space-y-4">
@@ -767,21 +789,6 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
               </div>
             )}
         </div>
-      </div>
-
-      {/* Footer */}
-      <div className="sticky bottom-0 left-0 right-0 bg-background py-4 px-4 sm:px-8 mt-auto w-full flex items-center justify-between z-10 border-t border-primary-50">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-10 sm:h-11 font-medium border border-primary-100 text-primary-800 shrink-0"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-
-        <ReclassifyMenu emailId={emailId} />
       </div>
     </div>
   );
