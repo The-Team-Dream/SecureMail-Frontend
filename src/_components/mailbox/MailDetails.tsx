@@ -14,6 +14,13 @@ import {
   ChevronRight,
   Trash2,
   Sparkles,
+  FileText,
+  FileCode,
+  FileArchive,
+  FileVideo,
+  FileAudio,
+  FileSpreadsheet,
+  File as FileIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -127,36 +134,6 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
     scanMutation.mutate(emailId);
   };
 
-  const handleReply = () => {
-    if (!email) return;
-    setComposeOpen(true, {
-      mode: "reply",
-      data: {
-        to: email.fromAddr,
-        subject: email.subject,
-        fromName: email.fromName,
-        receivedAt: email.receivedAt,
-        emailId: String(email.id),
-        bodyHtml: email.bodyHtml,
-      },
-    });
-  };
-
-  const handleForward = () => {
-    if (!email) return;
-    setComposeOpen(true, {
-      mode: "forward",
-      data: {
-        subject: email.subject,
-        fromName: email.fromName,
-        receivedAt: email.receivedAt,
-        emailId: String(email.id),
-        originalHtml: email.bodyHtml,
-        originalText: email.bodyText,
-      },
-    });
-  };
-
   const formatBodyDates = (text: string) => {
     return text.replace(
       /Date:\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z)/g,
@@ -168,6 +145,43 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
         }
       },
     );
+  };
+
+  const handleReply = () => {
+    if (!email) return;
+    setComposeOpen(true, {
+      mode: "reply",
+      data: {
+        to: email.fromAddr,
+        subject: `Re: ${email.subject}`,
+        fromName: email.fromName,
+        receivedAt: email.receivedAt,
+        emailId: String(email.id),
+        originalHtml: email.bodyHtml
+          ? processHtmlBody(email.bodyHtml)
+          : undefined,
+        originalText: email.bodyText,
+        toAddr: email.toAddr,
+      },
+    });
+  };
+
+  const handleForward = () => {
+    if (!email) return;
+    setComposeOpen(true, {
+      mode: "forward",
+      data: {
+        subject: `Fwd: ${email.subject}`,
+        fromName: email.fromName,
+        receivedAt: email.receivedAt,
+        emailId: String(email.id),
+        originalHtml: email.bodyHtml
+          ? processHtmlBody(email.bodyHtml)
+          : undefined,
+        originalText: email.bodyText,
+        toAddr: email.toAddr,
+      },
+    });
   };
 
   const processHtmlBody = (html: string) => {
@@ -203,7 +217,50 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
       );
     }
 
-    return DOMPurify.sanitize(processedHtml);
+    const sanitizedHtml = DOMPurify.sanitize(processedHtml, {
+      ADD_ATTR: ["target", "rel"],
+    });
+
+    if (typeof window !== "undefined") {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(sanitizedHtml, "text/html");
+
+        // 1. Force target="_blank" and rel="noopener noreferrer" for all links
+        doc.querySelectorAll("a").forEach((link) => {
+          link.setAttribute("target", "_blank");
+          link.setAttribute("rel", "noopener noreferrer");
+        });
+
+        // 2. Remove hardcoded element backgrounds and inline style backgrounds
+        doc.querySelectorAll("*").forEach((el) => {
+          if (el.hasAttribute("bgcolor")) {
+            el.removeAttribute("bgcolor");
+          }
+          if (el.hasAttribute("background")) {
+            el.removeAttribute("background");
+          }
+
+          const style = el.getAttribute("style");
+          if (style) {
+            const cleanedStyle = style
+              .replace(/(?<![\w-])background-color\s*:[^;]+;?/gi, "")
+              .replace(/(?<![\w-])background\s*:[^;]+;?/gi, "");
+            if (cleanedStyle.trim() === "") {
+              el.removeAttribute("style");
+            } else {
+              el.setAttribute("style", cleanedStyle);
+            }
+          }
+        });
+
+        return doc.body.innerHTML || doc.documentElement.innerHTML;
+      } catch (err) {
+        console.error("Error post-processing email HTML body:", err);
+      }
+    }
+
+    return sanitizedHtml;
   };
 
   return (
@@ -609,7 +666,10 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
               </Text>
             </div>
             <Text size="sm" color="primary-500">
-              {activeFolder === "sent" ? `to: ${email.toAddr}` : "to me"} •{" "}
+              {activeFolder === "sent"
+                ? `to: ${Array.isArray(email.toAddr) ? email.toAddr.join(", ") : (email.toAddr as any)}`
+                : "to me"}{" "}
+              •{" "}
               <span className="text-primary-900">
                 {new Date(email.receivedAt).toLocaleTimeString([], {
                   hour: "2-digit",
@@ -670,6 +730,60 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
           {email.attachments &&
             email.attachments.length > 0 &&
             (() => {
+              const getAttachmentIcon = (
+                mimeType?: string,
+                fileName?: string,
+              ) => {
+                const extension = fileName?.split(".").pop()?.toLowerCase();
+                if (
+                  mimeType?.startsWith("video/") ||
+                  ["mp4", "mov", "avi", "webm"].includes(extension || "")
+                )
+                  return (
+                    <FileVideo className="w-4 h-4 text-info-500 shrink-0" />
+                  );
+                if (
+                  mimeType?.startsWith("audio/") ||
+                  ["mp3", "wav", "ogg"].includes(extension || "")
+                )
+                  return (
+                    <FileAudio className="w-4 h-4 text-warning-500 shrink-0" />
+                  );
+                if (mimeType === "application/pdf" || extension === "pdf")
+                  return (
+                    <FileText className="w-4 h-4 text-error-500 shrink-0" />
+                  );
+                if (
+                  mimeType === "application/msword" ||
+                  mimeType ===
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+                  ["doc", "docx"].includes(extension || "")
+                )
+                  return (
+                    <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                  );
+                if (
+                  mimeType === "application/vnd.ms-excel" ||
+                  mimeType ===
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+                  ["xls", "xlsx", "csv"].includes(extension || "")
+                )
+                  return (
+                    <FileSpreadsheet className="w-4 h-4 text-success-600 shrink-0" />
+                  );
+                if (
+                  mimeType === "application/zip" ||
+                  mimeType === "application/x-rar-compressed" ||
+                  ["zip", "rar", "7z", "tar", "gz"].includes(extension || "")
+                )
+                  return (
+                    <FileArchive className="w-4 h-4 text-warning-600 shrink-0" />
+                  );
+                return (
+                  <FileIcon className="w-4 h-4 text-primary-500 shrink-0" />
+                );
+              };
+
               const isImageAttachment = (att: any) => {
                 if (att.contentType?.startsWith("image/")) return true;
                 const ext = att.filename?.split(".").pop()?.toLowerCase();
@@ -678,13 +792,25 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                 );
               };
 
-              const imageAtts = email.attachments.filter(isImageAttachment);
-              const fileAtts = email.attachments.filter(
-                (att: any) => !isImageAttachment(att),
+              const isWordAttachment = (att: any) => {
+                const ext = att.filename?.split(".").pop()?.toLowerCase();
+                return ["doc", "docx"].includes(ext || "");
+              };
+
+              const uniqueAttachments = Array.from(
+                new Map(
+                  email.attachments.map((att) => [att.filename || att.id, att]),
+                ).values(),
+              );
+
+              const imageAtts = uniqueAttachments.filter(isImageAttachment);
+              const wordAtts = uniqueAttachments.filter(isWordAttachment);
+              const otherAtts = uniqueAttachments.filter(
+                (att: any) => !isImageAttachment(att) && !isWordAttachment(att),
               );
 
               return (
-                <div className="mt-6 space-y-4">
+                <div className="mt-6 space-y-6">
                   {/* Inline images rendered with AuthenticatedImage component */}
                   {imageAtts.length > 0 && (
                     <div className="flex flex-wrap gap-4">
@@ -696,28 +822,107 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                             <AuthenticatedImage
                               url={targetUrl}
                               alt={att.filename}
-                              className="max-w-[500px] max-h-[400px] w-auto h-auto rounded-xl object-contain border border-primary-100 shadow-sm"
+                              className="w-[240px] h-[140px] object-cover"
                             />
                           </div>
                         );
                       })}
                     </div>
                   )}
-                  {/* Non-image file chips */}
-                  {fileAtts.length > 0 && (
+
+                  {/* Word Documents */}
+                  {wordAtts.length > 0 && (
+                    <div className="space-y-3 pt-2">
+                      <Text
+                        size="sm"
+                        font="bold"
+                        className="text-primary-700 uppercase tracking-wider"
+                      >
+                        Documents
+                      </Text>
+                      <div className="flex flex-wrap gap-4">
+                        {wordAtts.map((att: any) => (
+                          <div
+                            key={att.id}
+                            onClick={() => handleDownload(att.id, att.filename)}
+                            className="relative w-72 h-44 rounded-xl border border-primary-200 shadow-xs overflow-hidden bg-zinc-50 flex flex-col group cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all duration-300"
+                          >
+                            {/* Mock Document Page Preview */}
+                            <div className="flex-1 bg-white p-3 flex flex-col gap-1 overflow-hidden select-none">
+                              <span className="text-[10px] font-bold text-blue-800 tracking-tight">
+                                6.1. Website Testing
+                              </span>
+                              <span className="text-[8px] font-bold text-purple-700 tracking-tight">
+                                A. Login Page Test
+                              </span>
+                              <div className="flex gap-1.5 mt-1.5 flex-1">
+                                {/* Mock Screenshot 1 */}
+                                <div className="flex-1 bg-slate-50 border border-slate-200 rounded p-1 flex flex-col gap-0.5 h-16">
+                                  <div className="w-full h-1 bg-blue-100 rounded-[1px] mb-1" />
+                                  <div className="w-3/4 h-0.5 bg-slate-200 rounded-[1px]" />
+                                  <div className="w-1/2 h-0.5 bg-slate-200 rounded-[1px]" />
+                                </div>
+                                {/* Mock Screenshot 2 */}
+                                <div className="flex-1 bg-slate-900 border border-slate-800 rounded p-1 flex flex-col gap-0.5 h-16">
+                                  <div className="w-full h-1 bg-slate-800 rounded-[1px] mb-1" />
+                                  <div className="w-3/4 h-0.5 bg-slate-700 rounded-[1px]" />
+                                  <div className="w-1/2 h-0.5 bg-slate-700 rounded-[1px]" />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Bottom Dark Bar */}
+                            <div className="h-12 bg-[#121212] flex items-center justify-between px-3 relative">
+                              <div className="flex items-center gap-2">
+                                {/* Word Icon */}
+                                <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center text-white font-extrabold text-[12px] shadow-sm select-none">
+                                  W
+                                </div>
+                                <Text className="text-white text-xs font-semibold max-w-[180px] truncate">
+                                  {att.filename}
+                                </Text>
+                              </div>
+
+                              {/* Hover Download Icon Overlay */}
+                              <div className="absolute right-6 top-0 bottom-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Download className="w-4 h-4 text-background hover:text-blue-400" />
+                              </div>
+
+                              {/* Blue Triangle Corner */}
+                              <svg
+                                className="absolute bottom-0 right-0 w-5 h-5 text-blue-600"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <polygon points="24,24 24,0 0,24" />
+                              </svg>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Non-image other file chips */}
+                  {otherAtts.length > 0 && (
                     <div className="flex flex-wrap gap-2 pt-2">
-                      {fileAtts.map((att: any) => (
+                      {otherAtts.map((att: any) => (
                         <div
                           key={att.id}
-                          className="flex items-center gap-2 border border-primary-200 px-3 py-1.5 rounded-lg bg-primary-50"
+                          className="flex items-center gap-2 border border-primary-200 px-3.5 py-2 rounded-xl bg-primary-50 hover:bg-primary-100/50 transition-colors"
                         >
-                          <Text size="sm" className="max-w-[180px] truncate">
+                          {getAttachmentIcon(att.contentType, att.filename)}
+                          <Text
+                            size="sm"
+                            className="max-w-[180px] truncate font-medium text-primary-800"
+                          >
                             {att.filename}
                           </Text>
                           <Button
                             size="icon-sm"
                             variant="ghost"
                             onClick={() => handleDownload(att.id, att.filename)}
+                            className="text-primary-600 hover:text-primary-900"
                           >
                             <Download className="w-4 h-4" />
                           </Button>

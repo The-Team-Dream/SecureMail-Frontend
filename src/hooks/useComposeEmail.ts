@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { emailSchema, type EmailFormValues } from "@/schemas/SendEmail";
 import { type EmojiClickData } from "emoji-picker-react";
+import { formatForwardEmail, formatReplyEmail } from "@/utils/emailFormatter";
 
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useServerErrors } from "@/utils/form-utils";
@@ -103,21 +104,29 @@ export const useComposeEmail = () => {
   }, []);
 
   // ── Handlers ──────────────────────────────────────────────────────────
-  const handleAddFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
+  const addFiles = (files: File[]) => {
     setAttachments((prev) => {
-      const combined = [...prev, ...files];
+      const uniqueFiles = files.filter(
+        (file) => !prev.some((p) => p.name === file.name && p.size === file.size && p.lastModified === file.lastModified)
+      );
+      if (uniqueFiles.length === 0) return prev;
+      const combined = [...prev, ...uniqueFiles];
       if (combined.length > 10) {
         toast.error("Max 10 attachments allowed");
         return prev;
       }
-      const oversized = files.find((f) => f.size > 10 * 1024 * 1024);
+      const oversized = uniqueFiles.find((f) => f.size > 10 * 1024 * 1024);
       if (oversized) {
         toast.error(`"${oversized.name}" exceeds 10 MB limit`);
         return prev;
       }
       return combined;
     });
+  };
+
+  const handleAddFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    addFiles(files);
     // reset so same file can be re-picked
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -159,7 +168,13 @@ export const useComposeEmail = () => {
 
     if (composeMode === "reply" && composeData?.emailId) {
       if (sanitizedBodyText) fd.append("content", sanitizedBodyText);
-      if (data.bodyHtml) fd.append("bodyHtml", data.bodyHtml);
+      const originalHtml = composeData.originalHtml || (composeData.originalText ? `<p>${composeData.originalText.replace(/\n/g, "<br/>")}</p>` : "");
+      if (originalHtml) {
+        const fullHtml = formatReplyEmail(sanitizedBodyText, originalHtml, composeData);
+        fd.append("bodyHtml", fullHtml);
+      } else if (data.bodyHtml) {
+        fd.append("bodyHtml", data.bodyHtml);
+      }
       replyMutation.mutate(
         { id: composeData.emailId, formData: fd },
         {
@@ -169,14 +184,19 @@ export const useComposeEmail = () => {
       );
     } else if (composeMode === "forward" && composeData?.emailId) {
       fd.append("to", sanitizedTo);
-      if (sanitizedBodyText) fd.append("message", sanitizedBodyText);
-      forwardMutation.mutate(
-        { id: composeData.emailId, formData: fd },
-        {
-          onSuccess,
-          onError: (err: any) => handleServerErrors(err, ["to", "bodyText"]),
-        },
-      );
+      fd.append("subject", data.subject || `Fwd: ${composeData.subject || ""}`);
+      if (sanitizedBodyText) {
+        fd.append("bodyText", sanitizedBodyText);
+      }
+      const originalHtml = composeData.originalHtml || (composeData.originalText ? `<p>${composeData.originalText.replace(/\n/g, "<br/>")}</p>` : "");
+      const fullHtml = formatForwardEmail(sanitizedBodyText, originalHtml, composeData);
+      fd.append("bodyHtml", fullHtml);
+      
+      sendMutation.mutate(fd, {
+        onSuccess,
+        onError: (err: any) =>
+          handleServerErrors(err, ["to", "subject", "bodyText"]),
+      });
     } else {
       fd.append("to", sanitizedTo);
       fd.append("subject", sanitizedSubject);
@@ -242,6 +262,7 @@ export const useComposeEmail = () => {
     showBcc,
     setShowBcc,
     handleAddFiles,
+    addFiles,
     removeAttachment,
     insertEmoji,
     onSubmit,

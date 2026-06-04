@@ -19,6 +19,7 @@ interface MailState {
     bodyHtml?: string;
     originalHtml?: string;
     originalText?: string;
+    toAddr?: string[];
   } | null;
 
   setActiveFolder: (folder: Folder) => void;
@@ -39,6 +40,7 @@ interface MailState {
       bodyHtml?: string;
       originalHtml?: string;
       originalText?: string;
+      toAddr?: string[];
     };
     },
   ) => void;

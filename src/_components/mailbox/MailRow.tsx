@@ -93,7 +93,13 @@ export const MailRow = React.memo(
 
     const senderName =
       activeFolder === "sent"
-        ? `To: ${email.toAddr && email.toAddr.length > 0 ? email.toAddr.map((addr) => addr.split("@")[0]).join(", ") : "Unknown Recipient"}`
+        ? `To: ${
+            email.toAddr
+              ? Array.isArray(email.toAddr)
+                ? email.toAddr.map((addr) => addr.split("@")[0]).join(", ")
+                : (email.toAddr as any).split("@")[0]
+              : "Unknown Recipient"
+          }`
         : email.fromName ||
           (email.fromAddr ? email.fromAddr.split("@")[0] : "Unknown Sender");
 
@@ -216,60 +222,66 @@ export const MailRow = React.memo(
 
 
             {/* Attachment chips */}
-            {email.attachments && email.attachments.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-0.5">
-                {email.attachments.slice(0, 2).map((att) => {
-                  const getAttachmentIcon = () => {
-                    const ct = att.contentType || "";
-                    const fn = (att.filename || "").toLowerCase();
-                    if (
-                      ct.startsWith("image/") ||
-                      /\.(jpg|jpeg|png|gif|webp|svg)$/.test(fn)
-                    )
+            {(() => {
+              const uniqueAtts = email.attachments
+                ? Array.from(new Map(email.attachments.map((att) => [att.filename || att.id, att])).values())
+                : [];
+              if (uniqueAtts.length === 0) return null;
+              return (
+                <div className="flex flex-wrap gap-1 mt-0.5">
+                  {uniqueAtts.slice(0, 2).map((att) => {
+                    const getAttachmentIcon = () => {
+                      const ct = att.contentType || "";
+                      const fn = (att.filename || "").toLowerCase();
+                      if (
+                        ct.startsWith("image/") ||
+                        /\.(jpg|jpeg|png|gif|webp|svg)$/.test(fn)
+                      )
+                        return (
+                          <ImageIcon className="w-3 h-3 shrink-0 text-primary-500" />
+                        );
+                      if (
+                        ct.startsWith("video/") ||
+                        /\.(mp4|mov|avi|webm)$/.test(fn)
+                      )
+                        return (
+                          <Film className="w-3 h-3 shrink-0 text-primary-500" />
+                        );
+                      if (
+                        ct.startsWith("text/") ||
+                        /\.(txt|md|csv|json)$/.test(fn)
+                      )
+                        return (
+                          <FileText className="w-3 h-3 shrink-0 text-primary-500" />
+                        );
+                      if (/\.(pdf)$/.test(fn))
+                        return (
+                          <FileText className="w-3 h-3 shrink-0 text-error-500" />
+                        );
                       return (
-                        <ImageIcon className="w-3 h-3 shrink-0 text-primary-500" />
+                        <File className="w-3 h-3 shrink-0 text-primary-500" />
                       );
-                    if (
-                      ct.startsWith("video/") ||
-                      /\.(mp4|mov|avi|webm)$/.test(fn)
-                    )
-                      return (
-                        <Film className="w-3 h-3 shrink-0 text-primary-500" />
-                      );
-                    if (
-                      ct.startsWith("text/") ||
-                      /\.(txt|md|csv|json)$/.test(fn)
-                    )
-                      return (
-                        <FileText className="w-3 h-3 shrink-0 text-primary-500" />
-                      );
-                    if (/\.(pdf)$/.test(fn))
-                      return (
-                        <FileText className="w-3 h-3 shrink-0 text-error-500" />
-                      );
-                    return (
-                      <File className="w-3 h-3 shrink-0 text-primary-500" />
-                    );
-                  };
+                    };
 
-                  return (
-                    <span
-                      key={att.id}
-                      className="inline-flex items-center gap-1 bg-transparent border border-primary-200 rounded-full px-2 py-0 text-[10px] text-primary-600 max-w-[120px]"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {getAttachmentIcon()}
-                      <span className="truncate text-xs">{att.filename}</span>
+                    return (
+                      <span
+                        key={att.id}
+                        className="inline-flex items-center gap-1 bg-transparent border border-primary-200 rounded-full px-2 py-0 text-[10px] text-primary-600 max-w-[120px]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {getAttachmentIcon()}
+                        <span className="truncate text-xs">{att.filename}</span>
+                      </span>
+                    );
+                  })}
+                  {uniqueAtts.length > 2 && (
+                    <span className="inline-flex items-center bg-transparent border border-primary-200 rounded-full px-2 py-0 text-[10px] text-primary-500">
+                      +{uniqueAtts.length - 2}
                     </span>
-                  );
-                })}
-                {email.attachments.length > 2 && (
-                  <span className="inline-flex items-center bg-transparent border border-primary-200 rounded-full px-2 py-0 text-[10px] text-primary-500">
-                    +{email.attachments.length - 2}
-                  </span>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Right side: date (desktop) + actions */}

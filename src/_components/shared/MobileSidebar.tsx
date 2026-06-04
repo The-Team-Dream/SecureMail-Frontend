@@ -374,7 +374,7 @@ export const MobileSidebar = () => {
                             className={cn(
                               "w-4 h-4 transition-transform",
                               isActive
-                                ? "translate-x-1 text-primary"
+                                ? "x-1 text-primary"
                                 : "text-primary-600 opacity-0 group-hover:opacity-100",
                             )}
                           />

@@ -185,10 +185,127 @@ const getFileIcon = (mimeType: string, fileName: string) => {
   return { icon: FileIcon, color: "text-primary-500", bg: "bg-primary-50" };
 };
 
+const IsolatedHtml = ({ html }: { html: string }) => {
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
+
+  React.useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const handleLoad = () => {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (doc) {
+          // Adjust iframe height dynamically to match its inner content height
+          const bodyHeight = doc.body?.scrollHeight || doc.documentElement.scrollHeight || 200;
+          iframe.style.height = `${bodyHeight + 20}px`;
+        }
+      } catch (e) {
+        console.error("Failed to resize iframe:", e);
+      }
+    };
+
+    // Trigger calculation when the content document is updated
+    iframe.addEventListener("load", handleLoad);
+    
+    // Fallback: trigger after 200ms to ensure lazy/styled rendering is calculated
+    const timer = setTimeout(handleLoad, 200);
+
+    return () => {
+      iframe.removeEventListener("load", handleLoad);
+      clearTimeout(timer);
+    };
+  }, [html]);
+
+  const processed = React.useMemo(() => {
+    const sanitizedHtml = DOMPurify.sanitize(html, {
+      ADD_ATTR: ["target", "rel"],
+    });
+
+    if (typeof window !== "undefined") {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(sanitizedHtml, "text/html");
+
+        // 1. Force target="_blank" and rel="noopener noreferrer" for all links
+        doc.querySelectorAll("a").forEach((link) => {
+          link.setAttribute("target", "_blank");
+          link.setAttribute("rel", "noopener noreferrer");
+        });
+
+        // 2. Remove hardcoded element backgrounds and inline style backgrounds
+        doc.querySelectorAll("*").forEach((el) => {
+          if (el.hasAttribute("bgcolor")) {
+            el.removeAttribute("bgcolor");
+          }
+          if (el.hasAttribute("background")) {
+            el.removeAttribute("background");
+          }
+
+          const style = el.getAttribute("style");
+          if (style) {
+            const cleanedStyle = style
+              .replace(/(?<![\w-])background-color\s*:[^;]+;?/gi, "")
+              .replace(/(?<![\w-])background\s*:[^;]+;?/gi, "");
+            if (cleanedStyle.trim() === "") {
+              el.removeAttribute("style");
+            } else {
+              el.setAttribute("style", cleanedStyle);
+            }
+          }
+        });
+
+        // Inject scoped styles into the iframe head
+        const styleEl = doc.createElement("style");
+        styleEl.textContent = `
+          body, html {
+            background-color: transparent !important;
+            margin: 0;
+            padding: 0;
+            font-family: inherit;
+          }
+          a {
+            color: #3b82f6 !important;
+            text-decoration: underline !important;
+          }
+          img {
+            max-width: 320px !important;
+            width: 100% !important;
+            height: auto !important;
+            object-fit: contain !important;
+            display: inline-block;
+          }
+          * {
+            background-color: transparent !important;
+          }
+        `;
+        doc.head.appendChild(styleEl);
+
+        return doc.documentElement.outerHTML;
+      } catch (err) {
+        console.error("Error processing IsolatedHtml:", err);
+      }
+    }
+    return sanitizedHtml;
+  }, [html]);
+
+  return (
+    <iframe
+      ref={iframeRef}
+      srcDoc={processed}
+      title="Original Message Preview"
+      className="w-full border-0 min-h-[200px] max-h-[300px] overflow-y-auto rounded-lg bg-transparent"
+      sandbox="allow-same-origin allow-popups"
+    />
+  );
+};
+
 // ─── Component ─────────────────────────────────────────────────────────────
 export const ComposeEmailSheet = () => {
   const { resolvedTheme } = useTheme();
   const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkText, setLinkText] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
 
   const {
     isOpen,
@@ -202,6 +319,7 @@ export const ComposeEmailSheet = () => {
     attachments,
     setAttachments,
     fileInputRef,
+    addFiles,
     showEmoji,
     setShowEmoji,
     emojiRef,
@@ -384,22 +502,17 @@ export const ComposeEmailSheet = () => {
             </div>
 
             {/* Original Email (View Only) */}
-            {composeMode === "forward" && (composeData as any)?.originalHtml && (
+            {(composeMode === "forward" || composeMode === "reply") && (composeData as any)?.originalHtml && (
               <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
                 <Text size="sm" font="bold" className="text-primary-700">
                   Original Message
                 </Text>
-                <div className="p-4 rounded-xl border border-primary-100 bg-primary-50/30 overflow-y-auto max-h-[300px]">
-                  <div
-                    className="text-primary-800 text-[15px] leading-relaxed"
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize((composeData as any).originalHtml),
-                    }}
-                  />
+                <div className="p-2 rounded-xl border border-primary-100 bg-white overflow-hidden max-h-[350px]">
+                  <IsolatedHtml html={(composeData as any).originalHtml} />
                 </div>
               </div>
             )}
-            {composeMode === "forward" && !(composeData as any)?.originalHtml && (composeData as any)?.originalText && (
+            {(composeMode === "forward" || composeMode === "reply") && !(composeData as any)?.originalHtml && (composeData as any)?.originalText && (
               <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
                 <Text size="sm" font="bold" className="text-primary-700">
                   Original Message
@@ -447,7 +560,7 @@ export const ComposeEmailSheet = () => {
                 ) : (
                   <>
                     <span>Send</span>
-                    <Icons.Sent className="w-4 h-4 text-background" />
+                    <Icons.Sent className="w-4 h-4 text-white" />
                   </>
                 )}
               </Button>
@@ -504,26 +617,74 @@ export const ComposeEmailSheet = () => {
                     onClick={() => setShowLinkInput((v) => !v)}
                     icon={<LinkIcon className="w-5 h-5" />}
                   />
-                  {showLinkInput && (
-                    <div className="absolute bottom-full mb-2 left-0 z-50 bg-background p-2 rounded-lg border border-primary-200 shadow-lg flex items-center gap-2">
-                      <Input
-                        placeholder="https://..."
-                        className="w-48 h-8 text-xs"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            const val = e.currentTarget.value;
-                            if (val) {
-                              const current = getValues("bodyText") ?? "";
-                              setValue("bodyText", `${current} ${val}`);
-                              setShowLinkInput(false);
+                   {showLinkInput && (
+                    <div className="absolute bottom-full mb-2 left-0 z-50 bg-background p-3 rounded-xl border border-primary-200 shadow-xl flex flex-col gap-2 w-64">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-bold text-primary-500">Text Display</span>
+                        <Input
+                          placeholder="e.g. My Website"
+                          value={linkText}
+                          onChange={(e) => setLinkText(e.target.value)}
+                          className="h-8 text-xs w-full"
+                          autoFocus
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-bold text-primary-500">Link URL</span>
+                        <Input
+                          placeholder="https://example.com"
+                          value={linkUrl}
+                          onChange={(e) => setLinkUrl(e.target.value)}
+                          className="h-8 text-xs w-full"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              if (linkUrl) {
+                                const displayText = linkText || linkUrl;
+                                const current = getValues("bodyText") ?? "";
+                                const formattedLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline;">${displayText}</a>`;
+                                setValue("bodyText", `${current} ${formattedLink}`);
+                                setShowLinkInput(false);
+                                setLinkText("");
+                                setLinkUrl("");
+                              }
                             }
-                          } else if (e.key === "Escape") {
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-1.5 pt-1">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs px-2 text-primary-500"
+                          onClick={() => {
                             setShowLinkInput(false);
-                          }
-                        }}
-                      />
+                            setLinkText("");
+                            setLinkUrl("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-7 text-xs px-2"
+                          onClick={() => {
+                            if (linkUrl) {
+                              const displayText = linkText || linkUrl;
+                              const current = getValues("bodyText") ?? "";
+                              const formattedLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline;">${displayText}</a>`;
+                              setValue("bodyText", `${current} ${formattedLink}`);
+                              setShowLinkInput(false);
+                              setLinkText("");
+                              setLinkUrl("");
+                            }
+                          }}
+                        >
+                          Insert
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -541,14 +702,7 @@ export const ComposeEmailSheet = () => {
                       const files = Array.from(
                         (e.target as HTMLInputElement).files ?? [],
                       );
-                      setAttachments((prev) => {
-                        const combined = [...prev, ...files];
-                        if (combined.length > 10) {
-                          toast.error("Max 10 attachments allowed");
-                          return prev;
-                        }
-                        return combined;
-                      });
+                      addFiles(files);
                     };
                     imgInput.click();
                   }}

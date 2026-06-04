@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
   active?: boolean;
+  disableFill?: boolean;
   size?: number;
 }
 
@@ -14,6 +15,7 @@ interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
  */
 export const CustomIcon = ({
   active,
+  disableFill,
   size = 22,
   className,
   children,
