@@ -822,7 +822,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                             <AuthenticatedImage
                               url={targetUrl}
                               alt={att.filename}
-                              className="w-[240px] h-[140px] object-cover"
+                              className="w-[280px] h-[180px] object-cover"
                             />
                           </div>
                         );
@@ -847,29 +847,36 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                             onClick={() => handleDownload(att.id, att.filename)}
                             className="relative w-72 h-44 rounded-xl border border-primary-200 shadow-xs overflow-hidden bg-zinc-50 flex flex-col group cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all duration-300"
                           >
-                            {/* Mock Document Page Preview */}
-                            <div className="flex-1 bg-white p-3 flex flex-col gap-1 overflow-hidden select-none">
-                              <span className="text-[10px] font-bold text-blue-800 tracking-tight">
-                                6.1. Website Testing
-                              </span>
-                              <span className="text-[8px] font-bold text-purple-700 tracking-tight">
-                                A. Login Page Test
-                              </span>
-                              <div className="flex gap-1.5 mt-1.5 flex-1">
-                                {/* Mock Screenshot 1 */}
-                                <div className="flex-1 bg-slate-50 border border-slate-200 rounded p-1 flex flex-col gap-0.5 h-16">
-                                  <div className="w-full h-1 bg-blue-100 rounded-[1px] mb-1" />
-                                  <div className="w-3/4 h-0.5 bg-slate-200 rounded-[1px]" />
-                                  <div className="w-1/2 h-0.5 bg-slate-200 rounded-[1px]" />
+                            {/* Dynamic Document Page Preview */}
+                            {(() => {
+                              // Generate stable visual fingerprint from filename
+                              const name = att.filename || "document";
+                              const nameWithoutExt = name.replace(/\.[^.]+$/, "");
+                              const hash = name.split("").reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0);
+                              const lineWidths = ["w-full", "w-3/4", "w-5/6", "w-2/3", "w-1/2", "w-4/5"];
+                              const accentColors = ["bg-blue-300", "bg-emerald-300", "bg-violet-300", "bg-amber-300", "bg-rose-300", "bg-cyan-300"];
+                              const accent = accentColors[hash % accentColors.length];
+                              const titleLine = nameWithoutExt.slice(0, 22);
+                              const subLine = nameWithoutExt.length > 10 ? nameWithoutExt.slice(Math.floor(nameWithoutExt.length / 2)).slice(0, 18) : "Document";
+                              // Generate deterministic line widths based on filename chars
+                              const lines = Array.from({ length: 6 }, (_, i) => lineWidths[(hash + i * 3) % lineWidths.length]);
+                              return (
+                                <div className="flex-1 bg-white p-3 flex flex-col gap-1 overflow-hidden select-none">
+                                  <span className="text-[9px] font-bold text-blue-800 tracking-tight truncate">
+                                    {titleLine}
+                                  </span>
+                                  <span className="text-[7px] font-semibold text-slate-500 tracking-tight truncate">
+                                    {subLine}
+                                  </span>
+                                  <div className={`w-full h-1 ${accent} rounded-[1px] mt-0.5 mb-1 opacity-70`} />
+                                  <div className="flex flex-col gap-0.5 flex-1">
+                                    {lines.map((w, i) => (
+                                      <div key={i} className={`${w} h-0.5 bg-slate-200 rounded-[1px]`} />
+                                    ))}
+                                  </div>
                                 </div>
-                                {/* Mock Screenshot 2 */}
-                                <div className="flex-1 bg-slate-900 border border-slate-800 rounded p-1 flex flex-col gap-0.5 h-16">
-                                  <div className="w-full h-1 bg-slate-800 rounded-[1px] mb-1" />
-                                  <div className="w-3/4 h-0.5 bg-slate-700 rounded-[1px]" />
-                                  <div className="w-1/2 h-0.5 bg-slate-700 rounded-[1px]" />
-                                </div>
-                              </div>
-                            </div>
+                              );
+                            })()}
 
                             {/* Bottom Dark Bar */}
                             <div className="h-12 bg-[#121212] flex items-center justify-between px-3 relative">

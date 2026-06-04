@@ -31,4 +31,3 @@ export const downloadAttachment = async (
   link.remove();
   URL.revokeObjectURL(objectUrl);
 };
-

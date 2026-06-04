@@ -60,6 +60,8 @@ export const useComposeEmail = () => {
   // ── Attachments state ──────────────────────────────────────────────────
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Rich-text body editor ref (contentEditable div)
+  const bodyEditorRef = useRef<HTMLDivElement>(null);
 
   // ── Emoji picker ──────────────────────────────────────────────────────
   const [showEmoji, setShowEmoji] = useState(false);
@@ -88,6 +90,11 @@ export const useComposeEmail = () => {
       setShowEmoji(false);
       setShowCc(false);
       setShowBcc(false);
+      // Reset the contentEditable body editor
+      if (bodyEditorRef.current) {
+        bodyEditorRef.current.innerHTML =
+          composeMode === "reply" ? (composeData?.body ?? "") : "";
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, composeMode, composeData, mailboxes]);
@@ -124,6 +131,32 @@ export const useComposeEmail = () => {
     });
   };
 
+  // ── Insert a hyperlink into the rich-text editor at the cursor position ──
+  const insertLinkInEditor = (url: string, displayText: string) => {
+    const editor = bodyEditorRef.current;
+    if (!editor) return;
+    editor.focus();
+    const linkHtml = `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#3b82f6;text-decoration:underline;">${displayText}</a>&nbsp;`;
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const tmp = document.createElement("div");
+      tmp.innerHTML = linkHtml;
+      const frag = document.createDocumentFragment();
+      while (tmp.firstChild) frag.appendChild(tmp.firstChild);
+      range.insertNode(frag);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      editor.innerHTML += linkHtml;
+    }
+    // Sync React Hook Form value & clear errors
+    setValue("bodyText", editor.innerText?.trim() || " ");
+    clearErrors(["bodyText", "root" as any]);
+  };
+
   const handleAddFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     addFiles(files);
@@ -135,8 +168,24 @@ export const useComposeEmail = () => {
     setAttachments((prev) => prev.filter((_, i) => i !== idx));
 
   const insertEmoji = (data: EmojiClickData) => {
-    const current = form.getValues("bodyText") ?? "";
-    form.setValue("bodyText", current + data.emoji);
+    const editor = bodyEditorRef.current;
+    if (!editor) return;
+    editor.focus();
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const node = document.createTextNode(data.emoji);
+      range.insertNode(node);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      editor.innerHTML += data.emoji;
+    }
+    // Sync React Hook Form value & clear errors
+    setValue("bodyText", editor.innerText?.trim() || " ");
+    clearErrors(["bodyText", "root" as any]);
     setShowEmoji(false);
   };
 
@@ -152,12 +201,16 @@ export const useComposeEmail = () => {
   const onSubmit = (data: EmailFormValues) => {
     const fd = new FormData();
 
+    // Read content from the rich-text editor (contentEditable div)
+    const editorEl = bodyEditorRef.current;
+    const sanitizedBodyText = (editorEl?.innerText || data.bodyText || "").trim();
+    const editorBodyHtml = editorEl?.innerHTML?.trim() || "";
+
     // Sanitize inputs
     const sanitizedTo = sanitizeEmails(data.to);
     const sanitizedSubject = data.subject?.trim() || "";
     const sanitizedCc = sanitizeEmails(data.cc);
     const sanitizedBcc = sanitizeEmails(data.bcc);
-    const sanitizedBodyText = data.bodyText?.trim() || "";
 
     attachments.forEach((f) => fd.append("attachments", f));
     const onSuccess = () => {
@@ -189,7 +242,7 @@ export const useComposeEmail = () => {
         fd.append("bodyText", sanitizedBodyText);
       }
       const originalHtml = composeData.originalHtml || (composeData.originalText ? `<p>${composeData.originalText.replace(/\n/g, "<br/>")}</p>` : "");
-      const fullHtml = formatForwardEmail(sanitizedBodyText, originalHtml, composeData);
+      const fullHtml = formatForwardEmail(editorBodyHtml || sanitizedBodyText, originalHtml, composeData);
       fd.append("bodyHtml", fullHtml);
       
       sendMutation.mutate(fd, {
@@ -204,12 +257,12 @@ export const useComposeEmail = () => {
       if (sanitizedBcc) fd.append("bcc", sanitizedBcc);
       if (sanitizedBodyText) {
         fd.append("bodyText", sanitizedBodyText);
-        if (!data.bodyHtml) {
-          fd.append(
-            "bodyHtml",
-            `<p>${sanitizedBodyText.replace(/\n/g, "<br/>")}</p>`,
-          );
-        }
+      }
+      // Use rich HTML from editor (contains links etc.); fall back to plain text wrapped in <p>
+      if (editorBodyHtml) {
+        fd.append("bodyHtml", editorBodyHtml);
+      } else if (sanitizedBodyText) {
+        fd.append("bodyHtml", `<p>${sanitizedBodyText.replace(/\n/g, "<br/>")}</p>`);
       }
       if (data.bodyHtml) fd.append("bodyHtml", data.bodyHtml);
 
@@ -254,6 +307,8 @@ export const useComposeEmail = () => {
     attachments,
     setAttachments,
     fileInputRef,
+    bodyEditorRef,
+    insertLinkInEditor,
     showEmoji,
     setShowEmoji,
     emojiRef,

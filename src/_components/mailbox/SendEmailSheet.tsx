@@ -28,6 +28,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import BackEndError from "@/_components/shared/BackEndError";
+import Error from "@/_components/shared/Error";
 import dynamic from "next/dynamic";
 import { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
@@ -197,7 +198,8 @@ const IsolatedHtml = ({ html }: { html: string }) => {
         const doc = iframe.contentDocument || iframe.contentWindow?.document;
         if (doc) {
           // Adjust iframe height dynamically to match its inner content height
-          const bodyHeight = doc.body?.scrollHeight || doc.documentElement.scrollHeight || 200;
+          const bodyHeight =
+            doc.body?.scrollHeight || doc.documentElement.scrollHeight || 200;
           iframe.style.height = `${bodyHeight + 20}px`;
         }
       } catch (e) {
@@ -207,7 +209,7 @@ const IsolatedHtml = ({ html }: { html: string }) => {
 
     // Trigger calculation when the content document is updated
     iframe.addEventListener("load", handleLoad);
-    
+
     // Fallback: trigger after 200ms to ensure lazy/styled rendering is calculated
     const timer = setTimeout(handleLoad, 200);
 
@@ -217,85 +219,15 @@ const IsolatedHtml = ({ html }: { html: string }) => {
     };
   }, [html]);
 
-  const processed = React.useMemo(() => {
-    const sanitizedHtml = DOMPurify.sanitize(html, {
-      ADD_ATTR: ["target", "rel"],
-    });
-
-    if (typeof window !== "undefined") {
-      try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(sanitizedHtml, "text/html");
-
-        // 1. Force target="_blank" and rel="noopener noreferrer" for all links
-        doc.querySelectorAll("a").forEach((link) => {
-          link.setAttribute("target", "_blank");
-          link.setAttribute("rel", "noopener noreferrer");
-        });
-
-        // 2. Remove hardcoded element backgrounds and inline style backgrounds
-        doc.querySelectorAll("*").forEach((el) => {
-          if (el.hasAttribute("bgcolor")) {
-            el.removeAttribute("bgcolor");
-          }
-          if (el.hasAttribute("background")) {
-            el.removeAttribute("background");
-          }
-
-          const style = el.getAttribute("style");
-          if (style) {
-            const cleanedStyle = style
-              .replace(/(?<![\w-])background-color\s*:[^;]+;?/gi, "")
-              .replace(/(?<![\w-])background\s*:[^;]+;?/gi, "");
-            if (cleanedStyle.trim() === "") {
-              el.removeAttribute("style");
-            } else {
-              el.setAttribute("style", cleanedStyle);
-            }
-          }
-        });
-
-        // Inject scoped styles into the iframe head
-        const styleEl = doc.createElement("style");
-        styleEl.textContent = `
-          body, html {
-            background-color: transparent !important;
-            margin: 0;
-            padding: 0;
-            font-family: inherit;
-          }
-          a {
-            color: #3b82f6 !important;
-            text-decoration: underline !important;
-          }
-          img {
-            max-width: 320px !important;
-            width: 100% !important;
-            height: auto !important;
-            object-fit: contain !important;
-            display: inline-block;
-          }
-          * {
-            background-color: transparent !important;
-          }
-        `;
-        doc.head.appendChild(styleEl);
-
-        return doc.documentElement.outerHTML;
-      } catch (err) {
-        console.error("Error processing IsolatedHtml:", err);
-      }
-    }
-    return sanitizedHtml;
-  }, [html]);
+  const sanitized = DOMPurify.sanitize(html);
 
   return (
     <iframe
       ref={iframeRef}
-      srcDoc={processed}
+      srcDoc={sanitized}
       title="Original Message Preview"
-      className="w-full border-0 min-h-[200px] max-h-[300px] overflow-y-auto rounded-lg bg-transparent"
-      sandbox="allow-same-origin allow-popups"
+      className="w-full border-0 min-h-[200px] max-h-[300px] overflow-y-auto rounded-lg"
+      sandbox="allow-same-origin"
     />
   );
 };
@@ -306,6 +238,17 @@ export const ComposeEmailSheet = () => {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkText, setLinkText] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
+  const linkInputRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (linkInputRef.current && !linkInputRef.current.contains(e.target as Node)) {
+        setShowLinkInput(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const {
     isOpen,
@@ -319,6 +262,8 @@ export const ComposeEmailSheet = () => {
     attachments,
     setAttachments,
     fileInputRef,
+    bodyEditorRef,
+    insertLinkInEditor,
     addFiles,
     showEmoji,
     setShowEmoji,
@@ -483,47 +428,68 @@ export const ComposeEmailSheet = () => {
                 )}
               </label>
               <div className="flex flex-col gap-1">
-                <Textarea
-                  {...register("bodyText", {
-                    onChange: () => clearErrors(["bodyText", "root" as any]),
-                  })}
-                  placeholder={
+                {/* Rich-text contentEditable body editor */}
+                <div
+                  ref={bodyEditorRef}
+                  contentEditable={!isPending}
+                  suppressContentEditableWarning
+                  onInput={(e) => {
+                    const text = e.currentTarget.innerText?.trim() || "";
+                    setValue("bodyText", text);
+                    clearErrors(["bodyText", "root" as any]);
+                  }}
+                  onBlur={(e) => {
+                    const text = e.currentTarget.innerText?.trim() || "";
+                    setValue("bodyText", text, { shouldValidate: true, shouldTouch: true });
+                  }}
+                  data-placeholder={
                     composeMode === "reply"
                       ? "Type your reply..."
                       : composeMode === "forward"
                         ? "Add a message to this forward..."
                         : "Type your message here..."
                   }
-                  className="min-h-[220px]"
-                  disabled={isPending}
-                  error={errors.bodyText?.message as string}
+                  className={cn(
+                    "min-h-[220px] w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none focus:border-primary-400 transition duration-500",
+                    "text-primary-800 leading-relaxed break-words",
+                    "before:pointer-events-none",
+                    "[&:empty]:before:content-[attr(data-placeholder)]",
+                    errors.bodyText
+                      ? "border-error-500 before:text-error-500"
+                      : "border-primary-100 before:text-primary-400",
+                    isPending && "opacity-60 cursor-not-allowed pointer-events-none",
+                  )}
                 />
+                <Error error={errors.bodyText?.message as string} />
               </div>
             </div>
 
             {/* Original Email (View Only) */}
-            {(composeMode === "forward" || composeMode === "reply") && (composeData as any)?.originalHtml && (
-              <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
-                <Text size="sm" font="bold" className="text-primary-700">
-                  Original Message
-                </Text>
-                <div className="p-2 rounded-xl border border-primary-100 bg-white overflow-hidden max-h-[350px]">
-                  <IsolatedHtml html={(composeData as any).originalHtml} />
-                </div>
-              </div>
-            )}
-            {(composeMode === "forward" || composeMode === "reply") && !(composeData as any)?.originalHtml && (composeData as any)?.originalText && (
-              <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
-                <Text size="sm" font="bold" className="text-primary-700">
-                  Original Message
-                </Text>
-                <div className="p-4 rounded-xl border border-primary-100 bg-primary-50/30 overflow-y-auto max-h-[300px]">
-                  <div className="text-primary-800 text-[15px] leading-relaxed whitespace-pre-wrap">
-                    {(composeData as any).originalText}
+            {(composeMode === "forward" || composeMode === "reply") &&
+              (composeData as any)?.originalHtml && (
+                <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
+                  <Text size="sm" font="bold" className="text-primary-700">
+                    Original Message
+                  </Text>
+                  <div className="p-2 rounded-xl border border-primary-100 bg-white overflow-hidden max-h-[350px]">
+                    <IsolatedHtml html={(composeData as any).originalHtml} />
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            {(composeMode === "forward" || composeMode === "reply") &&
+              !(composeData as any)?.originalHtml &&
+              (composeData as any)?.originalText && (
+                <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
+                  <Text size="sm" font="bold" className="text-primary-700">
+                    Original Message
+                  </Text>
+                  <div className="p-4 rounded-xl border border-primary-100 bg-primary-50/30 overflow-y-auto max-h-[300px]">
+                    <div className="text-primary-800 text-[15px] leading-relaxed whitespace-pre-wrap">
+                      {(composeData as any).originalText}
+                    </div>
+                  </div>
+                </div>
+              )}
 
             {attachments.length > 0 && (
               <div className="flex flex-wrap gap-3 pt-2">
@@ -610,17 +576,19 @@ export const ComposeEmailSheet = () => {
                   )}
                 </div>
 
-                <div className="relative">
+                <div className="relative" ref={linkInputRef}>
                   <ActionButton
                     label="Insert link"
                     className="text-primary-500 hover:text-primary-900"
                     onClick={() => setShowLinkInput((v) => !v)}
                     icon={<LinkIcon className="w-5 h-5" />}
                   />
-                   {showLinkInput && (
+                  {showLinkInput && (
                     <div className="absolute bottom-full mb-2 left-0 z-50 bg-background p-3 rounded-xl border border-primary-200 shadow-xl flex flex-col gap-2 w-64">
                       <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-bold text-primary-500">Text Display</span>
+                        <span className="text-[10px] font-bold text-primary-500">
+                          Text Display
+                        </span>
                         <Input
                           placeholder="e.g. My Website"
                           value={linkText}
@@ -630,7 +598,9 @@ export const ComposeEmailSheet = () => {
                         />
                       </div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-bold text-primary-500">Link URL</span>
+                        <span className="text-[10px] font-bold text-primary-500">
+                          Link URL
+                        </span>
                         <Input
                           placeholder="https://example.com"
                           value={linkUrl}
@@ -641,9 +611,7 @@ export const ComposeEmailSheet = () => {
                               e.preventDefault();
                               if (linkUrl) {
                                 const displayText = linkText || linkUrl;
-                                const current = getValues("bodyText") ?? "";
-                                const formattedLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline;">${displayText}</a>`;
-                                setValue("bodyText", `${current} ${formattedLink}`);
+                                insertLinkInEditor(linkUrl, displayText);
                                 setShowLinkInput(false);
                                 setLinkText("");
                                 setLinkUrl("");
@@ -673,9 +641,7 @@ export const ComposeEmailSheet = () => {
                           onClick={() => {
                             if (linkUrl) {
                               const displayText = linkText || linkUrl;
-                              const current = getValues("bodyText") ?? "";
-                              const formattedLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline;">${displayText}</a>`;
-                              setValue("bodyText", `${current} ${formattedLink}`);
+                              insertLinkInEditor(linkUrl, displayText);
                               setShowLinkInput(false);
                               setLinkText("");
                               setLinkUrl("");

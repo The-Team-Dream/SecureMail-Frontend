@@ -47,13 +47,15 @@ export const getReplyHeader = (meta: EmailMeta): string => {
 };
 
 export const formatForwardEmail = (userMessage: string, originalHtml: string, meta: EmailMeta): string => {
-  const userHtml = `<p>${userMessage.replace(/\n/g, "<br/>")}</p>`;
+  const containsHtml = /<[a-z][\s\S]*>/i.test(userMessage);
+  const userHtml = containsHtml ? userMessage : `<p>${userMessage.replace(/\n/g, "<br/>")}</p>`;
   const header = getForwardHeader(meta);
   return `${userHtml}${header}<div class="gmail_quote">${originalHtml}</div>`;
 };
 
 export const formatReplyEmail = (userMessage: string, originalHtml: string, meta: EmailMeta): string => {
-  const userHtml = `<p>${userMessage.replace(/\n/g, "<br/>")}</p>`;
+  const containsHtml = /<[a-z][\s\S]*>/i.test(userMessage);
+  const userHtml = containsHtml ? userMessage : `<p>${userMessage.replace(/\n/g, "<br/>")}</p>`;
   const header = getReplyHeader(meta);
   return `${userHtml}${header}<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">${originalHtml}</blockquote>`;
 };
