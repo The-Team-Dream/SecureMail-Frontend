@@ -49,7 +49,6 @@ const ThemeToggler = ({ isCollapsed = false }: ThemeTogglerProps) => {
 
   return (
     <div>
-     
       <div
         className={cn(
           "relative mx-auto flex rounded-xl bg-primary-100 p-1 transition-all duration-300",

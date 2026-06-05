@@ -9,7 +9,9 @@ export const downloadAttachment = async (
   attachmentUrl?: string,
 ): Promise<void> => {
   const token = Cookies.get("token");
-  const url = attachmentUrl || `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${attachmentId}/download`;
+  const url =
+    attachmentUrl ||
+    `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${attachmentId}/download`;
 
   const headers: HeadersInit = {};
   if (token && (!url.startsWith("http") || url.includes("/mailboxes/"))) {

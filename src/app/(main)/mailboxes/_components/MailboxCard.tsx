@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,6 @@ import { ProgressBar } from "@/_components/shared/ProgressBar";
 import { useMailboxStats } from "@/APIs/hooks/analytics";
 import { ScanQueueBanner } from "@/_components/mailbox/ScanQueueBanner";
 import { differenceInSeconds, formatDistanceToNow } from "date-fns";
-import { arEG } from "date-fns/locale"; // لو عايز الوقت يظهر بالعربي (اختياري)
 export const getStatusStyles = (isActive: boolean) => {
   if (isActive) {
     return {
@@ -41,6 +41,13 @@ export function MailboxCard({
 }) {
   const statusStyles = getStatusStyles(acc.isActive);
   const { data: stats } = useMailboxStats(String(acc.id));
+  const [now, setNow] = useState(() => new Date());
+
+  // Tick every second so the "X seconds ago" display updates in real-time
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const totalThreats = (stats?.phishingEmails ?? 0) + (stats?.spamEmails ?? 0);
 
@@ -112,7 +119,7 @@ export function MailboxCard({
               {acc?.lastSyncedAt
                 ? (() => {
                     const diffInSecs = differenceInSeconds(
-                      new Date(),
+                      now,
                       new Date(acc.lastSyncedAt),
                     );
 
@@ -123,7 +130,7 @@ export function MailboxCard({
                     if (diffInSecs < 60) {
                       return `${diffInSecs} ${diffInSecs === 1 ? "second" : "seconds"} ago`;
                     }
-                    
+
                     return formatDistanceToNow(new Date(acc.lastSyncedAt), {
                       addSuffix: true,
                     });

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { ChevronUp, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronRight, ChevronDown, FolderSync } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Icons } from "@/constants/icons";
 import { Text } from "@/_components/shared/Text";
@@ -39,20 +39,18 @@ export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          disabled={reclassifyMutation.isPending} 
-          className="w-fit gap-2"
-        >
+        <Button disabled={reclassifyMutation.isPending} className="w-fit gap-2">
           {reclassifyMutation.isPending ? (
             <>
               <span className="text-sm font-normal">Reclassifying...</span>
-              <span className="text-primary-500 opacity-50">|</span>
               <Spinner className="w-4 h-4" />
             </>
           ) : (
             <>
-              <span className="text-sm font-normal">Reclassify</span>
-              <span className="text-primary-500 opacity-50">|</span>
+              <span className="text-sm font-normal hidden sm:flex">
+                Reclassify
+              </span>
+              <FolderSync className="flex sm:hidden" />
               <ChevronDown className="w-4 h-4" />
             </>
           )}

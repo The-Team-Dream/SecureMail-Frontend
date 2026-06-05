@@ -12,6 +12,8 @@ import {
   FileAudio,
   FileSpreadsheet,
   FileArchive,
+  Square,
+  CheckSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Email, EmailFolder } from "@/APIs/types/Email";
@@ -24,6 +26,7 @@ import {
   useStarEmail,
   useDeleteEmailWithUndo,
 } from "@/APIs/hooks/emails";
+import { ActionButton } from "@/_components/shared/ActionButton";
 
 import { RISK_STYLE_MAP } from "@/constants/security";
 import { Icons } from "@/constants/icons";
@@ -109,7 +112,10 @@ export const MailRow = React.memo(
     return (
       <div
         draggable
-        onDragStart={() => onDragStart(index)}
+        onDragStart={(e) => {
+          e.dataTransfer.setData("text/plain", String(email.id));
+          onDragStart(index);
+        }}
         onDragOver={(e) => {
           e.preventDefault();
           onDragOver(index);
@@ -124,37 +130,48 @@ export const MailRow = React.memo(
       >
 
         {/* Checkbox + Star — always flex-row, star hidden on mobile (moves to actions) */}
-        <div className="flex flex-row items-center justify-center gap-2 px-2 sm:px-3 py-3 shrink-0">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={() => toggleSelectEmail(String(email.id))}
-            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-[1.5px] border-primary-300 text-secondary-600 focus:ring-secondary-600 cursor-pointer accent-secondary-600 shrink-0"
-            onClick={(e) => e.stopPropagation()}
-          />
+        <div className="flex flex-row items-center justify-center px-2 sm:px-3 py-3 shrink-0">
+          <div onClick={(e) => e.stopPropagation()} className="flex items-center">
+            <ActionButton
+              label={isSelected ? "Deselect" : "Select"}
+              tooltipSide="top"
+              onClick={() => toggleSelectEmail(String(email.id))}
+              icon={
+                isSelected ? (
+                  <CheckSquare className="w-4.5 h-4.5 text-primary" />
+                ) : (
+                  <Square className="w-4.5 h-4.5 text-primary-300 group-hover:text-primary-400" />
+                )
+              }
+              className="h-7 w-7 rounded-sm"
+            />
+          </div>
 
           {/* Star: only visible on desktop here; on mobile it moves to the right actions row */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              starMutation.mutate({
-                id: String(email.id),
-                starred: !email.isFlagged,
-              });
-            }}
-            className="hidden sm:block p-0.5 rounded-full transition-colors shrink-0 cursor-pointer"
-            aria-label={isStarred ? "Unstar email" : "Star email"}
-          >
-            <Icons.Star
-              active={isStarred}
-              className={cn(
-                "w-4 h-4 transition-colors",
-                isStarred
-                  ? "text-warning-500"
-                  : "text-primary-300 hover:text-warning-400",
-              )}
+          <div className="hidden sm:block" onClick={(e) => e.stopPropagation()}>
+            <ActionButton
+              label={isStarred ? "Unstar" : "Star"}
+              tooltipSide="top"
+              onClick={() => {
+                starMutation.mutate({
+                  id: String(email.id),
+                  starred: !email.isFlagged,
+                });
+              }}
+              icon={
+                <Icons.Star
+                  active={isStarred}
+                  className={cn(
+                    "w-4 h-4 transition-colors",
+                    isStarred
+                      ? "text-warning-500"
+                      : "text-primary-300 hover:text-warning-400",
+                  )}
+                />
+              }
+              className="p-0.5 w-7 h-7 rounded-full hover:bg-primary-50 text-primary-300"
             />
-          </button>
+          </div>
         </div>
 
         {/* Main content */}
@@ -325,112 +342,102 @@ export const MailRow = React.memo(
             </div>
 
             {/* Desktop hover actions */}
-            <div className="hidden sm:group-hover:flex items-center gap-0.5">
-              <Button
-                size={"icon-sm"}
-                variant={"ghost"}
-                className={cn(
-                  "h-7 w-7",
-                  activeFolder === "trash" && "cursor-not-allowed opacity-50",
-                )}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteWithUndo(String(email.id));
-                }}
-                disabled={activeFolder === "trash"}
-                aria-label="Delete email"
-                title={
+            <div className="hidden sm:group-hover:flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+              <ActionButton
+                label={
                   activeFolder === "trash"
                     ? "Cannot delete from trash"
                     : "Delete"
                 }
-              >
-                <Icons.Delete className="w-4 h-4 text-primary-600 hover:text-error-500 transition-colors" />
-              </Button>
+                tooltipSide="top"
+                disabled={activeFolder === "trash"}
+                onClick={() => deleteWithUndo(String(email.id))}
+                icon={
+                  <Icons.Delete className="w-4 h-4 text-primary-600 hover:text-error-500 transition-colors" />
+                }
+                className="h-7 w-7 rounded-full"
+              />
 
-              <Button
-                size={"icon-sm"}
-                variant={"ghost"}
-                className="h-7 w-7"
-                onClick={(e) => {
-                  e.stopPropagation();
+              <ActionButton
+                label={email.isRead ? "Mark as unread" : "Mark as read"}
+                tooltipSide="top"
+                onClick={() => {
                   readMutation.mutate({
                     id: String(email.id),
                     read: !email.isRead,
                   });
                 }}
-                aria-label={email.isRead ? "Mark as unread" : "Mark as read"}
-                title={email.isRead ? "Mark as unread" : "Mark as read"}
-              >
-                {email.isRead ? (
-                  <Mail className="w-3.5 h-3.5 text-primary-600" />
-                ) : (
-                  <MailOpen className="w-3.5 h-3.5 text-primary-600" />
-                )}
-              </Button>
+                icon={
+                  email.isRead ? (
+                    <Mail className="w-3.5 h-3.5 text-primary-600" />
+                  ) : (
+                    <MailOpen className="w-3.5 h-3.5 text-primary-600" />
+                  )
+                }
+                className="h-7 w-7 rounded-full"
+              />
             </div>
 
             {/* Mobile actions: star + read + delete */}
-            <div className="flex sm:hidden items-center gap-1 ml-1">
+            <div className="flex sm:hidden items-center gap-1 ml-1" onClick={(e) => e.stopPropagation()}>
               {/* Star */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
+              <ActionButton
+                label={isStarred ? "Unstar" : "Star"}
+                tooltipSide="top"
+                onClick={() =>
                   starMutation.mutate({
                     id: String(email.id),
                     starred: !email.isFlagged,
-                  });
-                }}
+                  })
+                }
+                icon={
+                  <Icons.Star
+                    active={isStarred}
+                    className="w-3.5 h-3.5 transition-colors"
+                  />
+                }
                 className={cn(
-                  "flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-[10px] font-medium",
+                  "h-7 w-7 rounded-full",
                   isStarred
-                    ? "text-warning-500 bg-warning-50"
+                    ? "text-warning-500 bg-warning-50 hover:bg-warning-100"
                     : "text-primary-400 hover:text-warning-500 hover:bg-warning-50",
                 )}
-                aria-label={isStarred ? "Unstar email" : "Star email"}
-              >
-                <Icons.Star
-                  active={isStarred}
-                  className="w-3.5 h-3.5 transition-colors"
-                />
-              </button>
+              />
 
               {/* Read toggle */}
-              <button
+              <ActionButton
+                label={email.isRead ? "Mark as unread" : "Mark as read"}
+                tooltipSide="top"
+                onClick={() =>
+                  readMutation.mutate({
+                    id: String(email.id),
+                    read: !email.isRead,
+                  })
+                }
+                icon={
+                  email.isRead ? (
+                    <Mail className="w-3.5 h-3.5" />
+                  ) : (
+                    <MailOpen className="w-3.5 h-3.5" />
+                  )
+                }
                 className={cn(
-                  "flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-[10px] font-medium",
+                  "h-7 w-7 rounded-full",
                   email.isRead
                     ? "text-primary-400 hover:text-primary hover:bg-primary-50"
                     : "text-primary hover:text-primary hover:bg-primary-50",
                 )}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  readMutation.mutate({
-                    id: String(email.id),
-                    read: !email.isRead,
-                  });
-                }}
-                aria-label={email.isRead ? "Mark as unread" : "Mark as read"}
-              >
-                {email.isRead ? (
-                  <Mail className="w-3.5 h-3.5" />
-                ) : (
-                  <MailOpen className="w-3.5 h-3.5" />
-                )}
-              </button>
+              />
 
               {/* Delete */}
               {activeFolder !== "trash" && (
-                <button
-                  className="flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-[10px] font-medium text-primary-400 hover:text-error-500 hover:bg-error-50"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteWithUndo(String(email.id));
-                  }}
-                  aria-label="Delete email"
-                >
-                  <Icons.Delete className="w-3.5 h-3.5" />
-                </button>
+                <ActionButton
+                  label="Delete"
+                  tooltipSide="top"
+                  onClick={() => deleteWithUndo(String(email.id))}
+                  icon={<Icons.Delete className="w-3.5 h-3.5" />}
+                  className="h-7 w-7 rounded-full text-primary-400 hover:text-error-500 hover:bg-error-50"
+                />
               )}
             </div>
           </div>

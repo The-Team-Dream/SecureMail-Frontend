@@ -22,6 +22,9 @@ import Cookies from "js-cookie";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+import { ActionButton } from "@/_components/shared/ActionButton";
+import { useReclassifyEmail, useStarEmail } from "@/APIs/hooks/emails";
+import type { EmailFolder } from "@/APIs/types/Email";
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -31,6 +34,18 @@ export const Sidebar = () => {
   const isMailPage = !!params.mailboxId;
   const { data: unreadCount } = useUnreadCount();
   const router = useRouter();
+
+  const [activeDropFolder, setActiveDropFolder] = useState<string | null>(null);
+  const reclassifyMutation = useReclassifyEmail(String(params.mailboxId));
+  const starMutation = useStarEmail(String(params.mailboxId));
+
+  const handleDropEmail = (emailId: string, folder: string) => {
+    if (folder === "starred") {
+      starMutation.mutate({ id: emailId, starred: true });
+    } else {
+      reclassifyMutation.mutate({ id: emailId, folder: folder as EmailFolder });
+    }
+  };
 
   const { mutate: logout, isPending: isLoggingOut } = useLogout({
     onSuccess: () => {
@@ -67,30 +82,38 @@ export const Sidebar = () => {
             Navigation
           </Text>
         )}
-        <Button
-          size={"icon-sm"}
-          variant={"ghost"}
+        <ActionButton
+          icon={<Menu className="w-5 h-5 text-primary" />}
+          label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          tooltipSide="right"
           onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          <Menu className="w-5 h-5 text-primary" />
-        </Button>
+          className="rounded-md w-8 h-8 text-primary hover:bg-primary-100"
+        />
       </div>
 
       {isMailPage && (
-        <Button
-          onClick={() => setComposeOpen(true, { mode: "new" })}
-          size={"lg"}
-          className={cn(
-            "overflow-hidden bg-secondary-400 text-primary transition-colors hover:bg-secondary-600 mb-2",
-            isCollapsed ? "mx-auto h-12 w-12 p-0" : "px-4",
-          )}
-        >
-          <PencilLine
-            className={cn("w-6 h-6 text-primary-900", !isCollapsed && "mr-2")}
-          />
-          {!isCollapsed && <Text font={"bold"}>New Email</Text>}
-        </Button>
+        isCollapsed ? (
+          <div className="flex justify-center mb-2">
+            <ActionButton
+              icon={<PencilLine className="w-6 h-6 text-primary-900" />}
+              label="New Email"
+              tooltipSide="right"
+              onClick={() => setComposeOpen(true, { mode: "new" })}
+              className="rounded-lg w-12 h-12 bg-secondary-400 hover:bg-secondary-600 text-primary-900 flex items-center justify-center"
+            />
+          </div>
+        ) : (
+          <Button
+            onClick={() => setComposeOpen(true, { mode: "new" })}
+            size={"lg"}
+            className="overflow-hidden bg-secondary-400 text-primary transition-colors hover:bg-secondary-600 mb-2 px-4"
+          >
+            <PencilLine className="w-6 h-6 text-primary-900 mr-2" />
+            <Text font={"bold"}>New Email</Text>
+          </Button>
+        )
       )}
+
       {/* Nav Links */}
       <nav className="space-y-1 flex-1 mt-4 relative">
         {isMailPage ? (
@@ -100,40 +123,87 @@ export const Sidebar = () => {
               const isActive = pathname.startsWith(
                 `/mailboxes/${params.mailboxId}/${item.folder}`,
               );
-              return (
-                <Link
-                  key={item.name}
-                  href={targetHref}
-                  title={isCollapsed ? item.name : ""}
-                  className={cn(
-                    "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
-                    isCollapsed
-                      ? "justify-center w-10 h-10"
-                      : "justify-between px-3 py-2",
-                    isActive
-                      ? "text-primary"
-                      : "text-primary-900 hover:bg-primary-100 hover:text-primary",
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeNavIndicator"
-                      className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 30,
-                      }}
-                    />
-                  )}
+              const isDragActive = activeDropFolder === item.folder;
 
-                  <div className="flex items-center gap-2">
-                    <item.icon
-                      active={isActive}
-                      disableFill={true}
-                      className="w-[22px] h-[22px] min-w-[22px]"
+              const dragProps = {
+                onDragOver: (e: React.DragEvent) => {
+                  e.preventDefault();
+                },
+                onDragEnter: () => setActiveDropFolder(item.folder),
+                onDragLeave: () => setActiveDropFolder(null),
+                onDrop: (e: React.DragEvent) => {
+                  e.preventDefault();
+                  setActiveDropFolder(null);
+                  const emailId = e.dataTransfer.getData("text/plain");
+                  if (emailId) {
+                    handleDropEmail(emailId, item.folder);
+                  }
+                },
+              };
+
+              if (isCollapsed) {
+                return (
+                  <div
+                    key={item.name}
+                    className={cn(
+                      "flex justify-center transition-all duration-200",
+                      isDragActive && "scale-110 bg-primary-100/50 rounded-lg p-0.5 border-2 border-dashed border-primary",
+                    )}
+                    {...dragProps}
+                  >
+                    <ActionButton
+                      href={targetHref}
+                      label={item.name}
+                      tooltipSide="right"
+                      icon={
+                        <item.icon
+                          active={isActive}
+                          disableFill={true}
+                          className="w-[22px] h-[22px] min-w-[22px]"
+                        />
+                      }
+                      className={cn(
+                        "rounded-sm w-10 h-10",
+                        isActive
+                          ? "bg-primary-100 text-primary"
+                          : "text-primary-900 hover:bg-primary-100 hover:text-primary",
+                      )}
                     />
-                    {!isCollapsed && (
+                  </div>
+                );
+              }
+
+              return (
+                <div key={item.name} {...dragProps} className="w-full">
+                  <Link
+                    href={targetHref}
+                    className={cn(
+                      "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
+                      "justify-between px-3 py-2",
+                      isActive
+                        ? "text-primary"
+                        : "text-primary-900 hover:bg-primary-100 hover:text-primary",
+                      isDragActive && "bg-primary-100 border-2 border-dashed border-primary scale-[1.02] shadow-sm",
+                    )}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeNavIndicator"
+                        className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      <item.icon
+                        active={isActive}
+                        disableFill={true}
+                        className="w-[22px] h-[22px] min-w-[22px]"
+                      />
                       <div className="flex items-center gap-1">
                         <Text
                           as={"span"}
@@ -149,18 +219,16 @@ export const Sidebar = () => {
                             </span>
                           )}
                       </div>
-                    )}
-                  </div>
+                    </div>
 
-                  {!isCollapsed && (
                     <ChevronRight
                       className={cn(
                         "w-4 h-4 transition-transform",
                         isActive ? "translate-x-1 text-primary" : "text-muted",
                       )}
                     />
-                  )}
-                </Link>
+                  </Link>
+                </div>
               );
             })}
 
@@ -168,46 +236,97 @@ export const Sidebar = () => {
             {!isCollapsed && (
               <div className="mt-2 border-t border-primary-100 mx-2" />
             )}
+
             {/* Security Navigation */}
             {securityNavItems.map((item) => {
               const targetHref = `/mailboxes/${params.mailboxId}/${item.href}`;
               const isActive = pathname.startsWith(
                 `/mailboxes/${params.mailboxId}/${item.href}`,
               );
-              return (
-                <Link
-                  key={item.name}
-                  href={targetHref}
-                  title={isCollapsed ? item.name : ""}
-                  className={cn(
-                    "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative",
-                    isCollapsed
-                      ? "justify-center w-10 h-10"
-                      : "justify-between px-3 py-2",
-                    isActive
-                      ? "text-primary"
-                      : "text-primary-600 hover:bg-primary-100 hover:text-primary",
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeNavIndicator"
-                      className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 30,
-                      }}
-                    />
-                  )}
+              const isDropTarget = item.href === "phishing" || item.href === "malware";
+              const isDragActive = isDropTarget && activeDropFolder === item.href;
 
-                  <div className="flex items-center gap-3">
-                    <item.icon
-                      active={isActive}
-                      disableFill={true}
-                      className="w-[22px] h-[22px] min-w-[22px]"
+              const dragProps = isDropTarget
+                ? {
+                    onDragOver: (e: React.DragEvent) => {
+                      e.preventDefault();
+                    },
+                    onDragEnter: () => setActiveDropFolder(item.href),
+                    onDragLeave: () => setActiveDropFolder(null),
+                    onDrop: (e: React.DragEvent) => {
+                      e.preventDefault();
+                      setActiveDropFolder(null);
+                      const emailId = e.dataTransfer.getData("text/plain");
+                      if (emailId) {
+                        handleDropEmail(emailId, item.href);
+                      }
+                    },
+                  }
+                : {};
+
+              if (isCollapsed) {
+                return (
+                  <div
+                    key={item.name}
+                    className={cn(
+                      "flex justify-center transition-all duration-200",
+                      isDragActive && "scale-110 bg-primary-100/50 rounded-lg p-0.5 border-2 border-dashed border-primary",
+                    )}
+                    {...dragProps}
+                  >
+                    <ActionButton
+                      href={targetHref}
+                      label={item.name}
+                      tooltipSide="right"
+                      icon={
+                        <item.icon
+                          active={isActive}
+                          disableFill={true}
+                          className="w-[22px] h-[22px] min-w-[22px]"
+                        />
+                      }
+                      className={cn(
+                        "rounded-sm w-10 h-10",
+                        isActive
+                          ? "bg-primary-100 text-primary"
+                          : "text-primary-600 hover:bg-primary-100 hover:text-primary",
+                      )}
                     />
-                    {!isCollapsed && (
+                  </div>
+                );
+              }
+
+              return (
+                <div key={item.name} {...dragProps} className="w-full">
+                  <Link
+                    href={targetHref}
+                    className={cn(
+                      "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative",
+                      "justify-between px-3 py-2",
+                      isActive
+                        ? "text-primary"
+                        : "text-primary-600 hover:bg-primary-100 hover:text-primary",
+                      isDragActive && "bg-primary-100 border-2 border-dashed border-primary scale-[1.02] shadow-sm",
+                    )}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeNavIndicator"
+                        className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+
+                    <div className="flex items-center gap-3">
+                      <item.icon
+                        active={isActive}
+                        disableFill={true}
+                        className="w-[22px] h-[22px] min-w-[22px]"
+                      />
                       <Text
                         as={"span"}
                         font={isActive ? "medium" : "default"}
@@ -215,64 +334,79 @@ export const Sidebar = () => {
                       >
                         {item.name}
                       </Text>
-                    )}
-                  </div>
+                    </div>
 
-                  {!isCollapsed && (
                     <ChevronRight
                       className={cn(
                         "w-4 h-4 transition-transform",
                         isActive ? "translate-x-1 text-primary" : "text-muted",
                       )}
                     />
-                  )}
-                </Link>
+                  </Link>
+                </div>
               );
             })}
 
             {/* Settings Link */}
-            <Link
-              href={`/mailboxes/${params.mailboxId}/settings`}
-              title={isCollapsed ? "Settings" : ""}
-              className={cn(
-                "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
-                isCollapsed
-                  ? "justify-center w-10 h-10"
-                  : "justify-between px-3 py-2",
-                pathname.includes("/settings")
-                  ? "text-primary"
-                  : "text-default hover:bg-primary-100 hover:text-primary",
-              )}
-            >
-              {pathname.includes("/settings") && (
-                <motion.div
-                  layoutId="activeNavIndicator"
-                  className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
-                  transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 30,
-                  }}
+            {isCollapsed ? (
+              <div className="flex justify-center">
+                <ActionButton
+                  href={`/mailboxes/${params.mailboxId}/settings`}
+                  label="Settings"
+                  tooltipSide="right"
+                  icon={
+                    <Icons.Settings
+                      active={pathname.includes("/settings")}
+                      className="w-[22px] h-[22px] min-w-[22px]"
+                    />
+                  }
+                  className={cn(
+                    "rounded-sm w-10 h-10",
+                    pathname.includes("/settings")
+                      ? "bg-primary-100 text-primary"
+                      : "text-primary-600 hover:bg-primary-100 hover:text-primary",
+                  )}
                 />
-              )}
+              </div>
+            ) : (
+              <Link
+                href={`/mailboxes/${params.mailboxId}/settings`}
+                className={cn(
+                  "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
+                  "justify-between px-3 py-2",
+                  pathname.includes("/settings")
+                    ? "text-primary"
+                    : "text-default hover:bg-primary-100 hover:text-primary",
+                )}
+              >
+                {pathname.includes("/settings") && (
+                  <motion.div
+                    layoutId="activeNavIndicator"
+                    className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 30,
+                    }}
+                  />
+                )}
 
-              <div className="flex items-center gap-3">
-                <Icons.Settings
-                  active={pathname.includes("/settings")}
-                  className="w-[22px] h-[22px] min-w-[22px]"
-                />
-                {!isCollapsed && (
+                <div className="flex items-center gap-3">
+                  <Icons.Settings
+                    active={pathname.includes("/settings")}
+                    className="w-[22px] h-[22px] min-w-[22px]"
+                  />
                   <Text
                     as={"span"}
                     font={pathname.includes("/settings") ? "medium" : "default"}
-                    color={pathname.includes("/settings") ? "default" : "muted"}
+                    color={
+                      pathname.includes("/settings") ? "primary-950" : "muted"
+                    }
                   >
                     Settings
                   </Text>
-                )}
-              </div>
+                </div>
 
-              {!isCollapsed && (
                 <ChevronRight
                   className={cn(
                     "w-4 h-4 transition-transform",
@@ -281,22 +415,45 @@ export const Sidebar = () => {
                       : "text-muted",
                   )}
                 />
-              )}
-            </Link>
+              </Link>
+            )}
           </>
         ) : (
           dashboardNavItems.map((item) => {
             const isActive = pathname === item.href;
+
+            if (isCollapsed) {
+              return (
+                <div key={item.name} className="flex justify-center">
+                  <ActionButton
+                    href={item.href}
+                    label={item.name}
+                    tooltipSide="right"
+                    icon={
+                      <item.icon
+                        active={isActive}
+                        disableFill={true}
+                        className="w-[22px] h-[22px] min-w-[22px]"
+                      />
+                    }
+                    className={cn(
+                      "rounded-sm w-10 h-10",
+                      isActive
+                        ? "bg-primary-100 text-primary"
+                        : "text-primary-600 hover:bg-primary-100 hover:text-primary",
+                    )}
+                  />
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                title={isCollapsed ? item.name : ""}
                 className={cn(
                   "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative",
-                  isCollapsed
-                    ? "justify-center w-10 h-10"
-                    : "justify-between px-3 py-2",
+                  "justify-between px-3 py-2",
                   isActive
                     ? "text-primary"
                     : "text-primary-600 hover:bg-primary-100 hover:text-primary",
@@ -316,62 +473,81 @@ export const Sidebar = () => {
                     disableFill={true}
                     className="w-[22px] h-[22px] min-w-[22px]"
                   />
-                  {!isCollapsed && (
-                    <Text
-                      as={"span"}
-                      font={isActive ? "medium" : "default"}
-                      color={isActive ? "default" : "muted"}
-                    >
-                      {item.name}
-                    </Text>
-                  )}
+                  <Text
+                    as={"span"}
+                    font={isActive ? "medium" : "default"}
+                    color={isActive ? "default" : "muted"}
+                  >
+                    {item.name}
+                  </Text>
                 </div>
 
-                {!isCollapsed && (
-                  <ChevronRight
-                    className={cn(
-                      "w-4 h-4 transition-transform",
-                      isActive ? "translate-x-1 text-primary" : "text-muted",
-                    )}
-                  />
-                )}
+                <ChevronRight
+                  className={cn(
+                    "w-4 h-4 transition-transform",
+                    isActive ? "translate-x-1 text-primary" : "text-muted",
+                  )}
+                />
               </Link>
             );
           })
         )}
       </nav>
+
       <hr className="-m-2 mt-2 h-px bg-primary-100" />
+
       {/* Bottom Actions */}
       <div className="mt-auto pt-4 flex flex-col gap-1">
         {/* Profile Link */}
-        <Link
-          href="/profile"
-          title={isCollapsed ? "Profile" : ""}
-          className={cn(
-            "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
-            isCollapsed
-              ? "justify-center w-10 h-10"
-              : "justify-between px-3 py-2",
-            pathname === "/profile"
-              ? "text-primary"
-              : "text-primary-600 hover:bg-primary-100 hover:text-primary",
-          )}
-        >
-          {pathname === "/profile" && (
-            <motion.div
-              layoutId="activeNavIndicator"
-              className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            />
-          )}
-          <div className="flex items-center gap-3">
-            <User
+        {isCollapsed ? (
+          <div className="flex justify-center">
+            <ActionButton
+              href="/profile"
+              label="Profile"
+              tooltipSide="right"
+              icon={
+                <User
+                  className={cn(
+                    "w-[22px] h-[22px]",
+                    pathname === "/profile"
+                      ? "text-primary"
+                      : "text-primary-400",
+                  )}
+                />
+              }
               className={cn(
-                "w-[22px] h-[22px]",
-                pathname === "/profile" ? "text-primary" : "text-primary-400",
+                "rounded-sm w-10 h-10",
+                pathname === "/profile"
+                  ? "bg-primary-100 text-primary"
+                  : "text-primary-600 hover:bg-primary-100 hover:text-primary",
               )}
             />
-            {!isCollapsed && (
+          </div>
+        ) : (
+          <Link
+            href="/profile"
+            className={cn(
+              "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
+              "justify-between px-3 py-2",
+              pathname === "/profile"
+                ? "text-primary"
+                : "text-primary-600 hover:bg-primary-100 hover:text-primary",
+            )}
+          >
+            {pathname === "/profile" && (
+              <motion.div
+                layoutId="activeNavIndicator"
+                className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            <div className="flex items-center gap-3">
+              <User
+                className={cn(
+                  "w-[22px] h-[22px]",
+                  pathname === "/profile" ? "text-primary" : "text-primary-400",
+                )}
+              />
               <Text
                 as={"span"}
                 font={pathname === "/profile" ? "medium" : "default"}
@@ -379,9 +555,7 @@ export const Sidebar = () => {
               >
                 Profile
               </Text>
-            )}
-          </div>
-          {!isCollapsed && (
+            </div>
             <ChevronRight
               className={cn(
                 "w-4 h-4 transition-transform",
@@ -390,36 +564,52 @@ export const Sidebar = () => {
                   : "text-muted",
               )}
             />
-          )}
-        </Link>
+          </Link>
+        )}
 
         {/* Logout Button */}
-        <button
-          onClick={() => handleLogout()}
-          disabled={isLoggingOut}
-          title={isCollapsed ? "Logout" : ""}
-          className={cn(
-            "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full cursor-pointer",
-            isCollapsed
-              ? "justify-center w-10 h-10"
-              : "justify-between px-3 py-2",
-            "text-error-500 hover:bg-error-50",
-          )}
-        >
-          <div className="flex items-center gap-3">
-            {isLoggingOut ? (
-              <Spinner className="w-5 h-5 text-error-500" />
-            ) : (
-              <LogOut className="w-[22px] h-[22px] text-error-500" />
+        {isCollapsed ? (
+          <div className="flex justify-center">
+            <ActionButton
+              label={isLoggingOut ? "Logging out..." : "Logout"}
+              tooltipSide="right"
+              disabled={isLoggingOut}
+              variant="danger"
+              icon={
+                isLoggingOut ? (
+                  <Spinner className="w-5 h-5 text-error-500" />
+                ) : (
+                  <LogOut className="w-[22px] h-[22px] text-error-500" />
+                )
+              }
+              className="rounded-sm w-10 h-10"
+              onClick={handleLogout}
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => handleLogout()}
+            disabled={isLoggingOut}
+            className={cn(
+              "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full cursor-pointer",
+              "justify-between px-3 py-2",
+              "text-error-500 hover:bg-error-50",
             )}
-            {!isCollapsed && (
+          >
+            <div className="flex items-center gap-3">
+              {isLoggingOut ? (
+                <Spinner className="w-5 h-5 text-error-500" />
+              ) : (
+                <LogOut className="w-[22px] h-[22px] text-error-500" />
+              )}
               <Text as={"span"} color="error-500">
                 {isLoggingOut ? "Logging out..." : "Logout"}
               </Text>
-            )}
-          </div>
-        </button>
+            </div>
+          </button>
+        )}
       </div>
+
       <hr className="-m-2 my-2 h-px bg-primary-100" />
       <div className="mt-2">
         <ThemeToggler isCollapsed={isCollapsed} />

@@ -11,6 +11,7 @@ import { Notification } from "@/APIs/types/Notification";
 import Image from "next/image";
 import logo from "../../public/icons/logo.png";
 import { getInitials } from "@/lib/utils";
+import { ActionButton } from "./shared/ActionButton";
 
 interface NotificationCardProps {
   notification: Notification;
@@ -89,40 +90,33 @@ export const NotificationCard = ({
                 "absolute inset-0 flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10",
               )}
             >
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-7 w-7",
-                  "text-primary hover:bg-primary-50 rounded-full",
-                )}
+              <ActionButton
+                label={notification.isRead ? "Mark as unread" : "Mark as read"}
+                tooltipSide="top"
                 onClick={() => {
                   onToggleRead(notification.id, notification.isRead);
                 }}
-              >
-                {notification.isRead ? (
-                  <Mail className="h-3.5 w-3.5 text-primary-600" />
-                ) : (
-                  <MailOpen className="h-3.5 w-3.5 text-primary-600" />
-                )}
-              </Button>
+                icon={
+                  notification.isRead ? (
+                    <Mail className="h-3.5 w-3.5 text-primary-600" />
+                  ) : (
+                    <MailOpen className="h-3.5 w-3.5 text-primary-600" />
+                  )
+                }
+                className="h-7 w-7 rounded-full text-primary hover:bg-primary-50"
+              />
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-7 w-7",
-                  "text-error-500 hover:bg-error-50 rounded-full",
-                )}
+              <ActionButton
+                label="Delete"
+                tooltipSide="top"
                 onClick={() => onDelete(notification.id)}
-              >
-                <Icons.Delete
-                  className={cn(
-                    "h-3.5 w-3.5",
-                    "hover:scale-110 transition-transform",
-                  )}
-                />
-              </Button>
+                icon={
+                  <Icons.Delete
+                    className="h-3.5 w-3.5 hover:scale-110 transition-transform"
+                  />
+                }
+                className="h-7 w-7 rounded-full text-error-500 hover:bg-error-50"
+              />
             </div>
             <div className="opacity-100 group-hover:opacity-0 transition-opacity whitespace-nowrap">
               <Text size="xs" color="muted">

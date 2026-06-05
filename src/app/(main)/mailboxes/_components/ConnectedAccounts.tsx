@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Mailbox } from "@/APIs/types/Mailbox";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import notFoundImg from "@/../public/images/not-found.png";
 import { MailboxCard } from "./MailboxCard";
+import { useSocketContext } from "@/utils/providers/SocketProvider";
 
 interface ConnectedAccountsProps {
   onAddAccount: () => void;
@@ -17,11 +19,46 @@ interface ConnectedAccountsProps {
 
 export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
   const { data: mailboxes, isError, refetch } = useMailboxes();
+  const { socket } = useSocketContext();
+  const [syncingMailboxIds, setSyncingMailboxIds] = useState<string[]>([]);
   const syncMutation = useSyncMailbox();
   const syncMailbox = syncMutation.mutate;
-  const isSyncing = syncMutation.isPending
-    ? syncMutation.variables?.toString()
-    : null;
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleSyncComplete = (data: any) => {
+      const mailboxId = String(data.mailboxId ?? data.mailBoxId);
+      setSyncingMailboxIds((prev) => prev.filter((id) => id !== mailboxId));
+    };
+
+    const handleSyncFailed = (data: any) => {
+      const mailboxId = String(data.mailboxId ?? data.mailBoxId);
+      setSyncingMailboxIds((prev) => prev.filter((id) => id !== mailboxId));
+    };
+
+    socket.on("mailbox_sync_complete", handleSyncComplete);
+    socket.on("mailbox-sync-failed", handleSyncFailed);
+
+    return () => {
+      socket.off("mailbox_sync_complete", handleSyncComplete);
+      socket.off("mailbox-sync-failed", handleSyncFailed);
+    };
+  }, [socket]);
+
+  const handleSyncClick = (id: number) => {
+    const idStr = id.toString();
+    setSyncingMailboxIds((prev) => {
+      if (prev.includes(idStr)) return prev;
+      return [...prev, idStr];
+    });
+
+    syncMailbox(id, {
+      onError: () => {
+        setSyncingMailboxIds((prev) => prev.filter((mid) => mid !== idStr));
+      },
+    });
+  };
 
   if (isError)
     return (
@@ -65,8 +102,8 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
               key={acc.id} 
               acc={acc} 
               index={index} 
-              isSyncing={isSyncing} 
-              syncMailbox={syncMailbox} 
+              isSyncing={syncingMailboxIds.includes(acc.id.toString()) ? acc.id.toString() : null} 
+              syncMailbox={handleSyncClick} 
             />
           ))}
         </div>

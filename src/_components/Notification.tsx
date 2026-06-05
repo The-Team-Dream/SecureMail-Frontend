@@ -92,6 +92,7 @@ export const NotificationDropdown = () => {
           <ActionButton
             icon={<Bell className="w-5 h-5" />}
             label="Notifications"
+            tooltipSide="bottom"
             onClick={() => {}}
             className={cn(
               "text-primary-600",

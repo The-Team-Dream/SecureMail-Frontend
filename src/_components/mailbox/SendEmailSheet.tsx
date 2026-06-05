@@ -465,7 +465,7 @@ export const ComposeEmailSheet = () => {
             </div>
 
             {/* Original Email (View Only) */}
-            {(composeMode === "forward" || composeMode === "reply") &&
+            {composeMode === "reply" &&
               (composeData as any)?.originalHtml && (
                 <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
                   <Text size="sm" font="bold" className="text-primary-700">
@@ -476,7 +476,7 @@ export const ComposeEmailSheet = () => {
                   </div>
                 </div>
               )}
-            {(composeMode === "forward" || composeMode === "reply") &&
+            {composeMode === "reply" &&
               !(composeData as any)?.originalHtml &&
               (composeData as any)?.originalText && (
                 <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">

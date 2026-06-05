@@ -91,18 +91,25 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     (data: any) => {
       console.log("[WebSocket] handleEmailSent payload:", data);
       const mailboxId = data?.mailboxId ?? data?.mailBoxId;
-      
+
       if (mailboxId) {
+        // Invalidate broad key first (marks all sub-keys stale)
         queryClient.invalidateQueries({
           queryKey: ["emails", String(mailboxId)],
         });
+
+        // Actively refetch the sent folder so the new email appears immediately
+        // without the user needing to manually refresh the page.
+        queryClient.refetchQueries({
+          queryKey: ["emails", String(mailboxId), "sent"],
+        });
       } else {
-        // Fallback if backend payload differs
+        // Fallback: invalidate all email queries if mailboxId is missing
         queryClient.invalidateQueries({
           queryKey: ["emails"],
         });
       }
-      
+
       queryClient.invalidateQueries({
         queryKey: ["analytics"],
       });

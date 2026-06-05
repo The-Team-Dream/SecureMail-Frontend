@@ -9,10 +9,9 @@ export const useSendEmail = (mailboxId: string) => {
     mutationFn: (formData: FormData) =>
       emailsApi.sendEmail(mailboxId, formData),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["emails", mailboxId, "sent"],
-      });
-
+      // Invalidate the broad emails key so all sub-queries (sent, inbox, etc.)
+      // are marked stale. The actual cache pre-population happens in
+      // useComposeEmail via prefetchQuery before navigation.
       queryClient.invalidateQueries({
         queryKey: ["emails", mailboxId],
       });

@@ -9,7 +9,6 @@ export const replyEmail = async (
   const res = await axiosInstance.post(
     `/mailboxes/${mailboxId}/emails/${emailId}/reply`,
     formData,
-    { headers: { "Content-Type": "multipart/form-data" } },
   );
   return unwrap(res);
 };

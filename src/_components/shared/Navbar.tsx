@@ -201,7 +201,7 @@ export const Navbar = () => {
                     font="bold"
                     size="xs"
                     color="muted"
-                    className="uppercase tracking-[0.1em] opacity-70"
+                    className="uppercase tracking-widest opacity-70"
                   >
                     Global Security Status
                   </Text>

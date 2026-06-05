@@ -8,7 +8,6 @@ export const sendEmail = async (
   const res = await axiosInstance.post(
     `/mailboxes/${mailboxId}/send`,
     formData,
-    { headers: { "Content-Type": "multipart/form-data" } },
   );
   return unwrap(res);
 };

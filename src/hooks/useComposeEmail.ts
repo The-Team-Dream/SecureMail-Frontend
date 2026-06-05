@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { emailSchema, type EmailFormValues } from "@/schemas/SendEmail";
 import { type EmojiClickData } from "emoji-picker-react";
 import { formatForwardEmail, formatReplyEmail } from "@/utils/emailFormatter";
-
+import { useQueryClient } from "@tanstack/react-query";
+import { emailsApi } from "@/APIs/features/emails";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useServerErrors } from "@/utils/form-utils";
 
@@ -26,6 +27,7 @@ export const useComposeEmail = () => {
   } = useMailStore();
   const router = useRouter();
   const params = useParams();
+  const queryClient = useQueryClient();
   const { data: mailboxes = [] } = useMailboxes();
 
   // Determine the current mailbox ID from params or fallback to first mailbox
@@ -114,7 +116,13 @@ export const useComposeEmail = () => {
   const addFiles = (files: File[]) => {
     setAttachments((prev) => {
       const uniqueFiles = files.filter(
-        (file) => !prev.some((p) => p.name === file.name && p.size === file.size && p.lastModified === file.lastModified)
+        (file) =>
+          !prev.some(
+            (p) =>
+              p.name === file.name &&
+              p.size === file.size &&
+              p.lastModified === file.lastModified,
+          ),
       );
       if (uniqueFiles.length === 0) return prev;
       const combined = [...prev, ...uniqueFiles];
@@ -203,7 +211,11 @@ export const useComposeEmail = () => {
 
     // Read content from the rich-text editor (contentEditable div)
     const editorEl = bodyEditorRef.current;
-    const sanitizedBodyText = (editorEl?.innerText || data.bodyText || "").trim();
+    const sanitizedBodyText = (
+      editorEl?.innerText ||
+      data.bodyText ||
+      ""
+    ).trim();
     const editorBodyHtml = editorEl?.innerHTML?.trim() || "";
 
     // Sanitize inputs
@@ -213,17 +225,33 @@ export const useComposeEmail = () => {
     const sanitizedBcc = sanitizeEmails(data.bcc);
 
     attachments.forEach((f) => fd.append("attachments", f));
-    const onSuccess = () => {
+    const onSuccess = async () => {
       setOpen(false);
-      // Redirect to sent folder to see the sent email
+      try {
+        await queryClient.prefetchQuery({
+          queryKey: ["emails", mailboxIdToUse, "sent", 1],
+          queryFn: () => emailsApi.getEmails(mailboxIdToUse, "sent", 1),
+          staleTime: 0,
+        });
+      } catch {
+        // Prefetch failing shouldn't block navigation
+      }
       router.push(`/mailboxes/${mailboxIdToUse}/sent`);
     };
 
     if (composeMode === "reply" && composeData?.emailId) {
       if (sanitizedBodyText) fd.append("content", sanitizedBodyText);
-      const originalHtml = composeData.originalHtml || (composeData.originalText ? `<p>${composeData.originalText.replace(/\n/g, "<br/>")}</p>` : "");
+      const originalHtml =
+        composeData.originalHtml ||
+        (composeData.originalText
+          ? `<p>${composeData.originalText.replace(/\n/g, "<br/>")}</p>`
+          : "");
       if (originalHtml) {
-        const fullHtml = formatReplyEmail(sanitizedBodyText, originalHtml, composeData);
+        const fullHtml = formatReplyEmail(
+          sanitizedBodyText,
+          originalHtml,
+          composeData,
+        );
         fd.append("bodyHtml", fullHtml);
       } else if (data.bodyHtml) {
         fd.append("bodyHtml", data.bodyHtml);
@@ -241,10 +269,18 @@ export const useComposeEmail = () => {
       if (sanitizedBodyText) {
         fd.append("bodyText", sanitizedBodyText);
       }
-      const originalHtml = composeData.originalHtml || (composeData.originalText ? `<p>${composeData.originalText.replace(/\n/g, "<br/>")}</p>` : "");
-      const fullHtml = formatForwardEmail(editorBodyHtml || sanitizedBodyText, originalHtml, composeData);
+      const originalHtml =
+        composeData.originalHtml ||
+        (composeData.originalText
+          ? `<p>${composeData.originalText.replace(/\n/g, "<br/>")}</p>`
+          : "");
+      const fullHtml = formatForwardEmail(
+        editorBodyHtml || sanitizedBodyText,
+        originalHtml,
+        composeData,
+      );
       fd.append("bodyHtml", fullHtml);
-      
+
       sendMutation.mutate(fd, {
         onSuccess,
         onError: (err: any) =>
@@ -262,7 +298,10 @@ export const useComposeEmail = () => {
       if (editorBodyHtml) {
         fd.append("bodyHtml", editorBodyHtml);
       } else if (sanitizedBodyText) {
-        fd.append("bodyHtml", `<p>${sanitizedBodyText.replace(/\n/g, "<br/>")}</p>`);
+        fd.append(
+          "bodyHtml",
+          `<p>${sanitizedBodyText.replace(/\n/g, "<br/>")}</p>`,
+        );
       }
       if (data.bodyHtml) fd.append("bodyHtml", data.bodyHtml);
 
