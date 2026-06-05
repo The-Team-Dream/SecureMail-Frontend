@@ -6,14 +6,18 @@ export const downloadAttachment = async (
   emailId: string,
   attachmentId: string,
   filename: string,
+  attachmentUrl?: string,
 ): Promise<void> => {
   const token = Cookies.get("token");
-  const url = `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${attachmentId}/download`;
+  const url = attachmentUrl || `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${attachmentId}/download`;
+
+  const headers: HeadersInit = {};
+  if (token && (!url.startsWith("http") || url.includes("/mailboxes/"))) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   const response = await fetch(url, {
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers,
   });
 
   if (!response.ok) {

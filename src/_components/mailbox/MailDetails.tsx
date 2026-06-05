@@ -88,6 +88,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
   const params = useParams();
   const mailboxId = params.mailboxId as string;
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+  const [pendingDownloads, setPendingDownloads] = useState<Record<string, boolean>>({});
 
   const { data: email, isLoading, error } = useEmailDetails(mailboxId, emailId);
   const reportMutation = useReportEmail(mailboxId);
@@ -112,8 +113,16 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
     );
   }
 
-  const handleDownload = (attachmentId: string, filename: string) => {
-    emailsApi.downloadAttachment(mailboxId, emailId, attachmentId, filename);
+  const handleDownload = async (attachmentId: string, filename: string, url?: string) => {
+    setPendingDownloads((prev) => ({ ...prev, [attachmentId]: true }));
+    try {
+      await emailsApi.downloadAttachment(mailboxId, emailId, attachmentId, filename, url);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to download attachment");
+    } finally {
+      setPendingDownloads((prev) => ({ ...prev, [attachmentId]: false }));
+    }
   };
 
   const handleReportSpam = async () => {
@@ -267,14 +276,12 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
     <div className="flex flex-col h-full bg-background p-4 sm:p-8 duration-300">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Button
-            variant={"ghost"}
-            size="sm"
-            className="font-medium text-primary-800 shrink-0 hover:bg-transparent"
+          <ActionButton
+            icon={<ArrowLeft className="w-4 h-4" />}
+            label="Back"
             onClick={() => router.back()}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-          </Button>
+            className="shrink-0"
+          />
           <Text size="2xl" font="semiBold">
             {email.subject}
           </Text>
@@ -817,20 +824,42 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                       {imageAtts.map((att: any) => {
                         const defaultUrl = `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${att.id}/download`;
                         const targetUrl = att.url || defaultUrl;
+                        const isDownloading = pendingDownloads[att.id];
                         return (
-                          <div key={att.id} className="flex flex-col gap-1">
+                          <div
+                            key={att.id}
+                            className="relative group/image w-[280px] h-[180px] rounded-xl overflow-hidden border border-primary-200 shadow-xs cursor-pointer"
+                          >
                             <AuthenticatedImage
                               url={targetUrl}
                               alt={att.filename}
-                              className="w-[280px] h-[180px] object-cover"
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover/image:scale-105"
                             />
+                            {/* Glassmorphic hover overlay */}
+                            <div className="absolute inset-0 bg-black/45 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                disabled={isDownloading}
+                                className="bg-white/90 text-primary-900 hover:bg-white hover:scale-105 transition-all duration-200 font-semibold"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownload(att.id, att.filename, att.url);
+                                }}
+                              >
+                                {isDownloading ? (
+                                  <div className="w-4 h-4 border-2 border-primary-900 border-t-transparent rounded-full animate-spin mr-2" />
+                                ) : (
+                                  <Download className="w-4 h-4 mr-2" />
+                                )}
+                                Download
+                              </Button>
+                            </div>
                           </div>
                         );
                       })}
                     </div>
-                  )}
-
-                  {/* Word Documents */}
+                  )}                  {/* Word Documents */}
                   {wordAtts.length > 0 && (
                     <div className="space-y-3 pt-2">
                       <Text
@@ -841,71 +870,85 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                         Documents
                       </Text>
                       <div className="flex flex-wrap gap-4">
-                        {wordAtts.map((att: any) => (
-                          <div
-                            key={att.id}
-                            onClick={() => handleDownload(att.id, att.filename)}
-                            className="relative w-72 h-44 rounded-xl border border-primary-200 shadow-xs overflow-hidden bg-zinc-50 flex flex-col group cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all duration-300"
-                          >
-                            {/* Dynamic Document Page Preview */}
-                            {(() => {
-                              // Generate stable visual fingerprint from filename
-                              const name = att.filename || "document";
-                              const nameWithoutExt = name.replace(/\.[^.]+$/, "");
-                              const hash = name.split("").reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0);
-                              const lineWidths = ["w-full", "w-3/4", "w-5/6", "w-2/3", "w-1/2", "w-4/5"];
-                              const accentColors = ["bg-blue-300", "bg-emerald-300", "bg-violet-300", "bg-amber-300", "bg-rose-300", "bg-cyan-300"];
-                              const accent = accentColors[hash % accentColors.length];
-                              const titleLine = nameWithoutExt.slice(0, 22);
-                              const subLine = nameWithoutExt.length > 10 ? nameWithoutExt.slice(Math.floor(nameWithoutExt.length / 2)).slice(0, 18) : "Document";
-                              // Generate deterministic line widths based on filename chars
-                              const lines = Array.from({ length: 6 }, (_, i) => lineWidths[(hash + i * 3) % lineWidths.length]);
-                              return (
-                                <div className="flex-1 bg-white p-3 flex flex-col gap-1 overflow-hidden select-none">
-                                  <span className="text-[9px] font-bold text-blue-800 tracking-tight truncate">
-                                    {titleLine}
-                                  </span>
-                                  <span className="text-[7px] font-semibold text-slate-500 tracking-tight truncate">
-                                    {subLine}
-                                  </span>
-                                  <div className={`w-full h-1 ${accent} rounded-[1px] mt-0.5 mb-1 opacity-70`} />
-                                  <div className="flex flex-col gap-0.5 flex-1">
-                                    {lines.map((w, i) => (
-                                      <div key={i} className={`${w} h-0.5 bg-slate-200 rounded-[1px]`} />
-                                    ))}
+                        {wordAtts.map((att: any) => {
+                          const isDownloading = pendingDownloads[att.id];
+                          return (
+                            <div
+                              key={att.id}
+                              onClick={() => !isDownloading && handleDownload(att.id, att.filename, att.url)}
+                              className={cn(
+                                "relative w-72 h-44 rounded-xl border border-primary-200 shadow-xs overflow-hidden bg-zinc-50 flex flex-col group cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all duration-300",
+                                isDownloading && "pointer-events-none opacity-80"
+                              )}
+                            >
+                              {/* Dynamic Document Page Preview */}
+                              {(() => {
+                                // Generate stable visual fingerprint from filename
+                                const name = att.filename || "document";
+                                const nameWithoutExt = name.replace(/\.[^.]+$/, "");
+                                const hash = name.split("").reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0);
+                                const lineWidths = ["w-full", "w-3/4", "w-5/6", "w-2/3", "w-1/2", "w-4/5"];
+                                const accentColors = ["bg-blue-300", "bg-emerald-300", "bg-violet-300", "bg-amber-300", "bg-rose-300", "bg-cyan-300"];
+                                const accent = accentColors[hash % accentColors.length];
+                                const titleLine = nameWithoutExt.slice(0, 22);
+                                const subLine = nameWithoutExt.length > 10 ? nameWithoutExt.slice(Math.floor(nameWithoutExt.length / 2)).slice(0, 18) : "Document";
+                                // Generate deterministic line widths based on filename chars
+                                const lines = Array.from({ length: 6 }, (_, i) => lineWidths[(hash + i * 3) % lineWidths.length]);
+                                return (
+                                  <div className="flex-1 bg-white p-3 flex flex-col gap-1 overflow-hidden select-none">
+                                    <span className="text-[9px] font-bold text-blue-800 tracking-tight truncate">
+                                      {titleLine}
+                                    </span>
+                                    <span className="text-[7px] font-semibold text-slate-500 tracking-tight truncate">
+                                      {subLine}
+                                    </span>
+                                    <div className={`w-full h-1 ${accent} rounded-[1px] mt-0.5 mb-1 opacity-70`} />
+                                    <div className="flex flex-col gap-0.5 flex-1">
+                                      {lines.map((w, i) => (
+                                        <div key={i} className={`${w} h-0.5 bg-slate-200 rounded-[1px]`} />
+                                      ))}
+                                    </div>
                                   </div>
+                                );
+                              })()}
+
+                              {/* Bottom Dark Bar */}
+                              <div className="h-12 bg-[#121212] flex items-center justify-between px-3 relative">
+                                <div className="flex items-center gap-2">
+                                  {/* Word Icon */}
+                                  <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center text-white font-extrabold text-[12px] shadow-sm select-none">
+                                    {isDownloading ? (
+                                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                      "W"
+                                    )}
+                                  </div>
+                                  <Text className="text-white text-xs font-semibold max-w-[180px] truncate">
+                                    {att.filename}
+                                  </Text>
                                 </div>
-                              );
-                            })()}
 
-                            {/* Bottom Dark Bar */}
-                            <div className="h-12 bg-[#121212] flex items-center justify-between px-3 relative">
-                              <div className="flex items-center gap-2">
-                                {/* Word Icon */}
-                                <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center text-white font-extrabold text-[12px] shadow-sm select-none">
-                                  W
+                                {/* Hover Download Icon Overlay */}
+                                <div className="absolute right-6 top-0 bottom-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {isDownloading ? (
+                                    <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <Download className="w-4 h-4 text-background hover:text-blue-400" />
+                                  )}
                                 </div>
-                                <Text className="text-white text-xs font-semibold max-w-[180px] truncate">
-                                  {att.filename}
-                                </Text>
-                              </div>
 
-                              {/* Hover Download Icon Overlay */}
-                              <div className="absolute right-6 top-0 bottom-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Download className="w-4 h-4 text-background hover:text-blue-400" />
+                                {/* Blue Triangle Corner */}
+                                <svg
+                                  className="absolute bottom-0 right-0 w-5 h-5 text-blue-600"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                >
+                                  <polygon points="24,24 24,0 0,24" />
+                                </svg>
                               </div>
-
-                              {/* Blue Triangle Corner */}
-                              <svg
-                                className="absolute bottom-0 right-0 w-5 h-5 text-blue-600"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                              >
-                                <polygon points="24,24 24,0 0,24" />
-                              </svg>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -913,28 +956,36 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
                   {/* Non-image other file chips */}
                   {otherAtts.length > 0 && (
                     <div className="flex flex-wrap gap-2 pt-2">
-                      {otherAtts.map((att: any) => (
-                        <div
-                          key={att.id}
-                          className="flex items-center gap-2 border border-primary-200 px-3.5 py-2 rounded-xl bg-primary-50 hover:bg-primary-100/50 transition-colors"
-                        >
-                          {getAttachmentIcon(att.contentType, att.filename)}
-                          <Text
-                            size="sm"
-                            className="max-w-[180px] truncate font-medium text-primary-800"
+                      {otherAtts.map((att: any) => {
+                        const isDownloading = pendingDownloads[att.id];
+                        return (
+                          <div
+                            key={att.id}
+                            className="flex items-center gap-2 border border-primary-200 px-3.5 py-2 rounded-xl bg-primary-50 hover:bg-primary-100/50 transition-colors"
                           >
-                            {att.filename}
-                          </Text>
-                          <Button
-                            size="icon-sm"
-                            variant="ghost"
-                            onClick={() => handleDownload(att.id, att.filename)}
-                            className="text-primary-600 hover:text-primary-900"
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
+                            {getAttachmentIcon(att.contentType, att.filename)}
+                            <Text
+                              size="sm"
+                              className="max-w-[180px] truncate font-medium text-primary-800"
+                            >
+                              {att.filename}
+                            </Text>
+                            <Button
+                              size="icon-sm"
+                              variant="ghost"
+                              disabled={isDownloading}
+                              onClick={() => handleDownload(att.id, att.filename, att.url)}
+                              className="text-primary-600 hover:text-primary-900"
+                            >
+                              {isDownloading ? (
+                                <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Download className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

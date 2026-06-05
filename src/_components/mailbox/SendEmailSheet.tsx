@@ -451,9 +451,9 @@ export const ComposeEmailSheet = () => {
                   }
                   className={cn(
                     "min-h-[220px] w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none focus:border-primary-400 transition duration-500",
-                    "text-primary-800 leading-relaxed break-words",
+                    "text-primary-800 leading-relaxed wrap-break-word",
                     "before:pointer-events-none",
-                    "[&:empty]:before:content-[attr(data-placeholder)]",
+                    "empty:before:content-[attr(data-placeholder)]",
                     errors.bodyText
                       ? "border-error-500 before:text-error-500"
                       : "border-primary-100 before:text-primary-400",

@@ -9,6 +9,9 @@ import {
   FileText,
   Film,
   File,
+  FileAudio,
+  FileSpreadsheet,
+  FileArchive,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Email, EmailFolder } from "@/APIs/types/Email";
@@ -231,46 +234,66 @@ export const MailRow = React.memo(
                 <div className="flex flex-wrap gap-1 mt-0.5">
                   {uniqueAtts.slice(0, 2).map((att) => {
                     const getAttachmentIcon = () => {
-                      const ct = att.contentType || "";
+                      const ct = (att.contentType || "").toLowerCase();
                       const fn = (att.filename || "").toLowerCase();
+                      const ext = fn.split(".").pop();
+
                       if (
                         ct.startsWith("image/") ||
-                        /\.(jpg|jpeg|png|gif|webp|svg)$/.test(fn)
-                      )
-                        return (
-                          <ImageIcon className="w-3 h-3 shrink-0 text-primary-500" />
-                        );
+                        ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext || "")
+                      ) {
+                        return <ImageIcon className="w-3 h-3 shrink-0 text-primary-500" />;
+                      }
                       if (
                         ct.startsWith("video/") ||
-                        /\.(mp4|mov|avi|webm)$/.test(fn)
-                      )
-                        return (
-                          <Film className="w-3 h-3 shrink-0 text-primary-500" />
-                        );
+                        ["mp4", "mov", "avi", "webm"].includes(ext || "")
+                      ) {
+                        return <Film className="w-3 h-3 shrink-0 text-primary-500" />;
+                      }
                       if (
-                        ct.startsWith("text/") ||
-                        /\.(txt|md|csv|json)$/.test(fn)
-                      )
-                        return (
-                          <FileText className="w-3 h-3 shrink-0 text-primary-500" />
-                        );
-                      if (/\.(pdf)$/.test(fn))
-                        return (
-                          <FileText className="w-3 h-3 shrink-0 text-error-500" />
-                        );
-                      return (
-                        <File className="w-3 h-3 shrink-0 text-primary-500" />
-                      );
+                        ct.startsWith("audio/") ||
+                        ["mp3", "wav", "ogg", "m4a"].includes(ext || "")
+                      ) {
+                        return <FileAudio className="w-3 h-3 shrink-0 text-warning-500" />;
+                      }
+                      if (
+                        ct === "application/pdf" ||
+                        ext === "pdf"
+                      ) {
+                        return <FileText className="w-3 h-3 shrink-0 text-error-500" />;
+                      }
+                      if (
+                        ct === "application/msword" ||
+                        ct === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+                        ["doc", "docx"].includes(ext || "")
+                      ) {
+                        return <FileText className="w-3 h-3 shrink-0 text-blue-600" />;
+                      }
+                      if (
+                        ct === "application/vnd.ms-excel" ||
+                        ct === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+                        ["xls", "xlsx", "csv"].includes(ext || "")
+                      ) {
+                        return <FileSpreadsheet className="w-3 h-3 shrink-0 text-success-600" />;
+                      }
+                      if (
+                        ct === "application/zip" ||
+                        ct === "application/x-rar-compressed" ||
+                        ["zip", "rar", "7z", "tar", "gz"].includes(ext || "")
+                      ) {
+                        return <FileArchive className="w-3 h-3 shrink-0 text-warning-600" />;
+                      }
+                      return <File className="w-3 h-3 shrink-0 text-primary-500" />;
                     };
 
                     return (
                       <span
                         key={att.id}
-                        className="inline-flex items-center gap-1 bg-transparent border border-primary-200 rounded-full px-2 py-0 text-[10px] text-primary-600 max-w-[120px]"
+                        className="inline-flex items-center gap-1 bg-transparent border border-primary-200 rounded-full px-2 py-0 text-[10px] text-primary-600"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {getAttachmentIcon()}
-                        <span className="truncate text-xs">{att.filename}</span>
+                        <span className="text-xs">{att.filename}</span>
                       </span>
                     );
                   })}
