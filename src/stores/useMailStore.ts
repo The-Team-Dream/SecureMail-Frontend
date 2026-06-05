@@ -15,6 +15,7 @@ interface MailState {
     body?: string;
     emailId?: string;
     fromName?: string;
+    fromAddr?: string;
     receivedAt?: string;
     bodyHtml?: string;
     originalHtml?: string;
@@ -36,6 +37,7 @@ interface MailState {
       body?: string; 
       emailId?: string;
       fromName?: string;
+      fromAddr?: string;
       receivedAt?: string;
       bodyHtml?: string;
       originalHtml?: string;

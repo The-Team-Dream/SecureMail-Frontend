@@ -35,7 +35,8 @@ export const SecureRepliesSection = ({
         </Badge>
       </div>
       <Text size="xs" className="text-primary-600/80 -mt-1 block">
-        Click any suggested reply below to draft a secure, zero-trust response instantly.
+        Click any suggested reply below to draft a secure, zero-trust response
+        instantly.
       </Text>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">

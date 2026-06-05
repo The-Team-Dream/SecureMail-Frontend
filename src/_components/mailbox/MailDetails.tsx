@@ -127,10 +127,6 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
         fromName: email.fromName,
         receivedAt: email.receivedAt,
         emailId: String(email.id),
-        originalHtml: email.bodyHtml
-          ? processHtmlBody(email.bodyHtml)
-          : undefined,
-        originalText: email.bodyText,
         toAddr: email.toAddr,
       },
     });
@@ -143,6 +139,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
       data: {
         subject: `Fwd: ${email.subject}`,
         fromName: email.fromName,
+        fromAddr: email.fromAddr,
         receivedAt: email.receivedAt,
         emailId: String(email.id),
         originalHtml: email.bodyHtml

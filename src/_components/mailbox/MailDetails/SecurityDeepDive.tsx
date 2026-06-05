@@ -36,11 +36,7 @@ export const SecurityDeepDive = ({
         <SheetHeader className="space-y-1">
           <div className="flex items-center gap-2 text-primary-500 mb-2">
             <ShieldCheck className="w-5 h-5" />
-            <Text
-              size="xs"
-              font="black"
-              className="uppercase tracking-[0.2em]"
-            >
+            <Text size="xs" font="black" className="uppercase tracking-[0.2em]">
               SecureMail AI-Guard
             </Text>
           </div>

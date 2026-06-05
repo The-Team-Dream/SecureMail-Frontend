@@ -283,7 +283,7 @@ export const AttachmentsSection = ({
                   {/* Bottom Dark Bar */}
                   <div className="h-12 bg-[#121212] flex items-center justify-between px-3 relative">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center text-white font-extrabold text-[12px] shadow-sm select-none">
+                      <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center text-white font-extrabold text-[12px] shadow-sm select-none group">
                         {isDownloading ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
@@ -299,7 +299,7 @@ export const AttachmentsSection = ({
                       {isDownloading ? (
                         <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <Download className="w-4 h-4 tex-white hover:text-blue-400" />
+                        <Download className="w-4 h-4 tex-white group-hover:text-blue-400" />
                       )}
                     </div>
 

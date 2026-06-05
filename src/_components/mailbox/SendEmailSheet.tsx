@@ -464,32 +464,7 @@ export const ComposeEmailSheet = () => {
               </div>
             </div>
 
-            {/* Original Email (View Only) */}
-            {composeMode === "reply" &&
-              (composeData as any)?.originalHtml && (
-                <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
-                  <Text size="sm" font="bold" className="text-primary-700">
-                    Original Message
-                  </Text>
-                  <div className="p-2 rounded-xl border border-primary-100 bg-white overflow-hidden max-h-[350px]">
-                    <IsolatedHtml html={(composeData as any).originalHtml} />
-                  </div>
-                </div>
-              )}
-            {composeMode === "reply" &&
-              !(composeData as any)?.originalHtml &&
-              (composeData as any)?.originalText && (
-                <div className="flex flex-col gap-2 pt-4 border-t border-primary-100">
-                  <Text size="sm" font="bold" className="text-primary-700">
-                    Original Message
-                  </Text>
-                  <div className="p-4 rounded-xl border border-primary-100 bg-primary-50/30 overflow-y-auto max-h-[300px]">
-                    <div className="text-primary-800 text-[15px] leading-relaxed whitespace-pre-wrap">
-                      {(composeData as any).originalText}
-                    </div>
-                  </div>
-                </div>
-              )}
+
 
             {attachments.length > 0 && (
               <div className="flex flex-wrap gap-3 pt-2">
