@@ -15,11 +15,12 @@ import {
   Square,
   CheckSquare,
 } from "lucide-react";
+import { FaFileWord, FaRegFilePdf } from "react-icons/fa";
+
 import { cn } from "@/lib/utils";
 import type { Email, EmailFolder } from "@/APIs/types/Email";
 import { useMailStore } from "@/stores/useMailStore";
 import { Text } from "@/_components/shared/Text";
-import { Button } from "@/components/ui/button";
 import { useRouter, usePathname, useParams } from "next/navigation";
 import {
   useReadEmail,
@@ -28,7 +29,6 @@ import {
 } from "@/APIs/hooks/emails";
 import { ActionButton } from "@/_components/shared/ActionButton";
 
-import { RISK_STYLE_MAP } from "@/constants/security";
 import { Icons } from "@/constants/icons";
 
 interface MailRowProps {
@@ -128,10 +128,12 @@ export const MailRow = React.memo(
           isSelected && "bg-secondary-50/30",
         )}
       >
-
         {/* Checkbox + Star — always flex-row, star hidden on mobile (moves to actions) */}
         <div className="flex flex-row items-center justify-center px-2 sm:px-3 py-3 shrink-0">
-          <div onClick={(e) => e.stopPropagation()} className="flex items-center">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center"
+          >
             <ActionButton
               label={isSelected ? "Deselect" : "Select"}
               tooltipSide="top"
@@ -203,7 +205,9 @@ export const MailRow = React.memo(
               <span
                 className={cn(
                   "text-[11px] whitespace-nowrap",
-                  !email.isRead ? "font-semibold text-primary-600" : "font-normal text-primary-400",
+                  !email.isRead
+                    ? "font-semibold text-primary-600"
+                    : "font-normal text-primary-400",
                 )}
               >
                 {formattedDate}
@@ -240,11 +244,17 @@ export const MailRow = React.memo(
               )}
             </div>
 
-
             {/* Attachment chips */}
             {(() => {
               const uniqueAtts = email.attachments
-                ? Array.from(new Map(email.attachments.map((att) => [att.filename || att.id, att])).values())
+                ? Array.from(
+                    new Map(
+                      email.attachments.map((att) => [
+                        att.filename || att.id,
+                        att,
+                      ]),
+                    ).values(),
+                  )
                 : [];
               if (uniqueAtts.length === 0) return null;
               return (
@@ -257,56 +267,73 @@ export const MailRow = React.memo(
 
                       if (
                         ct.startsWith("image/") ||
-                        ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext || "")
+                        ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(
+                          ext || "",
+                        )
                       ) {
-                        return <ImageIcon className="w-3 h-3 shrink-0 text-primary-500" />;
+                        return (
+                          <ImageIcon className="w-3.5 h-3.5 shrink-0 text-primary-500" />
+                        );
                       }
                       if (
                         ct.startsWith("video/") ||
                         ["mp4", "mov", "avi", "webm"].includes(ext || "")
                       ) {
-                        return <Film className="w-3 h-3 shrink-0 text-primary-500" />;
+                        return (
+                          <Film className="w-3.5 h-3.5 shrink-0 text-primary-500" />
+                        );
                       }
                       if (
                         ct.startsWith("audio/") ||
                         ["mp3", "wav", "ogg", "m4a"].includes(ext || "")
                       ) {
-                        return <FileAudio className="w-3 h-3 shrink-0 text-warning-500" />;
+                        return (
+                          <FileAudio className="w-3.5 h-3.5 shrink-0 text-warning-500" />
+                        );
                       }
-                      if (
-                        ct === "application/pdf" ||
-                        ext === "pdf"
-                      ) {
-                        return <FileText className="w-3 h-3 shrink-0 text-error-500" />;
+                      if (ct === "application/pdf" || ext === "pdf") {
+                        return (
+                          <FaRegFilePdf className="w-3.5 h-3.5 shrink-0 text-error-500" />
+                        );
                       }
                       if (
                         ct === "application/msword" ||
-                        ct === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+                        ct ===
+                          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
                         ["doc", "docx"].includes(ext || "")
                       ) {
-                        return <FileText className="w-3 h-3 shrink-0 text-blue-600" />;
+                        return (
+                          <FaFileWord className="w-3.5 h-3.5 shrink-0 text-blue-600" />
+                        );
                       }
                       if (
                         ct === "application/vnd.ms-excel" ||
-                        ct === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+                        ct ===
+                          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
                         ["xls", "xlsx", "csv"].includes(ext || "")
                       ) {
-                        return <FileSpreadsheet className="w-3 h-3 shrink-0 text-success-600" />;
+                        return (
+                          <FileSpreadsheet className="w-3.5 h-3.5 shrink-0 text-success-600" />
+                        );
                       }
                       if (
                         ct === "application/zip" ||
                         ct === "application/x-rar-compressed" ||
                         ["zip", "rar", "7z", "tar", "gz"].includes(ext || "")
                       ) {
-                        return <FileArchive className="w-3 h-3 shrink-0 text-warning-600" />;
+                        return (
+                          <FileArchive className="w-3.5 h-3.5 shrink-0 text-warning-600" />
+                        );
                       }
-                      return <File className="w-3 h-3 shrink-0 text-primary-500" />;
+                      return (
+                        <File className="w-3.5 h-3.5 shrink-0 text-primary-500" />
+                      );
                     };
 
                     return (
                       <span
                         key={att.id}
-                        className="inline-flex items-center gap-1 bg-transparent border border-primary-200 rounded-full px-2 py-0 text-[10px] text-primary-600"
+                        className="inline-flex items-center gap-1 bg-transparent border border-primary-200 rounded-full px-2.5 py-1 text-[10px] text-primary-600"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {getAttachmentIcon()}
@@ -342,7 +369,10 @@ export const MailRow = React.memo(
             </div>
 
             {/* Desktop hover actions */}
-            <div className="hidden sm:group-hover:flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="hidden sm:group-hover:flex items-center gap-0.5"
+              onClick={(e) => e.stopPropagation()}
+            >
               <ActionButton
                 label={
                   activeFolder === "trash"
@@ -379,7 +409,10 @@ export const MailRow = React.memo(
             </div>
 
             {/* Mobile actions: star + read + delete */}
-            <div className="flex sm:hidden items-center gap-1 ml-1" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="flex sm:hidden items-center gap-1 ml-1"
+              onClick={(e) => e.stopPropagation()}
+            >
               {/* Star */}
               <ActionButton
                 label={isStarred ? "Unstar" : "Star"}
