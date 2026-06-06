@@ -36,6 +36,8 @@ export interface Email {
   attachments?: Attachment[];
   analysisStatus?: 'PENDING' | 'COMPLETED' | 'FAILED';
   isRescanning?: boolean;
+  bodyText?: string;
+  snippet?: string;
 }
 
 export interface EmailsResponse {

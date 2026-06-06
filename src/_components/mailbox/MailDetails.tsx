@@ -38,6 +38,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { SecurityStatusBanner } from "./MailDetails/SecurityStatusBanner";
 import { AttachmentsSection } from "./MailDetails/AttachmentsSection";
 import { SecureRepliesSection } from "./MailDetails/SecureRepliesSection";
+import { FilePreviewModal } from "./FilePreviewModal";
+import type { Attachment } from "@/APIs/types/Email";
 
 export const MailDetails = ({ emailId }: { emailId: string }) => {
   const router = useRouter();
@@ -46,6 +48,9 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
   const [pendingDownloads, setPendingDownloads] = useState<
     Record<string, boolean>
   >({});
+  const [previewAttachment, setPreviewAttachment] = useState<Attachment | null>(
+    null,
+  );
 
   const { data: email, isLoading, error } = useEmailDetails(mailboxId, emailId);
   const readMutation = useReadEmail(mailboxId);
@@ -327,11 +332,11 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
             label="Reply"
             onClick={handleReply}
           />
-          <ActionButton
+          {/* <ActionButton
             icon={<Forward className="size-4 text-primary" />}
             label="Forward"
             onClick={handleForward}
-          />
+          /> */}
           <ActionButton
             icon={
               email.isRead ? (
@@ -374,6 +379,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
             emailId={emailId}
             pendingDownloads={pendingDownloads}
             handleDownload={handleDownload}
+            onPreviewAttachment={setPreviewAttachment}
           />
 
           {/* Zero-Trust Secure Replies Section */}
@@ -384,6 +390,14 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
           />
         </div>
       </div>
+
+      <FilePreviewModal
+        isOpen={previewAttachment !== null}
+        onClose={() => setPreviewAttachment(null)}
+        attachment={previewAttachment}
+        mailboxId={mailboxId}
+        emailId={emailId}
+      />
     </div>
   );
 };

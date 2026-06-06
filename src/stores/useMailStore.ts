@@ -21,6 +21,7 @@ interface MailState {
     originalHtml?: string;
     originalText?: string;
     toAddr?: string[];
+    attachments?: { id: string; name: string }[];
   } | null;
 
   setActiveFolder: (folder: Folder) => void;
@@ -31,19 +32,19 @@ interface MailState {
     isOpen: boolean,
     config?: {
       mode: "new" | "reply" | "forward";
-      data?: { 
-      to?: string; 
-      subject?: string; 
-      body?: string; 
-      emailId?: string;
-      fromName?: string;
-      fromAddr?: string;
-      receivedAt?: string;
-      bodyHtml?: string;
-      originalHtml?: string;
-      originalText?: string;
-      toAddr?: string[];
-    };
+      data?: {
+        to?: string;
+        subject?: string;
+        body?: string;
+        emailId?: string;
+        fromName?: string;
+        fromAddr?: string;
+        receivedAt?: string;
+        bodyHtml?: string;
+        originalHtml?: string;
+        originalText?: string;
+        toAddr?: string[];
+      };
     },
   ) => void;
   toggleSelectEmail: (id: string) => void;

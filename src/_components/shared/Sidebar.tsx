@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { ActionButton } from "@/_components/shared/ActionButton";
-import { useReclassifyEmail, useStarEmail } from "@/APIs/hooks/emails";
+import { useEmails, useReclassifyEmail, useStarEmail } from "@/APIs/hooks/emails";
 import type { EmailFolder } from "@/APIs/types/Email";
 
 export const Sidebar = () => {
@@ -33,6 +33,9 @@ export const Sidebar = () => {
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
   const isMailPage = !!params.mailboxId;
   const { data: unreadCount } = useUnreadCount();
+    const { data: inboxData } = useEmails(params.mailboxId as string, "inbox", 1);
+    const unreadInboxCount =
+      inboxData?.data?.filter((e: any) => !e.isRead).length || 0;
   const router = useRouter();
 
   const [activeDropFolder, setActiveDropFolder] = useState<string | null>(null);
@@ -213,9 +216,9 @@ export const Sidebar = () => {
                           {item.name}
                         </Text>
                         {item.folder === "inbox" &&
-                          (unreadCount?.count ?? 0) > 0 && (
-                            <span className="bg-primary text-background flex items-center justify-center  px-0.5 text-[10px] font-medium rounded-xs">
-                              {unreadCount?.count}
+                          (unreadInboxCount ?? 0) > 0 && (
+                            <span className="bg-primary text-background flex items-center justify-center px-1 text-[10px] font-medium rounded-xs">
+                              {unreadInboxCount}
                             </span>
                           )}
                       </div>

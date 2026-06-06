@@ -238,22 +238,13 @@ export const MobileSidebar = () => {
                               >
                                 {item.name}
                               </Text>
-                              {item.folder === "inbox" &&
-                                unreadInboxCount > 0 && (
-                                  <span className="bg-primary-800 text-background text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                                    {unreadInboxCount}
-                                  </span>
-                                )}
                             </div>
-
-                            <ChevronRight
-                              className={cn(
-                                "w-4 h-4 transition-transform",
-                                isActive
-                                  ? "translate-x-1 text-primary"
-                                  : "text-primary-600 opacity-0 group-hover:opacity-100",
+                            {item.folder === "inbox" &&
+                              unreadInboxCount > 0 && (
+                                <span className="bg-primary text-background flex items-center justify-center px-1 text-[10px] font-medium rounded-xs">
+                                  {unreadInboxCount}
+                                </span>
                               )}
-                            />
                           </Link>
                         );
                       })}

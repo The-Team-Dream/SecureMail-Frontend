@@ -4,10 +4,11 @@ import { MailRow } from "./MailRow";
 import { useMailStore } from "@/stores/useMailStore";
 import { useParams } from "next/navigation";
 import { useEmails, useSearchEmails } from "@/APIs/hooks/emails";
-import type { Email, EmailFolder } from "@/APIs/types/Email";
+import type { Email, EmailFolder, Attachment } from "@/APIs/types/Email";
 import { MailListSkeleton } from "../skeleton/MailListSkeleton";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import notFoundImg from "../../../public/images/not-found.png";
+import { FilePreviewModal } from "./FilePreviewModal";
 
 export const MailList = () => {
   const params = useParams();
@@ -37,6 +38,9 @@ export const MailList = () => {
   const finalEmails = pagedEmails;
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [previewAttachment, setPreviewAttachment] = useState<Attachment | null>(null);
+  const [previewEmailId, setPreviewEmailId] = useState<string>("");
+
   const handleDragStart = useCallback((index: number) => {
     setDragIndex(index);
   }, []);
@@ -92,8 +96,20 @@ export const MailList = () => {
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
+          onPreviewAttachment={(att, emailId) => {
+            setPreviewAttachment(att);
+            setPreviewEmailId(emailId);
+          }}
         />
       ))}
+
+      <FilePreviewModal
+        isOpen={previewAttachment !== null}
+        onClose={() => setPreviewAttachment(null)}
+        attachment={previewAttachment}
+        mailboxId={mailboxId}
+        emailId={previewEmailId}
+      />
     </div>
   );
 };

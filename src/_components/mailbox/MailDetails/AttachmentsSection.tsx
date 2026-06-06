@@ -27,6 +27,7 @@ interface AttachmentsSectionProps {
     filename: string,
     url?: string,
   ) => Promise<void>;
+  onPreviewAttachment?: (attachment: Attachment) => void;
 }
 
 const AuthenticatedImage = ({
@@ -49,6 +50,35 @@ const AuthenticatedImage = ({
   }
 
   return <img src={imgSrc} alt={alt} className={className} />;
+};
+
+const getAttachmentMeta = (att: Attachment) => {
+  const attAsCustom = att as unknown as {
+    attachmentId?: string;
+    attachment_id?: string;
+    _id?: string;
+    fileId?: string;
+    path?: string;
+  };
+  const attId = String(
+    att.id ??
+      attAsCustom.attachmentId ??
+      attAsCustom.attachment_id ??
+      attAsCustom._id ??
+      attAsCustom.fileId ??
+      "",
+  );
+  const attUrl = att.url || attAsCustom.path;
+  return { attId, attUrl };
+};
+
+const formatBytes = (bytes?: number) => {
+  if (bytes === undefined || bytes === null || isNaN(bytes)) return "";
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
 
 const getAttachmentIcon = (mimeType?: string, fileName?: string) => {
@@ -94,16 +124,17 @@ export const AttachmentsSection = ({
   emailId,
   pendingDownloads,
   handleDownload,
+  onPreviewAttachment,
 }: AttachmentsSectionProps) => {
   if (!attachments || attachments.length === 0) return null;
 
-  const isImageAttachment = (att: any) => {
+  const isImageAttachment = (att: Attachment) => {
     if (att.contentType?.startsWith("image/")) return true;
     const ext = att.filename?.split(".").pop()?.toLowerCase();
     return ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext || "");
   };
 
-  const isWordAttachment = (att: any) => {
+  const isWordAttachment = (att: Attachment) => {
     const ext = att.filename?.split(".").pop()?.toLowerCase();
     return ["doc", "docx"].includes(ext || "");
   };
@@ -111,14 +142,7 @@ export const AttachmentsSection = ({
   const uniqueAttachments = Array.from(
     new Map(
       attachments.map((att) => {
-        const attId = String(
-          att.id ??
-            (att as any).attachmentId ??
-            (att as any).attachment_id ??
-            (att as any)._id ??
-            (att as any).fileId ??
-            "",
-        );
+        const { attId } = getAttachmentMeta(att);
         const attFilename = att.filename || attId;
         return [attFilename, att];
       }),
@@ -128,7 +152,7 @@ export const AttachmentsSection = ({
   const imageAtts = uniqueAttachments.filter(isImageAttachment);
   const wordAtts = uniqueAttachments.filter(isWordAttachment);
   const otherAtts = uniqueAttachments.filter(
-    (att: any) => !isImageAttachment(att) && !isWordAttachment(att),
+    (att) => !isImageAttachment(att) && !isWordAttachment(att),
   );
 
   return (
@@ -136,22 +160,15 @@ export const AttachmentsSection = ({
       {/* Inline images rendered with AuthenticatedImage component */}
       {imageAtts.length > 0 && (
         <div className="flex flex-wrap gap-4">
-          {imageAtts.map((att: any) => {
-            const attId = String(
-              att.id ??
-                att.attachmentId ??
-                att.attachment_id ??
-                att._id ??
-                att.fileId ??
-                "",
-            );
-            const attUrl = att.url || att.path;
+          {imageAtts.map((att: Attachment) => {
+            const { attId, attUrl } = getAttachmentMeta(att);
             const defaultUrl = `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${attId}/download`;
             const targetUrl = attUrl || defaultUrl;
             const isDownloading = pendingDownloads[attId];
             return (
               <div
                 key={attId}
+                onClick={() => onPreviewAttachment?.(att)}
                 className="relative group/image w-[280px] h-[180px] rounded-xl overflow-hidden border border-primary-200 shadow-xs cursor-pointer"
               >
                 <AuthenticatedImage
@@ -160,12 +177,21 @@ export const AttachmentsSection = ({
                   className="w-full h-full object-cover transition-transform duration-300 group-hover/image:scale-105"
                 />
                 {/* Glassmorphic hover overlay */}
-                <div className="absolute inset-0 bg-black/45 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-between p-3.5 backdrop-blur-[2px]">
+                  <div className="w-full min-w-0">
+                    <p className="text-xs font-bold text-white truncate">
+                      {att.filename}
+                    </p>
+                    <p className="text-[10px] text-zinc-300 mt-0.5 font-medium">
+                      {formatBytes(att.size)}
+                    </p>
+                  </div>
+
                   <Button
                     size="sm"
                     variant="secondary"
                     disabled={isDownloading}
-                    className="bg-white/90 text-primary-900 hover:bg-white hover:scale-105 transition-all duration-200 font-semibold"
+                    className="bg-white/95 text-primary-900 hover:bg-white hover:scale-105 transition-all duration-200 font-semibold mb-1.5"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDownload(attId, att.filename, attUrl);
@@ -196,26 +222,15 @@ export const AttachmentsSection = ({
             Documents
           </Text>
           <div className="flex flex-wrap gap-4">
-            {wordAtts.map((att: any) => {
-              const attId = String(
-                att.id ??
-                  att.attachmentId ??
-                  att.attachment_id ??
-                  att._id ??
-                  att.fileId ??
-                  "",
-              );
-              const attUrl = att.url || att.path;
+            {wordAtts.map((att: Attachment) => {
+              const { attId, attUrl } = getAttachmentMeta(att);
               const isDownloading = pendingDownloads[attId];
               return (
                 <div
                   key={attId}
-                  onClick={() =>
-                    !isDownloading &&
-                    handleDownload(attId, att.filename, attUrl)
-                  }
+                  onClick={() => onPreviewAttachment?.(att)}
                   className={cn(
-                    "relative w-72 h-44 rounded-xl border border-primary-200 shadow-xs overflow-hidden bg-zinc-50 flex flex-col group cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all duration-300",
+                    "relative w-72 h-44 rounded-xl border border-primary-200 shadow-xs overflow-hidden bg-zinc-50 flex flex-col group cursor-pointer hover:border-blue-500 hover:shadow-md hover:scale-[1.01] hover:bg-zinc-100/50 transition-all duration-300",
                     isDownloading && "pointer-events-none opacity-80",
                   )}
                 >
@@ -295,11 +310,19 @@ export const AttachmentsSection = ({
                       </Text>
                     </div>
 
-                    <div className="absolute right-6 top-0 bottom-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isDownloading) {
+                          handleDownload(attId, att.filename, attUrl);
+                        }
+                      }}
+                      className="absolute right-6 top-0 bottom-0 flex items-center  transition-opacity cursor-pointer hover:scale-110 z-10"
+                    >
                       {isDownloading ? (
                         <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <Download className="w-4 h-4 tex-white group-hover:text-blue-400" />
+                        <Download className="w-4 h-4 text-blue-200 hover:text-blue-400" />
                       )}
                     </div>
 
@@ -321,21 +344,14 @@ export const AttachmentsSection = ({
       {/* Non-image other file chips */}
       {otherAtts.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-2">
-          {otherAtts.map((att: any) => {
-            const attId = String(
-              att.id ??
-                att.attachmentId ??
-                att.attachment_id ??
-                att._id ??
-                att.fileId ??
-                "",
-            );
-            const attUrl = att.url || att.path;
+          {otherAtts.map((att: Attachment) => {
+            const { attId, attUrl } = getAttachmentMeta(att);
             const isDownloading = pendingDownloads[attId];
             return (
               <div
                 key={attId}
-                className="flex items-center gap-2 border border-primary-200 px-3.5 py-2 rounded-xl bg-primary-50 hover:bg-primary-100/50 transition-colors"
+                onClick={() => onPreviewAttachment?.(att)}
+                className="flex items-center gap-2 border border-primary-200 px-3.5 py-2 rounded-xl bg-primary-50 hover:bg-primary-100 hover:border-primary-400 hover:scale-[1.01] hover:shadow-sm transition-all duration-200 cursor-pointer shadow-2xs"
               >
                 {getAttachmentIcon(att.contentType, att.filename)}
                 <Text
@@ -348,7 +364,10 @@ export const AttachmentsSection = ({
                   size="icon-sm"
                   variant="ghost"
                   disabled={isDownloading}
-                  onClick={() => handleDownload(attId, att.filename, attUrl)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(attId, att.filename, attUrl);
+                  }}
                   className="text-primary-600 hover:text-primary-900"
                 >
                   {isDownloading ? (

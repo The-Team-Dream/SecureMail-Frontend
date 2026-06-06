@@ -6,7 +6,6 @@ import {
   Mail,
   Paperclip,
   ImageIcon,
-  FileText,
   Film,
   File,
   FileAudio,
@@ -18,7 +17,7 @@ import {
 import { FaFileWord, FaRegFilePdf } from "react-icons/fa";
 
 import { cn } from "@/lib/utils";
-import type { Email, EmailFolder } from "@/APIs/types/Email";
+import type { Email, EmailFolder, Attachment } from "@/APIs/types/Email";
 import { useMailStore } from "@/stores/useMailStore";
 import { Text } from "@/_components/shared/Text";
 import { useRouter, usePathname, useParams } from "next/navigation";
@@ -37,10 +36,11 @@ interface MailRowProps {
   onDragStart: (index: number) => void;
   onDragOver: (index: number) => void;
   onDragEnd: () => void;
+  onPreviewAttachment?: (attachment: Attachment, emailId: string) => void;
 }
 
 export const MailRow = React.memo(
-  ({ email, index, onDragStart, onDragOver, onDragEnd }: MailRowProps) => {
+  ({ email, index, onDragStart, onDragOver, onDragEnd, onPreviewAttachment }: MailRowProps) => {
     const toggleSelectEmail = useMailStore((s) => s.toggleSelectEmail);
     const selectedIds = useMailStore((s) => s.selectedIds);
     const isSelected = selectedIds.includes(String(email.id));
@@ -333,8 +333,11 @@ export const MailRow = React.memo(
                     return (
                       <span
                         key={att.id}
-                        className="inline-flex items-center gap-1 bg-transparent border border-primary-200 rounded-full px-2.5 py-1 text-[10px] text-primary-600"
-                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1 bg-transparent border border-primary-200 rounded-full px-2.5 py-1 text-[10px] text-primary-600 cursor-pointer hover:bg-primary-100 hover:border-primary-400 hover:text-primary-950 transition-colors duration-150"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPreviewAttachment?.(att, String(email.id));
+                        }}
                       >
                         {getAttachmentIcon()}
                         <span className="text-xs">{att.filename}</span>

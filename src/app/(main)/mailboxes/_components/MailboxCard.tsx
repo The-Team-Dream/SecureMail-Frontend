@@ -167,12 +167,13 @@ export function MailboxCard({
             <div className="relative z-10 flex items-center justify-center gap-2 w-full">
               {isSyncing === acc.id.toString() ? (
                 <>
-                  Syncing... <Spinner className="w-4 h-4 text-primary" />
+                  <span className="text-primary-900">Syncing... </span>
+                  <Spinner className="w-4 h-4 text-primary-900" />
                 </>
               ) : (
                 <>
-                  Sync{" "}
-                  <Icons.Refresh className="w-4 h-4 text-primary stroke-2" />
+                  <span className="text-primary-900">Sync </span>
+                  <Icons.Refresh className="w-4 h-4 text-primary-900 stroke-2" />
                 </>
               )}
             </div>
