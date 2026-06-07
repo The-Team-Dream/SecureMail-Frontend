@@ -38,12 +38,12 @@ export function StatCard({
       accent: "bg-warning-500",
     },
     info: {
-      bg: "bg-secondary-50/50",
-      border: "border-secondary-100/50",
+      bg: "bg-secondary-200",
+      border: "border-secondary-200/50",
       text: "text-secondary-800",
-      iconBg: "bg-secondary-100/80",
+      iconBg: "bg-secondary-400",
       iconColor: "text-secondary-600",
-      accent: "bg-secondary-500",
+      accent: "bg-secondary-800",
     },
     error: {
       bg: "bg-error-50/50",

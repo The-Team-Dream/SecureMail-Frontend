@@ -12,7 +12,10 @@ export const emailSchema = z.discriminatedUnion("mode", [
   // New Mode
   baseSchema.extend({
     mode: z.literal("new"),
-    to: z.string().min(1, "Recipient email is required"),
+    to: z
+      .string()
+      .min(1, "Recipient email is required")
+      .email("Invalid recipient email address"),
     subject: z.string().min(1, "Subject is required"),
     bodyText: z.string().min(1, "Message content is required"),
   }),

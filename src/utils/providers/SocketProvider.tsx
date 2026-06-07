@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { Socket } from "socket.io-client";
 import Cookies from "js-cookie";
@@ -49,6 +50,7 @@ export const useSocketContext = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
+  const pathname = usePathname();
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -58,26 +60,33 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const handleNewEmail = useCallback(
     (data: any) => {
       const mailboxId = data?.mailboxId ?? data?.mailBoxId;
+      if (!mailboxId) return;
 
-      // Invalidate email lists for this mailbox
-      queryClient.invalidateQueries({
-        queryKey: ["emails", String(mailboxId)],
-      });
+      const idStr = String(mailboxId);
+      const idNum = Number(mailboxId);
 
-      // Invalidate notifications
-      queryClient.invalidateQueries({
-        queryKey: ["notifications"],
-      });
+      // Invalidate and refetch email lists for this mailbox (support both string/number keys)
+      queryClient.invalidateQueries({ queryKey: ["emails", idStr] });
+      queryClient.invalidateQueries({ queryKey: ["emails", idNum] });
+      queryClient.refetchQueries({ queryKey: ["emails", idStr] });
+      queryClient.refetchQueries({ queryKey: ["emails", idNum] });
 
-      // Invalidate unread counts
-      queryClient.invalidateQueries({
-        queryKey: ["notifications", "unread-count"],
-      });
+      // Invalidate and refetch mailboxes list
+      queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
+      queryClient.refetchQueries({ queryKey: ["mailboxes"] });
 
-      // Invalidate analytics (new email changes stats)
-      queryClient.invalidateQueries({
-        queryKey: ["analytics"],
-      });
+      // Invalidate and refetch notifications
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.refetchQueries({ queryKey: ["notifications"] });
+
+      // Invalidate and refetch unread counts
+      queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
+      queryClient.refetchQueries({ queryKey: ["notifications", "unread-count"] });
+
+      // Invalidate and refetch analytics (new email changes stats)
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idStr] });
+      queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idNum] });
 
       toast.info("📩 New email received", {
         description: data.email?.subject || "You have a new email",
@@ -123,22 +132,42 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       const emailId = data.emailId;
       const securityVerdict = data.securityVerdict ?? data.verdict;
 
-      // Refresh the email list to show updated verdict
-      queryClient.invalidateQueries({
-        queryKey: ["emails", String(mailboxId)],
-      });
+      if (mailboxId) {
+        const idStr = String(mailboxId);
+        const idNum = Number(mailboxId);
 
-      // Refresh specific email details if open
-      queryClient.invalidateQueries({
-        queryKey: ["email", String(emailId)],
-      });
+        // Refresh and refetch the email list to show updated verdict
+        queryClient.invalidateQueries({ queryKey: ["emails", idStr] });
+        queryClient.invalidateQueries({ queryKey: ["emails", idNum] });
+        queryClient.refetchQueries({ queryKey: ["emails", idStr] });
+        queryClient.refetchQueries({ queryKey: ["emails", idNum] });
 
-      // Refresh analytics for updated threat stats
-      queryClient.invalidateQueries({
-        queryKey: ["analytics"],
-      });
+        // Refresh and refetch analytics for updated threat stats
+        queryClient.invalidateQueries({ queryKey: ["analytics"] });
+        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idStr] });
+        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idNum] });
 
-      if (securityVerdict && securityVerdict !== "SAFE" && securityVerdict !== "clean") {
+        // Refresh and refetch mailboxes list
+        queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
+        queryClient.refetchQueries({ queryKey: ["mailboxes"] });
+      }
+
+      if (emailId) {
+        const idStr = String(emailId);
+        const idNum = Number(emailId);
+
+        // Refresh and refetch specific email details if open
+        queryClient.invalidateQueries({ queryKey: ["email", idStr] });
+        queryClient.invalidateQueries({ queryKey: ["email", idNum] });
+        queryClient.refetchQueries({ queryKey: ["email", idStr] });
+        queryClient.refetchQueries({ queryKey: ["email", idNum] });
+      }
+
+      if (
+        securityVerdict &&
+        securityVerdict !== "SAFE" &&
+        securityVerdict !== "clean"
+      ) {
         toast.warning("⚠️ Threat Detected", {
           description: `Email flagged as ${securityVerdict}`,
           duration: 6000,
@@ -154,9 +183,15 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       queryClient.invalidateQueries({
         queryKey: ["notifications"],
       });
+      queryClient.refetchQueries({
+        queryKey: ["notifications"],
+      });
 
       // Invalidate unread count
       queryClient.invalidateQueries({
+        queryKey: ["notifications", "unread-count"],
+      });
+      queryClient.refetchQueries({
         queryKey: ["notifications", "unread-count"],
       });
 
@@ -348,6 +383,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       socket.off(SocketEvent.MAILBOX_STATUS, handleMailboxStatus);
     };
   }, [
+    pathname,
     handleNewEmail,
     handleEmailSent,
     handleEmailScanned,

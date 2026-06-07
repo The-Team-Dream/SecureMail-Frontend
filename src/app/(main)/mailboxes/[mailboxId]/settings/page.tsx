@@ -23,6 +23,8 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { ConfirmationModal } from "@/_components/shared/ConfirmationModal";
 import { useState, useEffect } from "react";
+import { useServerErrors } from "@/utils/form-utils";
+import BackEndError from "@/_components/shared/BackEndError";
 
 const MailboxSettings = () => {
   const params = useParams();
@@ -40,6 +42,7 @@ const MailboxSettings = () => {
     register,
     control,
     formState: { errors },
+    setError,
     clearErrors,
     reset,
   } = useForm<IMailboxSettings>({
@@ -52,6 +55,7 @@ const MailboxSettings = () => {
       pushNotifications: true,
     },
   });
+  const { handleServerErrors } = useServerErrors<IMailboxSettings>(setError);
 
   useEffect(() => {
     if (mailbox && !isLoading) {
@@ -64,13 +68,19 @@ const MailboxSettings = () => {
   }, [mailbox, isLoading, reset]);
 
   const onSubmit = (data: IMailboxSettings) => {
-    updateMailbox({
-      id: mailboxId,
-      data: {
-        displayName: data.mailboxName,
-        pushNotificationsEnabled: data.pushNotifications,
+    updateMailbox(
+      {
+        id: mailboxId,
+        data: {
+          displayName: data.mailboxName,
+          pushNotificationsEnabled: data.pushNotifications,
+        },
       },
-    });
+      {
+        onError: (err) =>
+          handleServerErrors(err, ["mailboxName", "pushNotifications"]),
+      },
+    );
   };
 
   const handleDelete = () => {
@@ -108,14 +118,17 @@ const MailboxSettings = () => {
           </Text>
           <div className="border-b border-primary-100 pb-10 space-y-6">
             <Input
-              label="Mailbox Name"
+              label="Display Name"
               {...register("mailboxName", {
                 onChange: () => clearErrors("mailboxName"),
               })}
-              placeholder={"Mailbox Name"}
+              placeholder={"displayName"}
               type="text"
               className="w-full md:w-[400px]"
               error={errors.mailboxName?.message}
+            />
+            <BackEndError
+              error={errors.root?.message}
             />
           </div>
         </section>

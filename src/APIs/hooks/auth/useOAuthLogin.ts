@@ -6,8 +6,6 @@ import { toast } from "sonner";
 export const useOAuthLogin = (
   options?: UseMutationOptions<string, Error, string>,
 ) => {
-  const router = useRouter();
-
   return useMutation({
     mutationFn: async (token: string) => {
       return token;
@@ -18,7 +16,7 @@ export const useOAuthLogin = (
         expires: 1,
       });
       toast.success("Logged in successfully", { id: "oauth-login" });
-      router.push("/mailboxes");
+      window.location.href = "/mailboxes";
     },
     onError: (error: any) => {
       toast.error(error?.message || "OAuth login failed");

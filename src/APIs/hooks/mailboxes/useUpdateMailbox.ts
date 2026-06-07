@@ -7,8 +7,13 @@ export const useUpdateMailbox = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number | string; data: Partial<Mailbox> }) =>
-      mailboxApi.updateMailbox(Number(id), data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number | string;
+      data: Partial<Mailbox>;
+    }) => mailboxApi.updateMailbox(Number(id), data),
     onSuccess: (updatedMailbox, variables) => {
       toast.success("Settings Updated Successfully");
 
@@ -33,7 +38,7 @@ export const useUpdateMailbox = () => {
       queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to update settings");
+      toast.error(error?.message.data || "Failed to update settings");
     },
   });
 };

@@ -107,6 +107,20 @@ export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
           <ChevronRight className="w-4 h-4 text-primary-400 group-hover:text-primary transition-colors" />
         </DropdownMenuItem>
         <DropdownMenuItem
+          onClick={() => handleReclassify("phishing")}
+          className="flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background "
+        >
+          <Icons.Phishing className="w-5 h-5 group-hover:text-primary" />
+          <Text
+            as={"span"}
+            font={"medium"}
+            className="text-primary-400 group-hover:text-primary flex-1 text-sm"
+          >
+            Phishing
+          </Text>
+          <ChevronRight className="w-4 h-4 text-primary-400 group-hover:text-primary transition-colors" />
+        </DropdownMenuItem>
+        <DropdownMenuItem
           onClick={() => handleReclassify("trash")}
           className="flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background "
         >

@@ -40,7 +40,14 @@ interface MailRowProps {
 }
 
 export const MailRow = React.memo(
-  ({ email, index, onDragStart, onDragOver, onDragEnd, onPreviewAttachment }: MailRowProps) => {
+  ({
+    email,
+    index,
+    onDragStart,
+    onDragOver,
+    onDragEnd,
+    onPreviewAttachment,
+  }: MailRowProps) => {
     const toggleSelectEmail = useMailStore((s) => s.toggleSelectEmail);
     const selectedIds = useMailStore((s) => s.selectedIds);
     const isSelected = selectedIds.includes(String(email.id));
@@ -57,13 +64,14 @@ export const MailRow = React.memo(
       activeFolder as EmailFolder,
     );
 
-    const riskLevel = email.malwareVerdict
-      ? "High"
-      : email.isPhishing
+    const riskLevel =
+      email.malwareVerdict && email.malwareVerdict !== "CLEAN"
         ? "High"
-        : email.isSpam
-          ? "Medium"
-          : "Low";
+        : email.isPhishing
+          ? "High"
+          : email.isSpam
+            ? "Medium"
+            : "Low";
 
     const formattedDate = useMemo(
       () =>
@@ -83,18 +91,7 @@ export const MailRow = React.memo(
       [email.receivedAt],
     );
 
-    const isNewRef = React.useRef(
-      !email.isRead && !sessionStorage.getItem(`seen_email_${email.id}`),
-    );
-
-    React.useEffect(() => {
-      if (isNewRef.current) {
-        sessionStorage.setItem(`seen_email_${email.id}`, "true");
-      }
-    }, [email.id]);
-
-    // Hide badge immediately if email has been read (e.g. after markAsRead action)
-    const showNewBadge = isNewRef.current && !email.isRead;
+    const showNewBadge = !email.isRead;
     const isStarred = email.isFlagged || email.folder === "starred";
 
     const senderName =
@@ -125,7 +122,7 @@ export const MailRow = React.memo(
         className={cn(
           "group flex items-center gap-0 border-b border-primary-50 hover:bg-primary-50/70 transition-all duration-150 cursor-pointer relative z-0 hover:z-10",
           !email.isRead ? "bg-background" : "bg-transparent",
-          isSelected && "bg-secondary-50/30",
+          isSelected && "bg-primary-50/70",
         )}
       >
         {/* Checkbox + Star — always flex-row, star hidden on mobile (moves to actions) */}
@@ -188,7 +185,7 @@ export const MailRow = React.memo(
                 {senderName}
               </Text>
               {/* Desktop New Badge */}
-              {showNewBadge && (
+              {activeFolder !== "sent" && showNewBadge && (
                 <span className="hidden sm:inline-flex shrink-0 px-1.5 py-0.5 text-[9px] font-black bg-primary text-background rounded uppercase tracking-wider">
                   New
                 </span>
@@ -233,10 +230,10 @@ export const MailRow = React.memo(
                   className={cn(
                     "shrink-0 mt-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider border",
                     riskLevel === "High"
-                      ? "bg-error-50 text-error-600 border-error-200"
+                      ? "bg-error-500 text-error-50 border-error-200"
                       : riskLevel === "Medium"
-                        ? "bg-warning-50 text-warning-600 border-warning-200"
-                        : "bg-primary-50 text-primary-500 border-primary-200",
+                        ? "bg-warning-500 text-warning-50 border-warning-200"
+                        : "bg-primary-500 text-primary-50 border-primary-200",
                   )}
                 >
                   {riskLevel}

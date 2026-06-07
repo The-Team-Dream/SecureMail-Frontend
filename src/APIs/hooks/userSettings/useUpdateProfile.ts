@@ -26,7 +26,7 @@ export const useUpdateProfile = () => {
         return {
           ...old,
           username: newUsername || old?.username,
-          avatarUrl: isAvatarDeleted ? null : (tempAvatarUrl || old?.avatarUrl),
+          avatarUrl: isAvatarDeleted ? null : tempAvatarUrl || old?.avatarUrl,
         };
       });
 
@@ -41,14 +41,14 @@ export const useUpdateProfile = () => {
             user: {
               ...old.user,
               username: newUsername || old.user.username,
-              avatar: isAvatarDeleted ? null : (tempAvatarUrl || old.user.avatar),
+              avatar: isAvatarDeleted ? null : tempAvatarUrl || old.user.avatar,
             },
           };
         }
         return {
           ...old,
           username: newUsername || old.username,
-          avatar: isAvatarDeleted ? null : (tempAvatarUrl || old.avatar),
+          avatar: isAvatarDeleted ? null : tempAvatarUrl || old.avatar,
         };
       });
 
@@ -59,7 +59,6 @@ export const useUpdateProfile = () => {
       queryClient.setQueryData(["auth-me"], context?.previousAuthMe);
     },
     onSuccess: (data) => {
-      toast.success("Profile updated successfully");
       const newAvatar =
         data?.avatarUrl ?? data?.avatar ?? data?.user?.avatar ?? null;
       const newUsername = data?.username ?? data?.user?.username ?? null;

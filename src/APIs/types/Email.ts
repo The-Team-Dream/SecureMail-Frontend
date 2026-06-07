@@ -34,10 +34,17 @@ export interface Email {
   folder?: EmailFolder;
   hasAttachments?: boolean;
   attachments?: Attachment[];
-  analysisStatus?: 'PENDING' | 'COMPLETED' | 'FAILED';
+  analysisStatus?: "PENDING" | "COMPLETED" | "FAILED";
   isRescanning?: boolean;
-  bodyText?: string;
-  snippet?: string;
+}
+
+export interface MalwareThreat extends Omit<
+  Email,
+  "malwareVerdict" | "malwareScore" | "malwareSeverity"
+> {
+  malwareVerdict: string;
+  malwareScore: number;
+  malwareSeverity: string;
 }
 
 export interface EmailsResponse {

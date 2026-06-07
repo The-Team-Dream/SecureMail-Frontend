@@ -23,9 +23,9 @@ export default function OAuthSuccess() {
 
     if (token) {
       Cookies.set("token", token, { path: "/", expires: 1 });
-      
+
       try {
-        const channel = new BroadcastChannel('oauth_channel');
+        const channel = new BroadcastChannel("oauth_channel");
         channel.postMessage({ type: "OAUTH_SUCCESS", token });
         channel.close();
       } catch (e) {
@@ -33,7 +33,10 @@ export default function OAuthSuccess() {
       }
 
       if (window.opener) {
-        window.opener.postMessage({ type: "OAUTH_SUCCESS", token }, window.location.origin);
+        window.opener.postMessage(
+          { type: "OAUTH_SUCCESS", token },
+          window.location.origin,
+        );
       }
 
       finish();
@@ -42,10 +45,12 @@ export default function OAuthSuccess() {
         toast.success("Logged in successfully", { id: "oauth-login" });
         router.push("/mailboxes");
       }, 500);
-
     } else if (code) {
       if (window.opener) {
-        window.opener.postMessage({ type: "OAUTH_CODE_RECEIVED", code }, window.location.origin);
+        window.opener.postMessage(
+          { type: "OAUTH_CODE_RECEIVED", code },
+          window.location.origin,
+        );
       }
       finish();
     } else {

@@ -23,7 +23,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { ActionButton } from "@/_components/shared/ActionButton";
-import { useEmails, useReclassifyEmail, useStarEmail } from "@/APIs/hooks/emails";
+import {
+  useEmails,
+  useReclassifyEmail,
+  useStarEmail,
+} from "@/APIs/hooks/emails";
 import type { EmailFolder } from "@/APIs/types/Email";
 
 export const Sidebar = () => {
@@ -33,9 +37,9 @@ export const Sidebar = () => {
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
   const isMailPage = !!params.mailboxId;
   const { data: unreadCount } = useUnreadCount();
-    const { data: inboxData } = useEmails(params.mailboxId as string, "inbox", 1);
-    const unreadInboxCount =
-      inboxData?.data?.filter((e: any) => !e.isRead).length || 0;
+  const { data: inboxData } = useEmails(params.mailboxId as string, "inbox", 1);
+  const unreadInboxCount =
+    inboxData?.data?.filter((e: any) => !e.isRead).length || 0;
   const router = useRouter();
 
   const [activeDropFolder, setActiveDropFolder] = useState<string | null>(null);
@@ -94,8 +98,8 @@ export const Sidebar = () => {
         />
       </div>
 
-      {isMailPage && (
-        isCollapsed ? (
+      {isMailPage &&
+        (isCollapsed ? (
           <div className="flex justify-center mb-2">
             <ActionButton
               icon={<PencilLine className="w-6 h-6 text-primary-900" />}
@@ -114,8 +118,7 @@ export const Sidebar = () => {
             <PencilLine className="w-6 h-6 text-primary-900 mr-2" />
             <Text font={"bold"}>New Email</Text>
           </Button>
-        )
-      )}
+        ))}
 
       {/* Nav Links */}
       <nav className="space-y-1 flex-1 mt-4 relative">
@@ -150,7 +153,8 @@ export const Sidebar = () => {
                     key={item.name}
                     className={cn(
                       "flex justify-center transition-all duration-200",
-                      isDragActive && "scale-110 bg-primary-100/50 rounded-lg p-0.5 border-2 border-dashed border-primary",
+                      isDragActive &&
+                        "scale-110 bg-primary-100/50 rounded-lg p-0.5 border-2 border-dashed border-primary",
                     )}
                     {...dragProps}
                   >
@@ -186,7 +190,8 @@ export const Sidebar = () => {
                       isActive
                         ? "text-primary"
                         : "text-primary-900 hover:bg-primary-100 hover:text-primary",
-                      isDragActive && "bg-primary-100 border-2 border-dashed border-primary scale-[1.02] shadow-sm",
+                      isDragActive &&
+                        "bg-primary-100 border-2 border-dashed border-primary scale-[1.02] shadow-sm",
                     )}
                   >
                     {isActive && (
@@ -246,8 +251,10 @@ export const Sidebar = () => {
               const isActive = pathname.startsWith(
                 `/mailboxes/${params.mailboxId}/${item.href}`,
               );
-              const isDropTarget = item.href === "phishing" || item.href === "malware";
-              const isDragActive = isDropTarget && activeDropFolder === item.href;
+              const isDropTarget =
+                item.href === "phishing" || item.href === "malware";
+              const isDragActive =
+                isDropTarget && activeDropFolder === item.href;
 
               const dragProps = isDropTarget
                 ? {
@@ -273,7 +280,8 @@ export const Sidebar = () => {
                     key={item.name}
                     className={cn(
                       "flex justify-center transition-all duration-200",
-                      isDragActive && "scale-110 bg-primary-100/50 rounded-lg p-0.5 border-2 border-dashed border-primary",
+                      isDragActive &&
+                        "scale-110 bg-primary-100/50 rounded-lg p-0.5 border-2 border-dashed border-primary",
                     )}
                     {...dragProps}
                   >
@@ -309,7 +317,8 @@ export const Sidebar = () => {
                       isActive
                         ? "text-primary"
                         : "text-primary-600 hover:bg-primary-100 hover:text-primary",
-                      isDragActive && "bg-primary-100 border-2 border-dashed border-primary scale-[1.02] shadow-sm",
+                      isDragActive &&
+                        "bg-primary-100 border-2 border-dashed border-primary scale-[1.02] shadow-sm",
                     )}
                   >
                     {isActive && (

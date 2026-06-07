@@ -6,9 +6,15 @@ export const useReadEmail = (mailboxId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, read }: { id: string; read: boolean }) =>
-      emailsApi.markAsRead(mailboxId, id, read),
-    onMutate: async ({ id, read }) => {
+    mutationFn: ({
+      id,
+      read,
+    }: {
+      id: string;
+      read: boolean;
+      showToast?: boolean;
+    }) => emailsApi.markAsRead(mailboxId, id, read),
+    onMutate: async ({ id, read, showToast = true }) => {
       await queryClient.cancelQueries({ queryKey: ["emails", mailboxId] });
       await queryClient.cancelQueries({ queryKey: ["email", id] });
 
@@ -23,7 +29,9 @@ export const useReadEmail = (mailboxId: string) => {
           return {
             ...old,
             data: old.data.map((email: any) =>
-              String(email.id) === String(id) ? { ...email, isRead: read } : email,
+              String(email.id) === String(id)
+                ? { ...email, isRead: read }
+                : email,
             ),
           };
         },
@@ -34,7 +42,9 @@ export const useReadEmail = (mailboxId: string) => {
         old ? { ...old, isRead: read } : old,
       );
 
-      toast.success(read ? "Email marked as read" : "Email marked as unread");
+      if (showToast) {
+        toast.success(read ? "Email marked as read" : "Email marked as unread");
+      }
 
       return { previousQueries, previousDetail };
     },
@@ -57,4 +67,3 @@ export const useReadEmail = (mailboxId: string) => {
     },
   });
 };
-

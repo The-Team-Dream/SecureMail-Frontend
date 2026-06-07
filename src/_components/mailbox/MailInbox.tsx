@@ -13,7 +13,9 @@ export const MailInbox = () => {
           <SearchAutocomplete inputClassName="bg-primary-100/20 w-full" />
         </div>
         <MailToolbar />
-        <ScanQueueBanner />
+        <div className="mt-2">
+          <ScanQueueBanner />
+        </div>
         <div className="mt-2">
           <MailList />
         </div>

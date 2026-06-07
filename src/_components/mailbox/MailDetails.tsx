@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft,
   Reply,
@@ -58,6 +58,19 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
   const deleteMutation = useDeleteEmail(mailboxId, activeFolder ?? undefined);
   const scanMutation = useScanEmail(mailboxId);
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
+
+  const mutateRead = readMutation.mutate;
+
+  const hasProcessedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (email && hasProcessedRef.current !== emailId) {
+      hasProcessedRef.current = emailId;
+      if (!email.isRead) {
+        mutateRead({ id: emailId, read: true, showToast: false });
+      }
+    }
+  }, [email, emailId, mutateRead]);
 
   if (isLoading) {
     return <MailDetailsSkeleton />;

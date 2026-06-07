@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronRight, Plus, User, ShieldAlert, Layers, Mail, Pencil } from "lucide-react";
+import {
+  Check,
+  ChevronRight,
+  Plus,
+  User,
+  ShieldAlert,
+  Layers,
+  Mail,
+  Pencil,
+} from "lucide-react";
 import Logo from "./Logo";
 import { Text } from "@/_components/shared/Text";
 import {
@@ -20,24 +29,20 @@ import { usePathname, useParams, useRouter } from "next/navigation";
 import { MobileSidebar } from "./MobileSidebar";
 import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
 import Link from "next/link";
-import { NotificationDropdown } from "../Notification"
-import { Icons } from "@/constants/icons";
+import { NotificationDropdown } from "../Notification";
 import { getImageUrl, cn } from "@/lib/utils";
 import { useGetAuthMe } from "@/APIs/hooks/auth";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useAnalyticsOverview } from "@/APIs/hooks/analytics";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
-import { ActionButton } from "./ActionButton";
 import { motion } from "framer-motion";
-import LogoImg from "@/../public/icons/logo.png";
 
 export const Navbar = () => {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
   const mailboxId = params?.mailboxId as string | undefined;
-
   const { data: mailboxes = [], isPending: mailboxesLoading } = useMailboxes();
   const { data: user } = useGetAuthMe();
   const { data: analytics } = useAnalyticsOverview();
@@ -69,7 +74,7 @@ export const Navbar = () => {
   const [isSwitching, setIsSwitching] = useState(false);
 
   const triggerAvatar = isMailPage
-    ? (activeAccount as any)?.avatar ?? userAvatar
+    ? ((activeAccount as any)?.avatar ?? userAvatar)
     : userAvatar;
 
   const handleSwitchAccount = async (id: string | number) => {
@@ -125,10 +130,9 @@ export const Navbar = () => {
       <div className="flex items-center gap-2">
         <NotificationDropdown />
 
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 cursor-pointer outline-none overflow-hidden">
+            <button className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center  cursor-pointer outline-none overflow-hidden">
               {triggerAvatar ? (
                 <Image
                   src={getImageUrl(triggerAvatar)}
@@ -148,9 +152,9 @@ export const Navbar = () => {
             className="min-w-[300px] w-[calc(100vw-32px)] md:min-w-[400px] md:w-auto bg-primary-50 border border-primary-100 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] p-5 flex flex-col gap-5"
           >
             <div className="flex flex-col items-center justify-center pt-2">
-              <Link 
+              <Link
                 href="/profile"
-                className="w-16 h-16 md:w-[120px] md:h-[120px] rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-900 overflow-hidden hover:scale-105 transition-transform"
+                className="w-16 h-16 md:w-[120px] md:h-[120px] rounded-full bg-secondary-100 flex items-center justify-center  overflow-hidden hover:scale-105 transition-transform"
               >
                 {isSwitching ? (
                   <Spinner className="w-10 h-10 text-secondary-900" />
@@ -207,7 +211,10 @@ export const Navbar = () => {
                   </Text>
                   <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-background/50 border border-primary-100/50">
                     <div
-                      className={cn("size-1.5 rounded-full animate-pulse", healthBg)}
+                      className={cn(
+                        "size-1.5 rounded-full animate-pulse",
+                        healthBg,
+                      )}
                     />
                     <Text size="xs" font="bold" className={healthColor}>
                       {dangerPercentage < 10
@@ -270,8 +277,6 @@ export const Navbar = () => {
                 </div>
               </div>
             )}
-
-
 
             {isMailPage && (
               <div>

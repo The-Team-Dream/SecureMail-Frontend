@@ -27,23 +27,23 @@ export const stats: Stat[] = [
   {
     id: 1,
     label: "Critical",
-    value: "12,482",
+    value: "12",
     badgeClass: "bg-secondary-200 text-secondary-900",
     badgeText: "+14%",
   },
   {
     id: 2,
     label: "Resolved",
-    value: "649.64",
+    value: "4",
     badgeClass: "bg-error-50 text-error-500",
     badgeText: "+82%",
   },
   {
     id: 3,
     label: "Pending",
-    value: "5",
+    value: "2",
     badgeClass: "bg-secondary-200 text-secondary-900",
-    badgeText: "0%",
+    badgeText: "10%",
   },
 ];
 
