@@ -63,33 +63,60 @@ export const MailRow = React.memo(
       mailboxId,
       activeFolder as EmailFolder,
     );
+    const badges = [
+      {
+        folder: "spam",
+        score: email.spamScore,
+        label: "Spam Score",
+        className: "bg-warning-50 text-warning-700 border-warning-200",
+      },
+      {
+        folder: "phishing",
+        score: email.phishingScore,
+        label: "Phishing Score",
+        className: "bg-error-500 text-error-100 border-error-500",
+      },
+      {
+        folder: "malware",
+        score: email.malwareScore,
+        label: "Malware Score",
+        className: "bg-error-50 text-error-700 border-error-200",
+      },
+    ];
+    const getSecurityLevel = (email: Email) => {
+      if (email.malwareVerdict === "MALICIOUS") return "MALICIOUS";
+      if (email.malwareVerdict === "SUSPICIOUS") return "SUSPICIOUS";
 
-    const riskLevel =
-      email.malwareVerdict && email.malwareVerdict !== "CLEAN"
-        ? "High"
-        : email.isPhishing
-          ? "High"
-          : email.isSpam
-            ? "Medium"
-            : "Low";
+      if (email.phishingScore > 80) return "PHISHING";
+      if (email.phishingScore > 50) return "SUSPICIOUS";
 
-    const formattedDate = useMemo(
-      () =>
-        new Date(email.receivedAt).toLocaleDateString(undefined, {
-          month: "short",
-          day: "numeric",
-        }),
-      [email.receivedAt],
-    );
+      if (email.malwareVerdict === "UNKNOWN") return "UNKNOWN";
 
-    const formattedTime = useMemo(
-      () =>
-        new Date(email.receivedAt).toLocaleTimeString(undefined, {
+      return "CLEAN";
+    };
+
+    const securityLevel = getSecurityLevel(email);
+
+    const displayDate = useMemo(() => {
+      const emailDate = new Date(email.receivedAt);
+      const today = new Date();
+      const isToday =
+        emailDate.getDate() === today.getDate() &&
+        emailDate.getMonth() === today.getMonth() &&
+        emailDate.getFullYear() === today.getFullYear();
+
+      if (isToday) {
+        return emailDate.toLocaleTimeString(undefined, {
           hour: "2-digit",
           minute: "2-digit",
-        }),
-      [email.receivedAt],
-    );
+        });
+      } else {
+        return emailDate.toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        });
+      }
+    }, [email.receivedAt]);
 
     const showNewBadge = !email.isRead;
     const isStarred = email.isFlagged || email.folder === "starred";
@@ -125,7 +152,7 @@ export const MailRow = React.memo(
           isSelected && "bg-primary-50/70",
         )}
       >
-        {/* Checkbox + Star — always flex-row, star hidden on mobile (moves to actions) */}
+        {/* Checkbox + Star  */}
         <div className="flex flex-row items-center justify-center px-2 sm:px-3 py-3 shrink-0">
           <div
             onClick={(e) => e.stopPropagation()}
@@ -146,7 +173,7 @@ export const MailRow = React.memo(
             />
           </div>
 
-          {/* Star: only visible on desktop here; on mobile it moves to the right actions row */}
+          {/* Star */}
           <div className="hidden sm:block" onClick={(e) => e.stopPropagation()}>
             <ActionButton
               label={isStarred ? "Unstar" : "Star"}
@@ -194,7 +221,7 @@ export const MailRow = React.memo(
                 <Paperclip className="w-3 h-3 text-primary-400 shrink-0" />
               )}
             </div>
-            {/* Mobile: blue dot + date side by side on the right */}
+            {/* Mobile: blue dot + date */}
             <div className="sm:hidden flex items-center gap-1.5 shrink-0">
               {showNewBadge && (
                 <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
@@ -207,7 +234,7 @@ export const MailRow = React.memo(
                     : "font-normal text-primary-400",
                 )}
               >
-                {formattedDate}
+                {displayDate}
               </span>
             </div>
           </div>
@@ -224,23 +251,72 @@ export const MailRow = React.memo(
                 {email.subject}
               </Text>
 
-              {/* Risk badge for phishing folder */}
-              {activeFolder === "phishing" && (
-                <span
-                  className={cn(
-                    "shrink-0 mt-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider border",
-                    riskLevel === "High"
-                      ? "bg-error-500 text-error-50 border-error-200"
-                      : riskLevel === "Medium"
-                        ? "bg-warning-500 text-warning-50 border-warning-200"
-                        : "bg-primary-500 text-primary-50 border-primary-200",
-                  )}
-                >
-                  {riskLevel}
-                </span>
-              )}
+              {/* Email Risk Score on Desktop */}
+              {badges
+                .filter(
+                  (b) =>
+                    b.folder === activeFolder && typeof b.score === "number",
+                )
+                .map((b, index) => (
+                  <span
+                    key={index}
+                    className={cn(
+                      "hidden lg:block shrink-0 w-fit mt-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider border",
+                      b.className,
+                    )}
+                  >
+                    {b.label}: {b.score}%
+                  </span>
+                ))}
             </div>
-
+            <div className="flex items-center gap-2">
+              {activeFolder === "phishing" && (
+                <div className="flex items-center gap-1">
+                  <div
+                    className={`w-2 h-2 ${
+                      securityLevel === "MALICIOUS"
+                        ? "bg-error-500"
+                        : securityLevel === "SUSPICIOUS"
+                          ? "bg-warning-500"
+                          : securityLevel === "CLEAN"
+                            ? "bg-green-600"
+                            : "bg-primary-500"
+                    } rounded-full`}
+                  />
+                  <span
+                    className={cn(
+                      "text-[10px] md:text-xs w-fit font-bold tracking-wider uppercase",
+                      securityLevel === "MALICIOUS"
+                        ? "text-error-500"
+                        : securityLevel === "SUSPICIOUS"
+                          ? "text-warning-500"
+                          : securityLevel === "CLEAN"
+                            ? "text-green-600"
+                            : "text-primary-500",
+                    )}
+                  >
+                    {securityLevel}
+                  </span>
+                </div>
+              )}
+              {/* Email Risk Score on Mobile */}
+              {badges
+                .filter(
+                  (b) =>
+                    b.folder === activeFolder && typeof b.score === "number",
+                )
+                .map((b, index) => (
+                  <span
+                    key={index}
+                    className={cn(
+                      "lg:hidden shrink-0 w-fit mt-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider border",
+                      b.className,
+                    )}
+                  >
+                    {b.label}: {b.score}%
+                  </span>
+                ))}
+            </div>
             {/* Attachment chips */}
             {(() => {
               const uniqueAtts = email.attachments
@@ -337,7 +413,9 @@ export const MailRow = React.memo(
                         }}
                       >
                         {getAttachmentIcon()}
-                        <span className="text-xs">{att.filename}</span>
+                        <span className="text-xs max-w-20 md:max-w-42 w-full truncate">
+                          {att.filename}
+                        </span>
                       </span>
                     );
                   })}
@@ -354,17 +432,14 @@ export const MailRow = React.memo(
           {/* Right side: date (desktop) + actions */}
           <div className="flex items-center justify-end gap-2 shrink-0">
             {/* Date — desktop only, hidden on hover */}
-            <div className="hidden sm:flex sm:group-hover:hidden flex-col items-end">
+            <div className="hidden sm:flex sm:group-hover:hidden items-end">
               <span
                 className={cn(
                   "text-xs text-primary-500 whitespace-nowrap",
                   !email.isRead ? "font-bold text-primary-800" : "font-normal",
                 )}
               >
-                {formattedDate}
-              </span>
-              <span className="text-[10px] text-primary-400 whitespace-nowrap">
-                {formattedTime}
+                {displayDate}
               </span>
             </div>
 

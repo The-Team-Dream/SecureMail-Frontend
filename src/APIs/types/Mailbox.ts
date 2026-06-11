@@ -4,7 +4,14 @@ export interface Folder {
   id: number;
   mailBoxId: number;
   name: string;
-  type: "INBOX" | "SPAM" | "TRASH" | "SENT" | "DRAFTS" | string;
+  type:
+    | "INBOX"
+    | "SPAM"
+    | "TRASH"
+    | "SENT"
+    | "PHISHING"
+    | "MALWARE"
+    | string;
   remoteId: string;
   createdAt: string;
 }

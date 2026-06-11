@@ -59,17 +59,28 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   const handleNewEmail = useCallback(
     (data: any) => {
-      const mailboxId = data?.mailboxId ?? data?.mailBoxId;
-      if (!mailboxId) return;
+      console.log("[WebSocket] handleNewEmail received event payload:", data);
+      const mailboxId = data?.mailboxId ?? data?.mailBoxId ?? data?.email?.mailboxId ?? data?.email?.mailBoxId;
+      console.log("[WebSocket] handleNewEmail extracted mailboxId:", mailboxId);
 
-      const idStr = String(mailboxId);
-      const idNum = Number(mailboxId);
+      if (!mailboxId) {
+        console.warn("[WebSocket] handleNewEmail: No mailboxId found in event data!");
+        // We'll still invalidate all emails queries as a safety fallback
+        queryClient.invalidateQueries({ queryKey: ["emails"] });
+        queryClient.refetchQueries({ queryKey: ["emails"] });
+      } else {
+        const idStr = String(mailboxId);
+        const idNum = Number(mailboxId);
 
-      // Invalidate and refetch email lists for this mailbox (support both string/number keys)
-      queryClient.invalidateQueries({ queryKey: ["emails", idStr] });
-      queryClient.invalidateQueries({ queryKey: ["emails", idNum] });
-      queryClient.refetchQueries({ queryKey: ["emails", idStr] });
-      queryClient.refetchQueries({ queryKey: ["emails", idNum] });
+        // Invalidate and refetch email lists for this mailbox (support both string/number keys)
+        queryClient.invalidateQueries({ queryKey: ["emails", idStr] });
+        queryClient.invalidateQueries({ queryKey: ["emails", idNum] });
+        queryClient.refetchQueries({ queryKey: ["emails", idStr] });
+        queryClient.refetchQueries({ queryKey: ["emails", idNum] });
+
+        // Force root key invalidation as well so any active view (e.g., FolderClient / inbox list) updates
+        queryClient.invalidateQueries({ queryKey: ["emails"] });
+      }
 
       // Invalidate and refetch mailboxes list
       queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
@@ -85,8 +96,12 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
       // Invalidate and refetch analytics (new email changes stats)
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
-      queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idStr] });
-      queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idNum] });
+      if (mailboxId) {
+        const idStr = String(mailboxId);
+        const idNum = Number(mailboxId);
+        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idStr] });
+        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idNum] });
+      }
 
       toast.info("📩 New email received", {
         description: data.email?.subject || "You have a new email",
@@ -355,6 +370,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
     // Register domain event listeners
     socket.on(SocketEvent.NEW_EMAIL, handleNewEmail);
+    socket.on("new_email_arrived", handleNewEmail);
     socket.on(SocketEvent.EMAIL_SENT, handleEmailSent);
     socket.on(SocketEvent.EMAIL_SCANNED, handleEmailScanned);
     socket.on(SocketEvent.NEW_NOTIFICATION, handleNewNotification);
@@ -374,6 +390,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       socket.off(SocketEvent.DISCONNECT, onDisconnect);
       socket.off(SocketEvent.CONNECT_ERROR, onConnectError);
       socket.off(SocketEvent.NEW_EMAIL, handleNewEmail);
+      socket.off("new_email_arrived", handleNewEmail);
       socket.off(SocketEvent.EMAIL_SENT, handleEmailSent);
       socket.off(SocketEvent.EMAIL_SCANNED, handleEmailScanned);
       socket.off(SocketEvent.NEW_NOTIFICATION, handleNewNotification);
@@ -383,7 +400,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       socket.off(SocketEvent.MAILBOX_STATUS, handleMailboxStatus);
     };
   }, [
-    pathname,
     handleNewEmail,
     handleEmailSent,
     handleEmailScanned,

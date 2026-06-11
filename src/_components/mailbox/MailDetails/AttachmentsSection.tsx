@@ -10,6 +10,7 @@ import {
   FileArchive,
   FileCode,
   File as FileIcon,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/_components/shared/Text";
@@ -30,24 +31,57 @@ interface AttachmentsSectionProps {
     url?: string,
   ) => Promise<void>;
   onPreviewAttachment?: (attachment: Attachment) => void;
+  analysisStatus?: string;
 }
 
 const AuthenticatedImage = ({
   url,
   alt,
   className,
+  onLoadStatus,
 }: {
   url: string;
   alt: string;
   className: string;
+  onLoadStatus: (
+    status: "loading" | "success" | "error",
+    errorMsg?: string,
+  ) => void;
 }) => {
-  const { data: imgSrc, isLoading } = useAuthenticatedImage(url);
+  const { data: imgSrc, isLoading, error } = useAuthenticatedImage(url);
 
-  if (isLoading || !imgSrc) {
+  React.useEffect(() => {
+    if (isLoading) {
+      onLoadStatus("loading");
+    } else if (imgSrc) {
+      onLoadStatus("success");
+    } else if (error) {
+      onLoadStatus("error", error.message);
+    }
+  }, [imgSrc, error, isLoading, onLoadStatus]);
+
+  if (isLoading) {
     return (
       <div
         className={cn(className, "animate-pulse bg-primary-100 min-h-[100px]")}
       />
+    );
+  }
+
+  if (error || !imgSrc) {
+    const errorMsg = error?.message || "Failed to load image";
+    return (
+      <div
+        className={cn(
+          className,
+          "bg-warning-50/50 border border-warning-200 text-warning-800 text-[10px] p-4 text-center flex flex-col items-center justify-center gap-1 font-medium select-none overflow-y-auto w-full h-full",
+        )}
+      >
+        <span className="font-bold text-xs">⚠️ Scan Pending / Error</span>
+        <span className="line-clamp-4 leading-snug text-warning-800">
+          {errorMsg}
+        </span>
+      </div>
     );
   }
 
@@ -525,7 +559,15 @@ export const AttachmentsSection = ({
   pendingDownloads,
   handleDownload,
   onPreviewAttachment,
+  analysisStatus,
 }: AttachmentsSectionProps) => {
+  const [imageStates, setImageStates] = React.useState<
+    Record<
+      string,
+      { status: "loading" | "success" | "error"; errorMsg?: string }
+    >
+  >({});
+
   if (!attachments || attachments.length === 0) return null;
 
   const isImageAttachment = (att: Attachment) => {
@@ -557,46 +599,71 @@ export const AttachmentsSection = ({
             const defaultUrl = `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${attId}/download`;
             const targetUrl = attUrl || defaultUrl;
             const isDownloading = pendingDownloads[attId];
+            const state = imageStates[attId] || { status: "loading" };
+            const isLoaded = state.status === "success";
+            const isError = state.status === "error";
             return (
               <div
                 key={attId}
-                onClick={() => onPreviewAttachment?.(att)}
-                className="relative group/image w-[280px] h-[180px] rounded-xl overflow-hidden border border-primary-200 shadow-xs cursor-pointer"
+                onClick={() => isLoaded && onPreviewAttachment?.(att)}
+                className={cn(
+                  "relative w-[280px] h-[180px] rounded-xl overflow-hidden border border-primary-200 shadow-xs",
+                  isLoaded
+                    ? "group/image cursor-pointer"
+                    : isError
+                      ? ""
+                      : "pointer-events-none",
+                )}
               >
                 <AuthenticatedImage
                   url={targetUrl}
                   alt={att.filename}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover/image:scale-105"
+                  onLoadStatus={(status, errorMsg) => {
+                    const currentState = imageStates[attId];
+                    if (
+                      !currentState ||
+                      currentState.status !== status ||
+                      currentState.errorMsg !== errorMsg
+                    ) {
+                      setImageStates((prev) => ({
+                        ...prev,
+                        [attId]: { status, errorMsg },
+                      }));
+                    }
+                  }}
                 />
                 {/* Glassmorphic hover overlay */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-between p-3.5 backdrop-blur-[2px]">
-                  <div className="w-full min-w-0">
-                    <p className="text-xs font-bold text-white truncate">
-                      {att.filename}
-                    </p>
-                    <p className="text-[10px] text-zinc-300 mt-0.5 font-medium">
-                      {formatBytes(att.size)}
-                    </p>
-                  </div>
+                {isLoaded && (
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-between p-3.5 backdrop-blur-[2px]">
+                    <div className="w-full min-w-0">
+                      <p className="text-xs font-bold text-white truncate">
+                        {att.filename}
+                      </p>
+                      <p className="text-[10px] text-zinc-300 mt-0.5 font-medium">
+                        {formatBytes(att.size)}
+                      </p>
+                    </div>
 
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    disabled={isDownloading}
-                    className="bg-white/95 text-primary-900 hover:bg-white hover:scale-105 transition-all duration-200 font-semibold mb-1.5"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownload(attId, att.filename, attUrl);
-                    }}
-                  >
-                    {isDownloading ? (
-                      <div className="w-4 h-4 border-2 border-primary-900 border-t-transparent rounded-full animate-spin mr-2" />
-                    ) : (
-                      <Download className="w-4 h-4 mr-2 text-black" />
-                    )}
-                    <span className="text-black font-semibold">Download</span>
-                  </Button>
-                </div>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={isDownloading}
+                      className="bg-white/95 text-primary-900 hover:bg-white hover:scale-105 transition-all duration-200 font-semibold mb-1.5 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(attId, att.filename, attUrl);
+                      }}
+                    >
+                      {isDownloading ? (
+                        <div className="w-4 h-4 border-2 border-primary-900 border-t-transparent rounded-full animate-spin mr-2" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2 text-black" />
+                      )}
+                      <span className="text-black font-semibold">Download</span>
+                    </Button>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -618,23 +685,50 @@ export const AttachmentsSection = ({
               const { attId, attUrl } = getAttachmentMeta(att);
               const isDownloading = pendingDownloads[attId];
               const config = getFileConfig(att.filename, att.contentType);
+              const isPending = analysisStatus === "PENDING";
 
               return (
                 <div
                   key={attId}
-                  onClick={() => onPreviewAttachment?.(att)}
+                  onClick={() => !isPending && onPreviewAttachment?.(att)}
                   className={cn(
-                    "relative w-72 h-44 rounded-xl border border-primary-200 shadow-xs overflow-hidden bg-zinc-50 flex flex-col group cursor-pointer hover:shadow-md hover:scale-[1.01] hover:bg-zinc-100/50 transition-all duration-300",
-                    config.hoverBorder,
+                    "relative w-72 h-44 rounded-xl border border-primary-200 shadow-xs overflow-hidden bg-zinc-50 flex flex-col group transition-all duration-300",
+                    isPending
+                      ? "border-warning-200"
+                      : cn(
+                          config.hoverBorder,
+                          "cursor-pointer hover:shadow-md hover:scale-[1.01] hover:bg-zinc-100/50",
+                        ),
                     isDownloading && "pointer-events-none opacity-80",
                   )}
                 >
                   {/* Mock Thumbnail Preview */}
-                  {renderCardMockup(
-                    config.type,
-                    att.filename,
-                    att.contentType,
-                    att.size,
+                  {isPending ? (
+                    <div className="bg-warning-50/50 border border-warning-200 text-warning-800 text-[10px] p-4 text-center flex flex-col items-center justify-center gap-1 font-medium select-none overflow-y-auto w-full h-full">
+                      <Text
+                        font="bold"
+                        size="xs"
+                        color="warning-800"
+                        className="mt-1"
+                      >
+                        ⚠️ Scan Pending / Error
+                      </Text>
+                      <Text
+                        size="xs"
+                        color="warning-800"
+                        className="mt-0.5 line-clamp-3 leading-snug px-2"
+                      >
+                        Cannot download attachment while email is still
+                        undergoing security analysis
+                      </Text>
+                    </div>
+                  ) : (
+                    renderCardMockup(
+                      config.type,
+                      att.filename,
+                      att.contentType,
+                      att.size,
+                    )
                   )}
 
                   {/* Bottom Dark Bar */}
@@ -657,37 +751,41 @@ export const AttachmentsSection = ({
                       </Text>
                     </div>
 
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isDownloading) {
-                          handleDownload(attId, att.filename, attUrl);
-                        }
-                      }}
-                      className="absolute right-6 top-0 bottom-0 flex items-center transition-opacity cursor-pointer hover:scale-110 z-10"
-                    >
-                      {isDownloading ? (
-                        <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Download
-                          className={cn(
-                            "w-4 h-4 text-blue-200",
-                            config.accentColor,
-                          )}
-                        />
-                      )}
-                    </div>
+                    {!isPending && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isDownloading) {
+                            handleDownload(attId, att.filename, attUrl);
+                          }
+                        }}
+                        className="absolute right-6 top-0 bottom-0 flex items-center transition-opacity cursor-pointer hover:scale-110 z-10"
+                      >
+                        {isDownloading ? (
+                          <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Download
+                            className={cn(
+                              "w-4 h-4 text-blue-200",
+                              config.accentColor,
+                            )}
+                          />
+                        )}
+                      </div>
+                    )}
 
-                    <svg
-                      className={cn(
-                        "absolute bottom-0 right-0 w-5 h-5",
-                        config.cornerSvg,
-                      )}
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <polygon points="24,24 24,0 0,24" />
-                    </svg>
+                    {!isPending && (
+                      <svg
+                        className={cn(
+                          "absolute bottom-0 right-0 w-5 h-5",
+                          config.cornerSvg,
+                        )}
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <polygon points="24,24 24,0 0,24" />
+                      </svg>
+                    )}
                   </div>
                 </div>
               );

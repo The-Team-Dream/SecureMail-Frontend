@@ -12,8 +12,11 @@ export const downloadAttachment = async (
   const url =
     attachmentUrl ||
     `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${attachmentId}/download`;
-
-  const headers: HeadersInit = {};
+  console.log("Downloading from URL:", url);
+  console.log("Using Token:", token);
+  const headers: HeadersInit = {
+    "Content-Type": `Bearer ${token}`,
+  };
   if (token && (!url.startsWith("http") || url.includes("/mailboxes/"))) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -23,7 +26,18 @@ export const downloadAttachment = async (
   });
 
   if (!response.ok) {
-    throw new Error("Download failed");
+    const errorText = await response.text();
+    console.error("Server error:", errorText);
+    let message = `Download failed: ${response.status}`;
+    try {
+      const parsed = JSON.parse(errorText);
+      if (parsed.message) {
+        message = parsed.message;
+      }
+    } catch {
+      // Fallback if not valid JSON
+    }
+    throw new Error(message);
   }
 
   const blob = await response.blob();

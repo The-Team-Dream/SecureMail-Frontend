@@ -12,6 +12,7 @@ import {
   File as FileIcon,
   Loader2,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import { FaFileWord, FaRegFilePdf } from "react-icons/fa";
 import Cookies from "js-cookie";
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/_components/shared/Text";
 import { emailsApi } from "@/APIs/features/emails";
 import { toast } from "sonner";
+import { useEmailDetails } from "@/APIs/hooks/emails";
 
 interface Attachment {
   id: string | number;
@@ -56,7 +58,10 @@ const getFileIcon = (filename: string, contentType?: string) => {
   const ext = filename.split(".").pop()?.toLowerCase() || "";
   const ct = (contentType || "").toLowerCase();
 
-  if (ct.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) {
+  if (
+    ct.startsWith("image/") ||
+    ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)
+  ) {
     return <ImageIcon className="w-16 h-16 text-primary-500" />;
   }
   if (ct === "application/pdf" || ext === "pdf") {
@@ -86,6 +91,9 @@ export const FilePreviewModal = ({
   const [error, setError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const { data: email, refetch: refetchEmail, isRefetching } = useEmailDetails(mailboxId, emailId);
+  const isAnalysisPending = email?.analysisStatus === "PENDING";
+
   useEffect(() => {
     if (!isOpen || !attachment) {
       setPreviewUrl(null);
@@ -93,9 +101,17 @@ export const FilePreviewModal = ({
       return;
     }
 
+    if (isAnalysisPending) {
+      setPreviewUrl(null);
+      setError(null);
+      return;
+    }
+
     const ext = attachment.filename.split(".").pop()?.toLowerCase() || "";
     const ct = (attachment.contentType || "").toLowerCase();
-    const isImage = ct.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext);
+    const isImage =
+      ct.startsWith("image/") ||
+      ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext);
     const isPdf = ct === "application/pdf" || ext === "pdf";
 
     if (!isImage && !isPdf) {
@@ -106,9 +122,9 @@ export const FilePreviewModal = ({
 
     const attId = String(
       attachment.id ??
-      (attachment as CustomAttachment).attachmentId ??
-      (attachment as CustomAttachment).fileId ??
-      ""
+        (attachment as CustomAttachment).attachmentId ??
+        (attachment as CustomAttachment).fileId ??
+        "",
     );
     const attUrl = attachment.url || (attachment as CustomAttachment).path;
     const defaultUrl = `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${attId}/download`;
@@ -129,7 +145,17 @@ export const FilePreviewModal = ({
 
         const response = await fetch(url, { headers });
         if (!response.ok) {
-          throw new Error("Failed to load preview data");
+          const errorText = await response.text();
+          let message = "Failed to load preview data";
+          try {
+            const parsed = JSON.parse(errorText);
+            if (parsed.message) {
+              message = parsed.message;
+            }
+          } catch {
+            // ignore
+          }
+          throw new Error(message);
         }
 
         const blob = await response.blob();
@@ -156,16 +182,16 @@ export const FilePreviewModal = ({
         URL.revokeObjectURL(createdUrl);
       }
     };
-  }, [isOpen, attachment, mailboxId, emailId]);
+  }, [isOpen, attachment, mailboxId, emailId, isAnalysisPending]);
 
   const handleDownload = async () => {
     if (!attachment) return;
     setIsDownloading(true);
     const attId = String(
       attachment.id ??
-      (attachment as CustomAttachment).attachmentId ??
-      (attachment as CustomAttachment).fileId ??
-      ""
+        (attachment as CustomAttachment).attachmentId ??
+        (attachment as CustomAttachment).fileId ??
+        "",
     );
     const attUrl = attachment.url || (attachment as CustomAttachment).path;
     try {
@@ -174,11 +200,17 @@ export const FilePreviewModal = ({
         emailId,
         attId,
         attachment.filename,
-        attUrl
+        attUrl,
       );
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      toast.error("Failed to download file");
+      if (e?.message?.toLowerCase().includes("undergoing security analysis")) {
+        toast.warning(
+          "The file is still being scanned for security. Please wait a moment.",
+        );
+      } else {
+        toast.error(e?.message || "Failed to download file");
+      }
     } finally {
       setIsDownloading(false);
     }
@@ -188,13 +220,18 @@ export const FilePreviewModal = ({
 
   const ext = attachment.filename.split(".").pop()?.toLowerCase() || "";
   const ct = (attachment.contentType || "").toLowerCase();
-  const isImage = ct.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext);
+  const isImage =
+    ct.startsWith("image/") ||
+    ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext);
   const isPdf = ct === "application/pdf" || ext === "pdf";
   const isWord = ["doc", "docx"].includes(ext);
   const hasPreview = (isImage || isPdf) && !error;
 
   return (
-    <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <DialogPrimitive.Root
+      open={isOpen}
+      onOpenChange={(open) => !open && onClose()}
+    >
       <AnimatePresence>
         {isOpen && (
           <DialogPrimitive.Portal forceMount>
@@ -218,9 +255,21 @@ export const FilePreviewModal = ({
                   {/* Header */}
                   <div className="flex items-center justify-between p-5 border-b border-primary-100 bg-background z-10">
                     <div className="flex flex-col min-w-0 pr-8">
-                      <DialogPrimitive.Title className="text-lg font-bold text-primary-950 truncate">
-                        {attachment.filename}
-                      </DialogPrimitive.Title>
+                      <div className="flex items-center gap-2">
+                        <DialogPrimitive.Title className="text-lg font-bold text-primary-950 truncate">
+                          {attachment.filename}
+                        </DialogPrimitive.Title>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => refetchEmail()}
+                          disabled={isRefetching}
+                          className="h-8 w-8 rounded-full text-primary-500 hover:text-primary-900 hover:bg-primary-50 cursor-pointer shrink-0"
+                          title="Refresh analysis status"
+                        >
+                          <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+                        </Button>
+                      </div>
                       <span className="text-xs text-primary-400">
                         {formatBytes(attachment.size)}
                       </span>
@@ -237,7 +286,27 @@ export const FilePreviewModal = ({
 
                   {/* Body Content */}
                   <div className="flex-1 overflow-auto p-6 flex flex-col items-center justify-center min-h-[350px] bg-primary-50/10">
-                    {isLoading ? (
+                    {isAnalysisPending ? (
+                      <div className="flex flex-col items-center gap-4 text-center max-w-md p-6 bg-warning-50/50 rounded-xl border border-warning-200">
+                        <Loader2 className="w-10 h-10 text-warning-500 animate-spin" />
+                        <div className="space-y-1">
+                          <Text font="bold" className="text-warning-800">
+                            Security Analysis in Progress
+                          </Text>
+                          <Text size="xs" className="text-warning-600">
+                            The file is still being scanned for security. Please wait a moment.
+                          </Text>
+                        </div>
+                        <Button
+                          onClick={() => refetchEmail()}
+                          disabled={isRefetching}
+                          className="bg-warning-600 hover:bg-warning-700 text-white font-semibold rounded-xl cursor-pointer"
+                        >
+                          <RefreshCw className={`w-4 h-4 mr-2 ${isRefetching ? "animate-spin" : ""}`} />
+                          Check Status
+                        </Button>
+                      </div>
+                    ) : isLoading ? (
                       <div className="flex flex-col items-center gap-3">
                         <Loader2 className="w-10 h-10 text-primary animate-spin" />
                         <Text size="sm" color="primary-500" font="medium">
@@ -319,7 +388,8 @@ export const FilePreviewModal = ({
                             : "Word Document";
                         const lines = Array.from(
                           { length: 10 },
-                          (_, i) => lineWidths[(hash + i * 3) % lineWidths.length],
+                          (_, i) =>
+                            lineWidths[(hash + i * 3) % lineWidths.length],
                         );
 
                         return (
@@ -343,17 +413,26 @@ export const FilePreviewModal = ({
                                 ))}
                               </div>
                             </div>
-                            
-                            <Text font="bold" size="lg" className="text-primary-950 mb-1 font-bold text-center max-w-sm truncate">
+
+                            <Text
+                              font="bold"
+                              size="lg"
+                              className="text-primary-950 mb-1 font-bold text-center max-w-sm truncate"
+                            >
                               {attachment.filename}
                             </Text>
-                            <Text size="xs" color="primary-500" className="mb-6 max-w-sm px-4 text-center">
-                              Word document preview is not supported directly in browser for safety. Please download to view.
+                            <Text
+                              size="xs"
+                              color="primary-500"
+                              className="mb-6 max-w-sm px-4 text-center"
+                            >
+                              Word document preview is not supported directly in
+                              browser for safety. Please download to view.
                             </Text>
                             <Button
                               onClick={handleDownload}
-                              disabled={isDownloading}
-                              className="bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl px-6 py-2.5 shadow-lg shadow-primary-200"
+                              disabled={isDownloading || isAnalysisPending || isRefetching}
+                              className="bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl px-6 py-2.5 shadow-lg shadow-primary-200 cursor-pointer"
                             >
                               {isDownloading ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -369,18 +448,31 @@ export const FilePreviewModal = ({
                       // Fallback for zip or other formats
                       <div className="flex flex-col items-center justify-center text-center p-8 bg-background border border-primary-200/50 rounded-2xl max-w-md shadow-sm">
                         <div className="p-4 bg-primary-50 rounded-full mb-4">
-                          {getFileIcon(attachment.filename, attachment.contentType)}
+                          {getFileIcon(
+                            attachment.filename,
+                            attachment.contentType,
+                          )}
                         </div>
-                        <Text font="bold" size="lg" className="text-primary-950 mb-2">
+                        <Text
+                          font="bold"
+                          size="lg"
+                          className="text-primary-950 mb-2"
+                        >
                           No Preview Available
                         </Text>
-                        <Text size="sm" color="primary-500" className="mb-6 px-4">
-                          Previews are not supported for this file type ({ext.toUpperCase() || "unknown"}). You can safely download and open the file locally.
+                        <Text
+                          size="sm"
+                          color="primary-500"
+                          className="mb-6 px-4"
+                        >
+                          Previews are not supported for this file type (
+                          {ext.toUpperCase() || "unknown"}). You can safely
+                          download and open the file locally.
                         </Text>
                         <Button
                           onClick={handleDownload}
-                          disabled={isDownloading}
-                          className="bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl px-6 py-2.5 shadow-lg shadow-primary-200"
+                          disabled={isDownloading || isAnalysisPending || isRefetching}
+                          className="bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl px-6 py-2.5 shadow-lg shadow-primary-200 cursor-pointer"
                         >
                           {isDownloading ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -406,8 +498,8 @@ export const FilePreviewModal = ({
                       </DialogPrimitive.Close>
                       <Button
                         onClick={handleDownload}
-                        disabled={isDownloading}
-                        className="bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl px-5 shadow-lg shadow-primary-100"
+                        disabled={isDownloading || isAnalysisPending || isRefetching}
+                        className="bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl px-5 shadow-lg shadow-primary-100 cursor-pointer"
                       >
                         {isDownloading ? (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />

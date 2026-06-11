@@ -1,26 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import {
-  Mail,
-  BarChart3,
-  FileText,
-  Settings,
-  Menu,
-  PencilLine,
-  ChevronRight,
-  X,
-  Send,
-  Star,
-  AlertCircle,
-  ShieldCheck,
-  LineChart,
-  Ghost,
-  ShieldAlert,
-  Trash2,
-  User,
-  LogOut,
-} from "lucide-react";
+import { Menu, PencilLine, ChevronRight, X, User, LogOut } from "lucide-react";
 import { useLogout } from "@/APIs/hooks/auth";
 import Cookies from "js-cookie";
 import { toast } from "sonner";
@@ -35,36 +16,11 @@ import ThemeToggler from "@/_components/ThemeToggler";
 import type { EmailFolder as Folder } from "@/APIs/types/Email";
 import { useMailStore } from "@/stores/useMailStore";
 import { useEmails } from "@/APIs/hooks/emails";
-
-const dashboardNavItems = [
-  { name: "Mailboxes", icon: Mail, href: "/mailboxes" },
-  { name: "Analytics", icon: BarChart3, href: "/analytics" },
-  { name: "Reports", icon: FileText, href: "/reports" },
-  { name: "Settings", icon: Settings, href: "/settings" },
-];
-
-const mailboxNavItems: {
-  name: string;
-  icon: React.ElementType;
-  folder: Folder;
-}[] = [
-  { name: "Inbox", icon: Mail, folder: "inbox" },
-  { name: "Sent", icon: Send, folder: "sent" },
-  { name: "Starred", icon: Star, folder: "starred" },
-  { name: "Spam", icon: AlertCircle, folder: "spam" },
-  { name: "Trash", icon: Trash2, folder: "trash" },
-];
-
-const securityNavItems = [
-  {
-    name: "Security Reports",
-    icon: ShieldCheck,
-    href: "security-reports",
-  },
-  { name: "Analytics", icon: LineChart, href: "analytics" },
-  { name: "Phishing", icon: Ghost, href: "phishing" },
-  { name: "Malware", icon: ShieldAlert, href: "malware" },
-];
+import {
+  dashboardNavItems,
+  mailboxNavItems,
+  securityNavItems,
+} from "@/constants/Sidebar";
 
 export const MobileSidebar = () => {
   const pathname = usePathname();

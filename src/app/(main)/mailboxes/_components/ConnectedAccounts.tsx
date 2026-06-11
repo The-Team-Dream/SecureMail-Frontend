@@ -98,12 +98,16 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
       <div className="bg-ghostBlue rounded-lg p-2 lg:py-6 lg:px-4 w-full">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
           {mailboxes?.map((acc: Mailbox, index: number) => (
-            <MailboxCard 
-              key={acc.id} 
-              acc={acc} 
-              index={index} 
-              isSyncing={syncingMailboxIds.includes(acc.id.toString()) ? acc.id.toString() : null} 
-              syncMailbox={handleSyncClick} 
+            <MailboxCard
+              key={acc.id}
+              acc={acc}
+              index={index}
+              isSyncing={
+                syncingMailboxIds.includes(acc.id.toString())
+                  ? acc.id.toString()
+                  : null
+              }
+              syncMailbox={handleSyncClick}
             />
           ))}
         </div>

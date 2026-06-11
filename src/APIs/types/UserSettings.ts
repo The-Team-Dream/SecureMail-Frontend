@@ -1,4 +1,4 @@
-export type ThemeMode = 'LIGHT' | 'DARK' | 'SYSTEM';
+export type ThemeMode = "LIGHT" | "DARK" | "SYSTEM";
 
 export interface UserSettings {
   username: string;
@@ -14,24 +14,21 @@ export interface TwoFactorSetupResponse {
   otpauthUrl: string;
 }
 
-/** What we PUT/PATCH to the server (as FormData fields) */
 export interface UpdateProfilePayload {
   username?: string;
-  avatar?: File; // actual File object, not a URL string
+  avatar?: File;
 }
 
-/** What the server returns after a successful profile update */
 export interface ProfileUpdateResponse {
   username?: string;
-  avatarUrl?: string | null;  // user-settings response shape
-  avatar?: string | null;     // auth/profile response shape
+  avatarUrl?: string | null;
+  avatar?: string | null;
   user?: {
     username?: string;
     avatar?: string | null;
   };
 }
 
-/** Payload for PATCH /user-settings/password */
 export interface ChangePasswordPayload {
   currentPassword: string;
   newPassword: string;

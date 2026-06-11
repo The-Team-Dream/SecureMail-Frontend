@@ -5,6 +5,7 @@ export const useMailboxById = (id: number | string) => {
   return useQuery({
     queryKey: ["mailboxes", id],
     queryFn: () => mailboxApi.getMailboxById(Number(id)),
+    refetchOnWindowFocus: false,
     enabled: !!id,
   });
 };

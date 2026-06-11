@@ -226,15 +226,19 @@ export const useComposeEmail = () => {
 
     // ─── Attachments Validation & Binary Handling Layer ───
     attachments.forEach((file) => {
-      console.log(`[DEBUG] Processing attachment: name="${file.name}", size=${file.size} bytes, type="${file.type}"`);
-      
+      console.log(
+        `[DEBUG] Processing attachment: name="${file.name}", size=${file.size} bytes, type="${file.type}"`,
+      );
+
       let fileToAppend = file;
 
       // Ensure PDF MIME type is correctly set
       const isPdfByName = file.name.toLowerCase().endsWith(".pdf");
       if (isPdfByName && file.type !== "application/pdf") {
-        console.warn(`[DEBUG] Correcting mismatch MIME type for PDF "${file.name}" from "${file.type}" to "application/pdf"`);
-        
+        console.warn(
+          `[DEBUG] Correcting mismatch MIME type for PDF "${file.name}" from "${file.type}" to "application/pdf"`,
+        );
+
         // Re-wrap the binary data into a new File instance with explicit application/pdf MIME type
         fileToAppend = new File([file], file.name, {
           type: "application/pdf",
@@ -247,12 +251,21 @@ export const useComposeEmail = () => {
 
     // ─── FormData Inspection before Mutation ───
     const attachedFiles = fd.getAll("attachments");
-    console.log(`[DEBUG] FormData "attachments" payload contains ${attachedFiles.length} files:`);
+    console.log(
+      `[DEBUG] FormData "attachments" payload contains ${attachedFiles.length} files:`,
+    );
     attachedFiles.forEach((entry, idx) => {
       if (entry instanceof File) {
-        console.log(`  - File #${idx + 1}: name="${entry.name}", size=${entry.size} bytes, type="${entry.type}"`);
-        if (entry.name.toLowerCase().endsWith(".pdf") && entry.type !== "application/pdf") {
-          console.error(`  [ERROR] File #${idx + 1} "${entry.name}" is a PDF but has incorrect type "${entry.type}".`);
+        console.log(
+          `  - File #${idx + 1}: name="${entry.name}", size=${entry.size} bytes, type="${entry.type}"`,
+        );
+        if (
+          entry.name.toLowerCase().endsWith(".pdf") &&
+          entry.type !== "application/pdf"
+        ) {
+          console.error(
+            `  [ERROR] File #${idx + 1} "${entry.name}" is a PDF but has incorrect type "${entry.type}".`,
+          );
         }
       } else {
         console.log(`  - Entry #${idx + 1} is not a File instance:`, entry);
@@ -326,7 +339,6 @@ export const useComposeEmail = () => {
       if (sanitizedBodyText) {
         fd.append("bodyText", sanitizedBodyText);
       }
-      // Use rich HTML from editor (contains links etc.); fall back to plain text wrapped in <p>
       if (editorBodyHtml) {
         fd.append("bodyHtml", editorBodyHtml);
       } else if (sanitizedBodyText) {

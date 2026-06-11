@@ -11,7 +11,15 @@ export const fetchAuthenticatedImage = async (url: string): Promise<string> => {
     },
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch image");
+    const errorText = await response.text();
+    let message = "Failed to fetch image";
+    try {
+      const parsed = JSON.parse(errorText);
+      if (parsed.message) {
+        message = parsed.message;
+      }
+    } catch {}
+    throw new Error(message);
   }
   const blob = await response.blob();
   return URL.createObjectURL(blob);

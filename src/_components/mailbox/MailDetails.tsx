@@ -9,6 +9,7 @@ import {
   MailOpen,
   Mail,
   Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,13 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
     null,
   );
 
-  const { data: email, isLoading, error } = useEmailDetails(mailboxId, emailId);
+  const {
+    data: email,
+    isLoading,
+    error,
+    refetch,
+    isRefetching,
+  } = useEmailDetails(mailboxId, emailId);
   const readMutation = useReadEmail(mailboxId);
   const activeFolder = useMailStore((s) => s.activeFolder);
   const deleteMutation = useDeleteEmail(mailboxId, activeFolder ?? undefined);
@@ -101,9 +108,15 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
         filename,
         url,
       );
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      toast.error("Failed to download attachment");
+      if (e?.message?.toLowerCase().includes("undergoing security analysis")) {
+        toast.warning(
+          "The file is still being scanned for security. Please wait a moment.",
+        );
+      } else {
+        toast.error(e?.message || "Failed to download attachment");
+      }
     } finally {
       setPendingDownloads((prev) => ({ ...prev, [attachmentId]: false }));
     }
@@ -172,6 +185,16 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
   const processHtmlBody = (html: string) => {
     let processedHtml = formatBodyDates(html);
     const token = Cookies.get("token");
+
+    if (email?.analysisStatus === "PENDING") {
+      processedHtml = processedHtml.replace(
+        /<img([^>]*)\/?>/gi,
+        `<div class="flex flex-col items-center justify-center p-4 my-2 border border-warning-200 bg-warning-50/50 rounded-lg text-warning-800 text-xs text-center font-medium max-w-lg select-none">
+          <span class="font-bold mb-1">⚠️ Image Blocked</span>
+          <span>Cannot download attachment while email is still undergoing security analysis</span>
+         </div>`,
+      );
+    }
 
     // Inject auth token or replace cid references for inline images
     if (email?.attachments) {
@@ -283,6 +306,17 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
           </Text>
         </div>
         <div className="flex items-center gap-2">
+          {/* <Button
+            onClick={() => refetch()}
+            variant={"outline"}
+            disabled={isRefetching}
+            className="cursor-pointer"
+          >
+            <RefreshCw
+              className={cn("w-4 h-4", isRefetching && "animate-spin")}
+            />
+            <span className="hidden sm:flex">Refresh</span>
+          </Button> */}
           <Button
             onClick={handleScan}
             variant={"outline"}
@@ -393,6 +427,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
             pendingDownloads={pendingDownloads}
             handleDownload={handleDownload}
             onPreviewAttachment={setPreviewAttachment}
+            analysisStatus={email.analysisStatus}
           />
 
           {/* Zero-Trust Secure Replies Section */}

@@ -6,7 +6,7 @@ export const stepProviderSchema = z.object({
 
 // Step 2 (Merged IMAP/SMTP)
 export const stepImapSmtpSchema = z.object({
-  email: z.string().email().min(1, "Email is required"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
   imapHost: z.string().min(1, "IMAP Host is required"),
   imapPort: z
     .string()

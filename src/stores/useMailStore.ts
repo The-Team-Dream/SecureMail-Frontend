@@ -1,9 +1,8 @@
 import { create } from "zustand";
-import type { EmailFolder as Folder, Classification } from "@/APIs/types/Email";
+import type { EmailFolder as Folder } from "@/APIs/types/Email";
 
 interface MailState {
   activeFolder: Folder;
-  activeClassification: Classification;
   currentPage: number;
   selectedIds: string[];
   searchQuery: string;
@@ -25,7 +24,6 @@ interface MailState {
   } | null;
 
   setActiveFolder: (folder: Folder) => void;
-  setActiveClassification: (classification: Classification) => void;
   setCurrentPage: (page: number) => void;
   setSearchQuery: (query: string) => void;
   setComposeOpen: (
@@ -49,12 +47,10 @@ interface MailState {
   ) => void;
   toggleSelectEmail: (id: string) => void;
   deselectAll: () => void;
-  getUnreadCount: (classification: Classification) => number;
 }
 
 export const useMailStore = create<MailState>((set, get) => ({
   activeFolder: "inbox",
-  activeClassification: "primary",
   currentPage: 1,
   selectedIds: [],
   searchQuery: "",
@@ -65,14 +61,6 @@ export const useMailStore = create<MailState>((set, get) => ({
   setActiveFolder: (folder: Folder) => {
     set({
       activeFolder: folder,
-      currentPage: 1,
-      selectedIds: [],
-      activeClassification: "primary",
-    });
-  },
-  setActiveClassification: (classification: Classification) => {
-    set({
-      activeClassification: classification,
       currentPage: 1,
       selectedIds: [],
     });

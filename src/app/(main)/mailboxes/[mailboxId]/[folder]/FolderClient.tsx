@@ -3,7 +3,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useMailStore } from "@/stores/useMailStore";
 import { MailInbox } from "@/_components/mailbox/MailInbox";
-import { MalwareInbox } from "@/_components/mailbox/MalwareInbox";
 import type { EmailFolder } from "@/APIs/types/Email";
 
 // Folders that show the MailInbox component
@@ -42,11 +41,6 @@ export function FolderClient({ mailboxId, folder }: FolderClientProps) {
 
   if (!validSections.includes(folder)) {
     return null;
-  }
-
-  // Render based on section
-  if (folder === "malware") {
-    return <MalwareInbox />;
   }
 
   if (mailFolders.includes(folder as EmailFolder)) {

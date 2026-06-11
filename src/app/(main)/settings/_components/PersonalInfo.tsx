@@ -19,12 +19,17 @@ import {
 } from "@/schemas/settings/personalInfo";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdateProfile } from "@/APIs/hooks/userSettings";
-import { Icons } from "@/constants/icons";
 import { useGetAuthMe } from "@/APIs/hooks/auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getInitials } from "@/lib/utils";
 import { PersonalInfoSkeleton } from "@/_components/skeleton/PersonalInfoSkeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const PersonalInfo = () => {
   const { data: user, isLoading } = useGetAuthMe();
@@ -35,6 +40,7 @@ const PersonalInfo = () => {
     user?.user?.avatar || undefined,
   );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const {
     handleSubmit,
     register,
@@ -142,7 +148,8 @@ const PersonalInfo = () => {
           {isLoading ? (
             <PersonalInfoSkeleton />
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <>
+              <form onSubmit={handleSubmit(onSubmit)}>
               <div className="border border-primary-100 py-4 px-6 md:py-6 md:px-8 rounded-lg">
                 {/* Header Section */}
                 <div className="flex justify-between items-start mb-10">
@@ -202,7 +209,7 @@ const PersonalInfo = () => {
                 </div>
 
                 {/* Profile Picture */}
-                <div className="mt-4 flex flex-col gap-4 md:flex-row items-start md:items-center justify-between max-w-md">
+                <div className="mt-4 flex flex-col gap-6 md:flex-row items-start md:items-center max-w-md">
                   <Text size={"sm"} color={"primary-500"}>
                     Profile Picture
                   </Text>
@@ -215,33 +222,41 @@ const PersonalInfo = () => {
                   />
 
                   <div className="flex items-center gap-6">
-                    <Avatar className={`w-16 h-16`}>
-                      <AvatarImage
-                        src={profileImage}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-primary-100 text-primary-800">
-                        {getInitials(currentValues.username || "")}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative group w-18 h-18">
+                      <div
+                        onClick={() => setIsPreviewOpen(true)}
+                        className="relative w-full h-full rounded-full overflow-hidden cursor-pointer"
+                      >
+                        <Avatar className="w-full h-full">
+                          <AvatarImage
+                            src={profileImage}
+                            className="object-cover w-full h-full"
+                          />
+                          <AvatarFallback className="bg-primary-100 text-primary-800 text-base font-semibold">
+                            {getInitials(currentValues.username || "")}
+                          </AvatarFallback>
+                        </Avatar>
 
-                    <div className="flex gap-4">
+                        {/* Hover Overlay "View Profile" */}
+                        <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-center p-1">
+                          <span className="text-[10px] text-white font-medium select-none">
+                            View Profile
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Pencil Edit Icon on the image itself */}
                       <button
                         type="button"
-                        disabled={!isEditing || isUpdating}
-                        onClick={handleUpdateClick}
-                        className="text-info-600 text-sm hover:underline font-medium cursor-pointer disabled:text-primary-400 disabled:cursor-not-allowed"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdateClick();
+                        }}
+                        disabled={isUpdating}
+                        className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-primary hover:bg-primary-700 text-white rounded-full flex items-center justify-center shadow-lg border border-background transition-transform duration-200 active:scale-90 cursor-pointer z-10"
+                        title="Update profile picture"
                       >
-                        Update
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={!isEditing || isUpdating}
-                        onClick={handleDeleteImage}
-                        className="flex items-center gap-1 text-sm text-error-500 hover:underline font-medium disabled:text-primary-400 disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        Delete <Icons.Delete className="w-4 h-4 text-error-500" />
+                        <Pencil className="w-3 h-3 text-white" />
                       </button>
                     </div>
                   </div>
@@ -300,7 +315,7 @@ const PersonalInfo = () => {
                   </div>
                 </div>
 
-                {isEditing && (
+                {(isEditing || !!selectedFile) && (
                   <div className="mt-8 flex justify-end">
                     <Button
                       type="submit"
@@ -329,6 +344,33 @@ const PersonalInfo = () => {
                 )}
               </div>
             </form>
+
+            {/* Profile Picture Preview Dialog */}
+            <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+              <DialogContent className="sm:max-w-md overflow-hidden bg-background border border-primary-100 p-0 rounded-xl">
+                <DialogHeader className="p-4 border-b border-primary-50">
+                  <DialogTitle className="text-primary-950 font-medium">
+                    Profile Picture Preview
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="flex items-center justify-center p-6 bg-primary-25/50 min-h-[300px]">
+                  {profileImage ? (
+                    <div className="relative w-64 h-64 rounded-full overflow-hidden border-4 border-white shadow-xl">
+                      <img
+                        src={profileImage}
+                        alt="Profile Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-40 h-40 flex items-center justify-center bg-primary-100 rounded-full text-primary-800 text-4xl font-semibold shadow-inner">
+                      {getInitials(currentValues.username || "")}
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+            </>
           )}
         </AccordionContent>
       </AccordionItem>

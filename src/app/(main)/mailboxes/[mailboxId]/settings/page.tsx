@@ -25,6 +25,7 @@ import { ConfirmationModal } from "@/_components/shared/ConfirmationModal";
 import { useState, useEffect } from "react";
 import { useServerErrors } from "@/utils/form-utils";
 import BackEndError from "@/_components/shared/BackEndError";
+import { toast } from "sonner";
 
 const MailboxSettings = () => {
   const params = useParams();
@@ -32,6 +33,9 @@ const MailboxSettings = () => {
   const mailboxId = params.mailboxId as string;
 
   const { data: mailbox, isLoading } = useMailboxById(mailboxId);
+  useEffect(() => {
+    console.log("Mailbox data updated:", mailbox);
+  }, [mailbox]);
   const { mutate: updateMailbox, isPending: isUpdating } = useUpdateMailbox();
   const { mutate: deleteMailbox, isPending: isDeleting } = useDeleteMailbox();
 
@@ -49,10 +53,10 @@ const MailboxSettings = () => {
     mode: "onBlur",
     reValidateMode: "onChange",
     resolver: zodResolver(mailBoxSettingsSchema),
-    defaultValues: {
-      mailboxName: "",
+    values: {
+      mailboxName: mailbox?.displayName || "",
       emailForwarding: false,
-      pushNotifications: true,
+      pushNotifications: mailbox?.pushNotificationsEnabled ?? true,
     },
   });
   const { handleServerErrors } = useServerErrors<IMailboxSettings>(setError);
@@ -60,7 +64,7 @@ const MailboxSettings = () => {
   useEffect(() => {
     if (mailbox && !isLoading) {
       reset({
-        mailboxName: mailbox.displayName || "",
+        mailboxName: mailbox.displayName.trim() || "",
         emailForwarding: false,
         pushNotifications: mailbox.pushNotificationsEnabled,
       });
@@ -68,6 +72,11 @@ const MailboxSettings = () => {
   }, [mailbox, isLoading, reset]);
 
   const onSubmit = (data: IMailboxSettings) => {
+    console.log("Data from Form:", data.mailboxName);
+    if (!mailboxId) {
+      console.error("Mailbox ID is missing!");
+      return;
+    }
     updateMailbox(
       {
         id: mailboxId,
@@ -92,6 +101,26 @@ const MailboxSettings = () => {
     });
   };
 
+  // const onValid = (data: IMailboxSettings) => {
+  //   console.log("Success! Data:", data);
+  //   updateMailbox(
+  //     {
+  //       id: mailboxId,
+  //       data: {
+  //         displayName: data.mailboxName,
+  //         pushNotificationsEnabled: data.pushNotifications,
+  //       },
+  //     },
+  //     {
+  //       onError: (err) =>
+  //         handleServerErrors(err, ["mailboxName", "pushNotifications"]),
+  //     },
+  //   );
+  // };
+
+  // const onInvalid = (errors: any) => {
+  //   console.log("Validation Failed! Errors:", errors);
+  // };
   if (isLoading) {
     return <FancySpinner text="Loading Settings..." />;
   }
@@ -127,9 +156,7 @@ const MailboxSettings = () => {
               className="w-full md:w-[400px]"
               error={errors.mailboxName?.message}
             />
-            <BackEndError
-              error={errors.root?.message}
-            />
+            <BackEndError error={errors.root?.message} />
           </div>
         </section>
 
@@ -243,7 +270,7 @@ const MailboxSettings = () => {
           <Button
             size={"lg"}
             type="submit"
-            disabled={isUpdating}
+            disabled={isUpdating || isLoading || !mailboxId}
             className="w-full md:w-[180px] rounded-lg gap-2"
           >
             {isUpdating ? (

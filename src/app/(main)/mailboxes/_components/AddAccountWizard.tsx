@@ -62,7 +62,7 @@ export function AddAccountWizard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-card relative"
+      className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-background relative"
     >
       <div className="flex items-center gap-2.5 px-10 py-3 w-full bg-ghostBlue border-b border-primary-100/80 z-10 flex-wrap">
         <button

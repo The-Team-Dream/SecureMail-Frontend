@@ -124,9 +124,7 @@ export const ActionButton = ({
   className?: string;
   variant?: "ghost" | "danger";
   disabled?: boolean;
-  /** When provided, renders as a Next.js Link instead of a button */
   href?: string;
-  /** Which side the tooltip appears on. Defaults to "top" */
   tooltipSide?: TooltipSide;
 }) => {
   const triggerRef = useRef<HTMLDivElement>(null);

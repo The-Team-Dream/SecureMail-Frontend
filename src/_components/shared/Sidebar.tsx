@@ -14,7 +14,7 @@ import {
   dashboardNavItems,
   mailboxNavItems,
   securityNavItems,
-} from "@/constants";
+} from "@/constants/Sidebar";
 import { Icons } from "@/constants/icons";
 import { User, LogOut } from "lucide-react";
 import { useLogout } from "@/APIs/hooks/auth";
@@ -359,76 +359,6 @@ export const Sidebar = () => {
               );
             })}
 
-            {/* Settings Link */}
-            {isCollapsed ? (
-              <div className="flex justify-center">
-                <ActionButton
-                  href={`/mailboxes/${params.mailboxId}/settings`}
-                  label="Settings"
-                  tooltipSide="right"
-                  icon={
-                    <Icons.Settings
-                      active={pathname.includes("/settings")}
-                      className="w-[22px] h-[22px] min-w-[22px]"
-                    />
-                  }
-                  className={cn(
-                    "rounded-sm w-10 h-10",
-                    pathname.includes("/settings")
-                      ? "bg-primary-100 text-primary"
-                      : "text-primary-600 hover:bg-primary-100 hover:text-primary",
-                  )}
-                />
-              </div>
-            ) : (
-              <Link
-                href={`/mailboxes/${params.mailboxId}/settings`}
-                className={cn(
-                  "flex items-center rounded-sm transition-colors duration-200 group mx-auto relative w-full",
-                  "justify-between px-3 py-2",
-                  pathname.includes("/settings")
-                    ? "text-primary"
-                    : "text-default hover:bg-primary-100 hover:text-primary",
-                )}
-              >
-                {pathname.includes("/settings") && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute inset-0 -z-10 rounded-sm bg-primary-100"
-                    transition={{
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 30,
-                    }}
-                  />
-                )}
-
-                <div className="flex items-center gap-3">
-                  <Icons.Settings
-                    active={pathname.includes("/settings")}
-                    className="w-[22px] h-[22px] min-w-[22px]"
-                  />
-                  <Text
-                    as={"span"}
-                    font={pathname.includes("/settings") ? "medium" : "default"}
-                    color={
-                      pathname.includes("/settings") ? "primary-950" : "muted"
-                    }
-                  >
-                    Settings
-                  </Text>
-                </div>
-
-                <ChevronRight
-                  className={cn(
-                    "w-4 h-4 transition-transform",
-                    pathname.includes("/settings")
-                      ? "translate-x-1 text-primary"
-                      : "text-muted",
-                  )}
-                />
-              </Link>
-            )}
           </>
         ) : (
           dashboardNavItems.map((item) => {

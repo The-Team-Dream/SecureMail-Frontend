@@ -1,4 +1,3 @@
-export type Classification = "primary" | "promotions" | "social";
 
 export type EmailFolder =
   | "inbox"
@@ -36,15 +35,6 @@ export interface Email {
   attachments?: Attachment[];
   analysisStatus?: "PENDING" | "COMPLETED" | "FAILED";
   isRescanning?: boolean;
-}
-
-export interface MalwareThreat extends Omit<
-  Email,
-  "malwareVerdict" | "malwareScore" | "malwareSeverity"
-> {
-  malwareVerdict: string;
-  malwareScore: number;
-  malwareSeverity: string;
 }
 
 export interface EmailsResponse {
