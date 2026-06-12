@@ -24,6 +24,7 @@ export interface Mailbox {
   provider: MailboxProvider;
   isActive: boolean;
   pushNotificationsEnabled: boolean;
+  emailForwarding: boolean;
   lastSyncedAt: string;
   createdAt: string;
   hasCredentials?: boolean;

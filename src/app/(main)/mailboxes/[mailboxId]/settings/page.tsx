@@ -1,4 +1,5 @@
 "use client";
+"use no memo";
 import Container from "@/_components/shared/Container";
 import { FancySpinner } from "@/_components/shared/FancySpinner";
 import { Input } from "@/_components/shared/Input";
@@ -53,9 +54,9 @@ const MailboxSettings = () => {
     mode: "onBlur",
     reValidateMode: "onChange",
     resolver: zodResolver(mailBoxSettingsSchema),
-    values: {
+    defaultValues: {
       mailboxName: mailbox?.displayName || "",
-      emailForwarding: false,
+      emailForwarding: mailbox?.emailForwarding ?? true,
       pushNotifications: mailbox?.pushNotificationsEnabled ?? true,
     },
   });
@@ -65,7 +66,7 @@ const MailboxSettings = () => {
     if (mailbox && !isLoading) {
       reset({
         mailboxName: mailbox.displayName.trim() || "",
-        emailForwarding: false,
+        emailForwarding: mailbox?.emailForwarding ?? false,
         pushNotifications: mailbox.pushNotificationsEnabled,
       });
     }
@@ -101,26 +102,6 @@ const MailboxSettings = () => {
     });
   };
 
-  // const onValid = (data: IMailboxSettings) => {
-  //   console.log("Success! Data:", data);
-  //   updateMailbox(
-  //     {
-  //       id: mailboxId,
-  //       data: {
-  //         displayName: data.mailboxName,
-  //         pushNotificationsEnabled: data.pushNotifications,
-  //       },
-  //     },
-  //     {
-  //       onError: (err) =>
-  //         handleServerErrors(err, ["mailboxName", "pushNotifications"]),
-  //     },
-  //   );
-  // };
-
-  // const onInvalid = (errors: any) => {
-  //   console.log("Validation Failed! Errors:", errors);
-  // };
   if (isLoading) {
     return <FancySpinner text="Loading Settings..." />;
   }
@@ -167,7 +148,7 @@ const MailboxSettings = () => {
           </Text>
           <div className="space-y-6 border-b border-primary-100 pb-10">
             {/* Email Forwarding */}
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Icons.Mail className="h-5 w-5 text-primary" />
                 <div>
@@ -190,7 +171,7 @@ const MailboxSettings = () => {
                   />
                 )}
               />
-            </div>
+            </div> */}
 
             {/* Push Notifications */}
             <div className="flex items-center justify-between">

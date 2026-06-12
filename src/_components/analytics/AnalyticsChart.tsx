@@ -1,9 +1,9 @@
 "use client";
 import {
-  CartesianGrid,
+  BarChart,
+  Bar,
   XAxis,
-  Area,
-  AreaChart,
+  CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
 import {
@@ -24,8 +24,8 @@ interface AnalyticsChartProps {
   phishingCount: string;
 }
 
-const SPAM_COLOR = "#1F8A70";
-const PHISHING_COLOR = "#EF4444";
+const SPAM_COLOR = "var(--color-warning-500)";
+const PHISHING_COLOR = "var(--color-error-500)";
 
 const chartConfig = {
   spam: {
@@ -38,11 +38,64 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+// Custom cell renderer to draw rounded top corners only on the top-most bar segment
+const RoundedBarShape = (props: any) => {
+  const { x, y, width, height, fill, payload, dataKey } = props;
+  if (!height || height <= 0) return null;
+
+  // Determine if this segment is the top-most segment of the stack for this day
+  const isTop =
+    dataKey === "phishing" ||
+    (dataKey === "spam" && (!payload.phishing || payload.phishing === 0));
+
+  const radius = 6; // subtle roundness matching the design in image_0.png
+
+  if (isTop && height > radius) {
+    return (
+      <path
+        d={`M${x},${y + radius} 
+            a${radius},${radius} 0 0 1 ${radius},-${radius} 
+            h${width - 2 * radius} 
+            a${radius},${radius} 0 0 1 ${radius},${radius} 
+            v${height - radius} 
+            h-${width} 
+            Z`}
+        fill={fill}
+      />
+    );
+  }
+
+  return <rect x={x} y={y} width={width} height={height} fill={fill} />;
+};
+
 export function AnalyticsChart({
   data,
   spamCount,
   phishingCount,
 }: AnalyticsChartProps) {
+  // Determine today's day abbreviation (e.g., "Fri")
+  const todayLabel = new Date().toLocaleDateString("en-US", {
+    weekday: "short",
+  });
+
+  // Aggregate only today's events, mapping all other days to 0
+  const aggregatedData = data.map((item) => {
+    if (item.day === todayLabel) {
+      const totalSpam = data.reduce((sum, d) => sum + d.spam, 0);
+      const totalPhishing = data.reduce((sum, d) => sum + d.phishing, 0);
+      return {
+        ...item,
+        spam: totalSpam,
+        phishing: totalPhishing,
+      };
+    }
+    return {
+      ...item,
+      spam: 0,
+      phishing: 0,
+    };
+  });
+
   return (
     <div className="min-w-0 rounded-lg p-6 bg-background border border-primary-100 flex flex-col h-full">
       <div className="flex items-center justify-between mb-8">
@@ -59,37 +112,11 @@ export function AnalyticsChart({
           className="h-full w-full min-h-0 min-w-0"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={data}
+            <BarChart
+              data={aggregatedData}
               margin={{ top: 16, right: 24, left: 0, bottom: 24 }}
+              barSize={24}
             >
-              <defs>
-                <linearGradient id="fillSpam" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor={SPAM_COLOR}
-                    stopOpacity={0.15}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={SPAM_COLOR}
-                    stopOpacity={0.01}
-                  />
-                </linearGradient>
-                <linearGradient id="fillPhishing" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor={PHISHING_COLOR}
-                    stopOpacity={0.15}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={PHISHING_COLOR}
-                    stopOpacity={0.01}
-                  />
-                </linearGradient>
-              </defs>
-
               <CartesianGrid
                 vertical={false}
                 horizontal={true}
@@ -105,65 +132,49 @@ export function AnalyticsChart({
                 tickMargin={10}
                 interval={0}
                 padding={{ left: 10, right: 10 }}
-                tick={{ fill: "#94A3B8", fontSize: 10, fontWeight: 500, dy: 10 }}
+                tick={{
+                  fill: "#94A3B8",
+                  fontSize: 10,
+                  fontWeight: 500,
+                  dy: 10,
+                }}
               />
 
               <ChartTooltip
-                cursor={{ stroke: "#E2E8F0", strokeWidth: 1 }}
+                cursor={{ fill: "rgba(0, 0, 0, 0.03)" }}
                 content={<ChartTooltipContent indicator="dot" />}
               />
 
-              {/* Spam line rendered LAST so it sits on top of phishing */}
-              <Area
-                connectNulls={true}
-                type="monotone"
-                dataKey="phishing"
-                stroke={PHISHING_COLOR}
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="url(#fillPhishing)"
-                dot={{
-                  r: 3,
-                  fill: "white",
-                  stroke: PHISHING_COLOR,
-                  strokeWidth: 2,
-                }}
-                activeDot={{ r: 5, strokeWidth: 0 }}
-                isAnimationActive={true}
-                animationDuration={1500}
-              />
-              <Area
-                connectNulls={true}
-                type="monotone"
+              {/* Spam Detection is the base (bottom) segment of the stack */}
+              <Bar
                 dataKey="spam"
-                stroke={SPAM_COLOR}
-                strokeWidth={3}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="url(#fillSpam)"
-                dot={{
-                  r: 4,
-                  fill: "white",
-                  stroke: SPAM_COLOR,
-                  strokeWidth: 2,
-                }}
-                activeDot={{ r: 6, strokeWidth: 0 }}
-                isAnimationActive={true}
-                animationDuration={1500}
+                stackId="a"
+                fill={SPAM_COLOR}
+                shape={<RoundedBarShape />}
               />
-            </AreaChart>
+
+              {/* Phishing Attempts sits directly on top of Spam Detection */}
+              <Bar
+                dataKey="phishing"
+                stackId="a"
+                fill={PHISHING_COLOR}
+                shape={<RoundedBarShape />}
+              />
+            </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
       </div>
 
       <div className="mt-2 pt-4 border-t border-primary-100">
-        <div className="flex flex-wrap items-center w-full md:max-w-md justify-between ">
+        <div className="flex flex-wrap items-center w-full md:max-w-md justify-between gap-y-4">
           {/* Spam */}
           <div className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full shrink-0" style={{ backgroundColor: SPAM_COLOR }} />
+            <div
+              className="w-4 h-4 rounded-full shrink-0"
+              style={{ backgroundColor: SPAM_COLOR }}
+            />
             <div className="flex flex-col">
-              <Text size="sm" font="medium" style={{ color: SPAM_COLOR }}>
+              <Text size="sm" font="medium" color={"warning-600"}>
                 Spam Detection
               </Text>
               <Text size="sm" font="bold">
@@ -175,7 +186,10 @@ export function AnalyticsChart({
 
           {/* Phishing */}
           <div className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full shrink-0" style={{ backgroundColor: PHISHING_COLOR }} />
+            <div
+              className="w-4 h-4 rounded-full shrink-0"
+              style={{ backgroundColor: PHISHING_COLOR }}
+            />
             <div className="flex flex-col">
               <Text size="sm" font="medium" style={{ color: PHISHING_COLOR }}>
                 Phishing Attempts

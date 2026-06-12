@@ -209,7 +209,8 @@ const PersonalInfo = () => {
                 </div>
 
                 {/* Profile Picture */}
-                <div className="mt-4 flex flex-col gap-6 md:flex-row items-start md:items-center justify-between max-w-md">
+                <div className="mt-4 flex
+                 flex-col gap-6 md:flex-row items-start md:items-center justify-between max-w-md">
                   <Text size={"sm"} color={"primary-500"}>
                     Profile Picture
                   </Text>
