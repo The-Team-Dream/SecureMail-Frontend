@@ -4,7 +4,7 @@ import { useState, use, useMemo } from "react";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, ShieldCheck } from "lucide-react";
 import { Icons } from "@/constants/icons";
 import { useMailboxReports } from "@/APIs/hooks/mailboxes";
 import { StateMessage } from "@/_components/shared/StateMessage";
@@ -26,20 +26,27 @@ export default function SecurityReportsPage({
   const { data, isLoading, isError, refetch } = useMailboxReports(mailboxId);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState<"all" | "phishing" | "spam" | "malware">("all");
 
   const reports: SecurityReport[] = useMemo(() => {
     return (data as any)?.data?.data || (data as any)?.data || [];
   }, [data]);
 
   const filteredReports = useMemo(() => {
-    return reports.filter(
-      (report) =>
-        report.subject
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase().trim()) ||
-        report.from.toLowerCase().includes(searchTerm.toLowerCase().trim()),
-    );
-  }, [reports, searchTerm]);
+    return reports.filter((report) => {
+      // 1. Search term filter
+      const matchesSearch =
+        report.subject.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+        report.from.toLowerCase().includes(searchTerm.toLowerCase().trim());
+
+      // 2. Classification filter
+      const matchesTab =
+        activeTab === "all" ||
+        report.classification?.toLowerCase() === activeTab;
+
+      return matchesSearch && matchesTab;
+    });
+  }, [reports, searchTerm, activeTab]);
 
   const stats = useMemo(
     () => ({
@@ -132,17 +139,23 @@ export default function SecurityReportsPage({
         />
 
         <div className="flex items-center gap-2 bg-ghostBlue/50 p-1 rounded-2xl border border-primary-100/50 shrink-0">
-          {["All", "Alerts", "Safe"].map((tab) => (
+          {[
+            { id: "all", label: "All" },
+            { id: "phishing", label: "Phishing" },
+            { id: "spam", label: "Spam" },
+            { id: "malware", label: "Malware" },
+          ].map((tab) => (
             <button
-              key={tab}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
               className={cn(
-                "px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-300",
-                tab === "All"
+                "px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer",
+                activeTab === tab.id
                   ? "bg-background shadow-md text-primary-950"
                   : "text-primary-400 hover:text-primary-600",
               )}
             >
-              {tab}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -156,7 +169,8 @@ export default function SecurityReportsPage({
             animate={{ opacity: 1, scale: 1 }}
           >
             <StateMessage
-              image={notFoundImg}
+              variant="empty"
+              icon={ShieldCheck}
               title="No Threats Found"
               description="Your mailbox is currently safe. No security threats have been detected in the processed emails."
               className="py-20 bg-ghostBlue/20 rounded-[2.5rem] border border-dashed border-primary-100"

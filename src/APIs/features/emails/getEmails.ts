@@ -14,6 +14,5 @@ export const getEmails = async (
       params: { page, limit },
     },
   );
-  console.log(unwrap(res));
   return unwrap(res);
 };

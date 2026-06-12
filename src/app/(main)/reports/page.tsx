@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Container from "@/_components/shared/Container";
 import { Text } from "@/_components/shared/Text";
 import { stats, listItems } from "./data";
-import { ReportsSkeleton } from "@/_components/skeleton/ReportsSkeleton";
+import { ReportsPageSkeleton } from "@/_components/skeleton/ReportsPageSkeleton";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useGetAuthMe } from "@/APIs/hooks/auth";
@@ -42,7 +42,7 @@ export default function Reports() {
     isError: userIsError,
   } = useGetAuthMe();
 
-  if (userIsLoading || reportsLoading) return <ReportsSkeleton />;
+  if (userIsLoading || reportsLoading) return <ReportsPageSkeleton />;
 
   if (userIsError || reportsIsError) {
     return (

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function proxy(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
-  console.log(token);
   const { pathname } = req.nextUrl;
 
   const publicPages = [

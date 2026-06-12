@@ -10,6 +10,7 @@ import {
   Mail,
   Trash2,
   RefreshCw,
+  MoreVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,12 @@ import { MailDetailsSkeleton } from "../skeleton/MailDetailsSkeleton";
 import { StateMessage } from "../shared/StateMessage";
 import notFoundImg from "../../../public/images/not-found.png";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Sub-components
 import { SecurityStatusBanner } from "./MailDetails/SecurityStatusBanner";
@@ -65,6 +72,17 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
   const deleteMutation = useDeleteEmail(mailboxId, activeFolder ?? undefined);
   const scanMutation = useScanEmail(mailboxId);
   const setComposeOpen = useMailStore((s) => s.setComposeOpen);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 640) {
+        setIsMoreOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const mutateRead = readMutation.mutate;
 
@@ -156,9 +174,15 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
         to: email.fromAddr,
         subject: `Re: ${email.subject}`,
         fromName: email.fromName,
+        fromAddr: email.fromAddr,
         receivedAt: email.receivedAt,
         emailId: String(email.id),
         toAddr: email.toAddr,
+        originalHtml: email.bodyHtml
+          ? processHtmlBody(email.bodyHtml)
+          : undefined,
+        originalText: email.bodyText,
+        attachments: email.attachments,
       },
     });
   };
@@ -178,6 +202,7 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
           : undefined,
         originalText: email.bodyText,
         toAddr: email.toAddr,
+        attachments: email.attachments,
       },
     });
   };
@@ -306,30 +331,41 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
           </Text>
         </div>
         <div className="flex items-center gap-2">
-          {/* <Button
-            onClick={() => refetch()}
-            variant={"outline"}
-            disabled={isRefetching}
-            className="cursor-pointer"
-          >
-            <RefreshCw
-              className={cn("w-4 h-4", isRefetching && "animate-spin")}
-            />
-            <span className="hidden sm:flex">Refresh</span>
-          </Button> */}
+          {/* Desktop scan & reclassify */}
           <Button
             onClick={handleScan}
             variant={"outline"}
             disabled={scanMutation.isPending || email.isRescanning}
+            className="hidden sm:flex cursor-pointer"
           >
             {scanMutation.isPending ? (
               <Spinner />
             ) : (
               <Shield className="w-4 h-4" />
             )}
-            <span className="hidden sm:flex">Scan</span>
+            <span>Scan</span>
           </Button>
-          <ReclassifyMenu emailId={emailId} />
+          <div className="hidden sm:flex">
+            <ReclassifyMenu emailId={emailId} triggerType="default" />
+          </div>
+
+          {/* Mobile scan & reclassify */}
+          <ActionButton
+            icon={
+              scanMutation.isPending ? (
+                <Spinner />
+              ) : (
+                <Shield className="w-4 h-4 text-primary" />
+              )
+            }
+            label="Scan"
+            onClick={handleScan}
+            disabled={scanMutation.isPending || email.isRescanning}
+            className="flex sm:hidden"
+          />
+          <div className="flex sm:hidden">
+            <ReclassifyMenu emailId={emailId} triggerType="action-button" />
+          </div>
         </div>
       </div>
 
@@ -374,34 +410,115 @@ export const MailDetails = ({ emailId }: { emailId: string }) => {
         </div>
         {/* Action Buttons  */}
         <div className="flex items-center gap-1.5">
-          <ActionButton
-            icon={<Reply className="size-4 text-primary" />}
-            label="Reply"
-            onClick={handleReply}
-          />
-          {/* <ActionButton
-            icon={<Forward className="size-4 text-primary" />}
-            label="Forward"
-            onClick={handleForward}
-          /> */}
-          <ActionButton
-            icon={
-              email.isRead ? (
-                <Mail className="size-4 text-primary" />
-              ) : (
-                <MailOpen className="size-4 text-primary" />
-              )
-            }
-            label={email.isRead ? "Mark as Unread" : "Mark as Read"}
-            onClick={handleToggleRead}
-            className={email.isRead ? "text-primary-400" : ""}
-          />
-          <ActionButton
-            icon={<Trash2 className="size-4 text-primary" />}
-            label="Delete"
-            onClick={handleDelete}
-            variant="danger"
-          />
+          {/* Desktop Actions */}
+          <div className="hidden sm:flex items-center gap-1.5">
+            <ActionButton
+              icon={<Reply className="size-4 text-primary" />}
+              label="Reply"
+              onClick={handleReply}
+            />
+            <ActionButton
+              icon={<Forward className="size-4 text-primary" />}
+              label="Forward"
+              onClick={handleForward}
+            />
+            <ActionButton
+              icon={
+                email.isRead ? (
+                  <Mail className="size-4 text-primary" />
+                ) : (
+                  <MailOpen className="size-4 text-primary" />
+                )
+              }
+              label={email.isRead ? "Mark as Unread" : "Mark as Read"}
+              onClick={handleToggleRead}
+              className={email.isRead ? "text-primary-400" : ""}
+            />
+            <ActionButton
+              icon={<Trash2 className="size-4 text-primary" />}
+              label="Delete"
+              onClick={handleDelete}
+              variant="danger"
+            />
+          </div>
+
+          {/* Mobile Actions Dropdown */}
+          <div className="flex sm:hidden">
+            <DropdownMenu open={isMoreOpen} onOpenChange={setIsMoreOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full text-primary-700 hover:bg-primary-50 size-9 items-center justify-center transition-all cursor-pointer"
+                  aria-label="More actions"
+                >
+                  <MoreVertical className="w-4.5 h-4.5 text-primary" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[200px] rounded-xl p-2 shadow-[0px_20px_50px_rgba(0,0,0,0.1)] border border-primary-100 bg-primary-50"
+                align="end"
+              >
+                <DropdownMenuItem
+                  onClick={handleReply}
+                  className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background"
+                >
+                  <Reply className="w-4 h-4 text-primary-400 group-hover:text-primary" />
+                  <Text
+                    as="span"
+                    font="medium"
+                    className="text-primary-400 group-hover:text-primary flex-1 text-sm"
+                  >
+                    Reply
+                  </Text>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={handleToggleRead}
+                  className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background"
+                >
+                  {email.isRead ? (
+                    <Mail className="w-4 h-4 text-primary-400 group-hover:text-primary" />
+                  ) : (
+                    <MailOpen className="w-4 h-4 text-primary-400 group-hover:text-primary" />
+                  )}
+                  <Text
+                    as="span"
+                    font="medium"
+                    className="text-primary-400 group-hover:text-primary flex-1 text-sm"
+                  >
+                    {email.isRead ? "Mark as Unread" : "Mark as Read"}
+                  </Text>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleForward}
+                  className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group hover:text-primary transition-colors data-highlighted:bg-background"
+                >
+                  <Forward className="w-4 h-4 text-primary-400 group-hover:text-primary" />
+                  <Text
+                    as="span"
+                    font="medium"
+                    className="text-primary-400 group-hover:text-primary flex-1 text-sm"
+                  >
+                    Forward
+                  </Text>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleDelete}
+                  className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group hover:text-error-500 transition-colors data-highlighted:bg-error-50/50"
+                >
+                  <Trash2 className="w-4 h-4 text-error-400 group-hover:text-error-500" />
+                  <Text
+                    as="span"
+                    font="medium"
+                    className="text-error-400 group-hover:text-error-500 flex-1 text-sm"
+                  >
+                    Delete
+                  </Text>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 

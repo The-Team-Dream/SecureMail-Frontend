@@ -10,6 +10,7 @@ import { useMailboxes, useSyncMailbox } from "@/APIs/hooks/mailboxes";
 import { Mailbox } from "@/APIs/types/Mailbox";
 import { StateMessage } from "@/_components/shared/StateMessage";
 import notFoundImg from "@/../public/images/not-found.png";
+import { ActionButton } from "@/_components/shared/ActionButton";
 import { MailboxCard } from "./MailboxCard";
 import { useSocketContext } from "@/utils/providers/SocketProvider";
 
@@ -89,14 +90,24 @@ export function ConnectedAccounts({ onAddAccount }: ConnectedAccountsProps) {
             You have Total {mailboxes?.length || 0} connected accounts
           </Text>
         </div>
-        <Button size={"lg"} onClick={onAddAccount}>
+        {/* Mobile: icon-only ActionButton */}
+        <ActionButton
+          icon={<Plus className="w-5 h-5 text-white" />}
+          label="Add New Account"
+          tooltipSide="left"
+          onClick={onAddAccount}
+          className="md:hidden h-10 w-10 bg-primary hover:bg-primary/90 rounded-full"
+        />
+
+        {/* Desktop: full labeled Button */}
+        <Button size={"lg"} onClick={onAddAccount} className="hidden md:flex">
           <Plus className="w-4 h-4" />
-          <span className="hidden md:block">Add New Account</span>
+          Add New Account
         </Button>
       </motion.div>
 
       <div className="bg-ghostBlue rounded-lg p-2 lg:py-6 lg:px-4 w-full">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full items-end">
           {mailboxes?.map((acc: Mailbox, index: number) => (
             <MailboxCard
               key={acc.id}

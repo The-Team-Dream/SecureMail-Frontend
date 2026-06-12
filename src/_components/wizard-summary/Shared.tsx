@@ -146,7 +146,7 @@ export function SecuritySelect({
       </label>
       <div className="relative">
         <select
-          className="w-full h-12 px-4 border border-primary-100 rounded-lg outline-none appearance-none focus:border-primary-400 text-primary-900 bg-card"
+          className="w-full h-12 px-4 border border-primary-100 rounded-lg outline-none appearance-none focus:border-primary-400 text-primary-900 bg-transparent"
           value={value}
           onChange={(e) => onChange(e.target.value)}
         >

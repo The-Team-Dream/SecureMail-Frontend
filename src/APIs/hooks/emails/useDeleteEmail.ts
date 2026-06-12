@@ -7,13 +7,15 @@ export const useDeleteEmail = (mailboxId: string, currentFolder?: EmailFolder) =
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => {
+    mutationFn: (args: string | { id: string; showToast?: boolean }) => {
+      const id = typeof args === "string" ? args : args.id;
       if (currentFolder === "trash") {
         return emailsApi.deleteEmail(mailboxId, id);
       }
       return emailsApi.reclassify(mailboxId, id, "trash");
     },
-    onMutate: async (id) => {
+    onMutate: async (args) => {
+      const id = typeof args === "string" ? args : args.id;
       await queryClient.cancelQueries({ queryKey: ["emails", mailboxId] });
       const previousQueries = queryClient.getQueriesData<any>({
         queryKey: ["emails", mailboxId],
@@ -55,13 +57,19 @@ export const useDeleteEmail = (mailboxId: string, currentFolder?: EmailFolder) =
 
       return { previousQueries };
     },
-    onSuccess: () => {
-      toast.success("Email deleted successfully");
+    onSuccess: (_data, args) => {
+      const showToast = typeof args === "string" ? true : (args.showToast ?? true);
+      if (showToast) {
+        toast.success("Email deleted successfully");
+      }
     },
-    onError: (err: any, _id, context) => {
+    onError: (err: any, args, context) => {
+      const showToast = typeof args === "string" ? true : (args.showToast ?? true);
       const errorMessage =
         err.response?.data?.message || err.message || "Failed to delete email";
-      toast.error(errorMessage);
+      if (showToast) {
+        toast.error(errorMessage);
+      }
 
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {

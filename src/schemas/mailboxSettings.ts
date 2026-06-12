@@ -5,7 +5,6 @@ export const mailBoxSettingsSchema = z.object({
     .string()
     .min(1, "Mailbox name is required")
     .max(50, "Mailbox name cannot exceed 50 characters"),
-  emailForwarding: z.boolean(),
   pushNotifications: z.boolean(),
 });
 

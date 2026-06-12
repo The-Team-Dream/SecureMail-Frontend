@@ -2,13 +2,9 @@ import React, { useState } from "react";
 import { Text } from "@/_components/shared/Text";
 import { Input } from "@/_components/shared/Input";
 import { WizardStepProps } from "../../../../../schemas/CustomAccount";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog as DialogPrimitive } from "radix-ui";
+import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
 export function StepImapSmtp({
@@ -73,7 +69,7 @@ export function StepImapSmtp({
           </label>
           <div className="relative">
             <select
-              className={`w-full h-12 px-4 border text-[14px] text-primary rounded-lg outline-none transition duration-500 appearance-none bg-card ${errors?.encryption ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
+              className={`w-full h-12 px-4 border text-[14px] text-primary rounded-lg outline-none transition duration-500 appearance-none bg-transparent ${errors?.encryption ? "border-error-500" : "border-primary-100 focus:border-primary-400"}`}
               {...(register
                 ? register("encryption", {
                     onChange: () => clearErrors?.("encryption"),
@@ -192,75 +188,109 @@ export function StepImapSmtp({
         </div>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md bg-card">
-          <DialogHeader>
-            <DialogTitle>How to generate an App Password</DialogTitle>
-            <DialogDescription className="text-primary-400 mt-2">
-              App passwords let you sign in to your email account from apps on
-              devices that don't support 2-Step Verification.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-4 py-4 text-sm text-primary">
-            <div className="space-y-2">
-              <Text font="semiBold">For Gmail / Google Workspace:</Text>
-              <ol className="list-decimal pl-5 space-y-1 text-primary-600">
-                <li>
-                  Go to your{" "}
-                  <Link
-                    href="https://myaccount.google.com/security"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline text-primary"
+      <DialogPrimitive.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <AnimatePresence>
+          {isModalOpen && (
+            <DialogPrimitive.Portal forceMount>
+              <DialogPrimitive.Overlay asChild>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 bg-background/40 backdrop-blur-sm"
+                />
+              </DialogPrimitive.Overlay>
+              <DialogPrimitive.Content asChild>
+                <div className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] p-4 focus:outline-none">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                    transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+                    className="relative overflow-hidden rounded-2xl bg-card p-6 shadow-2xl border border-primary-100/50"
                   >
-                    Google Account Settings
-                  </Link>
-                  .
-                </li>
-                <li>
-                  Select <strong>Security</strong> on the left panel.
-                </li>
-                <li>
-                  Under "How you sign in to Google", turn on{" "}
-                  <strong>2-Step Verification</strong>.
-                </li>
-                <li>
-                  Once enabled, go back to Security and select{" "}
-                  <strong>App passwords</strong> (or search for it).
-                </li>
-                <li>Generate a password and paste it here.</li>
-              </ol>
-            </div>
-            <div className="space-y-2">
-              <Text font="semiBold">For Outlook / Microsoft 365:</Text>
-              <ol className="list-decimal pl-5 space-y-1 text-primary-600">
-                <li>
-                  Go to your{" "}
-                  <Link
-                    href="https://account.microsoft.com/security"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline text-primary"
-                  >
-                    Microsoft Account Security page
-                  </Link>
-                  .
-                </li>
-                <li>
-                  Select <strong>Advanced security options</strong>.
-                </li>
-                <li>
-                  Ensure <strong>Two-step verification</strong> is turned on.
-                </li>
-                <li>
-                  Under "App passwords", select{" "}
-                  <strong>Create a new app password</strong>.
-                </li>
-              </ol>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+                    <div className="flex flex-col gap-2">
+                      <DialogPrimitive.Title className="text-lg font-semibold text-primary-950">
+                        How to generate an App Password
+                      </DialogPrimitive.Title>
+                      <DialogPrimitive.Description className="text-sm text-primary-400 mt-2">
+                        App passwords let you sign in to your email account from apps on
+                        devices that don't support 2-Step Verification.
+                      </DialogPrimitive.Description>
+                    </div>
+                    <div className="flex flex-col gap-4 py-4 text-sm text-primary max-h-[60vh] overflow-y-auto pr-1">
+                      <div className="space-y-2">
+                        <Text font="semiBold">For Gmail / Google Workspace:</Text>
+                        <ol className="list-decimal pl-5 space-y-1 text-primary-600">
+                          <li>
+                            Go to your{" "}
+                            <Link
+                              href="https://myaccount.google.com/security"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline text-primary"
+                            >
+                              Google Account Settings
+                            </Link>
+                            .
+                          </li>
+                          <li>
+                            Select <strong>Security</strong> on the left panel.
+                          </li>
+                          <li>
+                            Under "How you sign in to Google", turn on{" "}
+                            <strong>2-Step Verification</strong>.
+                          </li>
+                          <li>
+                            Once enabled, go back to Security and select{" "}
+                            <strong>App passwords</strong> (or search for it).
+                          </li>
+                          <li>Generate a password and paste it here.</li>
+                        </ol>
+                      </div>
+                      <div className="space-y-2">
+                        <Text font="semiBold">For Outlook / Microsoft 365:</Text>
+                        <ol className="list-decimal pl-5 space-y-1 text-primary-600">
+                          <li>
+                            Go to your{" "}
+                            <Link
+                              href="https://account.microsoft.com/security"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline text-primary"
+                            >
+                              Microsoft Account Security page
+                            </Link>
+                            .
+                          </li>
+                          <li>
+                            Select <strong>Advanced security options</strong>.
+                          </li>
+                          <li>
+                            Ensure <strong>Two-step verification</strong> is turned on.
+                          </li>
+                          <li>
+                            Under "App passwords", select{" "}
+                            <strong>Create a new app password</strong>.
+                          </li>
+                        </ol>
+                      </div>
+                    </div>
+                    <DialogPrimitive.Close asChild>
+                      <button
+                        className="absolute right-4 top-4 rounded-full p-1 text-primary-500 transition-colors hover:bg-primary-100 hover:text-primary-900 cursor-pointer"
+                        aria-label="Close"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </DialogPrimitive.Close>
+                  </motion.div>
+                </div>
+              </DialogPrimitive.Content>
+            </DialogPrimitive.Portal>
+          )}
+        </AnimatePresence>
+      </DialogPrimitive.Root>
     </div>
   );
 }

@@ -4,7 +4,6 @@ export * from "./useEmailDetails";
 export * from "./useUnreadEmailsCount";
 export * from "./useReadEmail";
 export * from "./useDeleteEmail";
-export * from "./useDeleteEmailWithUndo";
 export * from "./useReclassifyEmail";
 export * from "./useSendEmail";
 export * from "./useReplyEmail";

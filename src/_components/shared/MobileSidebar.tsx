@@ -137,8 +137,8 @@ export const MobileSidebar = () => {
                     );
                   }}
                 >
-                  <PencilLine className="w-6 h-6 text-black mr-2" />
-                  <Text className="text-black" font={"bold"}>
+                  <PencilLine className="w-6 h-6 text-primary-900 mr-2" />
+                  <Text className="text-primary-900" font={"bold"}>
                     New Email
                   </Text>
                 </Button>

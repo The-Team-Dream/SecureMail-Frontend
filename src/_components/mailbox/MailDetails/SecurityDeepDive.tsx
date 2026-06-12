@@ -238,11 +238,15 @@ export const SecurityDeepDive = ({
                           mode: "reply",
                           data: {
                             to: email.fromAddr,
-                            subject: email.subject,
+                            subject: `Re: ${email.subject}`,
                             fromName: email.fromName,
+                            fromAddr: email.fromAddr,
                             receivedAt: email.receivedAt,
                             emailId: String(email.id),
-                            bodyHtml: email.bodyHtml,
+                            toAddr: email.toAddr,
+                            originalHtml: email.bodyHtml,
+                            originalText: email.bodyText,
+                            attachments: email.attachments,
                             body: suggestion,
                           },
                         });

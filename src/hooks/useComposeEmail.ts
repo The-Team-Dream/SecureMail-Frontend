@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import Cookies from "js-cookie";
+import { baseURL } from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMailStore } from "@/stores/useMailStore";
 import { useParams, useRouter } from "next/navigation";
@@ -17,6 +19,37 @@ import { useQueryClient } from "@tanstack/react-query";
 import { emailsApi } from "@/APIs/features/emails";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useServerErrors } from "@/utils/form-utils";
+const fetchAttachmentAsFile = async (
+  mailboxId: string,
+  emailId: string,
+  attachmentId: string,
+  filename: string,
+  attachmentUrl?: string,
+): Promise<File> => {
+  const token = Cookies.get("token");
+  let url =
+    attachmentUrl ||
+    `${baseURL}/mailboxes/${mailboxId}/emails/${emailId}/attachments/${attachmentId}/download`;
+
+  if (url && !url.startsWith("http")) {
+    url = `${baseURL}${url.startsWith("/") ? "" : "/"}${url}`;
+  }
+
+  const headers: HeadersInit = {};
+  if (token && (!url.startsWith("http") || url.startsWith(baseURL) || url.includes("/mailboxes/"))) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch attachment: ${response.status} ${response.statusText}`);
+  }
+
+  const blob = await response.blob();
+  return new File([blob], filename, {
+    type: blob.type || "application/octet-stream",
+  });
+};
 
 export const useComposeEmail = () => {
   const {
@@ -61,6 +94,7 @@ export const useComposeEmail = () => {
 
   // ── Attachments state ──────────────────────────────────────────────────
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [forwardedAttachments, setForwardedAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Rich-text body editor ref (contentEditable div)
   const bodyEditorRef = useRef<HTMLDivElement>(null);
@@ -82,13 +116,14 @@ export const useComposeEmail = () => {
         mode: composeMode,
         from: mailboxIdToUse,
         to: composeData?.to ?? "",
-        subject: "",
+        subject: composeMode === "forward" ? (composeData?.subject ?? "") : "",
         cc: "",
         bcc: "",
         bodyText: composeMode === "reply" ? (composeData?.body ?? "") : "",
         bodyHtml: "",
       } as EmailFormValues);
       setAttachments([]);
+      setForwardedAttachments([]);
       setShowEmoji(false);
       setShowCc(false);
       setShowBcc(false);
@@ -97,9 +132,49 @@ export const useComposeEmail = () => {
         bodyEditorRef.current.innerHTML =
           composeMode === "reply" ? (composeData?.body ?? "") : "";
       }
+
+      // If forwarding or replying to an email with attachments, download them so they are included
+      const attachmentsToDownload = composeData?.attachments;
+      if (
+        (composeMode === "forward" || composeMode === "reply") &&
+        mailboxIdToUse &&
+        composeData?.emailId &&
+        attachmentsToDownload?.length
+      ) {
+        const downloadForwardedAttachments = async () => {
+          try {
+            const files: File[] = [];
+            for (const att of attachmentsToDownload) {
+              const attAsCustom = att as any;
+              const attId = String(
+                att.id ??
+                  attAsCustom.attachmentId ??
+                  attAsCustom.attachment_id ??
+                  attAsCustom._id ??
+                  attAsCustom.fileId ??
+                  "",
+              );
+              const attUrl = att.url || attAsCustom.path;
+
+              const file = await fetchAttachmentAsFile(
+                mailboxIdToUse,
+                composeData.emailId!,
+                attId,
+                att.filename,
+                attUrl,
+              );
+              files.push(file);
+            }
+            setForwardedAttachments(files);
+          } catch (error) {
+            console.error("Failed to load forwarded attachments:", error);
+          }
+        };
+        downloadForwardedAttachments();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, composeMode, composeData, mailboxes]);
+  }, [isOpen, composeMode, composeData, mailboxes, mailboxIdToUse]);
 
   // Close emoji picker on outside click
   useEffect(() => {
@@ -224,8 +299,11 @@ export const useComposeEmail = () => {
     const sanitizedCc = sanitizeEmails(data.cc);
     const sanitizedBcc = sanitizeEmails(data.bcc);
 
+    // Combine regular attachments with hidden forwarded attachments
+    const allAttachments = [...attachments, ...forwardedAttachments];
+
     // ─── Attachments Validation & Binary Handling Layer ───
-    attachments.forEach((file) => {
+    allAttachments.forEach((file) => {
       console.log(
         `[DEBUG] Processing attachment: name="${file.name}", size=${file.size} bytes, type="${file.type}"`,
       );
@@ -271,17 +349,8 @@ export const useComposeEmail = () => {
         console.log(`  - Entry #${idx + 1} is not a File instance:`, entry);
       }
     });
-    const onSuccess = async () => {
+    const onSuccess = () => {
       setOpen(false);
-      try {
-        await queryClient.prefetchQuery({
-          queryKey: ["emails", mailboxIdToUse, "sent", 1],
-          queryFn: () => emailsApi.getEmails(mailboxIdToUse, "sent", 1),
-          staleTime: 0,
-        });
-      } catch {
-        // Prefetch failing shouldn't block navigation
-      }
     };
 
     if (composeMode === "reply" && composeData?.emailId) {

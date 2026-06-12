@@ -9,8 +9,10 @@ export const useForwardEmail = (mailboxId: string) => {
     mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
       emailsApi.forwardEmail(mailboxId, id, formData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
       toast.success("Email forwarded successfully");
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
+      }, 2000);
     },
     onError: () => {},
   });

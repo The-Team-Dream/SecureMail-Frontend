@@ -35,13 +35,26 @@ export const getReplyHeader = (meta: EmailMeta): string => {
   const dateStr = meta.receivedAt
     ? format(new Date(meta.receivedAt), "PPPP 'at' p")
     : "";
-  const fromName = meta.fromName || "";
-  const fromAddr = meta.fromAddr || "";
+  const fromName = meta.fromName?.trim() || "";
+  const fromAddr = meta.fromAddr?.trim() || "";
+
+  let senderStr = "";
+  if (fromName && fromAddr) {
+    senderStr = `<b>${fromName}</b> &lt;${fromAddr}&gt;`;
+  } else if (fromAddr) {
+    senderStr = `<b>${fromAddr}</b>`;
+  } else if (fromName) {
+    senderStr = `<b>${fromName}</b>`;
+  } else {
+    senderStr = "someone";
+  }
+
+  const timePrefix = dateStr ? `On ${dateStr}, ` : "";
 
   return `
     <br>
     <div class="securemail_reply_header" style="font-family: Arial, sans-serif; font-size: 14px; color: #555; border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
-      On ${dateStr}, <b>${fromName}</b> &lt;${fromAddr}&gt; wrote:<br>
+      ${timePrefix}${senderStr} wrote:<br>
     </div>
   `;
 };

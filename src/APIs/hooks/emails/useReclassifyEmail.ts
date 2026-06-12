@@ -30,6 +30,8 @@ export const useReclassifyEmail = (mailboxId: string) => {
     },
     onSuccess: () => {
       toast.success("Email reclassified successfully");
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", mailboxId] });
     },
     onError: (_err, _variables, context) => {
       if (context?.previousQueries) {
@@ -40,6 +42,8 @@ export const useReclassifyEmail = (mailboxId: string) => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["emails", mailboxId] });
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", mailboxId] });
     },
   });
 };

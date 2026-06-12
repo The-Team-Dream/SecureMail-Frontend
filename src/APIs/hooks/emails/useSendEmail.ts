@@ -124,10 +124,12 @@ export const useSendEmail = (mailboxId: string) => {
     onSettled: () => {
       const idStr = String(mailboxId);
       const idNum = Number(mailboxId);
-      queryClient.invalidateQueries({ queryKey: ["emails", idStr] });
-      queryClient.invalidateQueries({ queryKey: ["emails", idNum] });
-      queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
-      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["emails", idStr] });
+        queryClient.invalidateQueries({ queryKey: ["emails", idNum] });
+        queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
+        queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      }, 2000);
     },
   });
 };

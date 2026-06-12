@@ -201,8 +201,8 @@ export const NotificationDropdown = () => {
                   ) : (
                     <div className="h-[400px] flex items-center justify-center">
                       <StateMessage
-                        image={notFoundImg}
-                        imageClassName="w-[180px] h-[180px] mb-4"
+                        variant="empty"
+                        icon={Bell}
                         title={`No ${activeTab === "all" ? "" : activeTab} notifications`}
                         description="You're all caught up!"
                       />

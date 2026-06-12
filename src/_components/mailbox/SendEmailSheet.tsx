@@ -242,7 +242,10 @@ export const ComposeEmailSheet = () => {
 
   React.useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (linkInputRef.current && !linkInputRef.current.contains(e.target as Node)) {
+      if (
+        linkInputRef.current &&
+        !linkInputRef.current.contains(e.target as Node)
+      ) {
         setShowLinkInput(false);
       }
     };
@@ -440,7 +443,10 @@ export const ComposeEmailSheet = () => {
                   }}
                   onBlur={(e) => {
                     const text = e.currentTarget.innerText?.trim() || "";
-                    setValue("bodyText", text, { shouldValidate: true, shouldTouch: true });
+                    setValue("bodyText", text, {
+                      shouldValidate: true,
+                      shouldTouch: true,
+                    });
                   }}
                   data-placeholder={
                     composeMode === "reply"
@@ -457,14 +463,13 @@ export const ComposeEmailSheet = () => {
                     errors.bodyText
                       ? "border-error-500 before:text-error-500"
                       : "border-primary-100 before:text-primary-400",
-                    isPending && "opacity-60 cursor-not-allowed pointer-events-none",
+                    isPending &&
+                      "opacity-60 cursor-not-allowed pointer-events-none",
                   )}
                 />
                 <Error error={errors.bodyText?.message as string} />
               </div>
             </div>
-
-
 
             {attachments.length > 0 && (
               <div className="flex flex-wrap gap-3 pt-2">

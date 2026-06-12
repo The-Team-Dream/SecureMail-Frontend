@@ -7,6 +7,7 @@ interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
   active?: boolean;
   disableFill?: boolean;
   size?: number;
+  disableGroupHover?: boolean;
 }
 
 /**
@@ -19,6 +20,7 @@ export const CustomIcon = ({
   size = 22,
   className,
   children,
+  disableGroupHover,
   ...props
 }: CustomIconProps) => {
   return (
@@ -26,11 +28,15 @@ export const CustomIcon = ({
       width={size}
       height={size}
       viewBox="0 0 18 18"
-            fill="none"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(
         "transition-colors duration-200",
-        active ? "text-primary" : "text-primary-600 group-hover:text-600",
+        active
+          ? "text-primary"
+          : disableGroupHover
+            ? "text-primary-600"
+            : "text-primary-600 group-hover:text-primary",
         className
       )}
       {...props}

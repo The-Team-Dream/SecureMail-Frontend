@@ -18,9 +18,10 @@ import type { EmailFolder } from "@/APIs/types/Email";
 
 interface ReclassifyMenuProps {
   emailId: string;
+  triggerType?: "default" | "action-button";
 }
 
-export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
+export const ReclassifyMenu = ({ emailId, triggerType = "default" }: ReclassifyMenuProps) => {
   const router = useRouter();
   const { mailboxId } = useParams();
   const reclassifyMutation = useReclassifyEmail(mailboxId as string);
@@ -39,22 +40,39 @@ export const ReclassifyMenu = ({ emailId }: ReclassifyMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button disabled={reclassifyMutation.isPending} className="w-fit gap-2">
-          {reclassifyMutation.isPending ? (
-            <>
-              <span className="text-sm font-normal">Reclassifying...</span>
+        {triggerType === "action-button" ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            disabled={reclassifyMutation.isPending}
+            className="rounded-full text-primary-700 hover:bg-primary-50 size-9 items-center justify-center transition-all cursor-pointer"
+            aria-label="Reclassify"
+          >
+            {reclassifyMutation.isPending ? (
               <Spinner className="w-4 h-4" />
-            </>
-          ) : (
-            <>
-              <span className="text-sm font-normal hidden sm:flex">
-                Reclassify
-              </span>
-              <FolderSync className="flex sm:hidden" />
-              <ChevronDown className="w-4 h-4" />
-            </>
-          )}
-        </Button>
+            ) : (
+              <FolderSync className="w-4 h-4 text-primary" />
+            )}
+          </Button>
+        ) : (
+          <Button disabled={reclassifyMutation.isPending} className="w-fit gap-2">
+            {reclassifyMutation.isPending ? (
+              <>
+                <span className="text-sm font-normal">Reclassifying...</span>
+                <Spinner className="w-4 h-4" />
+              </>
+            ) : (
+              <>
+                <span className="text-sm font-normal hidden sm:flex">
+                  Reclassify
+                </span>
+                <FolderSync className="flex sm:hidden" />
+                <ChevronDown className="w-4 h-4" />
+              </>
+            )}
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-[250px] rounded-xl p-2 shadow-[0px_20px_50px_rgba(0,0,0,0.1)] border border-primary-100 bg-primary-50 mb-2"

@@ -418,7 +418,7 @@ export const Sidebar = () => {
                   <Text
                     as={"span"}
                     font={isActive ? "medium" : "default"}
-                    color={isActive ? "default" : "muted"}
+                    color={isActive ? "primary-950" : "muted"}
                   >
                     {item.name}
                   </Text>
@@ -493,7 +493,7 @@ export const Sidebar = () => {
               <Text
                 as={"span"}
                 font={pathname === "/profile" ? "medium" : "default"}
-                color={pathname === "/profile" ? "default" : "muted"}
+                color={pathname === "/profile" ? "primary-950" : "muted"}
               >
                 Profile
               </Text>

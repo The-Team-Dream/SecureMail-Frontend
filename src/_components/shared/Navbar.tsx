@@ -72,6 +72,7 @@ export const Navbar = () => {
   const userEmail = userData?.email ?? "";
 
   const [isSwitching, setIsSwitching] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const triggerAvatar = isMailPage
     ? ((activeAccount as any)?.avatar ?? userAvatar)
@@ -130,7 +131,7 @@ export const Navbar = () => {
       <div className="flex items-center gap-2">
         <NotificationDropdown />
 
-        <DropdownMenu>
+        <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <button className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center  cursor-pointer outline-none overflow-hidden">
               {triggerAvatar ? (
@@ -155,6 +156,7 @@ export const Navbar = () => {
               <Link
                 href="/profile"
                 className="w-16 h-16 md:w-[120px] md:h-[120px] rounded-full bg-secondary-100 flex items-center justify-center  overflow-hidden hover:scale-105 transition-transform"
+                onClick={() => setIsDropdownOpen(false)}
               >
                 {isSwitching ? (
                   <Spinner className="w-10 h-10 text-secondary-900" />
@@ -180,6 +182,7 @@ export const Navbar = () => {
                   <Link
                     href="/settings"
                     className="p-1.5 rounded-full hover:bg-primary-100 transition-colors text-primary"
+                    onClick={() => setIsDropdownOpen(false)}
                   >
                     <Pencil className="size-4" />
                   </Link>
@@ -190,6 +193,7 @@ export const Navbar = () => {
                 <Link
                   href="/profile"
                   className="mt-2 text-xs font-bold text-secondary-800 hover:underline flex items-center gap-1 group"
+                  onClick={() => setIsDropdownOpen(false)}
                 >
                   View Full Profile
                   <ChevronRight className="size-3 transition-transform group-hover:translate-x-0.5" />

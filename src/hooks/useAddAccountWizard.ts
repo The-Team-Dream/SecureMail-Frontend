@@ -333,7 +333,7 @@ export function useAddAccountWizard({
         smtpPort: formData.smtpPort as unknown as number,
       });
 
-      // ── Success: clear state and go back to list ──────────
+      // ── Success: clear state and g  o back to list ──────────
       clearPersistence();
       reset();
       handleCancel();

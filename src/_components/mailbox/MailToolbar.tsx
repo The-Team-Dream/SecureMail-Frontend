@@ -125,29 +125,17 @@ export const MailToolbar = ({
     toast.success("Emails refreshed successfully");
   };
 
-  const handleBulkArchive = async () => {
-    if (selectedIds.length === 0) return;
-    try {
-      await Promise.all(
-        selectedIds.map((id) =>
-          reclassifyMutation.mutateAsync({ id, folder: "trash" }),
-        ),
-      ); // using trash as fallback since archive endpoint is missing
-      deselectAll();
-      toast.success("Selected emails archived");
-    } catch (e) {
-      toast.error("Some emails failed to archive");
-    }
-  };
-
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
+    const showToast = selectedIds.length === 1;
     try {
       await Promise.all(
-        selectedIds.map((id) => deleteMutation.mutateAsync(id)),
+        selectedIds.map((id) => deleteMutation.mutateAsync({ id, showToast })),
       );
       deselectAll();
-      toast.success("Selected emails deleted");
+      if (!showToast) {
+        toast.success("selected emails deleted");
+      }
     } catch (e) {
       toast.error("Some emails failed to delete");
     }
@@ -158,18 +146,25 @@ export const MailToolbar = ({
     // We don't know the read state of each email easily here without looking them up,
     // so we'll just mark them all as read for simplicity, or we could look up the first one
     const firstSelected = pagedEmails.find(
-      (e: Email) => e.id === selectedIds[0],
+      (e: Email) => String(e.id) === String(selectedIds[0]),
     );
     const newReadState = firstSelected ? !firstSelected.isRead : true;
+    const showToast = selectedIds.length === 1;
 
     try {
       await Promise.all(
         selectedIds.map((id) =>
-          readMutation.mutateAsync({ id, read: newReadState }),
+          readMutation.mutateAsync({ id, read: newReadState, showToast }),
         ),
       );
       deselectAll();
-      toast.success("Selected emails read status updated");
+      if (!showToast) {
+        toast.success(
+          newReadState
+            ? "selected emails marked as read"
+            : "selected emails marked as unread",
+        );
+      }
     } catch (e) {
       toast.error("Some emails failed to update read status");
     }
@@ -305,11 +300,11 @@ export const MailToolbar = ({
             style={{ width: `${scanProgress.percentage}%` }}
           />
           <div className="absolute right-2 -top-5 text-[10px] text-secondary-600 font-semibold">
-            {scanProgress.completed} / {scanProgress.total} ({scanProgress.percentage}%)
+            {scanProgress.completed} / {scanProgress.total} (
+            {scanProgress.percentage}%)
           </div>
         </div>
       )}
-
     </div>
   );
 };

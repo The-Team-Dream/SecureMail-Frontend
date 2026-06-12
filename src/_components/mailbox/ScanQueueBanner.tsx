@@ -9,8 +9,10 @@ import { cn } from "@/lib/utils";
 
 export const ScanQueueBanner = ({
   mailboxId: propMailboxId,
+  onDismiss,
 }: {
   mailboxId?: string;
+  onDismiss?: () => void;
 }) => {
   const params = useParams();
   const mailboxId = propMailboxId || (params.mailboxId as string);
@@ -83,7 +85,7 @@ export const ScanQueueBanner = ({
   return (
    <div
   className={cn(
-    "mx-2 pb-4 rounded-2xl overflow-hidden border shadow-sm transition-all",
+    "mx-2 pb-4 w-full rounded-2xl overflow-hidden border shadow-sm transition-all",
     localIsPaused
       ? "bg-amber-50 border-amber-200"
       : "bg-primary-50 border-primary-200",
@@ -181,7 +183,11 @@ export const ScanQueueBanner = ({
       )}
 
       <button
-        onClick={(e) => { e.preventDefault(); setDismissed(true); }}
+        onClick={(e) => {
+          e.preventDefault();
+          setDismissed(true);
+          onDismiss?.();
+        }}
         className="p-2 rounded-lg text-primary-400 hover:text-primary-600 hover:bg-primary-100 transition-colors cursor-pointer"
       >
         <X className="w-4 h-4" />

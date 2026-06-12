@@ -20,7 +20,7 @@ interface MailState {
     originalHtml?: string;
     originalText?: string;
     toAddr?: string[];
-    attachments?: { id: string; name: string }[];
+    attachments?: any[];
   } | null;
 
   setActiveFolder: (folder: Folder) => void;
@@ -42,6 +42,7 @@ interface MailState {
         originalHtml?: string;
         originalText?: string;
         toAddr?: string[];
+        attachments?: any[];
       };
     },
   ) => void;

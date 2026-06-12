@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Socket } from "socket.io-client";
 import Cookies from "js-cookie";
 import { getSocket, disconnectSocket } from "@/lib/socket";
+import { mailboxApi } from "@/APIs/features/mailboxes";
 import {
   SocketEvent,
   type NewEmailEvent,
@@ -54,6 +55,22 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+
+  // Throttled mailbox sync to prevent recursive/concurrent duplicate syncs within 10 seconds
+  const lastSyncTimeRef = useRef<Record<number, number>>({});
+  const triggerSync = useCallback((mailboxId: number) => {
+    const now = Date.now();
+    const lastSync = lastSyncTimeRef.current[mailboxId] || 0;
+    if (now - lastSync < 10000) {
+      console.log(`[WebSocket] Sync for mailbox ${mailboxId} throttled (last sync was ${now - lastSync}ms ago)`);
+      return;
+    }
+    lastSyncTimeRef.current[mailboxId] = now;
+    console.log(`[WebSocket] Triggering auto-sync for mailbox ${mailboxId}`);
+    mailboxApi.syncMailbox(mailboxId).catch((err) => {
+      console.error(`[WebSocket] Error syncing mailbox ${mailboxId}:`, err);
+    });
+  }, []);
 
   // ── Event Handlers ───────────────────────────────────────────────────────
 
@@ -101,6 +118,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         const idNum = Number(mailboxId);
         queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idStr] });
         queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idNum] });
+
+        // Trigger automatic mailbox sync with the mail provider on new email notification
+        triggerSync(idNum);
       }
 
       toast.info("📩 New email received", {
@@ -108,7 +128,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         duration: 4000,
       });
     },
-    [queryClient],
+    [queryClient, triggerSync],
   );
 
   const handleEmailSent = useCallback(
@@ -143,8 +163,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   const handleEmailScanned = useCallback(
     (data: any) => {
-      const mailboxId = data.mailboxId ?? data.mailBoxId;
-      const emailId = data.emailId;
+      const mailboxId = data.mailboxId ?? data.mailBoxId ?? data.email?.mailboxId ?? data.email?.mailBoxId;
+      const emailId = data.emailId ?? data.id ?? data.email?.id;
       const securityVerdict = data.securityVerdict ?? data.verdict;
 
       if (mailboxId) {
@@ -165,6 +185,12 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         // Refresh and refetch mailboxes list
         queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
         queryClient.refetchQueries({ queryKey: ["mailboxes"] });
+
+        // Refresh and refetch security reports
+        queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", idStr] });
+        queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", idNum] });
+        queryClient.refetchQueries({ queryKey: ["mailboxes", "reports", idStr] });
+        queryClient.refetchQueries({ queryKey: ["mailboxes", "reports", idNum] });
       }
 
       if (emailId) {
@@ -228,9 +254,15 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
             duration: 4000,
           });
         }
+
+        // Trigger automatic mailbox sync on receiving a new email notification
+        const mId = notification.mailBoxId ?? notification.mailboxId ?? notification.metadata?.mailboxId ?? notification.metadata?.mailBoxId;
+        if (notification.type === "NEW_EMAIL_RECEIVED" && mId) {
+          triggerSync(Number(mId));
+        }
       }
     },
-    [queryClient],
+    [queryClient, triggerSync],
   );
 
   const handleMailboxSyncComplete = useCallback(
@@ -368,11 +400,53 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     socket.on(SocketEvent.DISCONNECT, onDisconnect);
     socket.on(SocketEvent.CONNECT_ERROR, onConnectError);
 
+    const handleEmailReclassified = (reclassData: any) => {
+      console.log("[WebSocket] email_reclassified received event:", reclassData);
+      const mId = reclassData?.mailboxId ?? reclassData?.mailBoxId ?? reclassData?.email?.mailboxId ?? reclassData?.email?.mailBoxId;
+      const eId = reclassData?.emailId ?? reclassData?.id ?? reclassData?.email?.id;
+
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
+
+      if (mId) {
+        const idStr = String(mId);
+        const idNum = Number(mId);
+
+        queryClient.invalidateQueries({ queryKey: ["emails", idStr] });
+        queryClient.invalidateQueries({ queryKey: ["emails", idNum] });
+        queryClient.refetchQueries({ queryKey: ["emails", idStr] });
+        queryClient.refetchQueries({ queryKey: ["emails", idNum] });
+
+        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idStr] });
+        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idNum] });
+
+        queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", idStr] });
+        queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", idNum] });
+        queryClient.refetchQueries({ queryKey: ["mailboxes", "reports", idStr] });
+        queryClient.refetchQueries({ queryKey: ["mailboxes", "reports", idNum] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["emails"] });
+      }
+
+      if (eId) {
+        const idStr = String(eId);
+        const idNum = Number(eId);
+        queryClient.invalidateQueries({ queryKey: ["email", idStr] });
+        queryClient.invalidateQueries({ queryKey: ["email", idNum] });
+        queryClient.refetchQueries({ queryKey: ["email", idStr] });
+        queryClient.refetchQueries({ queryKey: ["email", idNum] });
+      }
+    };
+
     // Register domain event listeners
     socket.on(SocketEvent.NEW_EMAIL, handleNewEmail);
     socket.on("new_email_arrived", handleNewEmail);
+    socket.on("new_email", handleNewEmail);
+    socket.on("email_arrived", handleNewEmail);
     socket.on(SocketEvent.EMAIL_SENT, handleEmailSent);
     socket.on(SocketEvent.EMAIL_SCANNED, handleEmailScanned);
+    socket.on("email_reclassified", handleEmailReclassified);
+    socket.on("email-reclassified", handleEmailReclassified);
     socket.on(SocketEvent.NEW_NOTIFICATION, handleNewNotification);
     socket.on(SocketEvent.MAILBOX_SYNC_COMPLETE, handleMailboxSyncComplete);
     socket.on(SocketEvent.MAILBOX_SYNC_FAILED, handleMailboxSyncFailed);
@@ -391,8 +465,12 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       socket.off(SocketEvent.CONNECT_ERROR, onConnectError);
       socket.off(SocketEvent.NEW_EMAIL, handleNewEmail);
       socket.off("new_email_arrived", handleNewEmail);
+      socket.off("new_email", handleNewEmail);
+      socket.off("email_arrived", handleNewEmail);
       socket.off(SocketEvent.EMAIL_SENT, handleEmailSent);
       socket.off(SocketEvent.EMAIL_SCANNED, handleEmailScanned);
+      socket.off("email_reclassified", handleEmailReclassified);
+      socket.off("email-reclassified", handleEmailReclassified);
       socket.off(SocketEvent.NEW_NOTIFICATION, handleNewNotification);
       socket.off(SocketEvent.MAILBOX_SYNC_COMPLETE, handleMailboxSyncComplete);
       socket.off(SocketEvent.MAILBOX_SYNC_FAILED, handleMailboxSyncFailed);

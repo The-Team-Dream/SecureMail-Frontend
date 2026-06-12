@@ -11,6 +11,7 @@ import { Icons } from "@/constants/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { ProgressBar } from "@/_components/shared/ProgressBar";
 import { useMailboxStats } from "@/APIs/hooks/analytics";
+import { useScanQueueStatus } from "@/APIs/hooks/emails";
 import { ScanQueueBanner } from "@/_components/mailbox/ScanQueueBanner";
 import { differenceInSeconds, formatDistanceToNow } from "date-fns";
 export const getStatusStyles = (isActive: boolean) => {
@@ -49,6 +50,17 @@ export function MailboxCard({
     return () => clearInterval(interval);
   }, []);
 
+  const [isDismissed, setIsDismissed] = useState(false);
+  const { data: queue } = useScanQueueStatus(String(acc.id));
+
+  // Reset dismissed state when new scanning jobs start
+  useEffect(() => {
+    if (queue && queue.activeCount > 0) {
+      setIsDismissed(false);
+    }
+  }, [queue?.activeCount]);
+
+  const showBanner = queue && (queue.activeCount + queue.waitingCount > 0) && !isDismissed;
   const totalThreats = (stats?.phishingEmails ?? 0) + (stats?.spamEmails ?? 0);
 
   return (
@@ -61,15 +73,20 @@ export function MailboxCard({
         ease: "easeOut",
       }}
       whileHover={{ y: -5 }}
-      className="group flex flex-col gap-3"
+      className="group flex flex-col gap-3 w-full"
     >
-      <ScanQueueBanner mailboxId={String(acc.id)} />
+      {showBanner && (
+        <div className="h-[48px] mb-4 mt-2 flex items-center">
+          {/* نترك البانر يظهر ويختفي داخله بدون أن يؤثر على طول الكارت */}
+          <ScanQueueBanner mailboxId={String(acc.id)} onDismiss={() => setIsDismissed(true)} />
+        </div>
+      )}
       <Link
         href={`/mailboxes/${acc.id}/inbox`}
         className="bg-background border border-primary-100/60 rounded-lg py-6 px-8 max-h-[350px] h-full flex flex-col gap-8 shadow-[0_4px_16px_rgba(223, 223, 223, 0.5)] transition-all hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] cursor-pointer hover:border-primary-200"
       >
         {/* Header Section */}
-        <div className="flex justify-between items-center h-full">
+        <div className="flex justify-between items-center">
           <div className="flex items-center gap-4 min-w-0 flex-1 pr-4">
             <div className="w-[46px] h-[46px] min-w-[46px] rounded-full bg-primary-50 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
               <Icons.Mail className="w-5 h-5 text-primary" />
@@ -173,7 +190,7 @@ export function MailboxCard({
               ) : (
                 <>
                   <span className="text-primary-900">Sync </span>
-                  <Icons.Refresh className="w-4 h-4 text-primary-900 stroke-2" />
+                  <Icons.Refresh disableGroupHover className="w-4 h-4 text-primary-900 stroke-2" />
                 </>
               )}
             </div>
