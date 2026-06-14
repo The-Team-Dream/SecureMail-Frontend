@@ -14,7 +14,7 @@ export function ViewField({
 }) {
   return (
     <div>
-      <div className="text-[13px] text-primary-400 mb-1.5 font-medium">
+      <div className="text-[13px] text-primary-400 mb-1.5 font-medium text-nowrap">
         {label}
       </div>
       <div className="text-[15px] font-bold tracking-tight text-primary-900">
@@ -82,18 +82,19 @@ export function EditButton({
       type="button"
       variant="default"
       onClick={onCancel}
-      className="w-[140px] shrink-0 bg-error-600 hover:bg-error-700 text-white h-10 gap-2 px-3 rounded-[6px] text-sm font-semibold shadow-none"
+      className="shrink-0 bg-error-600 hover:bg-error-700 text-white h-10 gap-2 px-3 rounded-[6px] text-sm font-semibold shadow-none"
     >
-      <X className="w-4 h-4 stroke-3" /> Cancel Editing
+      <X className="w-4 h-4 stroke-3" />{" "}
+      <span className="hidden md:flex">Cancel Editing</span>
     </Button>
   ) : (
     <Button
       type="button"
       variant="outline"
       onClick={onEdit}
-      className="w-[84px] shrink-0 h-10 gap-2 px-3 rounded-[6px] text-primary-700 border-primary-200 hover:bg-primary-50 text-sm font-semibold shadow-none"
+      className="shrink-0 h-10 gap-2 px-3 rounded-[6px] text-primary-700 border-primary-200 hover:bg-primary-50 text-sm font-semibold shadow-none"
     >
-      <Pencil className="w-3.5 h-3.5" /> Edit
+      <Pencil className="w-3.5 h-3.5" /> <span className="hidden md:flex">Edit</span>
     </Button>
   );
 }
@@ -120,7 +121,7 @@ export function SectionBlock({
     <div
       className={`flex flex-col py-8 ${bordered ? "border-b border-primary-100" : "pb-16"}`}
     >
-      <div className="flex justify-between items-center w-full mb-6">
+      <div className="flex justify-between items-center w-full mb-2">
         <div className="flex items-center gap-2.5 text-secondary-800 font-semibold">
           {icon} {title}
         </div>
@@ -142,7 +143,7 @@ export function SecuritySelect({
   return (
     <div className="flex flex-col">
       <label className="block text-[13px] text-primary-400 mb-1.5 font-normal">
-        Security
+        Encryption
       </label>
       <div className="relative">
         <select

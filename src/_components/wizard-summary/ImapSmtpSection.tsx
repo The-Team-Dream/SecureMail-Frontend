@@ -98,7 +98,7 @@ export function ImapSmtpSection({
       {isEditing ? (
         <div className="flex flex-col gap-6">
           {/* Row 1: Email + App Password + Encryption */}
-          <div className="grid grid-cols-3 gap-6 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
             <Input
               label="Email Address"
               value={formData.email || ""}
@@ -122,21 +122,23 @@ export function ImapSmtpSection({
               onBlur={() => handleBlur?.("password")}
               error={errors?.password?.message}
             />
-            <SecuritySelect
-              value={formData.encryption}
-              onChange={(v) => {
-                handleChange("encryption", v);
-                clearErrors?.("encryption");
-              }}
-            />
+            <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+              <SecuritySelect
+                value={formData.encryption}
+                onChange={(v) => {
+                  handleChange("encryption", v);
+                  clearErrors?.("encryption");
+                }}
+              />
+            </div>
           </div>
 
           {/* Row 2: IMAP Settings (Label/Sub-heading) */}
           <div className="text-[13px] font-bold text-secondary-800 tracking-wider uppercase border-b border-primary-100/50 pb-1 mt-2">
             IMAP Settings
           </div>
-          
-          <div className="grid grid-cols-2 gap-4 w-full">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
             <Input
               label="IMAP Host"
               value={formData.imapHost || ""}
@@ -167,7 +169,7 @@ export function ImapSmtpSection({
             SMTP Settings
           </div>
 
-          <div className="grid grid-cols-2 gap-4 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
             <Input
               label="SMTP Host"
               value={formData.smtpHost || ""}
@@ -213,7 +215,7 @@ export function ImapSmtpSection({
       ) : (
         <div className="flex flex-col gap-6">
           {/* Row 1: Email + App Password + Encryption */}
-          <div className="grid grid-cols-3 gap-6 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
             <ViewField label="Email Address" value={formData.email} />
             <PasswordField
               label="App Password"
@@ -221,29 +223,49 @@ export function ImapSmtpSection({
               show={showPassword}
               onToggle={() => setShowPassword((p) => !p)}
             />
-            <ViewField label="Encryption" value={formData.encryption} fallback="SSL/TLS" />
+            <ViewField
+              label="Encryption"
+              value={formData.encryption}
+              fallback="SSL/TLS"
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-8 w-full">
+          <div className="grid grid-cols-2 gap-4 md:gap-8 w-full">
             {/* IMAP Column */}
             <div className="flex flex-col gap-4 border border-primary-100/60 rounded-xl p-5 bg-ghostBlue/20">
-              <div className="text-[13px] font-bold text-secondary-800 tracking-wider uppercase border-b border-primary-100/40 pb-1.5 mb-2">
+              <div className="text-[10px] sm:text-xs font-bold text-secondary-800 tracking-wider uppercase border-b border-primary-100/40 pb-1.5 mb-2">
                 IMAP Settings
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <ViewField label="IMAP Host" value={formData.imapHost} fallback="imap.company.com" />
-                <ViewField label="Port" value={formData.imapPort} fallback="993" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <ViewField
+                  label="IMAP Host"
+                  value={formData.imapHost}
+                  fallback="imap.company.com"
+                />
+                <ViewField
+                  label="Port"
+                  value={formData.imapPort}
+                  fallback="993"
+                />
               </div>
             </div>
 
             {/* SMTP Column */}
             <div className="flex flex-col gap-4 border border-primary-100/60 rounded-xl p-5 bg-ghostBlue/20">
-              <div className="text-[13px] font-bold text-secondary-800 tracking-wider uppercase border-b border-primary-100/40 pb-1.5 mb-2">
+              <div className="text-[10px] sm:text-xs font-bold text-secondary-800 tracking-wider uppercase border-b border-primary-100/40 pb-1.5 mb-2">
                 SMTP Settings
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <ViewField label="SMTP Host" value={formData.smtpHost} fallback="smtp.company.com" />
-                <ViewField label="Port" value={formData.smtpPort} fallback="465" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <ViewField
+                  label="SMTP Host"
+                  value={formData.smtpHost}
+                  fallback="smtp.company.com"
+                />
+                <ViewField
+                  label="Port"
+                  value={formData.smtpPort}
+                  fallback="465"
+                />
               </div>
             </div>
           </div>

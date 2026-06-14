@@ -62,7 +62,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     const now = Date.now();
     const lastSync = lastSyncTimeRef.current[mailboxId] || 0;
     if (now - lastSync < 10000) {
-      console.log(`[WebSocket] Sync for mailbox ${mailboxId} throttled (last sync was ${now - lastSync}ms ago)`);
+      console.log(
+        `[WebSocket] Sync for mailbox ${mailboxId} throttled (last sync was ${now - lastSync}ms ago)`,
+      );
       return;
     }
     lastSyncTimeRef.current[mailboxId] = now;
@@ -77,11 +79,17 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const handleNewEmail = useCallback(
     (data: any) => {
       console.log("[WebSocket] handleNewEmail received event payload:", data);
-      const mailboxId = data?.mailboxId ?? data?.mailBoxId ?? data?.email?.mailboxId ?? data?.email?.mailBoxId;
+      const mailboxId =
+        data?.mailboxId ??
+        data?.mailBoxId ??
+        data?.email?.mailboxId ??
+        data?.email?.mailBoxId;
       console.log("[WebSocket] handleNewEmail extracted mailboxId:", mailboxId);
 
       if (!mailboxId) {
-        console.warn("[WebSocket] handleNewEmail: No mailboxId found in event data!");
+        console.warn(
+          "[WebSocket] handleNewEmail: No mailboxId found in event data!",
+        );
         // We'll still invalidate all emails queries as a safety fallback
         queryClient.invalidateQueries({ queryKey: ["emails"] });
         queryClient.refetchQueries({ queryKey: ["emails"] });
@@ -108,16 +116,24 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       queryClient.refetchQueries({ queryKey: ["notifications"] });
 
       // Invalidate and refetch unread counts
-      queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
-      queryClient.refetchQueries({ queryKey: ["notifications", "unread-count"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notifications", "unread-count"],
+      });
+      queryClient.refetchQueries({
+        queryKey: ["notifications", "unread-count"],
+      });
 
       // Invalidate and refetch analytics (new email changes stats)
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
       if (mailboxId) {
         const idStr = String(mailboxId);
         const idNum = Number(mailboxId);
-        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idStr] });
-        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idNum] });
+        queryClient.refetchQueries({
+          queryKey: ["analytics", "mailbox", idStr],
+        });
+        queryClient.refetchQueries({
+          queryKey: ["analytics", "mailbox", idNum],
+        });
 
         // Trigger automatic mailbox sync with the mail provider on new email notification
         triggerSync(idNum);
@@ -163,7 +179,11 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   const handleEmailScanned = useCallback(
     (data: any) => {
-      const mailboxId = data.mailboxId ?? data.mailBoxId ?? data.email?.mailboxId ?? data.email?.mailBoxId;
+      const mailboxId =
+        data.mailboxId ??
+        data.mailBoxId ??
+        data.email?.mailboxId ??
+        data.email?.mailBoxId;
       const emailId = data.emailId ?? data.id ?? data.email?.id;
       const securityVerdict = data.securityVerdict ?? data.verdict;
 
@@ -179,18 +199,30 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
         // Refresh and refetch analytics for updated threat stats
         queryClient.invalidateQueries({ queryKey: ["analytics"] });
-        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idStr] });
-        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idNum] });
+        queryClient.refetchQueries({
+          queryKey: ["analytics", "mailbox", idStr],
+        });
+        queryClient.refetchQueries({
+          queryKey: ["analytics", "mailbox", idNum],
+        });
 
         // Refresh and refetch mailboxes list
         queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
         queryClient.refetchQueries({ queryKey: ["mailboxes"] });
 
         // Refresh and refetch security reports
-        queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", idStr] });
-        queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", idNum] });
-        queryClient.refetchQueries({ queryKey: ["mailboxes", "reports", idStr] });
-        queryClient.refetchQueries({ queryKey: ["mailboxes", "reports", idNum] });
+        queryClient.invalidateQueries({
+          queryKey: ["mailboxes", "reports", idStr],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["mailboxes", "reports", idNum],
+        });
+        queryClient.refetchQueries({
+          queryKey: ["mailboxes", "reports", idStr],
+        });
+        queryClient.refetchQueries({
+          queryKey: ["mailboxes", "reports", idNum],
+        });
       }
 
       if (emailId) {
@@ -256,7 +288,11 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Trigger automatic mailbox sync on receiving a new email notification
-        const mId = notification.mailBoxId ?? notification.mailboxId ?? notification.metadata?.mailboxId ?? notification.metadata?.mailBoxId;
+        const mId =
+          notification.mailBoxId ??
+          notification.mailboxId ??
+          notification.metadata?.mailboxId ??
+          notification.metadata?.mailBoxId;
         if (notification.type === "NEW_EMAIL_RECEIVED" && mId) {
           triggerSync(Number(mId));
         }
@@ -401,9 +437,17 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     socket.on(SocketEvent.CONNECT_ERROR, onConnectError);
 
     const handleEmailReclassified = (reclassData: any) => {
-      console.log("[WebSocket] email_reclassified received event:", reclassData);
-      const mId = reclassData?.mailboxId ?? reclassData?.mailBoxId ?? reclassData?.email?.mailboxId ?? reclassData?.email?.mailBoxId;
-      const eId = reclassData?.emailId ?? reclassData?.id ?? reclassData?.email?.id;
+      console.log(
+        "[WebSocket] email_reclassified received event:",
+        reclassData,
+      );
+      const mId =
+        reclassData?.mailboxId ??
+        reclassData?.mailBoxId ??
+        reclassData?.email?.mailboxId ??
+        reclassData?.email?.mailBoxId;
+      const eId =
+        reclassData?.emailId ?? reclassData?.id ?? reclassData?.email?.id;
 
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
       queryClient.invalidateQueries({ queryKey: ["mailboxes"] });
@@ -417,13 +461,25 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         queryClient.refetchQueries({ queryKey: ["emails", idStr] });
         queryClient.refetchQueries({ queryKey: ["emails", idNum] });
 
-        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idStr] });
-        queryClient.refetchQueries({ queryKey: ["analytics", "mailbox", idNum] });
+        queryClient.refetchQueries({
+          queryKey: ["analytics", "mailbox", idStr],
+        });
+        queryClient.refetchQueries({
+          queryKey: ["analytics", "mailbox", idNum],
+        });
 
-        queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", idStr] });
-        queryClient.invalidateQueries({ queryKey: ["mailboxes", "reports", idNum] });
-        queryClient.refetchQueries({ queryKey: ["mailboxes", "reports", idStr] });
-        queryClient.refetchQueries({ queryKey: ["mailboxes", "reports", idNum] });
+        queryClient.invalidateQueries({
+          queryKey: ["mailboxes", "reports", idStr],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["mailboxes", "reports", idNum],
+        });
+        queryClient.refetchQueries({
+          queryKey: ["mailboxes", "reports", idStr],
+        });
+        queryClient.refetchQueries({
+          queryKey: ["mailboxes", "reports", idNum],
+        });
       } else {
         queryClient.invalidateQueries({ queryKey: ["emails"] });
       }

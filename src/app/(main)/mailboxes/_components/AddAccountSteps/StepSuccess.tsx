@@ -25,7 +25,7 @@ const confettiVariants: Variants = {
 
 export function StepSuccess({ onCancel, resetWizard }: StepSuccessProps) {
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-80px)] bg-card items-center justify-center p-8">
+    <div className="flex flex-col w-full min-h-[calc(100vh-80px)] items-center justify-center p-8">
       <div className="flex flex-col items-center max-w-[540px] w-full animate-in fade-in zoom-in-95 duration-500">
         {/* Checkmark Icon */}
         <div className="relative mb-10 flex items-center justify-center">

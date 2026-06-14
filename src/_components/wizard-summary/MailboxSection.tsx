@@ -5,7 +5,11 @@ import { Input } from "@/_components/shared/Input";
 import { Button } from "@/components/ui/button";
 import { Mail, Save, Loader2 } from "lucide-react";
 import { WizardFormData } from "@/schemas/CustomAccount";
-import { SectionBlock, ViewField, MailboxDraft } from "@/_components/wizard-summary/Shared";
+import {
+  SectionBlock,
+  ViewField,
+  MailboxDraft,
+} from "@/_components/wizard-summary/Shared";
 import { Icons } from "@/constants/icons";
 
 import { FieldErrors } from "react-hook-form";
@@ -65,21 +69,17 @@ export function MailboxSection({
     >
       {isEditing ? (
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-4 gap-6 w-full">
-            <div className="col-span-2">
-              <Input
-                label="Mailbox Name"
-                value={formData.mailboxName}
-                className="w-full"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  handleChange("mailboxName", e.target.value);
-                  clearErrors?.("mailboxName");
-                }}
-                onBlur={() => handleBlur?.("mailboxName")}
-                error={errors?.mailboxName?.message}
-              />
-            </div>
-          </div>
+          <Input
+            label="Mailbox Name"
+            value={formData.mailboxName}
+            className="w-full sm:w-fit"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              handleChange("mailboxName", e.target.value);
+              clearErrors?.("mailboxName");
+            }}
+            onBlur={() => handleBlur?.("mailboxName")}
+            error={errors?.mailboxName?.message}
+          />
           <div className="flex justify-end">
             <Button
               type="button"

@@ -71,48 +71,46 @@ export function AdvancedSection({
     >
       {isEditing ? (
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-4 gap-6 w-full">
-            <div>
-              <label className="block text-[13px] text-primary-400 mb-1.5 font-normal">
-                Sync Interval (Minutes)
-              </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowSyncDropdown(!showSyncDropdown)}
-                  className="w-full h-[52px] flex items-center justify-between px-5 border border-primary-200 rounded-[16px] outline-none text-primary bg-card hover:border-primary-300 transition-colors"
-                >
-                  <span className="text-[14px] font-medium text-primary-700">
-                    {syncLabel}
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-primary-400 transition-transform duration-200 ${showSyncDropdown ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {showSyncDropdown && (
-                  <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-primary-50 rounded-[16px] z-50 flex flex-col p-2 gap-1 animate-in fade-in zoom-in-95 duration-150 shadow-sm border border-primary-100">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <button
-                        key={`summary-interval-${i}`}
-                        type="button"
-                        onClick={() => {
-                          handleChange("syncInterval", i.toString());
-                          clearErrors?.("syncInterval");
-                          setShowSyncDropdown(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-[12px] transition-colors hover:bg-primary-200/60 ${formData.syncInterval === i.toString() ? "bg-primary-200/40 text-primary-900" : "text-primary-500"}`}
-                      >
-                        <span className="text-[14px] font-medium">
-                          {i} Minutes
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-primary-400 stroke-[2.5px]" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <Error error={errors?.syncInterval?.message} />
+          <div>
+            <label className="block text-[13px] text-primary-400 mb-1.5 font-normal">
+              Sync Interval (Minutes)
+            </label>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowSyncDropdown(!showSyncDropdown)}
+                className="w-full h-[52px] flex items-center justify-between px-5 border border-primary-200 rounded-[16px] outline-none text-primary cursor-pointer hover:border-primary-300 transition-colors"
+              >
+                <span className="text-[14px] font-medium text-primary-700">
+                  {syncLabel}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-primary-400 transition-transform duration-200 ${showSyncDropdown ? "rotate-180" : ""}`}
+                />
+              </button>
+              {showSyncDropdown && (
+                <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-primary-50 rounded-[16px] z-50 flex flex-col p-2 gap-1 animate-in fade-in zoom-in-95 duration-150 shadow-sm border border-primary-100">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <button
+                      key={`summary-interval-${i}`}
+                      type="button"
+                      onClick={() => {
+                        handleChange("syncInterval", i.toString());
+                        clearErrors?.("syncInterval");
+                        setShowSyncDropdown(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-[12px] transition-colors cursor-pointer hover:bg-primary-200/60 ${formData.syncInterval === i.toString() ? "bg-primary-200/40 text-primary-900" : "text-primary-500"}`}
+                    >
+                      <span className="text-[14px] font-medium">
+                        {i} Minutes
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-primary-400 stroke-[2.5px]" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+            <Error error={errors?.syncInterval?.message} />
           </div>
           <div className="flex justify-end">
             <Button
@@ -132,7 +130,7 @@ export function AdvancedSection({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-6 w-full">
+        <div className="grid grid-cols-4 text-nowrap gap-6 w-full">
           <ViewField
             label="Sync Interval (Minutes)"
             value={

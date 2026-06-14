@@ -35,8 +35,6 @@ export function StepSummary({
   handleChange = () => {},
   handleImapSubmit,
 }: StepSummaryProps) {
-
-
   const {
     handleSubmit,
     setValue,
@@ -94,7 +92,7 @@ export function StepSummary({
         Please review your data before confirming
       </Text>
 
-      <div className="w-full max-w-[900px] flex flex-col mx-auto bg-card mb-8">
+      <div className="w-full flex flex-col mx-auto mb-2">
         <MailboxSection
           formData={localFormData}
           handleChange={localHandleChange}

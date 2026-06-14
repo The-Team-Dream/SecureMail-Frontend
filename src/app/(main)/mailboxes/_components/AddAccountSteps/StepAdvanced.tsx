@@ -35,7 +35,7 @@ export function StepAdvanced({
             <button
               type="button"
               onClick={() => setShowSyncDropdown(!showSyncDropdown)}
-              className="w-full h-[52px] flex items-center justify-between px-5 border border-primary-200 rounded-lg outline-none text-primary bg-card hover:border-primary-300 transition-colors"
+              className="w-full h-[52px] flex items-center justify-between px-5 border border-primary-200 rounded-lg outline-none text-primary hover:border-primary-300 transition-colors cursor-pointer"
             >
               <span className="text-[14px] font-medium text-primary-700">
                 {formData.syncInterval
@@ -59,7 +59,7 @@ export function StepAdvanced({
                       handleChange("syncInterval", i.toString());
                       setShowSyncDropdown(false);
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-[12px] transition-colors hover:bg-primary-200/60 ${formData.syncInterval === i.toString() ? "bg-primary-200/40 text-primary-900" : "text-primary-500"}`}
+                    className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-[12px] cursor-pointer transition-colors hover:bg-primary-200/60 ${formData.syncInterval === i.toString() ? "bg-primary-200/40 text-primary-900" : "text-primary-500"}`}
                   >
                     <span className="text-[14px] font-medium">{i} Minutes</span>
                     <ChevronRight className="w-4 h-4 text-primary-400 stroke-[2.5px]" />

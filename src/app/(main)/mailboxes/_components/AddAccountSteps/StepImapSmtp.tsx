@@ -214,13 +214,15 @@ export function StepImapSmtp({
                         How to generate an App Password
                       </DialogPrimitive.Title>
                       <DialogPrimitive.Description className="text-sm text-primary-400 mt-2">
-                        App passwords let you sign in to your email account from apps on
-                        devices that don't support 2-Step Verification.
+                        App passwords let you sign in to your email account from
+                        apps on devices that don't support 2-Step Verification.
                       </DialogPrimitive.Description>
                     </div>
                     <div className="flex flex-col gap-4 py-4 text-sm text-primary max-h-[60vh] overflow-y-auto pr-1">
                       <div className="space-y-2">
-                        <Text font="semiBold">For Gmail / Google Workspace:</Text>
+                        <Text font="semiBold">
+                          For Gmail / Google Workspace:
+                        </Text>
                         <ol className="list-decimal pl-5 space-y-1 text-primary-600">
                           <li>
                             Go to your{" "}
@@ -228,7 +230,7 @@ export function StepImapSmtp({
                               href="https://myaccount.google.com/security"
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="hover:underline text-primary"
+                              className="underline hover:text-primary-900"
                             >
                               Google Account Settings
                             </Link>
@@ -249,7 +251,9 @@ export function StepImapSmtp({
                         </ol>
                       </div>
                       <div className="space-y-2">
-                        <Text font="semiBold">For Outlook / Microsoft 365:</Text>
+                        <Text font="semiBold">
+                          For Outlook / Microsoft 365:
+                        </Text>
                         <ol className="list-decimal pl-5 space-y-1 text-primary-600">
                           <li>
                             Go to your{" "}
@@ -257,7 +261,7 @@ export function StepImapSmtp({
                               href="https://account.microsoft.com/security"
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="hover:underline text-primary"
+                              className="underline hover:text-primary-900"
                             >
                               Microsoft Account Security page
                             </Link>
@@ -267,7 +271,8 @@ export function StepImapSmtp({
                             Select <strong>Advanced security options</strong>.
                           </li>
                           <li>
-                            Ensure <strong>Two-step verification</strong> is turned on.
+                            Ensure <strong>Two-step verification</strong> is
+                            turned on.
                           </li>
                           <li>
                             Under "App passwords", select{" "}

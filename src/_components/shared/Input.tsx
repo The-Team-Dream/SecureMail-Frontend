@@ -90,6 +90,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {isPassword && (
             <button
               type="button"
+              onMouseDown={(e) => e.preventDefault()}
               onClick={togglePassword}
               className={cn(
                 "absolute right-4 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary cursor-pointer",
