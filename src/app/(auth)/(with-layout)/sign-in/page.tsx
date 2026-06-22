@@ -108,12 +108,12 @@ const SignIn = () => {
           {signinMutation.isPending ? (
             <>
               <Spinner />
-              <Text font={"medium"} className="text-background">
+              <Text font={"medium"} className="text-white">
                 Logging in...
               </Text>
             </>
           ) : (
-            <Text font={"medium"} className="text-background">
+            <Text font={"medium"} className="text-white">
               Login
             </Text>
           )}

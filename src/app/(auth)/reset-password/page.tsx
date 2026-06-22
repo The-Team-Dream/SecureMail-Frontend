@@ -1,6 +1,6 @@
 "use client";
 import { Input } from "@/_components/shared/Input";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { useResetPassword } from "@/APIs/hooks/auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +32,17 @@ export default function ResetPassword() {
 }
 
 function ResetPasswordContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
+  useEffect(() => {
+    if (!token) {
+      toast.error("Reset token is missing. Please check your email link.");
+      router.replace("/forgot-password");
+    }
+  }, [token, router]);
+
   const {
     handleSubmit,
     register,
@@ -43,9 +54,6 @@ function ResetPasswordContent() {
     reValidateMode: "onChange",
     resolver: zodResolver(resetPasswordSchema),
   });
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
   const { handleServerErrors } =
     useServerErrors<IResetPasswordSchema>(setError);
 
@@ -69,6 +77,14 @@ function ResetPasswordContent() {
       resetPasswordToken: token,
     });
   };
+
+  if (!token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
   return (
     <div className="relative w-full">
       {/* Logo */}

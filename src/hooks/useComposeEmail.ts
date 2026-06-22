@@ -133,7 +133,6 @@ export const useComposeEmail = () => {
           composeMode === "reply" ? (composeData?.body ?? "") : "";
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, composeMode, composeData]);
 
   // Sync form's 'from' field with mailboxIdToUse if not set

@@ -89,12 +89,12 @@ export default function ForgotPassword() {
                 {isPending ? (
                   <>
                     <Spinner />
-                    <Text className="text-background" font={"medium"}>
+                    <Text className="text-white" font={"medium"}>
                       Sending...
                     </Text>
                   </>
                 ) : (
-                  <Text className="text-background" font={"medium"}>
+                  <Text className="text-white" font={"medium"}>
                     Send
                   </Text>
                 )}
