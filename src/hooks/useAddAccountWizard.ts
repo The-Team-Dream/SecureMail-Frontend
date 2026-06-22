@@ -38,7 +38,7 @@ export function useAddAccountWizard({
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isImapLoading, setIsImapLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const oauthIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isClearingRef = useRef(false);
 
   const { mutateAsync: connectImap } = useConnectImap();
   const { mutateAsync: connectGmail } = useConnectGmail();
@@ -91,6 +91,7 @@ export function useAddAccountWizard({
   }, [searchParams, updateStepUrl]);
 
   const clearPersistence = useCallback(() => {
+    isClearingRef.current = true;
     sessionStorage.removeItem(STORAGE_KEYS.DATA);
     const params = new URLSearchParams(searchParams.toString());
     params.delete("step");
@@ -104,19 +105,13 @@ export function useAddAccountWizard({
 
   // ─── OAuth Popup Listener ──────────────────────────────────────────────────
   useEffect(() => {
+    const channel = new BroadcastChannel("securemail_oauth_channel");
+
     const handleMessage = async (event: MessageEvent) => {
-      if (
-        event.origin !== window.location.origin ||
-        event.data?.type !== "OAUTH_CODE_RECEIVED" ||
-        !event.data?.code
-      ) {
+      if (event.data?.type !== "OAUTH_CODE_RECEIVED" || !event.data?.code) {
         return;
       }
 
-      if (oauthIntervalRef.current) {
-        clearInterval(oauthIntervalRef.current);
-        oauthIntervalRef.current = null;
-      }
       const { code } = event.data;
       const origin = window.location.origin;
       const redirectUri =
@@ -152,10 +147,10 @@ export function useAddAccountWizard({
       }
     };
 
-    window.addEventListener("message", handleMessage);
+    channel.addEventListener("message", handleMessage);
     return () => {
-      window.removeEventListener("message", handleMessage);
-      if (oauthIntervalRef.current) clearInterval(oauthIntervalRef.current);
+      channel.removeEventListener("message", handleMessage);
+      channel.close();
     };
   }, [
     provider,
@@ -165,6 +160,8 @@ export function useAddAccountWizard({
     reset,
     handleCancel,
   ]);
+
+
 
   // Reset loading state when provider changes
   useEffect(() => {
@@ -188,6 +185,10 @@ export function useAddAccountWizard({
 
   useEffect(() => {
     if (!isLoaded) return;
+    if (isClearingRef.current) {
+      isClearingRef.current = false;
+      return;
+    }
     sessionStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(formData));
   }, [formData, isLoaded]);
 
@@ -267,18 +268,7 @@ export function useAddAccountWizard({
 
         // Update the popup URL
         popup.location.href = url;
-
-        // Start polling to check if the window is closed
-        if (oauthIntervalRef.current) clearInterval(oauthIntervalRef.current);
-        oauthIntervalRef.current = setInterval(() => {
-          if (popup.closed) {
-            if (oauthIntervalRef.current) {
-              clearInterval(oauthIntervalRef.current);
-              oauthIntervalRef.current = null;
-            }
-            setIsOAuthLoading(false);
-          }
-        }, 1000);
+        setIsOAuthLoading(false);
       } catch (error: any) {
         if (popup) popup.close();
         const message =

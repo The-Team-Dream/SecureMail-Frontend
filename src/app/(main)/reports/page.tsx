@@ -9,6 +9,7 @@ import { ReportsPageSkeleton } from "@/_components/skeleton/ReportsPageSkeleton"
 import { StateMessage } from "@/_components/shared/StateMessage";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useGetAuthMe } from "@/APIs/hooks/auth";
+import { getFirstName } from "@/lib/utils";
 
 const ReportStatCard = dynamic(() =>
   import("./ReportStatCard").then((mod) => mod.ReportStatCard),
@@ -68,8 +69,8 @@ export default function Reports() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Text size="xl" font="medium">
-            Good Morning, {user?.user?.username || "User"}
+          <Text size={"2xl"} font={"bold"}>
+            Good Morning, {getFirstName(user?.user?.username) || "User"}
           </Text>
         </motion.div>
 

@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { StateMessage } from "@/_components/shared/StateMessage";
 
 import { useGetAuthMe } from "@/APIs/hooks/auth";
+import { getFirstName } from "@/lib/utils";
 import { ActivityData } from "@/APIs/types/Analytics";
 import notFoundImg from "../../../public/images/not-found.png";
 
@@ -255,7 +256,7 @@ const AnalyticsClient = ({ mailboxId }: AnalyticsClientProps) => {
           <Skeleton className="h-9 w-64" />
         ) : (
           <Text size={"2xl"} font={"bold"}>
-            Good Morning, {user?.user?.username || "User"}
+            Good Morning, {getFirstName(user?.user?.username) || "User"}
           </Text>
         )}
       </motion.div>

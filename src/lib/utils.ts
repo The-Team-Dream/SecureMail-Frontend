@@ -19,3 +19,9 @@ export function getImageUrl(path: string | null | undefined) {
   // If no baseURL is needed because of proxy, we can just ensure leading slash:
   return path.startsWith("/") ? path : `/${path}`;
 }
+
+export function getFirstName(name: string | null | undefined) {
+  if (!name) return "";
+  return name.replace(/([A-Z])/g, " $1").trim().split(/\s+/)[0];
+}
+

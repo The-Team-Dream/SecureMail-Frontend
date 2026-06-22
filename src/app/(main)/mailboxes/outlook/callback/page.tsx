@@ -20,30 +20,23 @@ export default function OutlookOAuthCallback() {
       }, 100);
     };
 
-    if (window.opener) {
-      sentRef.current = true;
-      if (code) {
-        console.log("Outlook Callback: Sending code to opener");
-        window.opener.postMessage(
-          { type: "OAUTH_CODE_RECEIVED", code },
-          window.location.origin,
-        );
-        finish();
-      } else if (error) {
-        console.error("Outlook Callback Error:", error);
-        window.opener.postMessage(
-          { type: "OAUTH_ERROR", error },
-          window.location.origin,
-        );
-        finish();
-      } else {
-        console.warn("Outlook Callback: No code or error found");
-        finish();
-      }
+    sentRef.current = true;
+    const channel = new BroadcastChannel("securemail_oauth_channel");
+
+    if (code) {
+      console.log("Outlook Callback: Broadcasting code");
+      channel.postMessage({ type: "OAUTH_CODE_RECEIVED", code });
+      channel.close();
+      finish();
+    } else if (error) {
+      console.error("Outlook Callback Error:", error);
+      channel.postMessage({ type: "OAUTH_ERROR", error });
+      channel.close();
+      finish();
     } else {
-      console.error(
-        "Outlook Callback: window.opener is null. Cannot send message.",
-      );
+      console.warn("Outlook Callback: No code or error found");
+      channel.close();
+      finish();
     }
   }, [searchParams]);
 

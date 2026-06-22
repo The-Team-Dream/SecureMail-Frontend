@@ -32,6 +32,7 @@ export default function SecurityReportsPage({
     return (data as any)?.data?.data || (data as any)?.data || [];
   }, [data]);
 
+
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
       // 1. Search term filter

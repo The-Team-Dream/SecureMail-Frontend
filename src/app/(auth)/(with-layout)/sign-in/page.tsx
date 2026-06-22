@@ -48,7 +48,8 @@ const SignIn = () => {
       }
       toast.success("Logged in successfully");
       reset();
-      router.push(callbackUrl);
+      // router.push(callbackUrl);
+      window.location.href = callbackUrl;
     },
     onError: (err) => handleServerErrors(err, ["email", "password"]),
   });

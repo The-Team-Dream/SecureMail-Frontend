@@ -30,7 +30,7 @@ import { MobileSidebar } from "./MobileSidebar";
 import { SearchAutocomplete } from "../mailbox/SearchAutocomplete";
 import Link from "next/link";
 import { NotificationDropdown } from "../Notification";
-import { getImageUrl, cn } from "@/lib/utils";
+import { getImageUrl, cn, getFirstName } from "@/lib/utils";
 import { useGetAuthMe } from "@/APIs/hooks/auth";
 import { useMailboxes } from "@/APIs/hooks/mailboxes";
 import { useAnalyticsOverview } from "@/APIs/hooks/analytics";
@@ -177,7 +177,7 @@ export const Navbar = () => {
               <div className="mt-3 flex flex-col items-center">
                 <div className="flex items-center gap-2">
                   <Text as="h3" font="bold" size="lg">
-                    Hi, {userName.split(" ")[0]}!
+                    Hi, {getFirstName(userName)}!
                   </Text>
                   <Link
                     href="/settings"

@@ -30,6 +30,7 @@ export const getSocket = (): Socket => {
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 10000,
+    transports: ["websocket"],
   });
 
   return socket;
