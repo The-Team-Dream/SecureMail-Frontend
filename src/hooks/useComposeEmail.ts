@@ -132,49 +132,59 @@ export const useComposeEmail = () => {
         bodyEditorRef.current.innerHTML =
           composeMode === "reply" ? (composeData?.body ?? "") : "";
       }
-
-      // If forwarding or replying to an email with attachments, download them so they are included
-      const attachmentsToDownload = composeData?.attachments;
-      if (
-        (composeMode === "forward" || composeMode === "reply") &&
-        mailboxIdToUse &&
-        composeData?.emailId &&
-        attachmentsToDownload?.length
-      ) {
-        const downloadForwardedAttachments = async () => {
-          try {
-            const files: File[] = [];
-            for (const att of attachmentsToDownload) {
-              const attAsCustom = att as any;
-              const attId = String(
-                att.id ??
-                  attAsCustom.attachmentId ??
-                  attAsCustom.attachment_id ??
-                  attAsCustom._id ??
-                  attAsCustom.fileId ??
-                  "",
-              );
-              const attUrl = att.url || attAsCustom.path;
-
-              const file = await fetchAttachmentAsFile(
-                mailboxIdToUse,
-                composeData.emailId!,
-                attId,
-                att.filename,
-                attUrl,
-              );
-              files.push(file);
-            }
-            setForwardedAttachments(files);
-          } catch (error) {
-            console.error("Failed to load forwarded attachments:", error);
-          }
-        };
-        downloadForwardedAttachments();
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, composeMode, composeData, mailboxes, mailboxIdToUse]);
+  }, [isOpen, composeMode, composeData]);
+
+  // Sync form's 'from' field with mailboxIdToUse if not set
+  useEffect(() => {
+    if (isOpen && mailboxIdToUse && !form.getValues("from")) {
+      form.setValue("from", mailboxIdToUse);
+    }
+  }, [isOpen, mailboxIdToUse, form]);
+
+  // If forwarding or replying to an email with attachments, download them so they are included
+  useEffect(() => {
+    const attachmentsToDownload = composeData?.attachments;
+    if (
+      isOpen &&
+      (composeMode === "forward" || composeMode === "reply") &&
+      mailboxIdToUse &&
+      composeData?.emailId &&
+      attachmentsToDownload?.length
+    ) {
+      const downloadForwardedAttachments = async () => {
+        try {
+          const files: File[] = [];
+          for (const att of attachmentsToDownload) {
+            const attAsCustom = att as any;
+            const attId = String(
+              att.id ??
+                attAsCustom.attachmentId ??
+                attAsCustom.attachment_id ??
+                attAsCustom._id ??
+                attAsCustom.fileId ??
+                "",
+            );
+            const attUrl = att.url || attAsCustom.path;
+
+            const file = await fetchAttachmentAsFile(
+              mailboxIdToUse,
+              composeData.emailId!,
+              attId,
+              att.filename,
+              attUrl,
+            );
+            files.push(file);
+          }
+          setForwardedAttachments(files);
+        } catch (error) {
+          console.error("Failed to load forwarded attachments:", error);
+        }
+      };
+      downloadForwardedAttachments();
+    }
+  }, [isOpen, composeMode, composeData, mailboxIdToUse]);
 
   // Close emoji picker on outside click
   useEffect(() => {
