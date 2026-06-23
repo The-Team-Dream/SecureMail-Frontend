@@ -52,7 +52,7 @@ export const listItems: ListItem[] = [
     id: 1,
     badgeClass: "bg-error-50 text-error-500",
     badge: "CRITICAL THREAT",
-    time: "2m ago",
+    time: "1m ago",
     title: "Phishing Attempt: IT Support",
     description: "Targeting: CEO Office · Source: external-mail.net",
     meta: (
@@ -74,7 +74,7 @@ export const listItems: ListItem[] = [
     id: 2,
     badgeClass: "bg-warning-50 text-warning-600",
     badge: "SUSPICIOUS ACTIVITY",
-    time: "45m ago",
+    time: "2m ago",
     title: "Bulk Data Export Request",
     description: "Origin: Unusual IP (Shanghai) · Volume: 4.2GB",
     meta: (
@@ -88,7 +88,7 @@ export const listItems: ListItem[] = [
     id: 3,
     badgeClass: "bg-background text-secondary-600",
     badge: "SYSTEM UPDATE",
-    time: "2h ago",
+    time: "1m ago",
     title: "Firewall Rules Updated",
     description: "Auto-remediation successful for port 8080",
     meta: (

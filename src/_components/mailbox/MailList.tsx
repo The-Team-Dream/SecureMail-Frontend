@@ -22,6 +22,7 @@ export const MailList = () => {
     activeFolder,
     currentPage,
   );
+  console.log(emailsData)
   const { data: searchData, isLoading: isLoadingSearch } = useSearchEmails(
     mailboxId,
     searchQuery,

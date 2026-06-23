@@ -83,16 +83,13 @@ export const MailRow = React.memo(
         className: "bg-error-50 text-error-700 border-error-200",
       },
     ];
+    
     const getSecurityLevel = (email: Email) => {
-      if (email.malwareVerdict === "MALICIOUS") return "MALICIOUS";
-      if (email.malwareVerdict === "SUSPICIOUS") return "SUSPICIOUS";
+      if (email.malwareVerdict === "malicious") return "malicious";
+      if (email.malwareVerdict === "suspicious") return "suspicious";
+      if (email.malwareVerdict === "clean") return "clean";
 
-      if (email.phishingScore > 80) return "PHISHING";
-      if (email.phishingScore > 50) return "SUSPICIOUS";
-
-      if (email.malwareVerdict === "UNKNOWN") return "UNKNOWN";
-
-      return "CLEAN";
+      return "unknown";
     };
 
     const securityLevel = getSecurityLevel(email);
@@ -276,54 +273,7 @@ export const MailRow = React.memo(
                   </span>
                 ))}
             </div>
-            <div className="flex items-center gap-2">
-              {activeFolder === "phishing" && (
-                <div className="flex items-center gap-1">
-                  <div
-                    className={`w-2 h-2 ${
-                      securityLevel === "MALICIOUS"
-                        ? "bg-error-500"
-                        : securityLevel === "SUSPICIOUS"
-                          ? "bg-warning-500"
-                          : securityLevel === "CLEAN"
-                            ? "bg-green-600"
-                            : "bg-primary-500"
-                    } rounded-full`}
-                  />
-                  <span
-                    className={cn(
-                      "text-[10px] md:text-xs w-fit font-bold tracking-wider uppercase",
-                      securityLevel === "MALICIOUS"
-                        ? "text-error-500"
-                        : securityLevel === "SUSPICIOUS"
-                          ? "text-warning-500"
-                          : securityLevel === "CLEAN"
-                            ? "text-green-600"
-                            : "text-primary-500",
-                    )}
-                  >
-                    {securityLevel}
-                  </span>
-                </div>
-              )}
-              {/* Email Risk Score on Mobile */}
-              {badges
-                .filter(
-                  (b) =>
-                    b.folder === activeFolder && typeof b.score === "number",
-                )
-                .map((b, index) => (
-                  <span
-                    key={index}
-                    className={cn(
-                      "lg:hidden shrink-0 w-fit mt-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider border",
-                      b.className,
-                    )}
-                  >
-                    {b.label}: {b.score}%
-                  </span>
-                ))}
-            </div>
+
             {/* Attachment chips */}
             {(() => {
               const uniqueAtts = email.attachments
@@ -434,6 +384,54 @@ export const MailRow = React.memo(
                 </div>
               );
             })()}
+            <div className="flex items-center gap-2 pt-1">
+              {activeFolder === "malware" && (
+                <div className="flex items-center gap-1">
+                  <div
+                    className={`w-2 h-2 ${
+                      securityLevel === "malicious"
+                        ? "bg-error-500"
+                        : securityLevel === "suspicious"
+                          ? "bg-warning-500"
+                          : securityLevel === "clean"
+                            ? "bg-green-600"
+                            : "bg-primary-500"
+                    } rounded-full`}
+                  />
+                  <span
+                    className={cn(
+                      "text-[10px] md:text-xs w-fit font-bold tracking-wider capitalize",
+                      securityLevel === "malicious"
+                        ? "text-error-500"
+                        : securityLevel === "suspicious"
+                          ? "text-warning-500"
+                          : securityLevel === "clean"
+                            ? "text-green-600"
+                            : "text-primary-500",
+                    )}
+                  >
+                    {securityLevel}
+                  </span>
+                </div>
+              )}
+              {/* Email Risk Score on Mobile */}
+              {badges
+                .filter(
+                  (b) =>
+                    b.folder === activeFolder && typeof b.score === "number",
+                )
+                .map((b, index) => (
+                  <span
+                    key={index}
+                    className={cn(
+                      "lg:hidden shrink-0 w-fit mt-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider border",
+                      b.className,
+                    )}
+                  >
+                    {b.label}: {b.score}%
+                  </span>
+                ))}
+            </div>
           </div>
 
           {/* Right side: date (desktop) + actions */}
@@ -554,7 +552,9 @@ export const MailRow = React.memo(
                   label="Delete"
                   tooltipSide="top"
                   onClick={() => deleteMutation.mutate(String(email.id))}
-                  icon={<Icons.Delete disableGroupHover className="w-3.5 h-3.5" />}
+                  icon={
+                    <Icons.Delete disableGroupHover className="w-3.5 h-3.5" />
+                  }
                   className="h-7 w-7 rounded-full text-primary hover:text-error-500 hover:bg-error-50"
                 />
               )}
