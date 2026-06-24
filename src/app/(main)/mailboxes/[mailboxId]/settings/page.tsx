@@ -64,7 +64,7 @@ const MailboxSettings = () => {
   useEffect(() => {
     if (mailbox && !isLoading) {
       reset({
-        mailboxName: mailbox.displayName.trim() || "",
+        mailboxName: mailbox.displayName || "",
         pushNotifications: mailbox.pushNotificationsEnabled,
       });
     }

@@ -4,7 +4,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { WizardFormData, wizardSchema } from "../schemas/CustomAccount";
+import {
+  WizardFormData,
+  wizardSchema,
+  stepProviderSchema,
+  stepImapSmtpSchema,
+  stepAdvancedSchema,
+} from "../schemas/CustomAccount";
 import { Icons } from "@/constants/icons";
 import { mailboxApi } from "@/APIs/features/mailboxes";
 import {
@@ -62,7 +68,7 @@ export function useAddAccountWizard({
     },
   });
 
-  const { register, trigger, watch, setValue, reset, clearErrors } = form;
+  const { register, trigger, watch, setValue, reset, clearErrors, getValues } = form;
 
   const formData = watch();
 
@@ -75,20 +81,66 @@ export function useAddAccountWizard({
     [pathname, router, searchParams],
   );
 
-  // Sync step from URL
+  // Sync step from URL and check step eligibility
   useEffect(() => {
+    if (!isLoaded) return;
+
     const stepParam = searchParams.get("step");
     if (stepParam) {
       const parsedStep = parseInt(stepParam);
       if (!isNaN(parsedStep) && parsedStep >= 1 && parsedStep <= 5) {
-        setStep(parsedStep);
+        let isEligible = true;
+        const values = getValues();
+
+        // Step 1: needs mailboxName
+        if (parsedStep > 1) {
+          const step1Result = stepProviderSchema.safeParse({
+            mailboxName: values.mailboxName,
+          });
+          if (!step1Result.success) {
+            isEligible = false;
+          }
+        }
+
+        // Step 2: SMTP/IMAP configuration fields
+        if (parsedStep > 2) {
+          const step2Result = stepImapSmtpSchema.safeParse({
+            email: values.email,
+            imapHost: values.imapHost,
+            imapPort: values.imapPort,
+            encryption: values.encryption,
+            smtpHost: values.smtpHost,
+            smtpPort: values.smtpPort,
+            password: values.password,
+          });
+          if (!step2Result.success) {
+            isEligible = false;
+          }
+        }
+
+        // Step 3: advanced configuration settings (syncInterval)
+        if (parsedStep > 3) {
+          const step3Result = stepAdvancedSchema.safeParse({
+            syncInterval: values.syncInterval,
+          });
+          if (!step3Result.success) {
+            isEligible = false;
+          }
+        }
+
+        if (isEligible) {
+          setStep(parsedStep);
+        } else {
+          // Redirect back to step 1 if validation fails
+          updateStepUrl(1);
+        }
       } else {
         updateStepUrl(1);
       }
     } else {
       updateStepUrl(1);
     }
-  }, [searchParams, updateStepUrl]);
+  }, [searchParams, isLoaded, getValues, updateStepUrl]);
 
   const clearPersistence = useCallback(() => {
     isClearingRef.current = true;
